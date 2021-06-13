@@ -3,6 +3,10 @@
 
 # Ignore Gradle build output directory
 build
+bin
 
 .gitattributes
 .idea/
+.classpath
+.project
+.settings

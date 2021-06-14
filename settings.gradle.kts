@@ -30,3 +30,5 @@
  */
 
 rootProject.name = "julian-http-client"
+include("core")
+

@@ -54,7 +54,11 @@ public class JavaType {
 		this.rawClass = Kind.of(javaType);
 	}
 
-	public boolean is(Class<?> candidate) {
+    public Type get() {
+		return javaType;
+    }
+
+    public boolean is(Class<?> candidate) {
 		return rawClass.equals(candidate);
 	}
 
@@ -92,19 +96,19 @@ public class JavaType {
 	public <R> Optional<R> when(Class<?> candidate, Supplier<R> fn) {
 		return is(candidate) ? Optional.ofNullable(fn.get()) : Optional.empty();
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(javaType);
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof JavaType)) return false;
 		if (obj == this) return true;
 
 		JavaType that = (JavaType) obj;
-		
+
 		return this.javaType.equals(that.javaType);
 	}
 
@@ -112,7 +116,7 @@ public class JavaType {
 	public String toString() {
 		return javaType.toString();
 	}
-	
+
 	public static JavaType valueOf(Type javaType) {
 		return new JavaType(javaType);
 	}
@@ -120,7 +124,7 @@ public class JavaType {
 	public static JavaType none() {
 		return VOID_TYPE;
 	}
-	
+
 	public static JavaType object() {
 		return OBJECT_TYPE;
 	}
@@ -128,7 +132,7 @@ public class JavaType {
 	public static JavaType valueOf(Class<?> context, Type javaType) {
 		return new JavaType(Kind.resolve(context, javaType));
 	}
-	
+
 	public static JavaType parameterized(Type rawType, Type... arguments) {
 		return new JavaType(Parameterized.valueOf(rawType, arguments));
 	}
@@ -136,12 +140,13 @@ public class JavaType {
 	public static JavaType parameterized(Type rawType, JavaType... arguments) {
 		return new JavaType(Parameterized.valueOf(rawType, Arrays.stream(arguments).map(a -> a.javaType).toArray(Type[]::new)));
 	}
-	
+
 	public static JavaType genericArrayOf(Type arrayType) {
 		return new JavaType(GenericArray.valueOf(arrayType));
 	}
 
-	static class Kind {
+
+    static class Kind {
 
 		static Class<?> of(Type javaType) {
 			if (javaType instanceof Class) {

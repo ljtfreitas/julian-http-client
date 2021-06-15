@@ -20,21 +20,11 @@
  * SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian.http.codec;
+plugins {
+    `kotlin-dsl`
+}
 
-public class HTTPResponseReaderException extends HTTPMessageException {
-
-	private static final long serialVersionUID = 1L;
-
-	public HTTPResponseReaderException(String message) {
-		super(message);
-	}
-
-	public HTTPResponseReaderException(Throwable cause) {
-		super(cause);
-	}
-
-	public HTTPResponseReaderException(String message, Throwable cause) {
-		super(message, cause);
-	}
+repositories {
+    mavenLocal()
+    mavenCentral()
 }

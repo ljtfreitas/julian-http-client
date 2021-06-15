@@ -23,6 +23,7 @@
 package com.github.ljtfreitas.julian.http;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.stream.Stream;
 
 import com.github.ljtfreitas.julian.Arguments;
@@ -71,7 +72,7 @@ public class HTTP {
 							.map(ContentType::valueOf)
 							.map(contentType -> codecs.writers().select(contentType, b.getClass())
 									.orElseThrow(() -> new HTTPRequestWriterException(format("There isn't any HTTPRequestWriter able to convert {0} to {1}", b.getClass(), contentType))))
-							.map(writer -> new HTTPRequestBody(b, writer))
+							.map(writer -> new HTTPRequestBody(b, StandardCharsets.UTF_8, writer))
 							.orElseThrow(() -> new HTTPRequestWriterException("The HTTP request has a body, but doesn't have a Content-Type header.")))
 				.orElse(null);
 	}

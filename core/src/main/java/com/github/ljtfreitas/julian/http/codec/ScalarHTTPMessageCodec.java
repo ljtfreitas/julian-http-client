@@ -23,6 +23,7 @@
 package com.github.ljtfreitas.julian.http.codec;
 
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -87,8 +88,8 @@ class ScalarHTTPMessageCodec implements HTTPRequestWriter<Object>, HTTPResponseR
 	}
 
 	@Override
-	public byte[] write(Object body) {
-		return codec.write(body.toString());
+	public byte[] write(Object body, Charset encoding) {
+		return codec.write(body.toString(), encoding);
 	}
 	
 	private enum ScalarType {

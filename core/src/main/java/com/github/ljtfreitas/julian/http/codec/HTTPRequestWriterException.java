@@ -29,4 +29,8 @@ public class HTTPRequestWriterException extends HTTPMessageException {
 	public HTTPRequestWriterException(String message) {
 		super(message);
 	}
+
+	public HTTPRequestWriterException(String message, Throwable cause) {
+		super(message, cause);
+	}
 }

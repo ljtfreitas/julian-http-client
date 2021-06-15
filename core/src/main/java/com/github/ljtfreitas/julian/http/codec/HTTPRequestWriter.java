@@ -22,10 +22,12 @@
 
 package com.github.ljtfreitas.julian.http.codec;
 
+import java.nio.charset.Charset;
+
 public interface HTTPRequestWriter<T> extends HTTPMessageCodec {
 
 	boolean writable(ContentType candidate, Class<?> javaType);
 
-	byte[] write(T body);
+	byte[] write(T body, Charset encoding);
 
 }

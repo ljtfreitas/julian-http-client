@@ -25,20 +25,23 @@ package com.github.ljtfreitas.julian.http;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 
 import com.github.ljtfreitas.julian.http.codec.HTTPRequestWriter;
 
 public class HTTPRequestBody {
 
 	private final Object value;
+	private final Charset charset;
 	private final HTTPRequestWriter<Object> writer;
 
-	HTTPRequestBody(Object value, HTTPRequestWriter<Object> writer) {
+	HTTPRequestBody(Object value, Charset charset, HTTPRequestWriter<Object> writer) {
 		this.value = value;
+		this.charset = charset;
 		this.writer = writer;
 	}
 	
 	public InputStream serialize() {
-		return new BufferedInputStream(new ByteArrayInputStream(writer.write(value)));
+		return new BufferedInputStream(new ByteArrayInputStream(writer.write(value, charset)));
 	}
 }

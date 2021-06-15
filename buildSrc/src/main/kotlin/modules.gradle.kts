@@ -20,21 +20,31 @@
  * SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian.http.codec;
+plugins {
+    `java-library`
+}
 
-public class HTTPResponseReaderException extends HTTPMessageException {
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
 
-	private static final long serialVersionUID = 1L;
+dependencies {
 
-	public HTTPResponseReaderException(String message) {
-		super(message);
-	}
+    // Use JUnit Jupiter API for testing.
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.0")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
+    testImplementation("org.mockito:mockito-core:3.8.0")
+    testImplementation("org.mockito:mockito-junit-jupiter:3.8.0")
+    testImplementation("org.mockito:mockito-inline:3.8.0")
+    testImplementation("org.mock-server:mockserver-junit-jupiter:5.11.1")
+    testImplementation("ch.qos.logback:logback-classic:1.2.3")
+    testImplementation("org.hamcrest:hamcrest:2.2")
 
-	public HTTPResponseReaderException(Throwable cause) {
-		super(cause);
-	}
+    // Use JUnit Jupiter Engine for testing.
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.6.0")
+}
 
-	public HTTPResponseReaderException(String message, Throwable cause) {
-		super(message, cause);
-	}
+val test by tasks.getting(Test::class) {
+    useJUnitPlatform()
 }

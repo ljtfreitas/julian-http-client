@@ -28,11 +28,15 @@ public class HTTPMessageException extends HTTPException {
 
 	private static final long serialVersionUID = 1L;
 
-	HTTPMessageException(String message) {
+	public HTTPMessageException(String message) {
         super(message);
     }
 
 	public HTTPMessageException(Throwable cause) {
 		super(cause);
+	}
+
+	public HTTPMessageException(String message, Throwable cause) {
+		super(message, cause);
 	}
 }

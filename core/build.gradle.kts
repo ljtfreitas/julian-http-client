@@ -21,33 +21,7 @@
  */
 
 plugins {
-    // Apply the java-library plugin to add support for Java Library
-    `java-library`
-}
-
-repositories {
-    mavenLocal()
-    mavenCentral()
-}
-
-dependencies {
-
-    // Use JUnit Jupiter API for testing.
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.0")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
-    testImplementation("org.mockito:mockito-core:3.8.0")
-    testImplementation("org.mockito:mockito-junit-jupiter:3.8.0")
-    testImplementation("org.mockito:mockito-inline:3.8.0")
-    testImplementation("org.mock-server:mockserver-junit-jupiter:5.11.1")
-    testImplementation("ch.qos.logback:logback-classic:1.2.3")
-    testImplementation("org.hamcrest:hamcrest:2.2")
-
-    // Use JUnit Jupiter Engine for testing.
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.6.0")
-}
-
-val test by tasks.getting(Test::class) {
-    useJUnitPlatform()
+    modules
 }
 
 tasks.compileJava.configure {
@@ -57,6 +31,3 @@ tasks.compileJava.configure {
 tasks.compileTestJava.configure {
     options.compilerArgs.add("-parameters")
 }
-
-project.group = "com.github.ljtfreitas"
-project.version = "0.0.1"

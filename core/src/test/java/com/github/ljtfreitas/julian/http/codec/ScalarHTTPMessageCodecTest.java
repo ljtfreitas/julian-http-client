@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Nested;
@@ -26,7 +27,7 @@ import com.github.ljtfreitas.julian.http.codec.ScalarHTTPMessageCodec;
 class ScalarHTTPMessageCodecTest {
 
 	ScalarHTTPMessageCodec codec = new ScalarHTTPMessageCodec();
-	
+
 	@Nested
 	class Readable {
 
@@ -77,7 +78,7 @@ class ScalarHTTPMessageCodecTest {
 			@ArgumentsSource(ScalarTypesProvider.class)
 			void write(Class<?> scalarClassType, Object value) {
 				
-				byte[] output = codec.write(value);
+				byte[] output = codec.write(value, StandardCharsets.UTF_8);
 
 				assertArrayEquals(value.toString().getBytes(), output);
 			}

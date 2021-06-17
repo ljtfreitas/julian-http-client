@@ -20,78 +20,64 @@
  * SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian.http.codec.json.jackson;
+package com.github.ljtfreitas.julian.http.codec.json.gson;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Type;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
-import java.util.stream.Stream;
 
-import com.fasterxml.jackson.core.JsonEncoding;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.codec.ContentType;
 import com.github.ljtfreitas.julian.http.codec.HTTPRequestWriterException;
 import com.github.ljtfreitas.julian.http.codec.HTTPResponseReaderException;
 import com.github.ljtfreitas.julian.http.codec.JsonHTTPMessageCodec;
+import com.google.gson.Gson;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 
-import static com.github.ljtfreitas.julian.Preconditions.nonNull;
+public class GsonJsonHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
 
-public class JacksonJsonHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
+    private final Gson gson;
 
-    private final ObjectMapper jsonMapper;
-    private final TypeFactory typeFactory;
-    private final JsonFactory jsonFactory;
-
-    public JacksonJsonHTTPMessageCodec(ObjectMapper jsonMapper) {
-        this.jsonMapper = nonNull(jsonMapper);
-        this.typeFactory = jsonMapper.getTypeFactory();
-        this.jsonFactory = jsonMapper.getFactory();
+    public GsonJsonHTTPMessageCodec(Gson gson) {
+        this.gson = gson;
     }
 
     @Override
     public boolean writable(ContentType candidate, Class<?> javaType) {
-        return supports(candidate) && jsonMapper.canSerialize(javaType);
+        return supports(candidate);
     }
 
     @Override
     public byte[] write(T body, Charset encoding) {
-        JsonEncoding jsonEncoding = Stream.of(JsonEncoding.values()).filter(e -> e.getJavaName().equalsIgnoreCase(encoding.name()))
-                .findFirst()
-                .orElse(JsonEncoding.UTF8);
-
         try (ByteArrayOutputStream output = new ByteArrayOutputStream();
-             JsonGenerator generator = jsonFactory.createGenerator(output, jsonEncoding)) {
+             OutputStreamWriter writer = new OutputStreamWriter(output, encoding)) {
 
-            jsonMapper.writeValue(generator, body);
+            gson.toJson(body, writer);
 
-            output.flush();
+            writer.flush();
 
             return output.toByteArray();
-        } catch (IOException e) {
+        } catch (JsonIOException | IOException e) {
             throw new HTTPRequestWriterException("JSON serialization failed. Source: " + body, e);
         }
     }
 
     @Override
     public boolean readable(ContentType candidate, JavaType javaType) {
-        return supports(candidate) && readable(javaType.get());
-    }
-
-    private boolean readable(Type type) {
-        return jsonMapper.canDeserialize(typeFactory.constructType(type));
+        return supports(candidate);
     }
 
     @Override
     public T read(InputStream body, JavaType javaType) {
         try {
-            return jsonMapper.readValue(body, typeFactory.constructType(javaType.get()));
-        } catch (IOException e) {
+            TypeToken<?> token = TypeToken.get(javaType.get());
+            return gson.fromJson(new InputStreamReader(body), token.getType());
+        } catch (JsonIOException | JsonSyntaxException e) {
             throw new HTTPResponseReaderException("JSON deserialization failed. The target type was: " + javaType, e);
         }
     }

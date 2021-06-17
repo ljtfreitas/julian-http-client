@@ -20,5 +20,4 @@
  * SOFTWARE.
  */
 
-rootProject.name = "julian-http-client"
-include("core", "json-jackson", "json-gson")
+rootProject.name = "julian-http-client-json-gson"

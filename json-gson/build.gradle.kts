@@ -20,5 +20,11 @@
  * SOFTWARE.
  */
 
-rootProject.name = "julian-http-client"
-include("core", "json-jackson", "json-gson")
+plugins {
+    modules
+}
+
+dependencies {
+    implementation(project(":core"))
+    api("com.google.code.gson:gson:2.8.7")
+}

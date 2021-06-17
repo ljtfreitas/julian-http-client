@@ -20,7 +20,7 @@ import com.github.ljtfreitas.julian.http.codec.InputStreamHTTPResponseReader;
 
 class InputStreamHTTPResponseReaderTest {
 
-	InputStreamHTTPResponseReader reader = new InputStreamHTTPResponseReader();
+	private InputStreamHTTPResponseReader reader = new InputStreamHTTPResponseReader();
 
 	@Nested
 	class Readable {

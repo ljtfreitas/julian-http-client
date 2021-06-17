@@ -15,7 +15,7 @@ import com.github.ljtfreitas.julian.http.codec.ContentType;
 
 class ByteArrayHTTPResponseReaderTest {
 
-	ByteArrayHTTPResponseReader reader = new ByteArrayHTTPResponseReader();
+	private ByteArrayHTTPResponseReader reader = new ByteArrayHTTPResponseReader();
 
 	@Nested
 	class Readable {

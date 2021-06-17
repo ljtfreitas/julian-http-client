@@ -26,7 +26,7 @@ import com.github.ljtfreitas.julian.http.codec.ScalarHTTPMessageCodec;
 
 class ScalarHTTPMessageCodecTest {
 
-	ScalarHTTPMessageCodec codec = new ScalarHTTPMessageCodec();
+	private ScalarHTTPMessageCodec codec = new ScalarHTTPMessageCodec();
 
 	@Nested
 	class Readable {
@@ -88,7 +88,7 @@ class ScalarHTTPMessageCodecTest {
 	static class ScalarTypesProvider implements ArgumentsProvider {
 
 		@Override
-		public Stream<? extends Arguments> provideArguments(ExtensionContext context) throws Exception {
+		public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
 			return Stream.of(Arguments.of(byte.class, (byte) 1),
 							 Arguments.of(short.class, (short) 1),
 							 Arguments.of(int.class, 1),

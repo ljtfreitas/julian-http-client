@@ -48,3 +48,8 @@ dependencies {
 val test by tasks.getting(Test::class) {
     useJUnitPlatform()
 }
+
+configure<JavaPluginConvention> {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}

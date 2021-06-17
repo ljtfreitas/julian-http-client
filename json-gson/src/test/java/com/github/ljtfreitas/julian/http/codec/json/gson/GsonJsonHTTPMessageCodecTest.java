@@ -1,4 +1,4 @@
-package com.github.ljtfreitas.julian.http.codec.json.jackson;
+package com.github.ljtfreitas.julian.http.codec.json.gson;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
@@ -6,20 +6,18 @@ import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.codec.ContentType;
+import com.google.gson.Gson;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class JacksonJsonHTTPMessageCodecTest {
+class GsonJsonHTTPMessageCodecTest {
 
-    private JacksonJsonHTTPMessageCodec<Person> codec = new JacksonJsonHTTPMessageCodec<>(new ObjectMapper());
+    private GsonJsonHTTPMessageCodec<Person> codec = new GsonJsonHTTPMessageCodec<>(new Gson());
 
     @Nested
     class Readable {
@@ -76,14 +74,10 @@ class JacksonJsonHTTPMessageCodecTest {
 
     private static class Person {
 
-        @JsonProperty
         final String name;
-
-        @JsonProperty
         final int age;
 
-        @JsonCreator
-        private Person(@JsonProperty("name") String name, @JsonProperty("age") int age) {
+        private Person(String name, int age) {
             this.name = name;
             this.age = age;
         }

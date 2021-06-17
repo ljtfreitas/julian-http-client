@@ -41,9 +41,9 @@ class Responses {
 	}
 	
 	private <M, T> ResponseFn<M, T> select(Endpoint endpoint, Exclusions exclusions) {
-		Optional<ResponseT<?, ?>> requestT = find(endpoint, exclusions);
+		Optional<ResponseT<?, ?>> responseT = find(endpoint, exclusions);
 
-		return requestT.map(r -> this.<M, T> compose(endpoint, r, exclusions)).orElseGet(() -> unsafe(endpoint));
+		return responseT.map(r -> this.<M, T> compose(endpoint, r, exclusions)).orElseGet(() -> unsafe(endpoint));
 	}
 
 	private Optional<ResponseT<?, ?>> find(Endpoint endpoint, Exclusions exclusions) {

@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class StringHTTPMessageCodecTest {
 
-    StringHTTPMessageCodec codec = new StringHTTPMessageCodec();
+    private StringHTTPMessageCodec codec = new StringHTTPMessageCodec();
 
     @Nested
     class Readable {

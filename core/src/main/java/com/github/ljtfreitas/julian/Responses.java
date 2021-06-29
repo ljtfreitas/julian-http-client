@@ -30,7 +30,7 @@ class Responses {
 	
 	private final Collection<ResponseT<?, ?>> requests;
 
-	private final ResponseT<Object, Object> defaultResponseT = new DefaultResponseT<>();
+	private final ResponseT<Object, Object> defaultResponseT = new ObjectResponseT<>();
 
 	Responses(Collection<ResponseT<?, ?>> requests) {
 		this.requests = requests;

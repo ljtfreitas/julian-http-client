@@ -22,15 +22,32 @@
 
 package com.github.ljtfreitas.julian;
 
-public interface ResponseFn<M, T> {
+class ObjectResponseT<T> implements ResponseT<T, T> {
 
-	default Promise<M> run(RequestIO<T> request, Arguments arguments) {
-		return Promise.done(join(request, arguments));
+	@SuppressWarnings("unchecked")
+	@Override
+	public <A> ResponseFn<T, A> comp(Endpoint endpoint, ResponseFn<T, A> fn) {
+		return new ResponseFn<>() {
+
+			@Override
+			public Promise<T> run(RequestIO<A> request, Arguments arguments) {
+				return request.execute().then(response -> response.map(value -> (T) value).body());
+			}
+
+			@Override
+			public JavaType returnType() {
+				return endpoint.returnType();
+			}
+		};
 	}
 
-	default M join(RequestIO<T> request, Arguments arguments) {
-		return run(request, arguments).join().unsafe();
+	@Override
+	public boolean test(Endpoint t) {
+		return true;
 	}
 
-	JavaType returnType();
+	@Override
+	public JavaType adapted(Endpoint endpoint) {
+		return endpoint.returnType();
+	}
 }

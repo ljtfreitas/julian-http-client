@@ -53,6 +53,10 @@ public class Headers implements Iterable<Header> {
 		return new Headers(Stream.concat(this.headers.stream(), headers));
 	}
 
+	public Headers add(String name, Collection<String> values) {
+		return new Headers(Stream.concat(this.headers.stream(), Stream.of(new Header(name, values))));
+	}
+
 	public Headers add(Header... headers) {
 		return new Headers(Stream.concat(this.headers.stream(), Arrays.stream(headers)));
 	}

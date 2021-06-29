@@ -20,17 +20,34 @@
  * SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian;
+package com.github.ljtfreitas.julian.http;
 
-class DefaultResponseT<T> implements ResponseT<Response<T>, T> {
+import java.util.Optional;
+
+import com.github.ljtfreitas.julian.Arguments;
+import com.github.ljtfreitas.julian.Endpoint;
+import com.github.ljtfreitas.julian.Headers;
+import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.Promise;
+import com.github.ljtfreitas.julian.RequestIO;
+import com.github.ljtfreitas.julian.Response;
+import com.github.ljtfreitas.julian.ResponseFn;
+import com.github.ljtfreitas.julian.ResponseT;
+
+class HTTPHeadersResponseT implements ResponseT<HTTPHeaders, Void> {
 
     @Override
-    public <A> ResponseFn<Response<T>, A> comp(Endpoint endpoint, ResponseFn<T, A> fn) {
+    public <A> ResponseFn<HTTPHeaders, A> comp(Endpoint endpoint, ResponseFn<Void, A> fn) {
         return new ResponseFn<>() {
 
+            @SuppressWarnings({"unchecked", "rawtypes"})
             @Override
-            public Promise<Response<T>> run(RequestIO<A> request, Arguments arguments) {
-                return request.execute().then(r -> r.map(value -> fn.join(() -> Promise.done(r), arguments)));
+            public Promise<HTTPHeaders> run(RequestIO<A> request, Arguments arguments) {
+                return request.execute().then(r -> {
+                    Optional<HTTPResponse> httpResponse = r.as(HTTPResponse.class);
+                    return httpResponse.map(HTTPResponse::headers)
+                            .orElseGet(HTTPHeaders::empty);
+                });
             }
 
             @Override
@@ -42,14 +59,11 @@ class DefaultResponseT<T> implements ResponseT<Response<T>, T> {
 
     @Override
     public JavaType adapted(Endpoint endpoint) {
-        return endpoint.returnType().parameterized()
-                .map(JavaType.Parameterized::firstArg)
-                .map(JavaType::valueOf)
-                .orElseGet(JavaType::object);
+        return JavaType.none();
     }
 
     @Override
     public boolean test(Endpoint endpoint) {
-        return endpoint.returnType().compatible(Response.class);
+        return endpoint.returnType().is(HTTPHeaders.class);
     }
 }

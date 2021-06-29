@@ -30,17 +30,16 @@ class ResponsesTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
-    void test(@Mock EndpointDefinition endpoint, @Mock RequestIO<String> request, @Mock Response<String> response) {
+    void test(@Mock EndpointDefinition endpoint, @Mock RequestIO<String> request) {
 		JavaType completableFutureType = JavaType.parameterized(CompletableFuture.class, JavaType.Parameterized.valueOf(Optional.class, String.class));
 
 		when(endpoint.returnType()).thenReturn(completableFutureType);
 		when(endpoint.returns(any())).thenCallRealMethod();
 
-		when(response.body()).thenReturn("oi");
+		Response<String> response = Response.done("oi");
 
 		when(request.execute()).then(a -> Promise.done(response));
 		when(request.comp(any(), eq(Arguments.empty()))).thenCallRealMethod();
-		when(response.map(any())).then(a -> a.getArgument(0, Function.class).apply(response));
 
 		Responses requests = new Responses(List.of(new CompletionStageResponseT<>(), new OptionalResponseT<>()));
 

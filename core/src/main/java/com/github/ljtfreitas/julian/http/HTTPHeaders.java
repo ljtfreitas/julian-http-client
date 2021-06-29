@@ -39,12 +39,16 @@ public class HTTPHeaders implements Iterable<HTTPHeader> {
 		this.headers = headers.collect(toUnmodifiableList());
 	}
 
-	public HTTPHeaders add(HTTPHeader header) {
-		return new HTTPHeaders(Stream.concat(this.headers.stream(), Stream.of(header)));
-	}
-
 	Optional<HTTPHeader> select(String name) {
 		return headers.stream().filter(h -> h.is(name)).findFirst();
+	}
+
+	Collection<HTTPHeader> all() {
+		return headers;
+	}
+
+	public HTTPHeaders add(HTTPHeader header) {
+		return new HTTPHeaders(Stream.concat(headers.stream(), Stream.of(header)));
 	}
 
 	@Override

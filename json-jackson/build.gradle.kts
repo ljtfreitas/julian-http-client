@@ -24,6 +24,10 @@ plugins {
     modules
 }
 
+tasks.jar.configure {
+    archiveBaseName.set("julian-http-client-json-jackson")
+}
+
 dependencies {
     implementation(project(":core"))
     api("com.fasterxml.jackson.core:jackson-databind:2.12.3")

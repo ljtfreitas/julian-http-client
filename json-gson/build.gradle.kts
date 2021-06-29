@@ -24,6 +24,10 @@ plugins {
     modules
 }
 
+tasks.jar.configure {
+    archiveBaseName.set("julian-http-client-json-gson")
+}
+
 dependencies {
     implementation(project(":core"))
     api("com.google.code.gson:gson:2.8.7")

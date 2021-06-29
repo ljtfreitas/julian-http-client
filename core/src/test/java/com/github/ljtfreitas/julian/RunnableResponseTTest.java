@@ -52,10 +52,10 @@ class RunnableResponseTTest {
 	}
 
 	@Test
-	void compose(@Mock RequestIO<Void> request, @Mock Response<Void> response) throws Exception {
+	void compose(@Mock RequestIO<Void> request) throws Exception {
 		Arguments arguments = Arguments.empty();
 
-		when(request.execute()).then(a -> Promise.done(response));
+		when(request.execute()).then(a -> Promise.done(Response.empty()));
 
 		Runnable runnable = responseT.<Void> comp(endpoint, null).join(request, arguments);
 

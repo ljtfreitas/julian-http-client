@@ -22,6 +22,7 @@
 
 package com.github.ljtfreitas.julian;
 
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -36,4 +37,16 @@ public interface Response<T> {
 	<E extends Exception> Response<T> recover(Class<? super E> expected, Function<? super E, T> fn);
 
 	<E extends Exception> Response<T> recover(Predicate<? super E> p, Function<? super E, T> fn);
+
+	default <R extends Response<T>> Optional<R> as(Class<R> candidate) {
+		return candidate.isAssignableFrom(this.getClass()) ? Optional.of(candidate.cast(this)) : Optional.empty();
+	}
+
+	static <T> Response<T> done(T value) {
+		return new DoneResponse<>(value);
+	}
+
+	static Response<Void> empty() {
+		return new DoneResponse<>(null);
+	}
 }

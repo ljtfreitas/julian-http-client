@@ -24,6 +24,7 @@ package com.github.ljtfreitas.julian;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.Optional;
 
 import com.github.ljtfreitas.julian.contract.Contract;
 
@@ -39,10 +40,16 @@ class DefaultInvocationHandler implements InvocationHandler {
 
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) {
-		return contract.endpoints()
-				.select(method)
-				.map(endpoint -> requestRunner.run(endpoint, Arguments.create(args)))
-				.orElseGet(() -> isObjectMethod(method) ? new ObjectMethod(this, method).call(args) : new UnproxiedMethod(proxy, method).call(args));
+		Optional<? extends Endpoint> endpoint = contract.endpoints().select(method);
+		return endpoint.isEmpty() ? runAsMethod(proxy, method, args) : runAsEndpoint(endpoint.get(), args);
+	}
+
+	private Object runAsEndpoint(Endpoint endpoint, Object[] args) {
+		return requestRunner.run(endpoint, Arguments.create(args));
+	}
+
+	private Object runAsMethod(Object proxy, Method method, Object[] args) {
+		return isObjectMethod(method) ? new ObjectMethod(this, method).call(args) : new UnproxiedMethod(proxy, method).call(args);
 	}
 
 	private boolean isObjectMethod(Method method) {

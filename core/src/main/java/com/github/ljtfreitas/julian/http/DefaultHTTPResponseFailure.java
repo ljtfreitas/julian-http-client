@@ -25,7 +25,7 @@ package com.github.ljtfreitas.julian.http;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.client.HTTPClientResponse;
 
-class DefaultHTTPResponseFailure implements HTTPResponseFailure {
+public class DefaultHTTPResponseFailure implements HTTPResponseFailure {
 
 	@Override
 	public <T> HTTPResponse<T> apply(HTTPClientResponse response, JavaType javaType) {

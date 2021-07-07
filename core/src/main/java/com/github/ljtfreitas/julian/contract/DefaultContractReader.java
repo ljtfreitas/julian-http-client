@@ -31,7 +31,7 @@ import com.github.ljtfreitas.julian.Endpoint;
 
 import static java.util.stream.Collectors.toUnmodifiableList;
 
-class DefaultContractReader implements ContractReader {
+public class DefaultContractReader implements ContractReader {
 
 	@Override
 	public Contract read(Definition definition) {

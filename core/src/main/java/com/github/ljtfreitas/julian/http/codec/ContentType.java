@@ -35,6 +35,8 @@ import static java.util.stream.Collectors.toMap;
 
 public class ContentType {
 
+	private static final ContentType WILDCARD_CONTENT_TYPE = ContentType.valueOf("*/*");
+
 	private final MimeType mediaType;
 
 	private ContentType(MimeType mediaType) {
@@ -83,6 +85,10 @@ public class ContentType {
 
 	public static ContentType valueOf(String value) {
 		return new ContentType(MimeType.valueOf(value));
+	}
+
+	public static ContentType wildcard() {
+		return WILDCARD_CONTENT_TYPE;
 	}
 
 	private static class MimeType {

@@ -35,7 +35,7 @@ import com.github.ljtfreitas.julian.JavaType;
 import static com.github.ljtfreitas.julian.Message.format;
 import static com.github.ljtfreitas.julian.Preconditions.state;
 
-class ScalarHTTPMessageCodec implements HTTPRequestWriter<Object>, HTTPResponseReader<Object> {
+public class ScalarHTTPMessageCodec implements HTTPRequestWriter<Object>, HTTPResponseReader<Object> {
 
 	private static final ContentType TEXT_PLAIN_CONTENT_TYPE = ContentType.valueOf("text/plain");
 	private static final Set<Class<?>> SCALAR_TYPES = new HashSet<>();

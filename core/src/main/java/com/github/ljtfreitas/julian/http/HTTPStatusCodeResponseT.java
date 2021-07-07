@@ -34,7 +34,7 @@ import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
 import com.github.ljtfreitas.julian.ResponseT;
 
-class HTTPStatusCodeResponseT implements ResponseT<HTTPStatusCode, Void> {
+public class HTTPStatusCodeResponseT implements ResponseT<HTTPStatusCode, Void> {
 
     @Override
     public <A> ResponseFn<HTTPStatusCode, A> comp(Endpoint endpoint, ResponseFn<Void, A> fn) {

@@ -107,10 +107,10 @@ class DefaultHTTPRequestIO<T> implements RequestIO<T> {
 	private T deserialize(HTTPResponseBody body, HTTPHeaders headers) {
 		ContentType contentType = headers.select(CONTENT_TYPE)
 				.map(h -> ContentType.valueOf(h.value()))
-				.orElseThrow(() -> new HTTPResponseReaderException("HTTP response doesn't have a Content-Type header."));
+				.orElseGet(ContentType::wildcard);
 
 		HTTPResponseReader<?> reader = readers.select(contentType, source.returnType())
-				.orElseThrow(() -> new HTTPResponseReaderException(format("There isn't any HTTPResponseReader able to convert {0} to {1}", contentType, source.returnType())));
+				.orElseThrow(() -> new HTTPResponseReaderException(format("There is not any HTTPResponseReader able to convert {0} to {1}", contentType, source.returnType())));
 
 		return (T) body.deserialize(reader, source.returnType());
 	}

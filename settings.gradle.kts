@@ -21,4 +21,6 @@
  */
 
 rootProject.name = "julian-http-client"
-include(":core", ":json-jackson", ":json-gson")
+include("core")
+include("json-jackson")
+include("json-gson")

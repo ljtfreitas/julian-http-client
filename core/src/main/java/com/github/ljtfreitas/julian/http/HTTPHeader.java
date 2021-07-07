@@ -41,7 +41,7 @@ public class HTTPHeader {
 	private final String name;
 	private final Collection<String> values;
 
-	HTTPHeader(String name, Collection<String> values) {
+	public HTTPHeader(String name, Collection<String> values) {
 		this.name = nonNull(name);
 		this.values = unmodifiableCollection(check(values, Preconditions::nonNull, headers -> isFalse(headers, Collection::isEmpty)));
 	}

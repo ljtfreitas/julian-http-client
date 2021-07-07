@@ -28,15 +28,15 @@ import java.io.InputStream;
 
 import com.github.ljtfreitas.julian.JavaType;
 
-class InputStreamHTTPResponseReader implements WildcardHTTPResponseReader<InputStream> {
+public class InputStreamHTTPResponseReader implements WildcardHTTPResponseReader<InputStream> {
 
 	private final ByteArrayHTTPResponseReader reader;
 
-	InputStreamHTTPResponseReader() {
+	public InputStreamHTTPResponseReader() {
 		this.reader = new ByteArrayHTTPResponseReader();
 	}
 
-	InputStreamHTTPResponseReader(int bufferSize) {
+	public InputStreamHTTPResponseReader(int bufferSize) {
 		this.reader = new ByteArrayHTTPResponseReader(bufferSize);
 	}
 

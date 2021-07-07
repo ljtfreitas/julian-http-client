@@ -20,47 +20,30 @@
  * SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian.http;
+package com.github.ljtfreitas.julian.http.codec;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Optional;
-import java.util.stream.Stream;
+import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Set;
 
-import com.github.ljtfreitas.julian.Headers;
+import com.github.ljtfreitas.julian.JavaType;
 
-import static java.util.stream.Collectors.toUnmodifiableList;
+public class NonReadableHTTPResponseReader implements WildcardHTTPResponseReader<Void> {
 
-public class HTTPHeaders implements Iterable<HTTPHeader> {
+	private static final Set<Class<?>> SKIPPABLES_TYPES = new HashSet<>();
 
-	private final Collection<HTTPHeader> headers;
-
-	private HTTPHeaders(Stream<HTTPHeader> headers) {
-		this.headers = headers.collect(toUnmodifiableList());
-	}
-
-	Optional<HTTPHeader> select(String name) {
-		return headers.stream().filter(h -> h.is(name)).findFirst();
-	}
-
-	public Collection<HTTPHeader> all() {
-		return headers;
-	}
-
-	public HTTPHeaders add(HTTPHeader header) {
-		return new HTTPHeaders(Stream.concat(headers.stream(), Stream.of(header)));
+	static {
+		SKIPPABLES_TYPES.add(void.class);
+		SKIPPABLES_TYPES.add(Void.class);
 	}
 
 	@Override
-	public Iterator<HTTPHeader> iterator() {
-		return headers.iterator();
+	public boolean readable(ContentType candidate, JavaType javaType) {
+		return supports(candidate) && javaType.classType().map(SKIPPABLES_TYPES::contains).orElse(false);
 	}
 
-	public static HTTPHeaders empty() {
-		return new HTTPHeaders(Stream.empty());
-	}
-
-	public static HTTPHeaders valueOf(Headers headers) {
-		return new HTTPHeaders(headers.map(header -> new HTTPHeader(header.name(), header.values())));
+	@Override
+	public Void read(InputStream body, JavaType javaType) {
+		return null;
 	}
 }

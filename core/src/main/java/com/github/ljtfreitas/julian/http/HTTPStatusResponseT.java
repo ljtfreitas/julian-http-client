@@ -32,7 +32,7 @@ import com.github.ljtfreitas.julian.RequestIO;
 import com.github.ljtfreitas.julian.ResponseFn;
 import com.github.ljtfreitas.julian.ResponseT;
 
-class HTTPStatusResponseT implements ResponseT<HTTPStatus, Void> {
+public class HTTPStatusResponseT implements ResponseT<HTTPStatus, Void> {
 
     @Override
     public <A> ResponseFn<HTTPStatus, A> comp(Endpoint endpoint, ResponseFn<Void, A> fn) {

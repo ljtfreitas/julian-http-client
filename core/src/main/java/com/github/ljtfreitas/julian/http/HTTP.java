@@ -45,7 +45,7 @@ public class HTTP {
 	private final HTTPMessageCodecs codecs;
 	private final HTTPResponseFailure failure;
 
-	HTTP(HTTPClient httpClient, HTTPMessageCodecs codecs, HTTPResponseFailure failure) {
+	public HTTP(HTTPClient httpClient, HTTPMessageCodecs codecs, HTTPResponseFailure failure) {
 		this.httpClient = httpClient;
 		this.codecs = codecs;
 		this.failure = failure;

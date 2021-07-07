@@ -26,15 +26,13 @@ import java.util.Optional;
 
 import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.Endpoint;
-import com.github.ljtfreitas.julian.Headers;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.RequestIO;
-import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
 import com.github.ljtfreitas.julian.ResponseT;
 
-class HTTPHeadersResponseT implements ResponseT<HTTPHeaders, Void> {
+public class HTTPHeadersResponseT implements ResponseT<HTTPHeaders, Void> {
 
     @Override
     public <A> ResponseFn<HTTPHeaders, A> comp(Endpoint endpoint, ResponseFn<Void, A> fn) {

@@ -24,7 +24,7 @@ package com.github.ljtfreitas.julian.contract;
 
 import com.github.ljtfreitas.julian.Definition;
 
-interface ContractReader {
+public interface ContractReader {
 
     Contract read(Definition definition);
 }

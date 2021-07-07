@@ -45,7 +45,7 @@ public class Definition {
 
 	Definition(Class<?> javaClass, URL root) {
 		this.javaClass = check(javaClass, Preconditions::nonNull, t -> isTrue(t, Class::isInterface, () -> format("{0} must be a interface.", javaClass)));
-		this.root = nonNull(root);
+		this.root = root;
 	}
 
 	public <R> Stream<R> map(DefinitionFn<R> fn) {

@@ -84,11 +84,11 @@ public enum HTTPStatusCode {
 		this.message = message;
 	}
 
-	int value() {
+	public int value() {
 		return value;
 	}
 
-	String message() {
+	public String message() {
 		return message;
 	}
 

@@ -28,12 +28,12 @@ import java.util.Optional;
 
 class Responses {
 	
-	private final Collection<ResponseT<?, ?>> requests;
+	private final Collection<ResponseT<?, ?>> responses;
 
 	private final ResponseT<Object, Object> defaultResponseT = new ObjectResponseT<>();
 
-	Responses(Collection<ResponseT<?, ?>> requests) {
-		this.requests = requests;
+	Responses(Collection<ResponseT<?, ?>> responses) {
+		this.responses = responses;
 	}
 
 	<M, T> ResponseFn<M, T> select(Endpoint endpoint) {
@@ -47,7 +47,7 @@ class Responses {
 	}
 
 	private Optional<ResponseT<?, ?>> find(Endpoint endpoint, Exclusions exclusions) {
-		return requests.stream()
+		return responses.stream()
 				.filter(exclusions::negate)
 				.filter(r -> r.test(endpoint))
 				.findFirst();

@@ -27,17 +27,17 @@ import java.io.InputStream;
 import com.github.ljtfreitas.julian.Except;
 import com.github.ljtfreitas.julian.JavaType;
 
-class ByteArrayHTTPResponseReader implements WildcardHTTPResponseReader<byte[]> {
+public class ByteArrayHTTPResponseReader implements WildcardHTTPResponseReader<byte[]> {
 
 	private static final int DEFAULT_BUFFER_SIZE = 1024 * 100;
 
 	private final int bufferSize;
 
-	ByteArrayHTTPResponseReader() {
+	public ByteArrayHTTPResponseReader() {
 		this(DEFAULT_BUFFER_SIZE);
 	}
 
-	ByteArrayHTTPResponseReader(int bufferSize) {
+	public ByteArrayHTTPResponseReader(int bufferSize) {
 		this.bufferSize = bufferSize;
 	}
 

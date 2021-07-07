@@ -56,22 +56,13 @@ class DefaultPromise<T> implements Promise<T> {
 	@Override
 	public Except<T> join() {
 		return run(future::join)
-				.failure(CompletionException.class, Exception::getCause);
+				.failure(CompletionException.class, Exception::getCause)
+				.failure(ExecutionException.class, Exception::getCause);
 	}
 
 	@Override
 	public CompletableFuture<T> future() {
 		return future;
-	}
-
-	@Override
-	public Callable<T> callable() {
-		return () -> run(future::get).failure(ExecutionException.class, Exception::getCause).unsafe();
-	}
-	
-	@Override
-	public Runnable runnable() {
-		return () -> run(future::get).failure(ExecutionException.class, Exception::getCause).unsafe();
 	}
 
 	static <T> Promise<T> done(T value) {

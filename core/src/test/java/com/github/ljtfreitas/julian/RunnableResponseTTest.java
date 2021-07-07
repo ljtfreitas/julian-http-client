@@ -12,14 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.github.ljtfreitas.julian.Arguments;
-import com.github.ljtfreitas.julian.Endpoint;
-import com.github.ljtfreitas.julian.JavaType;
-import com.github.ljtfreitas.julian.Promise;
-import com.github.ljtfreitas.julian.RequestIO;
-import com.github.ljtfreitas.julian.Response;
-import com.github.ljtfreitas.julian.RunnableResponseT;
-
 @ExtendWith(MockitoExtension.class)
 class RunnableResponseTTest {
 
@@ -52,15 +44,12 @@ class RunnableResponseTTest {
 	}
 
 	@Test
-	void compose(@Mock RequestIO<Void> request) throws Exception {
+	void compose(@Mock ResponseFn<Void, Void> fn, @Mock RequestIO<Void> request) throws Exception {
 		Arguments arguments = Arguments.empty();
 
-		when(request.execute()).then(a -> Promise.done(Response.empty()));
-
-		Runnable runnable = responseT.<Void> comp(endpoint, null).join(request, arguments);
-
+		Runnable runnable = responseT.comp(endpoint, fn).join(request, arguments);
 		runnable.run();
 		
-		verify(request).execute();
+		verify(fn).join(request, arguments);
 	}
 }

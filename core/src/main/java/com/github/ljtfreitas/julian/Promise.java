@@ -24,7 +24,11 @@ package com.github.ljtfreitas.julian;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Flow.Publisher;
+import java.util.function.Consumer;
 import java.util.function.Function;
+
+import com.github.ljtfreitas.julian.Except.ThrowableConsumer;
 
 public interface Promise<T> {
 
@@ -36,11 +40,7 @@ public interface Promise<T> {
 
 	CompletableFuture<T> future();
 
-	Callable<T> callable();
-
-	Runnable runnable();
-
-	static <T> Promise<T> done(T value) {
+    static <T> Promise<T> done(T value) {
 		return DefaultPromise.done(value);
 	}
 
@@ -51,7 +51,5 @@ public interface Promise<T> {
 	static <T, F> Promise<T> pending(CompletableFuture<T> future) {
 		return new DefaultPromise<>(future);
 	}
-
-
 
 }

@@ -30,7 +30,7 @@ class RunnableResponseT implements ResponseT<Runnable, Void> {
 
 			@Override
 			public Runnable join(RequestIO<A> request, Arguments arguments) {
-				return request.execute().runnable();
+				return () -> fn.join(request, arguments);
 			}
 
 			@Override

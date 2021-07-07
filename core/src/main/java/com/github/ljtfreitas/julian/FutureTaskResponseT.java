@@ -22,17 +22,18 @@
 
 package com.github.ljtfreitas.julian;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 
-class FutureTaskResponseT<T> implements ResponseT<FutureTask<T>, T> {
+class FutureTaskResponseT<T> implements ResponseT<FutureTask<T>, Callable<T>> {
 
 	@Override
-	public <A> ResponseFn<FutureTask<T>, A> comp(Endpoint endpoint, ResponseFn<T, A> fn) {
+	public <A> ResponseFn<FutureTask<T>, A> comp(Endpoint endpoint, ResponseFn<Callable<T>, A> fn) {
 		return new ResponseFn<>() {
 
 			@Override
 			public FutureTask<T> join(RequestIO<A> request, Arguments arguments) {
-				return new FutureTask<>(request.comp(fn, arguments).callable());
+				return new FutureTask<>(fn.join(request, arguments));
 			}
 
 			@Override
@@ -49,7 +50,8 @@ class FutureTaskResponseT<T> implements ResponseT<FutureTask<T>, T> {
 
 	@Override
 	public JavaType adapted(Endpoint endpoint) {
-		return endpoint.returnType().parameterized().map(JavaType.Parameterized::firstArg).map(JavaType::valueOf)
+		return endpoint.returnType().parameterized().map(JavaType.Parameterized::firstArg)
+				.map(t -> JavaType.parameterized(Callable.class, t))
 				.orElseGet(JavaType::object);
 	}
 }

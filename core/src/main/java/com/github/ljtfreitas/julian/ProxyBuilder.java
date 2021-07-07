@@ -107,6 +107,7 @@ public class ProxyBuilder {
                     new ListIteratorResponseT<>(),
                     new OptionalResponseT<>(),
                     new PromiseResponseT<>(),
+                    new PublisherResponseT<>(),
                     new QueueResponseT<>(),
                     new RunnableResponseT(),
                     new StreamResponseT<>(),

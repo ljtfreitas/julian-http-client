@@ -61,8 +61,8 @@ class CallableResponseTTest {
 	void compose(@Mock ResponseFn<String, String> fn, @Mock RequestIO<String> request) throws Exception {
 		Arguments arguments = Arguments.empty();
 
-		when(request.comp(fn, arguments)).thenReturn(Promise.done("expected"));
-		
+		when(fn.join(request, arguments)).thenReturn("expected");
+
 		Callable<String> callable = responseT.comp(endpoint, fn).join(request, arguments);
 		
 		assertEquals("expected", callable.call());

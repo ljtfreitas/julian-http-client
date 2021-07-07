@@ -45,8 +45,4 @@ public interface Response<T> {
 	static <T> Response<T> done(T value) {
 		return new DoneResponse<>(value);
 	}
-
-	static Response<Void> empty() {
-		return new DoneResponse<>(null);
-	}
 }

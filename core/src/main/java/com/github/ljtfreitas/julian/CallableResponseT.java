@@ -32,7 +32,7 @@ class CallableResponseT<T> implements ResponseT<Callable<T>, T> {
 
 			@Override
 			public Callable<T> join(RequestIO<A> request, Arguments arguments) {
-				return request.comp(fn, arguments).callable();
+				return () -> fn.join(request, arguments);
 			}
 
 			@Override

@@ -3,8 +3,10 @@ package com.github.ljtfreitas.julian;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 
@@ -52,14 +54,14 @@ class FutureTaskResponseTTest {
 	class Adapted {
 
 		@Test
-		void parameterized() throws Exception {
+		void parameterized() {
 			when(endpoint.returnType()).thenReturn(JavaType.parameterized(FutureTask.class, String.class));
 
-			assertEquals(JavaType.valueOf(String.class), responseT.adapted(endpoint));
+			assertEquals(JavaType.parameterized(Callable.class, String.class), responseT.adapted(endpoint));
 		}
 
 		@Test
-		void simple() throws Exception {
+		void simple() {
 			when(endpoint.returnType()).thenReturn(JavaType.object());
 
 			assertEquals(JavaType.object(), responseT.adapted(endpoint));
@@ -67,10 +69,10 @@ class FutureTaskResponseTTest {
 	}
 	
 	@Test
-	void compose(@Mock ResponseFn<String, String> fn, @Mock RequestIO<String> request) throws Exception {
+	void compose(@Mock ResponseFn<Callable<String>, String> fn, @Mock RequestIO<String> request) throws Exception {
 		Arguments arguments = Arguments.empty();
 
-		when(request.comp(fn, arguments)).thenReturn(Promise.done("expected"));
+		when(fn.join(request, arguments)).thenReturn(() -> "expected");
 
 		FutureTask<String> task = responseT.comp(endpoint, fn).join(request, arguments);
 

@@ -20,40 +20,9 @@
  * SOFTWARE.
  */
 
-plugins {
-    `java-library`
-}
+module com.github.ljtfreitas.julian.json.gson {
+    exports com.github.ljtfreitas.julian.http.codec.json.gson;
 
-java {
-    modularity.inferModulePath.set(true)
-}
-
-repositories {
-    mavenLocal()
-    mavenCentral()
-}
-
-dependencies {
-
-    // Use JUnit Jupiter API for testing.
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.0")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
-    testImplementation("org.mockito:mockito-core:3.8.0")
-    testImplementation("org.mockito:mockito-junit-jupiter:3.8.0")
-    testImplementation("org.mockito:mockito-inline:3.8.0")
-    testImplementation("org.mock-server:mockserver-junit-jupiter:5.11.1")
-    testImplementation("ch.qos.logback:logback-classic:1.2.3")
-    testImplementation("org.hamcrest:hamcrest:2.2")
-
-    // Use JUnit Jupiter Engine for testing.
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.6.0")
-}
-
-val test by tasks.getting(Test::class) {
-    useJUnitPlatform()
-}
-
-configure<JavaPluginConvention> {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    requires com.github.ljtfreitas.julian;
+    requires com.google.gson;
 }

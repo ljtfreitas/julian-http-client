@@ -22,6 +22,7 @@
 
 package com.github.ljtfreitas.julian.http.codec.json.gson;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,6 +43,10 @@ import com.google.gson.reflect.TypeToken;
 public class GsonJsonHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
 
     private final Gson gson;
+
+    public GsonJsonHTTPMessageCodec() {
+        this(new Gson());
+    }
 
     public GsonJsonHTTPMessageCodec(Gson gson) {
         this.gson = gson;
@@ -74,10 +79,13 @@ public class GsonJsonHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
 
     @Override
     public T read(InputStream body, JavaType javaType) {
-        try {
+        try (InputStreamReader reader = new InputStreamReader(body);
+             BufferedReader buffered = new BufferedReader(reader)) {
+
             TypeToken<?> token = TypeToken.get(javaType.get());
-            return gson.fromJson(new InputStreamReader(body), token.getType());
-        } catch (JsonIOException | JsonSyntaxException e) {
+            return gson.fromJson(buffered, token.getType());
+
+        } catch (JsonIOException | JsonSyntaxException | IOException e) {
             throw new HTTPResponseReaderException("JSON deserialization failed. The target type was: " + javaType, e);
         }
     }

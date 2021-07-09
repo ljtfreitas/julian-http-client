@@ -1,4 +1,4 @@
-package com.github.ljtfreitas.julian.http.codec.json.jackson;
+package com.github.ljtfreitas.http.codec.json.jsonb;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
@@ -6,9 +6,6 @@ import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.codec.ContentType;
 
@@ -17,9 +14,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class JacksonJsonHTTPMessageCodecTest {
+class JsonbJsonHTTPMessageCodecTest {
 
-    private JacksonJsonHTTPMessageCodec<Person> codec = new JacksonJsonHTTPMessageCodec<>();
+    private JsonbJsonHTTPMessageCodec<Person> codec = new JsonbJsonHTTPMessageCodec<>();
 
     @Nested
     class Readable {
@@ -69,22 +66,36 @@ class JacksonJsonHTTPMessageCodecTest {
             void write() {
                 byte[] output = codec.write(new Person("Tiago", 35), StandardCharsets.UTF_8);
 
-                assertEquals("{\"name\":\"Tiago\",\"age\":35}", new String(output));
+                assertEquals("{\"age\":35,\"name\":\"Tiago\"}", new String(output));
             }
         }
     }
 
-    private static class Person {
+    public static class Person {
 
-        @JsonProperty
-        final String name;
+        String name;
+        int age;
 
-        @JsonProperty
-        final int age;
+        public Person(){};
 
-        @JsonCreator
-        private Person(@JsonProperty("name") String name, @JsonProperty("age") int age) {
+        private Person(String name, int age) {
             this.name = name;
+            this.age = age;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public int getAge() {
+            return age;
+        }
+
+        public void setAge(int age) {
             this.age = age;
         }
     }

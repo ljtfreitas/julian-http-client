@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GsonJsonHTTPMessageCodecTest {
 
-    private GsonJsonHTTPMessageCodec<Person> codec = new GsonJsonHTTPMessageCodec<>(new Gson());
+    private GsonJsonHTTPMessageCodec<Person> codec = new GsonJsonHTTPMessageCodec<>();
 
     @Nested
     class Readable {

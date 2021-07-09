@@ -22,9 +22,11 @@
 
 package com.github.ljtfreitas.julian.http.codec.json.jackson;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.stream.Stream;
@@ -47,6 +49,10 @@ public class JacksonJsonHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
     private final ObjectMapper jsonMapper;
     private final TypeFactory typeFactory;
     private final JsonFactory jsonFactory;
+
+    public JacksonJsonHTTPMessageCodec() {
+        this(new ObjectMapper());
+    }
 
     public JacksonJsonHTTPMessageCodec(ObjectMapper jsonMapper) {
         this.jsonMapper = nonNull(jsonMapper);
@@ -89,8 +95,10 @@ public class JacksonJsonHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
 
     @Override
     public T read(InputStream body, JavaType javaType) {
-        try {
-            return jsonMapper.readValue(body, typeFactory.constructType(javaType.get()));
+        try (InputStreamReader reader = new InputStreamReader(body);
+             BufferedReader buffered = new BufferedReader(reader)) {
+
+            return jsonMapper.readValue(buffered, typeFactory.constructType(javaType.get()));
         } catch (IOException e) {
             throw new HTTPResponseReaderException("JSON deserialization failed. The target type was: " + javaType, e);
         }

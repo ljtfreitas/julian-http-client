@@ -28,13 +28,6 @@ tasks.jar.configure {
     archiveBaseName.set("julian-http-client-json-jsonb")
 }
 
-repositories {
-    maven {
-        name = "Maven Java Net Snapshots and Releases"
-        url = uri("https://maven.java.net/content/groups/public/")
-    }
-}
-
 dependencies {
     implementation(project(":core"))
     implementation("org.eclipse:yasson:2.0.2")

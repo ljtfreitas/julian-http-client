@@ -20,9 +20,17 @@
  * SOFTWARE.
  */
 
-rootProject.name = "julian-http-client"
-include("core")
-include("json-jackson")
-include("json-gson")
-include("json-jsonb")
-include("json-jsonp")
+plugins {
+    modules
+}
+
+tasks.jar.configure {
+    archiveBaseName.set("julian-http-client-json-jsonp")
+}
+
+dependencies {
+    implementation(project(":core"))
+    implementation("jakarta.json:jakarta.json-api:2.0.0")
+    implementation("org.eclipse.parsson:parsson:1.0.0")
+
+}

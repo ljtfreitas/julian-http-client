@@ -20,9 +20,8 @@
  * SOFTWARE.
  */
 
-rootProject.name = "julian-http-client"
-include("core")
-include("json-jackson")
-include("json-gson")
-include("json-jsonb")
-include("json-jsonp")
+module com.github.ljtfreitas.julian.json.jsonp {
+
+    requires com.github.ljtfreitas.julian;
+    requires jakarta.json;
+}

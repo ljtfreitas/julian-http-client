@@ -20,11 +20,26 @@
  *  SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian.http;
+package com.github.ljtfreitas.julian.http.auth;
 
-import java.nio.ByteBuffer;
-import java.util.concurrent.Flow.Publisher;
+import java.util.Base64;
+import java.util.function.Supplier;
 
-public interface HTTPRequestBody {
-    Publisher<ByteBuffer> serialize();
+public class BearerAuthentication implements Authentication {
+
+    private final Supplier<String> supplier;
+
+    public BearerAuthentication(String token) {
+        this(() -> token);
+    }
+
+    public BearerAuthentication(Supplier<String> supplier) {
+        this.supplier = supplier;
+    }
+
+    @Override
+    public String content() {
+        return "Bearer " + supplier.get();
+    }
+
 }

@@ -20,11 +20,26 @@
  *  SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian.http;
+package com.github.ljtfreitas.julian.http.auth;
 
-import java.nio.ByteBuffer;
-import java.util.concurrent.Flow.Publisher;
+import org.junit.jupiter.api.Test;
 
-public interface HTTPRequestBody {
-    Publisher<ByteBuffer> serialize();
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
+class BearerAuthenticationTest {
+
+    @Test
+    void content() {
+        String token = "abc1234";
+
+        BearerAuthentication bearerAuthentication = new BearerAuthentication(token);
+
+        String content = bearerAuthentication.content();
+
+        assertAll(() -> assertThat(content, startsWith("Bearer ")),
+                  () -> assertThat(content, endsWith(token)));
+    }
 }

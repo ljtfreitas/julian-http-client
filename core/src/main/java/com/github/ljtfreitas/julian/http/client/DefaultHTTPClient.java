@@ -27,8 +27,9 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
 
 import com.github.ljtfreitas.julian.http.HTTPRequest;
+import com.github.ljtfreitas.julian.http.codec.HTTPMessageCodecs;
 
-import static java.net.http.HttpRequest.BodyPublishers.ofInputStream;
+import static java.net.http.HttpRequest.BodyPublishers.fromPublisher;
 
 public class DefaultHTTPClient implements HTTPClient {
 
@@ -37,7 +38,7 @@ public class DefaultHTTPClient implements HTTPClient {
 	@Override
 	public HTTPClientRequest request(HTTPRequest<?> request) {
 		HttpRequest.Builder builder = HttpRequest.newBuilder(request.path())
-				.method(request.method().name(), request.body().map(b -> ofInputStream(b::serialize)).orElseGet(BodyPublishers::noBody));
+				.method(request.method().name(), request.body().map(b -> fromPublisher(b.serialize())).orElseGet(BodyPublishers::noBody));
 
 		request.headers().forEach(header -> header.values().forEach(value -> builder.header(header.name(), value)));
 

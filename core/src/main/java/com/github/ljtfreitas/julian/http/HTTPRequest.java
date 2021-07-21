@@ -22,21 +22,27 @@
 
 package com.github.ljtfreitas.julian.http;
 
+import java.net.URI;
 import java.util.Optional;
 
-import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.Request;
-import com.github.ljtfreitas.julian.RequestIO;
 
-public interface HTTPRequest<T> extends Request, RequestIO<T> {
+public interface HTTPRequest<T> extends Request, HTTPRequestIO<T> {
+
+	URI path();
+
+	HTTPRequest<T> path(URI path);
 
 	HTTPMethod method();
 
+	HTTPRequest<T> method(HTTPMethod method);
+
 	HTTPHeaders headers();
 
+	HTTPRequest<T> headers(HTTPHeaders headers);
+
 	Optional<HTTPRequestBody> body();
-	
-	@Override
-	Promise<HTTPResponse<T>> execute();
+
+	HTTPRequest<T> body(HTTPRequestBody body);
 
 }

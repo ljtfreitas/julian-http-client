@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package com.github.ljtfreitas.http.codec.json.jsonb;
+package com.github.ljtfreitas.julian.http.codec.json.jsonp;
 
 import jakarta.json.Json;
 import jakarta.json.JsonException;
@@ -37,7 +37,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
-import java.util.Collections;
 import java.util.Map;
 
 import com.github.ljtfreitas.julian.JavaType;

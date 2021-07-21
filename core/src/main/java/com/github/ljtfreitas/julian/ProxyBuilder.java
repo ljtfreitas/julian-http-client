@@ -32,12 +32,16 @@ import java.util.List;
 import com.github.ljtfreitas.julian.contract.Contract;
 import com.github.ljtfreitas.julian.contract.ContractReader;
 import com.github.ljtfreitas.julian.contract.DefaultContractReader;
+import com.github.ljtfreitas.julian.http.DefaultHTTPRequestInterceptor;
 import com.github.ljtfreitas.julian.http.DefaultHTTPResponseFailure;
+import com.github.ljtfreitas.julian.http.DefaultHTTP;
 import com.github.ljtfreitas.julian.http.HTTP;
 import com.github.ljtfreitas.julian.http.HTTPHeadersResponseT;
+import com.github.ljtfreitas.julian.http.HTTPRequestInterceptor;
 import com.github.ljtfreitas.julian.http.HTTPResponseFailure;
 import com.github.ljtfreitas.julian.http.HTTPStatusCodeResponseT;
 import com.github.ljtfreitas.julian.http.HTTPStatusResponseT;
+import com.github.ljtfreitas.julian.http.InterceptedHTTP;
 import com.github.ljtfreitas.julian.http.client.DefaultHTTPClient;
 import com.github.ljtfreitas.julian.http.client.HTTPClient;
 import com.github.ljtfreitas.julian.http.codec.ByteArrayHTTPResponseReader;
@@ -46,6 +50,8 @@ import com.github.ljtfreitas.julian.http.codec.InputStreamHTTPResponseReader;
 import com.github.ljtfreitas.julian.http.codec.NonReadableHTTPResponseReader;
 import com.github.ljtfreitas.julian.http.codec.ScalarHTTPMessageCodec;
 import com.github.ljtfreitas.julian.http.codec.StringHTTPMessageCodec;
+
+import static java.util.Collections.emptyList;
 
 public class ProxyBuilder {
 
@@ -150,7 +156,7 @@ public class ProxyBuilder {
     }
 
     private HTTP http() {
-        return new HTTP(httpClient(), codecs.build(), failure());
+        return intercepted(new DefaultHTTP(httpClient(), codecs.build(), failure()));
     }
 
     private HTTPClient httpClient() {
@@ -159,5 +165,13 @@ public class ProxyBuilder {
 
     private HTTPResponseFailure failure() {
         return failure == null ? new DefaultHTTPResponseFailure() : failure;
+    }
+
+    private HTTP intercepted(HTTP http) {
+        return new InterceptedHTTP(http, interceptor());
+    }
+
+    private HTTPRequestInterceptor interceptor() {
+        return new DefaultHTTPRequestInterceptor(emptyList());
     }
 }

@@ -20,11 +20,28 @@
  *  SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian.http;
+package com.github.ljtfreitas.julian.http.auth;
 
-import java.nio.ByteBuffer;
-import java.util.concurrent.Flow.Publisher;
+import java.util.Base64;
 
-public interface HTTPRequestBody {
-    Publisher<ByteBuffer> serialize();
+public class BasicAuthentication implements Authentication {
+
+    private final Credentials credentials;
+
+    public BasicAuthentication(String username, String password) {
+        this(new Credentials(username, password));
+    }
+
+    public BasicAuthentication(Credentials credentials) {
+        this.credentials = credentials;
+    }
+
+    @Override
+    public String content() {
+        return "Basic " + base64(credentials);
+    }
+
+    private String base64(Credentials credentials) {
+        return Base64.getEncoder().encodeToString((credentials.username() + ":" + credentials.password()).getBytes());
+    }
 }

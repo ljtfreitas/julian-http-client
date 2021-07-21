@@ -22,9 +22,23 @@
 
 package com.github.ljtfreitas.julian.http;
 
-import java.nio.ByteBuffer;
-import java.util.concurrent.Flow.Publisher;
+import com.github.ljtfreitas.julian.Arguments;
+import com.github.ljtfreitas.julian.Endpoint;
+import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.Promise;
 
-public interface HTTPRequestBody {
-    Publisher<ByteBuffer> serialize();
+public class InterceptedHTTP implements HTTP {
+
+    private final HTTP http;
+    private final HTTPRequestInterceptor interceptor;
+
+    public InterceptedHTTP(HTTP http, HTTPRequestInterceptor interceptor) {
+        this.http = http;
+        this.interceptor = interceptor;
+    }
+
+    @Override
+    public <T> Promise<HTTPRequest<T>> request(Endpoint endpoint, Arguments arguments, JavaType returnType) {
+        return interceptor.intercepts(http.request(endpoint, arguments, returnType));
+    }
 }

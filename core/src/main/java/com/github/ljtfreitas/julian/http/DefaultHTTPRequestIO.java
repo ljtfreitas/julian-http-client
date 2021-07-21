@@ -33,6 +33,7 @@ import com.github.ljtfreitas.julian.http.client.HTTPClient;
 import com.github.ljtfreitas.julian.http.client.HTTPClientException;
 import com.github.ljtfreitas.julian.http.client.HTTPClientResponse;
 import com.github.ljtfreitas.julian.http.codec.ContentType;
+import com.github.ljtfreitas.julian.http.codec.HTTPMessageCodecs;
 import com.github.ljtfreitas.julian.http.codec.HTTPMessageException;
 import com.github.ljtfreitas.julian.http.codec.HTTPResponseReader;
 import com.github.ljtfreitas.julian.http.codec.HTTPResponseReaderException;
@@ -41,17 +42,17 @@ import com.github.ljtfreitas.julian.http.codec.HTTPResponseReaders;
 import static com.github.ljtfreitas.julian.Message.format;
 import static com.github.ljtfreitas.julian.http.HTTPHeader.CONTENT_TYPE;
 
-class DefaultHTTPRequestIO<T> implements RequestIO<T> {
+class DefaultHTTPRequestIO<T> implements HTTPRequestIO<T> {
 
 	private final HTTPRequest<T> source;
 	private final HTTPClient httpClient;
-	private final HTTPResponseReaders readers;
+	private final HTTPMessageCodecs codecs;
 	private final HTTPResponseFailure failure;
 	
-	DefaultHTTPRequestIO(HTTPRequest<T> source, HTTPClient httpClient, HTTPResponseReaders readers, HTTPResponseFailure failure) {
+	DefaultHTTPRequestIO(HTTPRequest<T> source, HTTPClient httpClient, HTTPMessageCodecs codecs, HTTPResponseFailure failure) {
 		this.source = source;
 		this.httpClient = httpClient;
-		this.readers = readers;
+		this.codecs = codecs;
 		this.failure = failure;
 	}
 
@@ -109,7 +110,7 @@ class DefaultHTTPRequestIO<T> implements RequestIO<T> {
 				.map(h -> ContentType.valueOf(h.value()))
 				.orElseGet(ContentType::wildcard);
 
-		HTTPResponseReader<?> reader = readers.select(contentType, source.returnType())
+		HTTPResponseReader<?> reader = codecs.readers().select(contentType, source.returnType())
 				.orElseThrow(() -> new HTTPResponseReaderException(format("There is not any HTTPResponseReader able to convert {0} to {1}", contentType, source.returnType())));
 
 		return (T) body.deserialize(reader, source.returnType());

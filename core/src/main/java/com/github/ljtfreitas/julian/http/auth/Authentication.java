@@ -20,11 +20,9 @@
  *  SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian.http;
+package com.github.ljtfreitas.julian.http.auth;
 
-import java.nio.ByteBuffer;
-import java.util.concurrent.Flow.Publisher;
+public interface Authentication {
 
-public interface HTTPRequestBody {
-    Publisher<ByteBuffer> serialize();
+    String content();
 }

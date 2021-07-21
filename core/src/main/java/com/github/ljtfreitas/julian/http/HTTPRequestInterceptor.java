@@ -22,9 +22,9 @@
 
 package com.github.ljtfreitas.julian.http;
 
-import java.nio.ByteBuffer;
-import java.util.concurrent.Flow.Publisher;
+import com.github.ljtfreitas.julian.Promise;
 
-public interface HTTPRequestBody {
-    Publisher<ByteBuffer> serialize();
+public interface HTTPRequestInterceptor {
+
+    <T> Promise<HTTPRequest<T>> intercepts(Promise<HTTPRequest<T>> request);
 }

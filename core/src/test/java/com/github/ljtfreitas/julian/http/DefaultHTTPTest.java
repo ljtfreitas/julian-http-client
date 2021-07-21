@@ -16,11 +16,7 @@ import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.MediaType.APPLICATION_JSON;
 import static org.mockserver.model.MediaType.TEXT_PLAIN;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -43,7 +39,6 @@ import org.mockserver.model.HttpResponse;
 import org.mockserver.model.NottableString;
 
 import com.github.ljtfreitas.julian.Arguments;
-import com.github.ljtfreitas.julian.Bracket;
 import com.github.ljtfreitas.julian.Cookie;
 import com.github.ljtfreitas.julian.Cookies;
 import com.github.ljtfreitas.julian.Endpoint;
@@ -55,10 +50,9 @@ import com.github.ljtfreitas.julian.Except;
 import com.github.ljtfreitas.julian.Header;
 import com.github.ljtfreitas.julian.Headers;
 import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.contract.CookiesParameterSerializer;
 import com.github.ljtfreitas.julian.contract.HeadersParameterSerializer;
-import com.github.ljtfreitas.julian.http.DefaultHTTPResponseFailure;
-import com.github.ljtfreitas.julian.http.FailureHTTPResponse;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.BadRequest;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.Conflict;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.ExpectationFailed;
@@ -76,44 +70,36 @@ import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.Requ
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.RequestedRangeNotSatisfiable;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.Unauthorized;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.UnsupportedMediaType;
-import com.github.ljtfreitas.julian.http.HTTPFailureResponseException;
-import com.github.ljtfreitas.julian.http.HTTPHeader;
-import com.github.ljtfreitas.julian.http.HTTPRequest;
-import com.github.ljtfreitas.julian.http.HTTPResponse;
-import com.github.ljtfreitas.julian.http.HTTPResponseException;
 import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.BadGateway;
 import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.GatewayTimeout;
 import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.HTTPVersionNotSupported;
 import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.InternalServerError;
 import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.NotImplemented;
 import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.ServiceUnavailable;
-import com.github.ljtfreitas.julian.http.HTTPStatusCode;
 import com.github.ljtfreitas.julian.http.client.DefaultHTTPClient;
 import com.github.ljtfreitas.julian.http.client.HTTPClientException;
 import com.github.ljtfreitas.julian.http.codec.ContentType;
 import com.github.ljtfreitas.julian.http.codec.HTTPMessageCodecs;
-import com.github.ljtfreitas.julian.http.codec.HTTPRequestWriter;
 import com.github.ljtfreitas.julian.http.codec.HTTPRequestWriterException;
-import com.github.ljtfreitas.julian.http.codec.HTTPResponseReader;
 import com.github.ljtfreitas.julian.http.codec.HTTPResponseReaderException;
 import com.github.ljtfreitas.julian.http.codec.StringHTTPMessageCodec;
 
 @ExtendWith(MockServerExtension.class)
-class HTTPTest {
+class DefaultHTTPTest {
 
 	private HTTP http;
 
 	private final MockServerClient mockServer;
 
-	HTTPTest(MockServerClient mockServer) {
+	DefaultHTTPTest(MockServerClient mockServer) {
 		this.mockServer = mockServer;
 	}
 
 	@BeforeEach
 	void setup() {
-		http = new HTTP(new DefaultHTTPClient(), 
-						new HTTPMessageCodecs(List.of(new StringHTTPMessageCodec(ContentType.valueOf("text/*")))),
-						new DefaultHTTPResponseFailure());
+		http = new DefaultHTTP(new DefaultHTTPClient(),
+							   new HTTPMessageCodecs(List.of(new StringHTTPMessageCodec(ContentType.valueOf("text/*")))),
+							   new DefaultHTTPResponseFailure());
 	}
 
 	@Nested
@@ -127,9 +113,9 @@ class HTTPTest {
 
 			mockServer.when(expectedRequest).respond(expectedResponse);
 
-			HTTPRequest<String> request = http.request(endpoint, arguments, returnType);
+			Promise<HTTPRequest<String>> request = http.request(endpoint, arguments, returnType);
 
-			HTTPResponse<String> response = request.execute().join().unsafe();
+			HTTPResponse<String> response = request.bind(HTTPRequest::execute).join().unsafe();
 
 			assertAll(() -> assertEquals(expectedResponse.getStatusCode(), response.status().code()),
 					  () -> assertEquals(expectedResponse.getBodyAsString(), response.body()));
@@ -151,9 +137,9 @@ class HTTPTest {
 		void shouldRunRequestAndReadTheResponse(HttpRequest expectedRequest, HttpResponse expectedResponse, Endpoint endpoint, Arguments arguments) {
 			mockServer.when(expectedRequest).respond(expectedResponse);
 
-			HTTPRequest<Void> request = http.request(endpoint, arguments, JavaType.none());
+			Promise<HTTPRequest<Void>> request = http.request(endpoint, arguments, JavaType.none());
 
-			HTTPResponse<Void> response = request.execute().join().unsafe();
+			HTTPResponse<Void> response = request.bind(HTTPRequest::execute).join().unsafe();
 
 			HTTPHeader[] expectedHeaders = expectedResponse.getHeaderList().stream()
 						.map(h -> HTTPHeader.create(h.getName().getValue(), h.getValues().stream()
@@ -191,9 +177,9 @@ class HTTPTest {
 							Headers.create(new Header("Content-Type", "text/plain")), Cookies.empty(),
 							Parameters.create(EndpointDefinition.Parameter.body(0, "body", JavaType.valueOf(String.class))));
 
-					HTTPRequest<String> request = http.request(endpoint, Arguments.create(requestBodyAsString), JavaType.valueOf(String.class));
+					Promise<HTTPRequest<String>> request = http.request(endpoint, Arguments.create(requestBodyAsString), JavaType.valueOf(String.class));
 
-					String response = request.execute().then(HTTPResponse::body).join().unsafe();
+					String response = request.bind(HTTPRequest::execute).then(HTTPResponse::body).join().unsafe();
 
 					assertEquals(expectedResponse, response);
 				}
@@ -260,9 +246,9 @@ class HTTPTest {
 							Headers.empty(), Cookies.empty(),
 							Parameters.empty(), responseType);
 
-					HTTPRequest<String> request = http.request(endpoint, Arguments.empty(), responseType);
+					Promise<HTTPRequest<String>> request = http.request(endpoint, Arguments.empty(), responseType);
 
-					String response = request.execute().then(HTTPResponse::body).join().unsafe();
+					String response = request.bind(HTTPRequest::execute).then(HTTPResponse::body).join().unsafe();
 
 					assertEquals(expectedResponse, response);
 				}
@@ -287,7 +273,9 @@ class HTTPTest {
 													Headers.empty(), Cookies.empty(),
 													Parameters.empty(), responseType);
 
-					Except<HTTPResponse<Object>> response = http.request(endpoint, Arguments.empty(), responseType).execute().join();
+					Except<HTTPResponse<Object>> response = http.request(endpoint, Arguments.empty(), responseType)
+							.bind(HTTPRequest::execute)
+							.join();
 
 					response.consumes(r -> fail("a HTTPResponseReaderException was expected."))
 							.failure(e -> assertThat(e, instanceOf(HTTPResponseReaderException.class)));
@@ -306,7 +294,10 @@ class HTTPTest {
 													Headers.empty(), Cookies.empty(),
 													Parameters.empty(), responseType);
 
-					Except<Object> response = http.request(endpoint, Arguments.empty(), responseType).execute().then(HTTPResponse::body).join();
+					Except<Object> response = http.request(endpoint, Arguments.empty(), responseType)
+							.bind(HTTPRequest::execute)
+							.then(HTTPResponse::body)
+							.join();
 
 					response.consumes(r -> fail("a HTTPResponseReaderException was expected, but the response is " + r))
 							.failure(e -> assertThat(e, instanceOf(HTTPResponseReaderException.class)));
@@ -334,7 +325,10 @@ class HTTPTest {
 				Endpoint endpoint = new EndpointDefinition(new Path("http://localhost:8090/hello/" + statusCode), "GET",
 												Headers.empty(), Cookies.empty(), Parameters.empty());
 
-				HTTPResponse<Void> response = http.<Void> request(endpoint, Arguments.empty(), JavaType.none()).execute().join().unsafe();
+				HTTPResponse<Void> response = http.<Void> request(endpoint, Arguments.empty(), JavaType.none())
+						.bind(HTTPRequest::execute)
+						.join()
+						.unsafe();
 
 				assertThat(response, instanceOf(FailureHTTPResponse.class));
 
@@ -360,7 +354,10 @@ class HTTPTest {
 				Endpoint endpoint = new EndpointDefinition(new Path("http://localhost:8090/hello/" + statusCode), "GET",
 												Headers.empty(), Cookies.empty(), Parameters.empty());
 
-				HTTPResponse<String> response = http.<String> request(endpoint, Arguments.empty(), JavaType.none()).execute().join().unsafe();
+				HTTPResponse<String> response = http.<String> request(endpoint, Arguments.empty(), JavaType.none())
+						.bind(HTTPRequest::execute)
+						.join()
+						.unsafe();
 
 				String recovered = "recovered";
 				
@@ -368,7 +365,7 @@ class HTTPTest {
 						  () -> assertEquals(recovered, response.recover(empty -> recovered).body()),
 						  () -> assertEquals(recovered, response.recover(exceptionType, e -> recovered).body()),
 						  () -> assertEquals(recovered, response.recover(statusCode, e -> recovered).body()),
-						  () -> assertEquals(recovered, response.recover(e -> exceptionType.isInstance(e), e -> recovered).body()));
+						  () -> assertEquals(recovered, response.recover(exceptionType::isInstance, e -> recovered).body()));
 			}
 		}
 
@@ -380,7 +377,9 @@ class HTTPTest {
 				Endpoint endpoint = new EndpointDefinition(new Path("http://localhost:8091/hello"), "GET",
 						Headers.empty(), Cookies.empty(), Parameters.empty());
 
-				Except<HTTPResponse<Void>> response = http.<Void> request(endpoint, Arguments.empty(), JavaType.none()).execute().join();
+				Except<HTTPResponse<Void>> response = http.<Void> request(endpoint, Arguments.empty(), JavaType.none())
+						.bind(HTTPRequest::execute)
+						.join();
 
 				response.consumes(r -> fail("a connection error was expected..."))
 						.failure(e -> assertThat(e, instanceOf(HTTPClientException.class)))
@@ -549,44 +548,6 @@ class HTTPTest {
 						     arguments(HTTPStatusCode.SERVICE_UNAVAILABLE, ServiceUnavailable.class),
 						     arguments(HTTPStatusCode.GATEWAY_TIMEOUT, GatewayTimeout.class),
 						     arguments(HTTPStatusCode.HTTP_VERSION_NOT_SUPPORTED, HTTPVersionNotSupported.class));
-		}
-	}
-	
-	static class SimpleHTTPRequestWriter implements HTTPRequestWriter<String> {
-
-		@Override
-		public Collection<ContentType> contentTypes() {
-			return List.of(ContentType.valueOf("text/plain"));
-		}
-
-		@Override
-		public boolean writable(ContentType candidate, Class<?> javaType) {
-			return supports(candidate) && javaType.equals(String.class);
-		}
-
-		@Override
-		public byte[] write(String body, Charset encoding) {
-			return body.getBytes(encoding);
-		}
-	}
-
-	static class SimpleHTTPResponseReader implements HTTPResponseReader<String> {
-
-		@Override
-		public Collection<ContentType> contentTypes() {
-			return List.of(ContentType.valueOf("text/plain"));
-		}
-
-		@Override
-		public boolean readable(ContentType candidate, JavaType javaType) {
-			return supports(candidate) && javaType.is(String.class);
-		}
-
-		@Override
-		public String read(InputStream body, JavaType javaType) {
-			return Bracket.acquire(() -> new BufferedReader(new InputStreamReader(body)))
-					.map(buffer -> buffer.lines().collect(Collectors.joining("\n")))
-					.unsafe();
 		}
 	}
 }

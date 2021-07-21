@@ -22,28 +22,29 @@
 
 package com.github.ljtfreitas.julian.http;
 
-import java.net.URI;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.net.http.HttpRequest.BodyPublishers;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.util.concurrent.Flow.Publisher;
 
-import com.github.ljtfreitas.julian.JavaType;
-import com.github.ljtfreitas.julian.Request;
+import com.github.ljtfreitas.julian.http.codec.HTTPRequestWriter;
 
-class SimpleRequest implements Request {
+public class DefaultHTTPRequestBody implements HTTPRequestBody {
 
-	private final URI uri;
-	private final JavaType returnType;
+	private final Object value;
+	private final Charset charset;
+	private final HTTPRequestWriter<Object> writer;
 
-	SimpleRequest(URI uri, JavaType returnType) {
-		this.uri = uri;
-		this.returnType = returnType;
+	DefaultHTTPRequestBody(Object value, Charset charset, HTTPRequestWriter<Object> writer) {
+		this.value = value;
+		this.charset = charset;
+		this.writer = writer;
 	}
 
 	@Override
-	public URI path() {
-		return uri;
-	}
-
-	@Override
-	public JavaType returnType() {
-		return returnType;
+	public Publisher<ByteBuffer> serialize() {
+		return BodyPublishers.ofInputStream(() -> new BufferedInputStream(new ByteArrayInputStream(writer.write(value, charset))));
 	}
 }

@@ -20,11 +20,25 @@
  *  SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian.http;
+package com.github.ljtfreitas.julian.http.auth;
 
-import java.nio.ByteBuffer;
-import java.util.concurrent.Flow.Publisher;
+import org.junit.jupiter.api.Test;
 
-public interface HTTPRequestBody {
-    Publisher<ByteBuffer> serialize();
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
+class BasicAuthenticationTest {
+
+    @Test
+    void content() {
+        // base64(username:password) = dXNlcm5hbWU6cGFzc3dvcmQ=
+        BasicAuthentication basicAuthentication = new BasicAuthentication("username", "password");
+
+        String content = basicAuthentication.content();
+
+        assertAll(() -> assertThat(content, startsWith("Basic ")),
+                  () -> assertThat(content, endsWith("dXNlcm5hbWU6cGFzc3dvcmQ=")));
+    }
 }

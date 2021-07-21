@@ -24,6 +24,7 @@ package com.github.ljtfreitas.julian.http;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 import com.github.ljtfreitas.julian.Preconditions;
@@ -36,10 +37,15 @@ import static java.util.Collections.unmodifiableCollection;
 
 public class HTTPHeader {
 
-	static final String CONTENT_TYPE = "Content-Type";
+	public static final String AUTHORIZATION = "Authorization";
+    public static final String CONTENT_TYPE = "Content-Type";
 
 	private final String name;
 	private final Collection<String> values;
+
+	public HTTPHeader(String name, String value) {
+		this(name, List.of(value));
+	}
 
 	public HTTPHeader(String name, Collection<String> values) {
 		this.name = nonNull(name);

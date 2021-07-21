@@ -20,11 +20,23 @@
  *  SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian.http;
+package com.github.ljtfreitas.julian.http.auth;
 
-import java.nio.ByteBuffer;
-import java.util.concurrent.Flow.Publisher;
+import com.github.ljtfreitas.julian.Promise;
+import com.github.ljtfreitas.julian.http.HTTPHeader;
+import com.github.ljtfreitas.julian.http.HTTPRequest;
+import com.github.ljtfreitas.julian.http.HTTPRequestInterceptor;
 
-public interface HTTPRequestBody {
-    Publisher<ByteBuffer> serialize();
+public class HTTPAuthenticationInterceptor implements HTTPRequestInterceptor {
+
+    private final Authentication authentication;
+
+    public HTTPAuthenticationInterceptor(Authentication authentication) {
+        this.authentication = authentication;
+    }
+
+    @Override
+    public <T> Promise<HTTPRequest<T>> intercepts(Promise<HTTPRequest<T>> request) {
+        return request.then(r -> r.headers(r.headers().add(new HTTPHeader(HTTPHeader.AUTHORIZATION, authentication.content()))));
+    }
 }

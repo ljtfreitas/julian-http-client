@@ -27,31 +27,42 @@ import java.util.Optional;
 
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.Promise;
-import com.github.ljtfreitas.julian.Request;
 import com.github.ljtfreitas.julian.http.client.HTTPClient;
-import com.github.ljtfreitas.julian.http.codec.HTTPResponseReaders;
+import com.github.ljtfreitas.julian.http.codec.HTTPMessageCodecs;
 
 class DefaultHTTPRequest<T> implements HTTPRequest<T> {
 
-	private final Request source;
+	private final JavaType returnType;
+	private final URI path;
 	private final HTTPMethod method;
 	private final HTTPRequestBody body;
 	private final HTTPHeaders headers;
 	private final DefaultHTTPRequestIO<T> io;
 
-	public DefaultHTTPRequest(Request source, HTTPMethod method, HTTPRequestBody body, HTTPHeaders headers, HTTPClient httpClient, HTTPResponseReaders readers, HTTPResponseFailure failure) {
-		this.source = source;
+	public DefaultHTTPRequest(JavaType returnType, URI path, HTTPMethod method, HTTPRequestBody body, HTTPHeaders headers,
+							  HTTPClient httpClient, HTTPMessageCodecs codecs, HTTPResponseFailure failure) {
+		this.returnType = returnType;
+		this.path = path;
 		this.method = method;
 		this.body = body;
 		this.headers = headers;
-		this.io = new DefaultHTTPRequestIO<>(this, httpClient, readers, failure);
+		this.io = new DefaultHTTPRequestIO<>(this, httpClient, codecs, failure);
 	}
-	
+
+	private DefaultHTTPRequest(JavaType returnType, URI path, HTTPMethod method, HTTPRequestBody body, HTTPHeaders headers, DefaultHTTPRequestIO<T> io) {
+		this.returnType = returnType;
+		this.path = path;
+		this.method = method;
+		this.body = body;
+		this.headers = headers;
+		this.io = io;
+	}
+
 	@Override
 	public URI path() {
-		return source.path();
+		return path;
 	}
-	
+
 	@Override
 	public HTTPMethod method() {
 		return method;
@@ -69,11 +80,31 @@ class DefaultHTTPRequest<T> implements HTTPRequest<T> {
 	
 	@Override
 	public JavaType returnType() {
-		return source.returnType();
+		return returnType;
 	}
 
 	@Override
 	public Promise<HTTPResponse<T>> execute() {
 		return io.execute();
+	}
+
+	@Override
+	public HTTPRequest<T> path(URI path) {
+		return new DefaultHTTPRequest<>(returnType, path, method, body, headers, io);
+	}
+
+	@Override
+	public HTTPRequest<T> method(HTTPMethod method) {
+		return new DefaultHTTPRequest<>(returnType, path, method, body, headers, io);
+	}
+
+	@Override
+	public HTTPRequest<T> headers(HTTPHeaders headers) {
+		return new DefaultHTTPRequest<>(returnType, path, method, body, headers, io);
+	}
+
+	@Override
+	public HTTPRequest<T> body(HTTPRequestBody body) {
+		return new DefaultHTTPRequest<>(returnType, path, method, body, headers, io);
 	}
 }

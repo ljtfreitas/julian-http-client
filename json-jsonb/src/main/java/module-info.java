@@ -21,6 +21,7 @@
  */
 
 module com.github.ljtfreitas.julian.json.jsonb {
+    exports com.github.ljtfreitas.julian.http.codec.json.jsonp;
 
     requires com.github.ljtfreitas.julian;
     requires jakarta.json.bind;

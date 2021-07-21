@@ -34,6 +34,8 @@ public interface Promise<T> {
 
 	<R> Promise<R> then(Function<? super T, R> fn);
 
+	<R> Promise<R> bind(Function<? super T, Promise<R>> fn);
+
 	Promise<T> failure(Function<Throwable, ? extends Exception> fn);
 
 	Except<T> join();

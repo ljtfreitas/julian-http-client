@@ -22,8 +22,6 @@
 
 package com.github.ljtfreitas.julian;
 
-import java.util.Optional;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
@@ -45,8 +43,13 @@ class DefaultPromise<T> implements Promise<T> {
 	}
 
 	@Override
+	public <R> Promise<R> bind(Function<? super T, Promise<R>> fn) {
+		return new DefaultPromise<>(future.thenCompose(t -> fn.apply(t).future()));
+	}
+
+	@Override
 	public Promise<T> failure(Function<Throwable, ? extends Exception> fn) {
-		return new DefaultPromise<>(future.handle((r, e) -> Optional.ofNullable(r).orElseThrow(() -> failure(fn.apply(e)))));
+		return new DefaultPromise<>(future.handle((r, e) -> { if (e == null) return r; else throw failure(fn.apply(e));}));
 	}
 	
 	private RuntimeException failure(Exception e) {

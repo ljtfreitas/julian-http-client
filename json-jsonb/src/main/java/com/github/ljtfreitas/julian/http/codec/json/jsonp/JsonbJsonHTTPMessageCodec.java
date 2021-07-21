@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package com.github.ljtfreitas.http.codec.json.jsonb;
+package com.github.ljtfreitas.julian.http.codec.json.jsonp;
 
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;

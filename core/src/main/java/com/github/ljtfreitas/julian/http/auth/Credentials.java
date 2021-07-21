@@ -20,11 +20,23 @@
  *  SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian.http;
+package com.github.ljtfreitas.julian.http.auth;
 
-import java.nio.ByteBuffer;
-import java.util.concurrent.Flow.Publisher;
+public class Credentials {
 
-public interface HTTPRequestBody {
-    Publisher<ByteBuffer> serialize();
+    private final String username;
+    private final String password;
+
+    public Credentials(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
+
+    public String username() {
+        return username;
+    }
+
+    public String password() {
+        return password;
+    }
 }

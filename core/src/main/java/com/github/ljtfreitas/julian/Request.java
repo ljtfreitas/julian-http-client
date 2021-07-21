@@ -26,7 +26,5 @@ import java.net.URI;
 
 public interface Request {
 
-	URI path();
-
 	JavaType returnType();
 }

@@ -40,7 +40,7 @@ class DefaultHTTPClientRequest implements HTTPClientRequest {
 
 	@Override
 	public Promise<HTTPClientResponse> execute() {
-		return Promise.pending(client.sendAsync(httpRequest, BodyHandlers.ofInputStream())
+		return Promise.pending(client.sendAsync(httpRequest, BodyHandlers.ofByteArray())
 				.thenApply(DefaultHTTPClientResponse::valueOf));
 	}
 }

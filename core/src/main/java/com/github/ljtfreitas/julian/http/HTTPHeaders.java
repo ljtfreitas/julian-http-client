@@ -23,6 +23,7 @@
 package com.github.ljtfreitas.julian.http;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -34,6 +35,10 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 public class HTTPHeaders implements Iterable<HTTPHeader> {
 
 	private final Collection<HTTPHeader> headers;
+
+	public HTTPHeaders(Collection<HTTPHeader> headers) {
+		this.headers = Collections.unmodifiableCollection(headers);
+	}
 
 	private HTTPHeaders(Stream<HTTPHeader> headers) {
 		this.headers = headers.collect(toUnmodifiableList());

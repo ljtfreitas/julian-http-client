@@ -22,11 +22,36 @@
 
 package com.github.ljtfreitas.julian.http;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.Optional;
 import java.util.function.Function;
 
-public interface HTTPResponseBody {
+import com.github.ljtfreitas.julian.Bracket;
+import com.github.ljtfreitas.julian.Except;
+import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.http.codec.HTTPResponseReader;
+import com.github.ljtfreitas.julian.http.codec.HTTPResponseReaderException;
 
-    <T> Optional<T> deserialize(Function<byte[], T> fn);
+public class DefaultHTTPResponseBody implements HTTPResponseBody {
 
+	private final HTTPStatus status;
+	private final HTTPHeaders headers;
+	private final byte[] body;
+
+	public DefaultHTTPResponseBody(HTTPStatus status, HTTPHeaders headers, byte[] body) {
+		this.status = status;
+		this.headers = headers;
+		this.body = body;
+	}
+
+	@Override
+	public <T> Optional<T> deserialize(Function<byte[], T> fn) {
+		return (status.readable() && hasContentLength()) ? Optional.ofNullable(fn.apply(body)) : Optional.empty();
+	}
+
+	private boolean hasContentLength() {
+		int length = headers.select("Content-Length").map(HTTPHeader::value).map(Integer::valueOf).orElse(-1);
+		return length != 0;
+	}
 }

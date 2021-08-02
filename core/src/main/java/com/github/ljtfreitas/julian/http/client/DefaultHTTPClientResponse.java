@@ -22,7 +22,6 @@
 
 package com.github.ljtfreitas.julian.http.client;
 
-import java.io.InputStream;
 import java.net.http.HttpResponse;
 import java.util.Optional;
 import java.util.function.Function;
@@ -30,7 +29,7 @@ import java.util.function.Function;
 import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.http.HTTPHeader;
 import com.github.ljtfreitas.julian.http.HTTPHeaders;
-import com.github.ljtfreitas.julian.http.HTTPResponseBody;
+import com.github.ljtfreitas.julian.http.DefaultHTTPResponseBody;
 import com.github.ljtfreitas.julian.http.HTTPStatus;
 import com.github.ljtfreitas.julian.http.HTTPStatusCode;
 
@@ -38,9 +37,9 @@ class DefaultHTTPClientResponse implements HTTPClientResponse {
 
 	private final HTTPStatus status;
 	private final HTTPHeaders headers;
-	private final HTTPResponseBody body;
+	private final DefaultHTTPResponseBody body;
 
-	private DefaultHTTPClientResponse(HTTPStatus status, HTTPHeaders headers, HTTPResponseBody body) {
+	private DefaultHTTPClientResponse(HTTPStatus status, HTTPHeaders headers, DefaultHTTPResponseBody body) {
 		this.status = status;
 		this.headers = headers;
 		this.body = body;
@@ -52,7 +51,7 @@ class DefaultHTTPClientResponse implements HTTPClientResponse {
 	}
 
 	@Override
-	public HTTPResponseBody body() {
+	public DefaultHTTPResponseBody body() {
 		return body;
 	}
 
@@ -71,7 +70,7 @@ class DefaultHTTPClientResponse implements HTTPClientResponse {
 		return status.success() || status.redirection() ? Optional.ofNullable(fn.apply(this)) : Optional.empty();
 	}
 
-	static DefaultHTTPClientResponse valueOf(HttpResponse<InputStream> response) {
+	static DefaultHTTPClientResponse valueOf(HttpResponse<byte[]> response) {
 		HTTPStatus status = HTTPStatusCode.select(response.statusCode()).map(HTTPStatus::new)
 				.orElseGet(() -> HTTPStatus.valueOf(response.statusCode()));
 
@@ -79,7 +78,7 @@ class DefaultHTTPClientResponse implements HTTPClientResponse {
 				.map(e -> HTTPHeader.create(e.getKey(), e.getValue()))
 				.reduce(HTTPHeaders.empty(), HTTPHeaders::add, (a, b) -> b);
 
-		HTTPResponseBody body = new HTTPResponseBody(status, headers, response.body());
+		DefaultHTTPResponseBody body = new DefaultHTTPResponseBody(status, headers, response.body());
 
 		return new DefaultHTTPClientResponse(status, headers, body);
 	}

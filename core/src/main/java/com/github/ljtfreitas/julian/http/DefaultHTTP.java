@@ -74,7 +74,7 @@ public class DefaultHTTP implements HTTP {
 							.map(ContentType::valueOf)
 							.map(contentType -> codecs.writers().select(contentType, b.getClass())
 									.orElseThrow(() -> new HTTPRequestWriterException(format("There isn't any HTTPRequestWriter able to convert {0} to {1}", b.getClass(), contentType))))
-							.map(writer -> new DefaultHTTPRequestBody(b, StandardCharsets.UTF_8, writer))
+							.map(writer -> new DefaultHTTPRequestBody<>(b, StandardCharsets.UTF_8, writer))
 							.orElseThrow(() -> new HTTPRequestWriterException("The HTTP request has a body, but doesn't have a Content-Type header.")))
 				.orElse(null);
 	}

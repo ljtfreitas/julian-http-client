@@ -26,5 +26,6 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.Flow.Publisher;
 
 public interface HTTPRequestBody {
+
     Publisher<ByteBuffer> serialize();
 }

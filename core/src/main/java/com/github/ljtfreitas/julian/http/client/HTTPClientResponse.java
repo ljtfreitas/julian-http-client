@@ -27,6 +27,7 @@ import java.util.function.Function;
 
 import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.http.HTTPHeaders;
+import com.github.ljtfreitas.julian.http.DefaultHTTPResponseBody;
 import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.HTTPStatus;
 

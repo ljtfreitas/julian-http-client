@@ -32,9 +32,10 @@ import java.util.List;
 import com.github.ljtfreitas.julian.contract.Contract;
 import com.github.ljtfreitas.julian.contract.ContractReader;
 import com.github.ljtfreitas.julian.contract.DefaultContractReader;
+import com.github.ljtfreitas.julian.http.DebugHTTPClient;
+import com.github.ljtfreitas.julian.http.DefaultHTTP;
 import com.github.ljtfreitas.julian.http.DefaultHTTPRequestInterceptor;
 import com.github.ljtfreitas.julian.http.DefaultHTTPResponseFailure;
-import com.github.ljtfreitas.julian.http.DefaultHTTP;
 import com.github.ljtfreitas.julian.http.HTTP;
 import com.github.ljtfreitas.julian.http.HTTPHeadersResponseT;
 import com.github.ljtfreitas.julian.http.HTTPRequestInterceptor;
@@ -56,10 +57,9 @@ import static java.util.Collections.emptyList;
 public class ProxyBuilder {
 
     private ContractReader contractReader = null;
-
-    private HTTPClient httpClient = null;
     private HTTPResponseFailure failure = null;
 
+    private final HTTPClientSpec httpClientSpec = new HTTPClientSpec();
     private final ResponsesTs responseTs = new ResponsesTs();
     private final HTTPMessageCodecs codecs = new HTTPMessageCodecs();
 
@@ -123,6 +123,50 @@ public class ProxyBuilder {
         }
     }
 
+    public class HTTPClientSpec {
+
+        private HTTPClient httpClient = null;
+
+        private final Debug debug = new Debug();
+
+        public HTTPClientSpec using(HTTPClient httpClient) {
+            this.httpClient = httpClient;
+            return this;
+        }
+
+        public HTTPClientSpec.Debug debug() {
+            return debug;
+        }
+
+        public ProxyBuilder and() {
+            return ProxyBuilder.this;
+        }
+
+        private HTTPClient build() {
+            HTTPClient client = this.httpClient == null ? new DefaultHTTPClient() : this.httpClient;
+            return debug.enabled ? new DebugHTTPClient(client) : client;
+        }
+
+        public class Debug {
+
+            private boolean enabled = false;
+
+            public HTTPClientSpec enabled() {
+                this.enabled = true;
+                return HTTPClientSpec.this;
+            }
+
+            public HTTPClientSpec disabled() {
+                this.enabled = false;
+                return HTTPClientSpec.this;
+            }
+        }
+    }
+
+    public HTTPClientSpec client() {
+        return httpClientSpec;
+    }
+
     public <T> T build(Class<? extends T> type) {
         return build(type, handler(type, null));
     }
@@ -160,7 +204,7 @@ public class ProxyBuilder {
     }
 
     private HTTPClient httpClient() {
-        return httpClient == null ? new DefaultHTTPClient() : httpClient;
+        return httpClientSpec.build();
     }
 
     private HTTPResponseFailure failure() {

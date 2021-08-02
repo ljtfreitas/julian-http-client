@@ -17,7 +17,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.Response;
-import com.github.ljtfreitas.julian.http.DefaultHTTPResponseFailure;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.BadRequest;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.Conflict;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.ExpectationFailed;
@@ -35,19 +34,12 @@ import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.Requ
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.RequestedRangeNotSatisfiable;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.Unauthorized;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.UnsupportedMediaType;
-import com.github.ljtfreitas.julian.http.HTTPHeaders;
-import com.github.ljtfreitas.julian.http.HTTPResponse;
-import com.github.ljtfreitas.julian.http.HTTPResponseBody;
-import com.github.ljtfreitas.julian.http.HTTPResponseException;
-import com.github.ljtfreitas.julian.http.HTTPResponseFailure;
 import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.BadGateway;
 import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.GatewayTimeout;
 import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.HTTPVersionNotSupported;
 import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.InternalServerError;
 import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.NotImplemented;
 import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.ServiceUnavailable;
-import com.github.ljtfreitas.julian.http.HTTPStatus;
-import com.github.ljtfreitas.julian.http.HTTPStatusCode;
 import com.github.ljtfreitas.julian.http.client.HTTPClientResponse;
 
 class DefaultHTTPResponseFailureTest {
@@ -72,8 +64,8 @@ class DefaultHTTPResponseFailureTest {
 			}
 
 			@Override
-			public HTTPResponseBody body() {
-				return new HTTPResponseBody(status, headers, new ByteArrayInputStream("response body".getBytes()));
+			public DefaultHTTPResponseBody body() {
+				return new DefaultHTTPResponseBody(status, headers, "response body".getBytes());
 			}
 
 			@Override

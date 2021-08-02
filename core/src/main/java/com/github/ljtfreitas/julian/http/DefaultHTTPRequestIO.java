@@ -22,13 +22,14 @@
 
 package com.github.ljtfreitas.julian.http;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 
+import com.github.ljtfreitas.julian.Bracket;
 import com.github.ljtfreitas.julian.Promise;
-import com.github.ljtfreitas.julian.RequestIO;
 import com.github.ljtfreitas.julian.http.client.HTTPClient;
 import com.github.ljtfreitas.julian.http.client.HTTPClientException;
 import com.github.ljtfreitas.julian.http.client.HTTPClientResponse;
@@ -37,7 +38,6 @@ import com.github.ljtfreitas.julian.http.codec.HTTPMessageCodecs;
 import com.github.ljtfreitas.julian.http.codec.HTTPMessageException;
 import com.github.ljtfreitas.julian.http.codec.HTTPResponseReader;
 import com.github.ljtfreitas.julian.http.codec.HTTPResponseReaderException;
-import com.github.ljtfreitas.julian.http.codec.HTTPResponseReaders;
 
 import static com.github.ljtfreitas.julian.Message.format;
 import static com.github.ljtfreitas.julian.http.HTTPHeader.CONTENT_TYPE;
@@ -98,21 +98,23 @@ class DefaultHTTPRequestIO<T> implements HTTPRequestIO<T> {
 
 	private HTTPResponse<T> success(HTTPClientResponse response) {
 		Optional<HTTPResponse<T>> r = response.body()
-				.available(b -> deserialize(b, response.headers()))
+				.deserialize(body -> deserialize(body, response.headers()))
 				.map(b -> new DefaultHTTPResponse<>(response.status(), response.headers(), b));
 
 		return r.orElseGet(() -> empty(response));
 	}
 
 	@SuppressWarnings("unchecked")
-	private T deserialize(HTTPResponseBody body, HTTPHeaders headers) {
+	private T deserialize(byte[] bodyAsBytes, HTTPHeaders headers) {
 		ContentType contentType = headers.select(CONTENT_TYPE)
 				.map(h -> ContentType.valueOf(h.value()))
 				.orElseGet(ContentType::wildcard);
 
 		HTTPResponseReader<?> reader = codecs.readers().select(contentType, source.returnType())
-				.orElseThrow(() -> new HTTPResponseReaderException(format("There is not any HTTPResponseReader able to convert {0} to {1}", contentType, source.returnType())));
+				.orElseThrow(() -> new HTTPResponseReaderException(format("There is not a HTTPResponseReader able to convert {0} to {1}", contentType, source.returnType())));
 
-		return (T) body.deserialize(reader, source.returnType());
+		return (T) Bracket.acquire(() -> new ByteArrayInputStream(bodyAsBytes))
+				.map(stream -> reader.read(stream, source.returnType()))
+				.prop(HTTPResponseReaderException::new);
 	}
 }

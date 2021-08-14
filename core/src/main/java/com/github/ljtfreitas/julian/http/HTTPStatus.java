@@ -35,7 +35,7 @@ public class HTTPStatus {
 		this(status.value(), status.message());
 	}
 
-	HTTPStatus(int code, String message) {
+	public HTTPStatus(int code, String message) {
 		this.code = code;
 		this.message = message;
 	}

@@ -27,21 +27,13 @@ import java.util.Optional;
 
 import com.github.ljtfreitas.julian.Request;
 
-public interface HTTPRequest<T> extends Request, HTTPRequestIO<T> {
-
-	URI path();
+public interface HTTPRequest<T> extends HTTPRequestDefinition, HTTPRequestIO<T> {
 
 	HTTPRequest<T> path(URI path);
 
-	HTTPMethod method();
-
 	HTTPRequest<T> method(HTTPMethod method);
 
-	HTTPHeaders headers();
-
 	HTTPRequest<T> headers(HTTPHeaders headers);
-
-	Optional<HTTPRequestBody> body();
 
 	HTTPRequest<T> body(HTTPRequestBody body);
 

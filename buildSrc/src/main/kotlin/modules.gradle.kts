@@ -36,8 +36,8 @@ repositories {
 dependencies {
 
     // Use JUnit Jupiter API for testing.
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.0")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.0")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.7.0")
     testImplementation("org.mockito:mockito-core:3.8.0")
     testImplementation("org.mockito:mockito-junit-jupiter:3.8.0")
     testImplementation("org.mockito:mockito-inline:3.8.0")

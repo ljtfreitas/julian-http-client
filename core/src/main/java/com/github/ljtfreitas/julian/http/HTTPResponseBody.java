@@ -29,4 +29,7 @@ public interface HTTPResponseBody {
 
     <T> Optional<T> deserialize(Function<byte[], T> fn);
 
+    static HTTPResponseBody empty() {
+        return new EmptyHTTPResponseBody();
+    }
 }

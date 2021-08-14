@@ -51,7 +51,7 @@ class HTTPHeadersResponseTTest {
     void compose(@Mock ResponseFn<Void, Void> fn, @Mock RequestIO<Void> request, @Mock HTTPResponse<Void> response) throws Exception {
         Arguments arguments = Arguments.empty();
 
-        HTTPHeaders headers = HTTPHeaders.valueOf(Headers.create(new Header("X-Header", "x-header-content")));
+        HTTPHeaders headers = HTTPHeaders.create(new HTTPHeader("X-Header", "x-header-content"));
 
         when(response.headers()).thenReturn(headers);
         when(response.as(HTTPResponse.class)).thenCallRealMethod();

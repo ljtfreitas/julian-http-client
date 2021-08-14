@@ -20,12 +20,4 @@
  * SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian.http.client;
-
-import com.github.ljtfreitas.julian.http.HTTPRequestDefinition;
-
-public interface HTTPClient {
-
-	HTTPClientRequest request(HTTPRequestDefinition request);
-
-}
+rootProject.name = "julian-http-client-reactor-netty"

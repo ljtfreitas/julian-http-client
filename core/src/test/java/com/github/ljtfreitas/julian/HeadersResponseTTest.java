@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.github.ljtfreitas.julian.http.HTTPHeader;
 import com.github.ljtfreitas.julian.http.HTTPHeaders;
 import com.github.ljtfreitas.julian.http.HTTPResponse;
 
@@ -48,7 +49,7 @@ class HeadersResponseTTest {
 
         Headers headers = Headers.create(new Header("X-Header", "x-header-content"));
 
-        when(response.headers()).thenReturn(HTTPHeaders.valueOf(headers));
+        when(response.headers()).thenReturn(headers.all().stream().reduce(HTTPHeaders.empty(), (a, b) -> a.add(new HTTPHeader(b.name(), b.values())), (a, b) -> b));
         when(response.as(HTTPResponse.class)).thenCallRealMethod();
         when(request.execute()).then(a -> Promise.done(response));
 

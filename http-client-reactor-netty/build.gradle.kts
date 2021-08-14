@@ -20,12 +20,20 @@
  * SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian.http.client;
+plugins {
+    modules
+}
 
-import com.github.ljtfreitas.julian.http.HTTPRequestDefinition;
+tasks.jar.configure {
+    archiveBaseName.set("julian-http-client-reactor-netty")
+}
 
-public interface HTTPClient {
+dependencies {
+    implementation(project(":core"))
 
-	HTTPClientRequest request(HTTPRequestDefinition request);
-
+    implementation(platform("io.projectreactor:reactor-bom:2020.0.9"))
+//    implementation("io.netty:netty-transport-native-epoll:4.1.65.Final:linux-x86_64")
+    implementation("io.projectreactor.netty:reactor-netty-core")
+    implementation("io.projectreactor.netty:reactor-netty-http")
+    runtimeOnly("io.netty:netty-transport-native-epoll:4.1.65.Final:linux-x86_64")
 }

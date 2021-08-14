@@ -20,12 +20,26 @@
  * SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian.http.client;
+package com.github.ljtfreitas.julian.http.client.reactor;
 
-import com.github.ljtfreitas.julian.http.HTTPRequestDefinition;
+import reactor.netty.http.client.HttpClient.ResponseReceiver;
 
-public interface HTTPClient {
+import com.github.ljtfreitas.julian.Promise;
+import com.github.ljtfreitas.julian.http.client.HTTPClientRequest;
+import com.github.ljtfreitas.julian.http.client.HTTPClientResponse;
 
-	HTTPClientRequest request(HTTPRequestDefinition request);
+class ReactorNettyHTTPClientRequest implements HTTPClientRequest {
 
+    private final ResponseReceiver<?> receiver;
+
+    ReactorNettyHTTPClientRequest(ResponseReceiver<?> receiver) {
+        this.receiver = receiver;
+    }
+
+    @Override
+    public Promise<HTTPClientResponse> execute() {
+        return Promise.pending(receiver.responseSingle(ReactorNettyHTTPClientResponse::valueOf)
+                .cast(HTTPClientResponse.class)
+                .toFuture());
+    }
 }

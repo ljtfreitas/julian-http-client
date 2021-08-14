@@ -30,6 +30,7 @@ import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.http.HTTPHeader;
 import com.github.ljtfreitas.julian.http.HTTPHeaders;
 import com.github.ljtfreitas.julian.http.DefaultHTTPResponseBody;
+import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.HTTPStatus;
 import com.github.ljtfreitas.julian.http.HTTPStatusCode;
 
@@ -37,9 +38,9 @@ class DefaultHTTPClientResponse implements HTTPClientResponse {
 
 	private final HTTPStatus status;
 	private final HTTPHeaders headers;
-	private final DefaultHTTPResponseBody body;
+	private final HTTPResponseBody body;
 
-	private DefaultHTTPClientResponse(HTTPStatus status, HTTPHeaders headers, DefaultHTTPResponseBody body) {
+	DefaultHTTPClientResponse(HTTPStatus status, HTTPHeaders headers, HTTPResponseBody body) {
 		this.status = status;
 		this.headers = headers;
 		this.body = body;
@@ -51,7 +52,7 @@ class DefaultHTTPClientResponse implements HTTPClientResponse {
 	}
 
 	@Override
-	public DefaultHTTPResponseBody body() {
+	public HTTPResponseBody body() {
 		return body;
 	}
 
@@ -78,7 +79,7 @@ class DefaultHTTPClientResponse implements HTTPClientResponse {
 				.map(e -> HTTPHeader.create(e.getKey(), e.getValue()))
 				.reduce(HTTPHeaders.empty(), HTTPHeaders::add, (a, b) -> b);
 
-		DefaultHTTPResponseBody body = new DefaultHTTPResponseBody(status, headers, response.body());
+		HTTPResponseBody body = new DefaultHTTPResponseBody(status, headers, response.body());
 
 		return new DefaultHTTPClientResponse(status, headers, body);
 	}

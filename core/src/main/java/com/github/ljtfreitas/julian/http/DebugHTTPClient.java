@@ -23,13 +23,16 @@
 package com.github.ljtfreitas.julian.http;
 
 import java.lang.System.Logger.Level;
+import java.net.http.HttpResponse.BodySubscribers;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.concurrent.Flow.Subscriber;
 import java.util.concurrent.Flow.Subscription;
 import java.util.stream.Collectors;
 
-import com.github.ljtfreitas.julian.Except;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.http.client.HTTPClient;
 import com.github.ljtfreitas.julian.http.client.HTTPClientRequest;
@@ -46,7 +49,7 @@ public class DebugHTTPClient implements HTTPClient {
     }
 
     @Override
-    public HTTPClientRequest request(HTTPRequest<?> request) {
+    public HTTPClientRequest request(HTTPRequestDefinition request) {
         return new DebugHTTPClientRequest(source.request(info(request)));
     }
 
@@ -64,15 +67,15 @@ public class DebugHTTPClient implements HTTPClient {
         }
     }
 
-    private HTTPRequest<?> info(HTTPRequest<?> request) {
+    private HTTPRequestDefinition info(HTTPRequestDefinition request) {
         request.body().ifPresentOrElse(body -> info(request, body), () -> info(request, ""));
         return request;
     }
 
-    private void info(HTTPRequest<?> request, HTTPRequestBody body) {
+    private void info(HTTPRequestDefinition request, HTTPRequestBody body) {
         body.serialize().subscribe(new Subscriber<>() {
 
-            private final ByteBuffer buffer = ByteBuffer.allocate(1024 * 100);
+            private final Collection<ByteBuffer> received = new ArrayList<>();
 
             @Override
             public void onSubscribe(Subscription subscription) {
@@ -81,7 +84,7 @@ public class DebugHTTPClient implements HTTPClient {
 
             @Override
             public void onNext(ByteBuffer buffer) {
-                this.buffer.put(buffer);
+                received.add(buffer);
             }
 
             @Override
@@ -90,14 +93,19 @@ public class DebugHTTPClient implements HTTPClient {
 
             @Override
             public void onComplete() {
-                String bodyAsString = new String(buffer.array());
+                int size = received.stream().mapToInt(Buffer::remaining).sum();
+
+                byte[] buffer = new byte[size];
+                received.forEach(b -> b.get(buffer));
+
+                String bodyAsString = new String(buffer);
 
                 info(request, bodyAsString);
             }
         });
     }
 
-    private void info(HTTPRequest<?> request, String body) {
+    private void info(HTTPRequestDefinition request, String body) {
         String headers = request.headers().all().stream().map(HTTPHeader::toString).collect(Collectors.joining("\n"));
 
         String message = new StringBuilder()

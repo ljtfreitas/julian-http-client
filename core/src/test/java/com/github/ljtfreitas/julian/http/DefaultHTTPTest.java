@@ -1,21 +1,5 @@
 package com.github.ljtfreitas.julian.http;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.anyOf;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.mockserver.model.HttpRequest.request;
-import static org.mockserver.model.HttpResponse.response;
-import static org.mockserver.model.MediaType.APPLICATION_JSON;
-import static org.mockserver.model.MediaType.TEXT_PLAIN;
-
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
@@ -83,6 +67,22 @@ import com.github.ljtfreitas.julian.http.codec.HTTPMessageCodecs;
 import com.github.ljtfreitas.julian.http.codec.HTTPRequestWriterException;
 import com.github.ljtfreitas.julian.http.codec.HTTPResponseReaderException;
 import com.github.ljtfreitas.julian.http.codec.StringHTTPMessageCodec;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
+import static org.mockserver.model.MediaType.APPLICATION_JSON;
+import static org.mockserver.model.MediaType.TEXT_PLAIN;
 
 @ExtendWith(MockServerExtension.class)
 class DefaultHTTPTest {
@@ -165,7 +165,7 @@ class DefaultHTTPTest {
 				@Test
 				void shouldSerializeTheContentToHTTPRequestBody() {
 					String requestBodyAsString = "{\"message\":\"hello\"}";
-					String expectedResponse = "it's works!";
+					String expectedResponse = "it works!";
 
 					mockServer.when(request("/hello")
 							.withMethod("POST")
@@ -264,7 +264,7 @@ class DefaultHTTPTest {
 
 					mockServer.when(request("/hello")
 									.withMethod("GET"))
-							.respond(response("{\"message\":\"it's works!\"}")
+							.respond(response("{\"message\":\"it works!\"}")
 									.withContentType(APPLICATION_JSON));
 
 					JavaType responseType = JavaType.valueOf(MyObjectBody.class);
@@ -285,7 +285,7 @@ class DefaultHTTPTest {
 				void unsupportedContentType() {
 					mockServer.when(request("/hello")
 								.withMethod("GET"))
-							.respond(response("{\"message\":\"it's works!\"}")
+							.respond(response("{\"message\":\"it works!\"}")
 								.withContentType(APPLICATION_JSON));
 
 					JavaType responseType = JavaType.valueOf(String.class);
@@ -393,7 +393,7 @@ class DefaultHTTPTest {
 		@Override
 		public Stream<? extends org.junit.jupiter.params.provider.Arguments> provideArguments(ExtensionContext context) {
 
-			HttpResponse expectedResponse = response("it's works!").withContentType(TEXT_PLAIN);
+			HttpResponse expectedResponse = response("it works!").withContentType(TEXT_PLAIN);
 
 			String requestBodyAsString = "{\"message\":\"hello\"}";
 

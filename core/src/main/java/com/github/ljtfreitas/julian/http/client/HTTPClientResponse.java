@@ -42,4 +42,12 @@ public interface HTTPClientResponse {
 	<T, R extends Response<T>> Optional<R> failure(Function<? super HTTPClientResponse, R> fn);
 
 	<T, R extends Response<T>> Optional<R> success(Function<? super HTTPClientResponse, R> fn);
+
+	static HTTPClientResponse create(HTTPStatus status, HTTPHeaders headers, HTTPResponseBody body) {
+		return new DefaultHTTPClientResponse(status, headers, body);
+	}
+
+	static HTTPClientResponse empty(HTTPStatus status, HTTPHeaders headers) {
+		return new DefaultHTTPClientResponse(status, headers, HTTPResponseBody.empty());
+	}
 }

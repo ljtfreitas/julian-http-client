@@ -20,12 +20,13 @@
  * SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian.http.client;
+module com.github.ljtfreitas.julian.http.client.reactor {
+    exports com.github.ljtfreitas.julian.http.client.reactor;
 
-import com.github.ljtfreitas.julian.http.HTTPRequestDefinition;
-
-public interface HTTPClient {
-
-	HTTPClientRequest request(HTTPRequestDefinition request);
-
+    requires com.github.ljtfreitas.julian;
+    requires io.netty.buffer;
+    requires io.netty.codec.http;
+    requires reactor.core;
+    requires reactor.netty.core;
+    requires reactor.netty.http;
 }

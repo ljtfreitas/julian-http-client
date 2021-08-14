@@ -52,7 +52,7 @@ class DebugHTTPClientTest {
                         .withStatusCode(200)
                         .withContentType(TEXT_PLAIN)
                         .withHeader("x-some-header", "some-content")
-                        .withBody("it's works!"));
+                        .withBody("it works!"));
 
         DebugHTTPClient debugHTTPClient = new DebugHTTPClient(new DefaultHTTPClient());
 

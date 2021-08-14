@@ -22,6 +22,7 @@
 
 package com.github.ljtfreitas.julian.http;
 
+import java.io.ByteArrayInputStream;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -35,7 +36,7 @@ public class DefaultHTTPRequestBody<T> implements HTTPRequestBody {
 	private final Charset charset;
 	private final HTTPRequestWriter<T> writer;
 
-	DefaultHTTPRequestBody(T value, Charset charset, HTTPRequestWriter<T> writer) {
+	public DefaultHTTPRequestBody(T value, Charset charset, HTTPRequestWriter<T> writer) {
 		this.value = value;
 		this.charset = charset;
 		this.writer = writer;
@@ -43,6 +44,6 @@ public class DefaultHTTPRequestBody<T> implements HTTPRequestBody {
 
 	@Override
 	public Publisher<ByteBuffer> serialize() {
-		return BodyPublishers.ofByteArray(writer.write(value, charset));
+		return BodyPublishers.ofInputStream(() -> new ByteArrayInputStream(writer.write(value, charset)));
 	}
 }

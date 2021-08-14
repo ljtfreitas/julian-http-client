@@ -22,52 +22,17 @@
 
 package com.github.ljtfreitas.julian.http;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
+import java.net.URI;
 import java.util.Optional;
-import java.util.stream.Stream;
 
-import com.github.ljtfreitas.julian.Headers;
+import com.github.ljtfreitas.julian.Request;
 
-import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.toUnmodifiableList;
+public interface HTTPRequestDefinition extends Request {
+    URI path();
 
-public class HTTPHeaders implements Iterable<HTTPHeader> {
+    HTTPMethod method();
 
-	private final Collection<HTTPHeader> headers;
+    HTTPHeaders headers();
 
-	public HTTPHeaders(Collection<HTTPHeader> headers) {
-		this.headers = Collections.unmodifiableCollection(headers);
-	}
-
-	private HTTPHeaders(Stream<HTTPHeader> headers) {
-		this.headers = headers.collect(toUnmodifiableList());
-	}
-
-	Optional<HTTPHeader> select(String name) {
-		return headers.stream().filter(h -> h.is(name)).findFirst();
-	}
-
-	public Collection<HTTPHeader> all() {
-		return headers;
-	}
-
-	public HTTPHeaders add(HTTPHeader header) {
-		return new HTTPHeaders(Stream.concat(headers.stream(), Stream.of(header)));
-	}
-
-	@Override
-	public Iterator<HTTPHeader> iterator() {
-		return headers.iterator();
-	}
-
-	public static HTTPHeaders empty() {
-		return new HTTPHeaders(Stream.empty());
-	}
-
-	public static HTTPHeaders create(HTTPHeader... headers) {
-		return new HTTPHeaders(asList(headers));
-	}
+    Optional<HTTPRequestBody> body();
 }

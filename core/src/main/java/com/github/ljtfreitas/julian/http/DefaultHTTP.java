@@ -57,7 +57,9 @@ public class DefaultHTTP implements HTTP {
 		URI uri = endpoint.path().expand(arguments)
 				.prop(cause -> new IllegalArgumentException(endpoint.path().toString(), cause));
 
-		HTTPHeaders headers = HTTPHeaders.valueOf(headers(endpoint, arguments).merge(cookies(endpoint, arguments)));
+		HTTPHeaders headers = headers(endpoint, arguments).merge(cookies(endpoint, arguments)).all().stream()
+				.map(h -> new HTTPHeader(h.name(), h.values()))
+				.reduce(HTTPHeaders.empty(), HTTPHeaders::add, (a, b) -> b);
 
 		HTTPRequestBody body = body(endpoint, arguments, headers);
 

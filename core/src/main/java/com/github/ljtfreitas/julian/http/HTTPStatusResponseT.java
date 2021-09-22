@@ -34,6 +34,8 @@ import com.github.ljtfreitas.julian.ResponseT;
 
 public class HTTPStatusResponseT implements ResponseT<HTTPStatus, Void> {
 
+    private static final HTTPStatusResponseT SINGLE_INSTANCE = new HTTPStatusResponseT();
+
     @Override
     public <A> ResponseFn<HTTPStatus, A> comp(Endpoint endpoint, ResponseFn<Void, A> fn) {
         return new ResponseFn<>() {
@@ -63,5 +65,9 @@ public class HTTPStatusResponseT implements ResponseT<HTTPStatus, Void> {
     @Override
     public boolean test(Endpoint endpoint) {
         return endpoint.returnType().is(HTTPStatus.class);
+    }
+
+    public static HTTPStatusResponseT get() {
+        return SINGLE_INSTANCE;
     }
 }

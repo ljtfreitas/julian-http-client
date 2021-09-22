@@ -29,6 +29,8 @@ import java.util.Queue;
 
 class QueueResponseT<T> implements ResponseT<Queue<T>, Collection<T>> {
 
+	private static final QueueResponseT<Object> SINGLE_INSTANCE = new QueueResponseT<>();
+
 	@Override
 	public <A> ResponseFn<Queue<T>, A> comp(Endpoint endpoint, ResponseFn<Collection<T>, A> fn) {
 		return new ResponseFn<>() {
@@ -54,5 +56,9 @@ class QueueResponseT<T> implements ResponseT<Queue<T>, Collection<T>> {
 	public JavaType adapted(Endpoint endpoint) {
 		return JavaType.parameterized(Collection.class, endpoint.returnType().parameterized().map(JavaType.Parameterized::firstArg).map(JavaType::valueOf)
 				.orElseGet(JavaType::object));
+	}
+
+	public static QueueResponseT<Object> get() {
+		return SINGLE_INSTANCE;
 	}
 }

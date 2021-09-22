@@ -28,6 +28,8 @@ import java.util.Optional;
 
 class IterableResponseT<T> implements ResponseT<Iterable<T>, Collection<T>> {
 
+	private static final IterableResponseT<Object> SINGLE_INSTANCE = new IterableResponseT<>();
+
 	@Override
 	public <A> ResponseFn<Iterable<T>, A> comp(Endpoint endpoint, ResponseFn<Collection<T>, A> fn) {
 		return new ResponseFn<>() {
@@ -52,5 +54,9 @@ class IterableResponseT<T> implements ResponseT<Iterable<T>, Collection<T>> {
 	@Override
 	public JavaType adapted(Endpoint endpoint) {
 		return JavaType.parameterized(Collection.class, endpoint.returnType().parameterized().map(JavaType.Parameterized::firstArg).orElse(Object.class));
+	}
+
+	public static IterableResponseT<Object> get() {
+		return SINGLE_INSTANCE;
 	}
 }

@@ -24,6 +24,8 @@ package com.github.ljtfreitas.julian;
 
 class RunnableResponseT implements ResponseT<Runnable, Void> {
 
+	private static final RunnableResponseT SINGLE_INSTANCE = new RunnableResponseT();
+
 	@Override
 	public <A> ResponseFn<Runnable, A> comp(Endpoint endpoint, ResponseFn<Void, A> fn) {
 		return new ResponseFn<Runnable, A>() {
@@ -48,5 +50,9 @@ class RunnableResponseT implements ResponseT<Runnable, Void> {
 	@Override
 	public JavaType adapted(Endpoint endpoint) {
 		return JavaType.none();
+	}
+
+	public static RunnableResponseT get() {
+		return SINGLE_INSTANCE;
 	}
 }

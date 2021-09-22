@@ -43,6 +43,6 @@ class ProxyFactory<T> {
 
 	@SuppressWarnings("unchecked")
 	T create() {
-		return (T) Proxy.newProxyInstance(loader, new Class[] { classType }, handler);
+		return (T) Proxy.newProxyInstance(loader == null ? classType.getClassLoader() : loader, new Class[] { classType }, handler);
 	}
 }

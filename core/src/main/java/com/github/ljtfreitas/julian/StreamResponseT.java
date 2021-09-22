@@ -28,6 +28,8 @@ import java.util.stream.Stream;
 
 class StreamResponseT<T> implements ResponseT<Stream<T>, Collection<T>> {
 
+	private static final StreamResponseT<Object> SINGLE_INSTANCE = new StreamResponseT<>();
+
 	@Override
 	public <A> ResponseFn<Stream<T>, A> comp(Endpoint endpoint, ResponseFn<Collection<T>, A> fn) {
 		return new ResponseFn<>() {
@@ -52,5 +54,9 @@ class StreamResponseT<T> implements ResponseT<Stream<T>, Collection<T>> {
 	@Override
 	public JavaType adapted(Endpoint endpoint) {
 		return JavaType.parameterized(Collection.class, endpoint.returnType().parameterized().map(JavaType.Parameterized::firstArg).orElse(Object.class));
+	}
+
+	public static StreamResponseT<Object> get() {
+		return SINGLE_INSTANCE;
 	}
 }

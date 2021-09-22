@@ -22,8 +22,10 @@
 
 package com.github.ljtfreitas.julian.http;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import com.github.ljtfreitas.julian.Response;
 
@@ -31,22 +33,22 @@ public class FailureHTTPResponse<T> implements HTTPResponse<T> {
 
 	private final HTTPStatus status;
 	private final HTTPHeaders headers;
-	private final HTTPResponseException failure;
+	private final Supplier<HTTPResponseException> exception;
 
-	public FailureHTTPResponse(HTTPStatus status, HTTPHeaders headers, HTTPResponseException failure) {
+	public FailureHTTPResponse(HTTPStatus status, HTTPHeaders headers, Supplier<HTTPResponseException> exception) {
 		this.status = status;
 		this.headers = headers;
-		this.failure = failure;
+		this.exception = exception;
 	}
 
 	@Override
 	public T body() {
-		throw failure;
+		throw exception.get();
 	}
 
 	@Override
 	public <R> Response<R> map(Function<? super T, R> fn) {
-		throw failure;
+		throw exception.get();
 	}
 
 	@Override
@@ -62,13 +64,14 @@ public class FailureHTTPResponse<T> implements HTTPResponse<T> {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <E extends Exception> Response<T> recover(Class<? super E> expected, Function<? super E, T> fn) {
-		return expected.isInstance(failure) ? new DefaultHTTPResponse<>(status, headers, fn.apply((E) failure)) : this;
+		HTTPResponseException e = exception.get();
+		return expected.isInstance(e) ? new DefaultHTTPResponse<>(status, headers, fn.apply((E) e)) : this;
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	public <E extends Exception> Response<T> recover(Function<? super E, T> fn) {
-		return new DefaultHTTPResponse<>(status, headers, fn.apply((E) failure));
+		return new DefaultHTTPResponse<>(status, headers, fn.apply((E) exception.get()));
 	}
 	
 	@Override
@@ -79,6 +82,7 @@ public class FailureHTTPResponse<T> implements HTTPResponse<T> {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <E extends Exception> Response<T> recover(Predicate<? super E> p, Function<? super E, T> fn) {
-		return p.test((E) failure) ? new DefaultHTTPResponse<>(status, headers, fn.apply((E) failure)) : this;
+		E e = (E) exception.get();
+		return p.test(e) ? new DefaultHTTPResponse<>(status, headers, fn.apply(e)) : this;
 	}
 }

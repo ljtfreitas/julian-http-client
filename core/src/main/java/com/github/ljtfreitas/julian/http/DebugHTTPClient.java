@@ -22,21 +22,19 @@
 
 package com.github.ljtfreitas.julian.http;
 
+import com.github.ljtfreitas.julian.Promise;
+import com.github.ljtfreitas.julian.http.client.HTTPClient;
+import com.github.ljtfreitas.julian.http.client.HTTPClientRequest;
+import com.github.ljtfreitas.julian.http.client.HTTPClientResponse;
+
 import java.lang.System.Logger.Level;
-import java.net.http.HttpResponse.BodySubscribers;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.Flow.Subscriber;
 import java.util.concurrent.Flow.Subscription;
 import java.util.stream.Collectors;
-
-import com.github.ljtfreitas.julian.Promise;
-import com.github.ljtfreitas.julian.http.client.HTTPClient;
-import com.github.ljtfreitas.julian.http.client.HTTPClientRequest;
-import com.github.ljtfreitas.julian.http.client.HTTPClientResponse;
 
 public class DebugHTTPClient implements HTTPClient {
 

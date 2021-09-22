@@ -30,17 +30,19 @@ import com.github.ljtfreitas.julian.JavaType;
 
 public class InputStreamHTTPResponseReader implements WildcardHTTPResponseReader<InputStream> {
 
+	private static final InputStreamHTTPResponseReader SINGLE_INSTANCE = new InputStreamHTTPResponseReader();
+
 	private final ByteArrayHTTPResponseReader reader;
 
 	public InputStreamHTTPResponseReader() {
-		this.reader = new ByteArrayHTTPResponseReader();
+		this.reader = ByteArrayHTTPResponseReader.get();
 	}
 
 	public InputStreamHTTPResponseReader(int bufferSize) {
 		this.reader = new ByteArrayHTTPResponseReader(bufferSize);
 	}
 
-	@Override
+    @Override
 	public boolean readable(ContentType candidate, JavaType javaType) {
 		return supports(candidate) && javaType.is(InputStream.class);
 	}
@@ -49,4 +51,8 @@ public class InputStreamHTTPResponseReader implements WildcardHTTPResponseReader
 	public InputStream read(InputStream body, JavaType javaType) {
 		return new BufferedInputStream(new ByteArrayInputStream(reader.read(body, javaType)));
 	}
+
+    public static InputStreamHTTPResponseReader get() {
+		return SINGLE_INSTANCE;
+    }
 }

@@ -29,6 +29,8 @@ import com.github.ljtfreitas.julian.JavaType;
 
 public class ByteArrayHTTPResponseReader implements WildcardHTTPResponseReader<byte[]> {
 
+	private static final ByteArrayHTTPResponseReader SINGLE_INSTANCE = new ByteArrayHTTPResponseReader();
+
 	private static final int DEFAULT_BUFFER_SIZE = 1024 * 100;
 
 	private final int bufferSize;
@@ -41,7 +43,7 @@ public class ByteArrayHTTPResponseReader implements WildcardHTTPResponseReader<b
 		this.bufferSize = bufferSize;
 	}
 
-	@Override
+    @Override
 	public boolean readable(ContentType candidate, JavaType javaType) {
 		return supports(candidate) && javaType.is(byte[].class);
 	}
@@ -51,4 +53,7 @@ public class ByteArrayHTTPResponseReader implements WildcardHTTPResponseReader<b
 		return Except.run(() -> body.readNBytes(bufferSize)).prop(HTTPResponseReaderException::new);
 	}
 
+    public static ByteArrayHTTPResponseReader get() {
+		return SINGLE_INSTANCE;
+    }
 }

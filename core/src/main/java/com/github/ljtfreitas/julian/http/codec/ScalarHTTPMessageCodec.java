@@ -37,10 +37,12 @@ import static com.github.ljtfreitas.julian.Preconditions.state;
 
 public class ScalarHTTPMessageCodec implements HTTPRequestWriter<Object>, HTTPResponseReader<Object> {
 
+	private static final ScalarHTTPMessageCodec SINGLE_INSTANCE = new ScalarHTTPMessageCodec();
+
 	private static final ContentType TEXT_PLAIN_CONTENT_TYPE = ContentType.valueOf("text/plain");
 	private static final Set<Class<?>> SCALAR_TYPES = new HashSet<>();
-	
-	private final StringHTTPMessageCodec codec = new StringHTTPMessageCodec();
+
+	private final StringHTTPMessageCodec codec = StringHTTPMessageCodec.get();
 
 	static {
 		SCALAR_TYPES.add(byte.class);
@@ -61,7 +63,7 @@ public class ScalarHTTPMessageCodec implements HTTPRequestWriter<Object>, HTTPRe
 		SCALAR_TYPES.add(Character.class);
 	}
 
-	@Override
+    @Override
 	public Collection<ContentType> contentTypes() {
 		return List.of(TEXT_PLAIN_CONTENT_TYPE);
 	}
@@ -163,5 +165,9 @@ public class ScalarHTTPMessageCodec implements HTTPRequestWriter<Object>, HTTPRe
 					.findFirst()
 					.orElseThrow(() -> new IllegalArgumentException(format("Unsupported type: {0}", javaType)));
 		}
+	}
+
+	public static ScalarHTTPMessageCodec get() {
+		return SINGLE_INSTANCE;
 	}
 }

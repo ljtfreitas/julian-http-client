@@ -34,7 +34,27 @@ import static java.net.http.HttpRequest.BodyPublishers.fromPublisher;
 
 public class DefaultHTTPClient implements HTTPClient {
 
-	private final HttpClient client = HttpClient.newHttpClient();
+	private final HttpClient client;
+	private final HTTPClient.Specification specification;
+
+	public DefaultHTTPClient() {
+		this.client = HttpClient.newHttpClient();
+		this.specification = new HTTPClient.Specification();
+	}
+
+	public DefaultHTTPClient(HTTPClient.Specification specification) {
+		HttpClient.Builder builder = HttpClient.newBuilder();
+
+		specification.connectionTimeout().ifPresent(builder::connectTimeout);
+		specification.redirects().apply(() -> builder.followRedirects(HttpClient.Redirect.NORMAL),
+										() -> builder.followRedirects(HttpClient.Redirect.NEVER));
+		specification.proxySelector().ifPresent(builder::proxy);
+		specification.ssl().context().ifPresent(builder::sslContext);
+		specification.ssl().parameters().ifPresent(builder::sslParameters);
+
+		this.client = builder.build();
+		this.specification = specification;
+	}
 
 	@Override
 	public HTTPClientRequest request(HTTPRequestDefinition request) {
@@ -42,6 +62,8 @@ public class DefaultHTTPClient implements HTTPClient {
 				.method(request.method().name(), request.body().map(b -> fromPublisher(b.serialize())).orElseGet(BodyPublishers::noBody));
 
 		request.headers().forEach(header -> header.values().forEach(value -> builder.header(header.name(), value)));
+
+		specification.requestTimeout().ifPresent(builder::timeout);
 
 		return new DefaultHTTPClientRequest(client, builder.build());
 	}

@@ -29,6 +29,8 @@ import java.util.Optional;
 
 class ListIteratorResponseT<T> implements ResponseT<ListIterator<T>, List<T>> {
 
+	private static final ListIteratorResponseT<Object> SINGLE_INSTANCE = new ListIteratorResponseT<>();
+
 	@Override
 	public <A> ResponseFn<ListIterator<T>, A> comp(Endpoint endpoint, ResponseFn<List<T>, A> fn) {
 		return new ResponseFn<>() {
@@ -53,5 +55,9 @@ class ListIteratorResponseT<T> implements ResponseT<ListIterator<T>, List<T>> {
 	@Override
 	public JavaType adapted(Endpoint endpoint) {
 		return JavaType.parameterized(List.class, endpoint.returnType().parameterized().map(JavaType.Parameterized::firstArg).orElse(Object.class));
+	}
+
+	public static ListIteratorResponseT<Object> get() {
+		return SINGLE_INSTANCE;
 	}
 }

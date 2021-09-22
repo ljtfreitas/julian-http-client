@@ -1,7 +1,6 @@
 package com.github.ljtfreitas.julian;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Flow.Publisher;
 import java.util.concurrent.Flow.Subscriber;
 import java.util.concurrent.Flow.Subscription;
@@ -70,6 +69,8 @@ class PublisherResponseTTest {
 
         when(request.comp(fn, arguments)).thenReturn(Promise.pending(CompletableFuture.supplyAsync(() -> "expected",
                 CompletableFuture.delayedExecutor(1000, TimeUnit.MILLISECONDS))));
+
+        when(request.comp(fn, arguments)).thenReturn(Promise.done("expected"));
 
         Publisher<String> publisher = responseT.comp(endpoint, fn).join(request, arguments);
 

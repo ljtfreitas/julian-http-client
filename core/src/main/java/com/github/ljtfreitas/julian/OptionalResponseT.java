@@ -30,6 +30,8 @@ import com.github.ljtfreitas.julian.RequestIO;
 
 class OptionalResponseT<T> implements ResponseT<Optional<T>, T> {
 
+	private static final OptionalResponseT<Object> SINGLE_INSTANCE = new OptionalResponseT<>();
+
 	@Override
 	public <A> ResponseFn<Optional<T>, A> comp(Endpoint endpoint, ResponseFn<T, A> fn) {
 		return new ResponseFn<>() {
@@ -55,5 +57,9 @@ class OptionalResponseT<T> implements ResponseT<Optional<T>, T> {
 	public JavaType adapted(Endpoint endpoint) {
 		return endpoint.returnType().parameterized().map(JavaType.Parameterized::firstArg).map(JavaType::valueOf)
 				.orElseGet(JavaType::object);
+	}
+
+	public static OptionalResponseT<Object> get() {
+		return SINGLE_INSTANCE;
 	}
 }

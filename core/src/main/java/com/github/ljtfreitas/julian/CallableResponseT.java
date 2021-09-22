@@ -26,6 +26,8 @@ import java.util.concurrent.Callable;
 
 class CallableResponseT<T> implements ResponseT<Callable<T>, T> {
 
+	private static final CallableResponseT<Object> SINGLE_INSTANCE = new CallableResponseT<>();
+
 	@Override
 	public <A> ResponseFn<Callable<T>, A> comp(Endpoint endpoint, ResponseFn<T, A> fn) {
 		return new ResponseFn<>() {
@@ -52,5 +54,9 @@ class CallableResponseT<T> implements ResponseT<Callable<T>, T> {
 	public JavaType adapted(Endpoint endpoint) {
 		return endpoint.returnType().parameterized().map(JavaType.Parameterized::firstArg).map(JavaType::valueOf)
 				.orElseGet(JavaType::object);
+	}
+
+	public static CallableResponseT<Object> get() {
+		return SINGLE_INSTANCE;
 	}
 }

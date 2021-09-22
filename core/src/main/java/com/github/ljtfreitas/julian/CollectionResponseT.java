@@ -30,6 +30,8 @@ import java.util.Set;
 
 class CollectionResponseT<T> implements ResponseT<Collection<T>, Collection<T>> {
 
+	private static final CollectionResponseT<Object> SINGLE_INSTANCE = new CollectionResponseT<>();
+
 	@Override
 	public <A> ResponseFn<Collection<T>, A> comp(Endpoint endpoint, ResponseFn<Collection<T>, A> fn) {
 		return new ResponseFn<>() {
@@ -72,5 +74,9 @@ class CollectionResponseT<T> implements ResponseT<Collection<T>, Collection<T>> 
 	@Override
 	public JavaType adapted(Endpoint endpoint) {
 		return JavaType.parameterized(Collection.class, endpoint.returnType().parameterized().map(JavaType.Parameterized::firstArg).orElse(Object.class));
+	}
+
+	public static CollectionResponseT<Object> get() {
+		return SINGLE_INSTANCE;
 	}
 }

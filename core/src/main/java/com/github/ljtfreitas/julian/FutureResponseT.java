@@ -26,6 +26,8 @@ import java.util.concurrent.Future;
 
 class FutureResponseT<T> implements ResponseT<Future<T>, T> {
 
+	private static final FutureResponseT<Object> SINGLE_INSTANCE = new FutureResponseT<>();
+
 	@Override
 	public <A> ResponseFn<Future<T>, A> comp(Endpoint endpoint, ResponseFn<T, A> fn) {
 		return new ResponseFn<>() {
@@ -51,5 +53,9 @@ class FutureResponseT<T> implements ResponseT<Future<T>, T> {
 	public JavaType adapted(Endpoint endpoint) {
 		return endpoint.returnType().parameterized().map(JavaType.Parameterized::firstArg).map(JavaType::valueOf)
 				.orElseGet(JavaType::object);
+	}
+
+	public static FutureResponseT<Object> get() {
+		return SINGLE_INSTANCE;
 	}
 }

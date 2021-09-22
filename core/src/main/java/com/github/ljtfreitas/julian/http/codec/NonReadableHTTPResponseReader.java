@@ -30,6 +30,8 @@ import com.github.ljtfreitas.julian.JavaType;
 
 public class NonReadableHTTPResponseReader implements WildcardHTTPResponseReader<Void> {
 
+	private static final NonReadableHTTPResponseReader SINGLE_INSTANCE = new NonReadableHTTPResponseReader();
+
 	private static final Set<Class<?>> SKIPPABLES_TYPES = new HashSet<>();
 
 	static {
@@ -37,7 +39,7 @@ public class NonReadableHTTPResponseReader implements WildcardHTTPResponseReader
 		SKIPPABLES_TYPES.add(Void.class);
 	}
 
-	@Override
+    @Override
 	public boolean readable(ContentType candidate, JavaType javaType) {
 		return supports(candidate) && javaType.classType().map(SKIPPABLES_TYPES::contains).orElse(false);
 	}
@@ -45,5 +47,9 @@ public class NonReadableHTTPResponseReader implements WildcardHTTPResponseReader
 	@Override
 	public Void read(InputStream body, JavaType javaType) {
 		return null;
+	}
+
+	public static NonReadableHTTPResponseReader get() {
+		return SINGLE_INSTANCE;
 	}
 }

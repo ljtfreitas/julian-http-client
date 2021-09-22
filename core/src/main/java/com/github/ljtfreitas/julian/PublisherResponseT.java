@@ -23,10 +23,24 @@
 package com.github.ljtfreitas.julian;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.Flow;
 import java.util.concurrent.Flow.Publisher;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.SubmissionPublisher;
 
 public class PublisherResponseT<T> implements ResponseT<Publisher<T>, T> {
+
+    private static final PublisherResponseT<Object> SINGLE_INSTANCE = new PublisherResponseT<>();
+
+    private final Executor executor;
+
+    public PublisherResponseT() {
+        this(null);
+    }
+
+    public PublisherResponseT(Executor executor) {
+        this.executor = executor;
+    }
 
     @Override
     public <A> ResponseFn<Publisher<T>, A> comp(Endpoint endpoint, ResponseFn<T, A> fn) {
@@ -34,7 +48,8 @@ public class PublisherResponseT<T> implements ResponseT<Publisher<T>, T> {
 
             @Override
             public Publisher<T> join(RequestIO<A> request, Arguments arguments) {
-                SubmissionPublisher<T> publisher = new SubmissionPublisher<>();
+                SubmissionPublisher<T> publisher = executor == null ?
+                        new SubmissionPublisher<>() : new SubmissionPublisher<>(executor, Flow.defaultBufferSize());
 
                 request.comp(fn, arguments).future()
                         .thenAccept(publisher::submit)
@@ -60,5 +75,9 @@ public class PublisherResponseT<T> implements ResponseT<Publisher<T>, T> {
     @Override
     public boolean test(Endpoint endpoint) {
         return endpoint.returnType().is(Publisher.class);
+    }
+
+    public static PublisherResponseT<Object> get() {
+        return SINGLE_INSTANCE;
     }
 }

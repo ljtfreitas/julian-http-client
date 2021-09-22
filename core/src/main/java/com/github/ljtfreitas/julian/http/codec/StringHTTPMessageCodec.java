@@ -36,7 +36,9 @@ import static java.util.stream.Collectors.joining;
 
 public class StringHTTPMessageCodec implements HTTPRequestWriter<String>, HTTPResponseReader<String> {
 
-	static final ContentType TEXT_CONTENT_TYPE = ContentType.valueOf("text/*");
+	private static final ContentType TEXT_CONTENT_TYPE = ContentType.valueOf("text/*");
+
+	private static final StringHTTPMessageCodec SINGLE_INSTANCE = new StringHTTPMessageCodec();
 
 	private final Collection<ContentType> contentTypes;
 
@@ -48,7 +50,7 @@ public class StringHTTPMessageCodec implements HTTPRequestWriter<String>, HTTPRe
 		this.contentTypes = List.of(contentTypes);
 	}
 
-	@Override
+    @Override
 	public Collection<ContentType> contentTypes() {
 		return contentTypes;
 	}
@@ -73,5 +75,9 @@ public class StringHTTPMessageCodec implements HTTPRequestWriter<String>, HTTPRe
 	@Override
 	public byte[] write(String body, Charset encoding) {
 		return body.getBytes(encoding);
+	}
+
+	public static StringHTTPMessageCodec get() {
+		return SINGLE_INSTANCE;
 	}
 }

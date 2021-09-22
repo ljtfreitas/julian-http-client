@@ -25,14 +25,18 @@ package com.github.ljtfreitas.julian.http;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.client.HTTPClientResponse;
 
+import java.util.function.Supplier;
+
 public class DefaultHTTPResponseFailure implements HTTPResponseFailure {
+
+	private static final DefaultHTTPResponseFailure SINGLE_INSTANCE = new DefaultHTTPResponseFailure();
 
 	@Override
 	public <T> HTTPResponse<T> apply(HTTPClientResponse response, JavaType javaType) {
 		HTTPStatus status = response.status();
 		HTTPHeaders headers = response.headers();
 
-		HTTPResponseException ex = HTTPStatusCode.select(status.code())
+		Supplier<HTTPResponseException> ex = () -> HTTPStatusCode.select(status.code())
 				.<HTTPResponseException> map(httpStatusCode -> failure(httpStatusCode, headers))
 				.orElseGet(() -> unknown(status, headers));
 
@@ -119,4 +123,7 @@ public class DefaultHTTPResponseFailure implements HTTPResponseFailure {
 		}
 	}
 
+	public static DefaultHTTPResponseFailure get() {
+		return SINGLE_INSTANCE;
+	}
 }

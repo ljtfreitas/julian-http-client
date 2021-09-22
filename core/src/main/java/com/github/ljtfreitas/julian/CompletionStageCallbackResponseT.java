@@ -36,6 +36,8 @@ import com.github.ljtfreitas.julian.JavaType.Parameterized;
 
 class CompletionStageCallbackResponseT<T> implements ResponseT<Void, T> {
 
+	private static final CompletionStageCallbackResponseT<Object> SINGLE_INSTANCE = new CompletionStageCallbackResponseT<>();
+
 	@Override
 	public <A> ResponseFn<Void, A> comp(Endpoint endpoint, ResponseFn<T, A> fn) {
 		return new ResponseFn<>() {
@@ -130,5 +132,9 @@ class CompletionStageCallbackResponseT<T> implements ResponseT<Void, T> {
 			.filter(p)
 			.findFirst()
 			.flatMap(c -> c.javaType().parameterized().map(Parameterized::firstArg));
+	}
+
+	public static CompletionStageCallbackResponseT<Object> get() {
+		return SINGLE_INSTANCE;
 	}
 }

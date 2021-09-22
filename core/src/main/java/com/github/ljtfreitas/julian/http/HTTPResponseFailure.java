@@ -27,5 +27,9 @@ import com.github.ljtfreitas.julian.http.client.HTTPClientResponse;
 
 public interface HTTPResponseFailure {
 
-	<T> HTTPResponse<T> apply(HTTPClientResponse response, JavaType javaType);
+    <T> HTTPResponse<T> apply(HTTPClientResponse response, JavaType javaType);
+
+    static HTTPResponseFailure empty() {
+        return EmptyHTTPResponseFailure.get();
+    }
 }

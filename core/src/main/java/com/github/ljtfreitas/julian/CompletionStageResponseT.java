@@ -26,6 +26,8 @@ import java.util.concurrent.CompletionStage;
 
 class CompletionStageResponseT<T> implements ResponseT<CompletionStage<T>, T> {
 
+	private static final CompletionStageResponseT<Object> SINGLE_INSTANCE = new CompletionStageResponseT<>();
+
 	@Override
 	public <A> ResponseFn<CompletionStage<T>, A> comp(Endpoint endpoint, ResponseFn<T, A> fn) {
 		return new ResponseFn<>() {
@@ -51,5 +53,9 @@ class CompletionStageResponseT<T> implements ResponseT<CompletionStage<T>, T> {
 	public JavaType adapted(Endpoint endpoint) {
 		return endpoint.returnType().parameterized().map(JavaType.Parameterized::firstArg).map(JavaType::valueOf)
 				.orElseGet(JavaType::object);
+	}
+
+	public static CompletionStageResponseT<Object> get() {
+		return SINGLE_INSTANCE;
 	}
 }

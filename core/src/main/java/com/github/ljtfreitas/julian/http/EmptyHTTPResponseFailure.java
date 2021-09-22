@@ -20,44 +20,21 @@
  * SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian;
+package com.github.ljtfreitas.julian.http;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.FutureTask;
+import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.http.client.HTTPClientResponse;
 
-class FutureTaskResponseT<T> implements ResponseT<FutureTask<T>, Callable<T>> {
+public class EmptyHTTPResponseFailure implements HTTPResponseFailure {
 
-	private static final FutureTaskResponseT<Object> SINGLE_INSTANCE = new FutureTaskResponseT<>();
+    private static final EmptyHTTPResponseFailure SINGLE_INSTANCE = new EmptyHTTPResponseFailure();
 
-	@Override
-	public <A> ResponseFn<FutureTask<T>, A> comp(Endpoint endpoint, ResponseFn<Callable<T>, A> fn) {
-		return new ResponseFn<>() {
+    @Override
+    public <T> HTTPResponse<T> apply(HTTPClientResponse response, JavaType javaType) {
+        return new EmptyHTTPResponse<>(response.status(), response.headers());
+    }
 
-			@Override
-			public FutureTask<T> join(RequestIO<A> request, Arguments arguments) {
-				return new FutureTask<>(fn.join(request, arguments));
-			}
-
-			@Override
-			public JavaType returnType() {
-				return fn.returnType();
-			}
-		};
-	}
-
-	@Override
-	public boolean test(Endpoint endpoint) {
-		return endpoint.returnType().is(FutureTask.class);
-	}
-
-	@Override
-	public JavaType adapted(Endpoint endpoint) {
-		return endpoint.returnType().parameterized().map(JavaType.Parameterized::firstArg)
-				.map(t -> JavaType.parameterized(Callable.class, t))
-				.orElseGet(JavaType::object);
-	}
-
-	public static FutureTaskResponseT<Object> get() {
-		return SINGLE_INSTANCE;
-	}
+    public static EmptyHTTPResponseFailure get() {
+        return SINGLE_INSTANCE;
+    }
 }

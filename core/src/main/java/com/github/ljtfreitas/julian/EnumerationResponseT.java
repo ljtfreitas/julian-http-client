@@ -29,6 +29,8 @@ import java.util.Optional;
 
 class EnumerationResponseT<T> implements ResponseT<Enumeration<T>, Collection<T>> {
 
+	private static final EnumerationResponseT<Object> SINGLE_INSTANCE = new EnumerationResponseT<>();
+
 	@Override
 	public <A> ResponseFn<Enumeration<T>, A> comp(Endpoint endpoint, ResponseFn<Collection<T>, A> fn) {
 		return new ResponseFn<>() {
@@ -54,5 +56,9 @@ class EnumerationResponseT<T> implements ResponseT<Enumeration<T>, Collection<T>
 	@Override
 	public JavaType adapted(Endpoint endpoint) {
 		return JavaType.parameterized(Collection.class, endpoint.returnType().parameterized().map(JavaType.Parameterized::firstArg).orElse(Object.class));
+	}
+
+	public static EnumerationResponseT<Object> get() {
+		return SINGLE_INSTANCE;
 	}
 }

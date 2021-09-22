@@ -24,6 +24,8 @@ package com.github.ljtfreitas.julian;
 
 class DefaultResponseT<T> implements ResponseT<Response<T>, T> {
 
+    private static final DefaultResponseT<Object> SINGLE_INSTANCE = new DefaultResponseT<>();
+
     @Override
     public <A> ResponseFn<Response<T>, A> comp(Endpoint endpoint, ResponseFn<T, A> fn) {
         return new ResponseFn<>() {
@@ -51,5 +53,9 @@ class DefaultResponseT<T> implements ResponseT<Response<T>, T> {
     @Override
     public boolean test(Endpoint endpoint) {
         return endpoint.returnType().compatible(Response.class);
+    }
+
+    public static DefaultResponseT<Object> get() {
+        return SINGLE_INSTANCE;
     }
 }

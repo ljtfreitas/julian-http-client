@@ -28,6 +28,8 @@ import com.github.ljtfreitas.julian.http.HTTPResponse;
 
 public class HeadersResponseT implements ResponseT<Headers, Void> {
 
+    private static final HeadersResponseT SINGLE_INSTANCE = new HeadersResponseT();
+
     @Override
     public <A> ResponseFn<Headers, A> comp(Endpoint endpoint, ResponseFn<Void, A> fn) {
         return new ResponseFn<>() {
@@ -59,5 +61,9 @@ public class HeadersResponseT implements ResponseT<Headers, Void> {
     @Override
     public boolean test(Endpoint endpoint) {
         return endpoint.returnType().is(Headers.class);
+    }
+
+    public static HeadersResponseT get() {
+        return SINGLE_INSTANCE;
     }
 }

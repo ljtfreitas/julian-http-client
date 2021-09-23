@@ -28,10 +28,13 @@ public class HTTPResponseException extends RuntimeException {
 
 	private final HTTPStatus status;
 	private final HTTPHeaders headers;
+	private final String body;
 
-	HTTPResponseException(HTTPStatus status, HTTPHeaders headers) {
+	HTTPResponseException(HTTPStatus status, HTTPHeaders headers, String body) {
+		super(HTTPResponseException.message(status, headers, body));
 		this.status = status;
 		this.headers = headers;
+		this.body = body;
 	}
 
 	public HTTPStatus status() {
@@ -40,5 +43,22 @@ public class HTTPResponseException extends RuntimeException {
 
 	public HTTPHeaders headers() {
 		return headers;
+	}
+
+	public String body() {
+		return body;
+	}
+
+	private static String message(HTTPStatus status, HTTPHeaders headers, String body) {
+		return new StringBuilder()
+				.append(status)
+					.append("\n")
+				.append("headers: ")
+					.append("[")
+						.append(headers)
+					.append("]")
+				.append("\n")
+				.append(body)
+				.toString();
 	}
 }

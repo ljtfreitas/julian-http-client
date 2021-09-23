@@ -1,29 +1,20 @@
 package com.github.ljtfreitas.julian.http;
 
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Optional;
-
+import com.github.ljtfreitas.julian.http.client.DefaultHTTPClient;
+import com.github.ljtfreitas.julian.http.client.HTTPClientRequest;
+import com.github.ljtfreitas.julian.http.codec.StringHTTPMessageCodec;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Answers;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.jupiter.MockServerExtension;
 import org.mockserver.junit.jupiter.MockServerSettings;
-import org.mockserver.model.HttpRequest;
-import org.mockserver.model.HttpResponse;
-import org.mockserver.model.MediaType;
 
-import com.github.ljtfreitas.julian.Promise;
-import com.github.ljtfreitas.julian.http.client.DefaultHTTPClient;
-import com.github.ljtfreitas.julian.http.client.HTTPClient;
-import com.github.ljtfreitas.julian.http.client.HTTPClientRequest;
-import com.github.ljtfreitas.julian.http.client.HTTPClientResponse;
-import com.github.ljtfreitas.julian.http.codec.StringHTTPMessageCodec;
+import java.net.URI;
+import java.net.http.HttpRequest.BodyPublishers;
+import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
@@ -60,7 +51,7 @@ class DebugHTTPClientTest {
         when(httpRequest.method()).thenReturn(HTTPMethod.GET);
         when(httpRequest.headers()).thenReturn(new HTTPHeaders(List.of(new HTTPHeader("X-Some-Header", "some-content"),
                                                                        new HTTPHeader("Accept", "text/plain"))));
-        when(httpRequest.body()).thenReturn(Optional.of(new DefaultHTTPRequestBody<>("request body", StandardCharsets.UTF_8, new StringHTTPMessageCodec())));
+        when(httpRequest.body()).thenReturn(Optional.of(new DefaultHTTPRequestBody(StringHTTPMessageCodec.TEXT_PLAIN_MEDIA_TYPE, () -> BodyPublishers.ofString("request body"))));
 
         HTTPClientRequest intercepted = debugHTTPClient.request(httpRequest);
 

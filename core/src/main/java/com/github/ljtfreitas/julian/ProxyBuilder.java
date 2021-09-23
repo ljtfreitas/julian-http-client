@@ -28,11 +28,11 @@ import com.github.ljtfreitas.julian.contract.DefaultContractReader;
 import com.github.ljtfreitas.julian.http.ConditionalHTTPResponseFailure;
 import com.github.ljtfreitas.julian.http.DebugHTTPClient;
 import com.github.ljtfreitas.julian.http.DefaultHTTP;
-import com.github.ljtfreitas.julian.http.DefaultHTTPRequestInterceptor;
 import com.github.ljtfreitas.julian.http.DefaultHTTPResponseFailure;
 import com.github.ljtfreitas.julian.http.HTTP;
 import com.github.ljtfreitas.julian.http.HTTPHeadersResponseT;
 import com.github.ljtfreitas.julian.http.HTTPRequestInterceptor;
+import com.github.ljtfreitas.julian.http.HTTPRequestInterceptorChain;
 import com.github.ljtfreitas.julian.http.HTTPResponseFailure;
 import com.github.ljtfreitas.julian.http.HTTPStatusCode;
 import com.github.ljtfreitas.julian.http.HTTPStatusCodeResponseT;
@@ -499,6 +499,6 @@ public class ProxyBuilder {
     }
 
     private HTTPRequestInterceptor interceptor() {
-        return new DefaultHTTPRequestInterceptor(httpSpec.client.interceptors.all());
+        return new HTTPRequestInterceptorChain(httpSpec.client.interceptors.all());
     }
 }

@@ -27,5 +27,8 @@ import java.util.concurrent.Flow.Publisher;
 
 public interface HTTPRequestBody {
 
+    MediaType contentType();
+
     Publisher<ByteBuffer> serialize();
+
 }

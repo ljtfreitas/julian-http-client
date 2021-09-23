@@ -22,6 +22,7 @@
 
 package com.github.ljtfreitas.julian.http.client.reactor;
 
+import com.github.ljtfreitas.julian.http.OptionalHTTPResponseBody;
 import reactor.core.publisher.Mono;
 import reactor.netty.ByteBufMono;
 import reactor.netty.http.client.HttpClientResponse;
@@ -77,11 +78,11 @@ class ReactorNettyHTTPClientResponse implements HTTPClientResponse {
 
         HTTPHeaders headers = response.responseHeaders().names().stream()
                 .map(name -> HTTPHeader.create(name, response.responseHeaders().getAll(name)))
-                .reduce(HTTPHeaders.empty(), HTTPHeaders::add, (a, b) -> b);
+                .reduce(HTTPHeaders.empty(), HTTPHeaders::join, (a, b) -> b);
 
         return bodyAsBuffer.asByteArray()
-                .map(bodyAsByteArray -> new DefaultHTTPResponseBody(status, headers, bodyAsByteArray))
+                .map(bodyAsByteArray -> new OptionalHTTPResponseBody(status, headers, new DefaultHTTPResponseBody(bodyAsByteArray)))
                 .map(body -> new ReactorNettyHTTPClientResponse(HTTPClientResponse.create(status, headers, body)))
-                .defaultIfEmpty(new ReactorNettyHTTPClientResponse(HTTPClientResponse.empty(status, headers)));
+                .switchIfEmpty(Mono.fromCallable(() -> new ReactorNettyHTTPClientResponse(HTTPClientResponse.empty(status, headers))));
     }
 }

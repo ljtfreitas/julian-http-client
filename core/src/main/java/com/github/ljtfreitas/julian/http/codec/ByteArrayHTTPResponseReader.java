@@ -22,10 +22,13 @@
 
 package com.github.ljtfreitas.julian.http.codec;
 
-import java.io.InputStream;
-
+import com.github.ljtfreitas.julian.Bracket;
 import com.github.ljtfreitas.julian.Except;
 import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.http.MediaType;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 
 public class ByteArrayHTTPResponseReader implements WildcardHTTPResponseReader<byte[]> {
 
@@ -43,14 +46,16 @@ public class ByteArrayHTTPResponseReader implements WildcardHTTPResponseReader<b
 		this.bufferSize = bufferSize;
 	}
 
-    @Override
-	public boolean readable(ContentType candidate, JavaType javaType) {
+	@Override
+	public boolean readable(MediaType candidate, JavaType javaType) {
 		return supports(candidate) && javaType.is(byte[].class);
 	}
 
 	@Override
-	public byte[] read(InputStream body, JavaType javaType) {
-		return Except.run(() -> body.readNBytes(bufferSize)).prop(HTTPResponseReaderException::new);
+	public byte[] read(byte[] body, JavaType javaType) {
+		return Bracket.acquire(() -> new ByteArrayInputStream(body))
+				.map(stream -> stream.readNBytes(bufferSize))
+				.prop(HTTPResponseReaderException::new);
 	}
 
     public static ByteArrayHTTPResponseReader get() {

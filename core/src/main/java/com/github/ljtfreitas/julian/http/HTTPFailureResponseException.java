@@ -26,7 +26,7 @@ public class HTTPFailureResponseException extends HTTPResponseException {
 
 	private static final long serialVersionUID = 1L;
 
-	public HTTPFailureResponseException(HTTPStatusCode status, HTTPHeaders headers) {
-		super(new HTTPStatus(status.value(), status.message()), headers);
+	public HTTPFailureResponseException(HTTPStatusCode status, HTTPHeaders headers, String body) {
+		super(new HTTPStatus(status.value(), status.message()), headers, body);
 	}
 }

@@ -49,7 +49,7 @@ class HeadersResponseTTest {
 
         Headers headers = Headers.create(new Header("X-Header", "x-header-content"));
 
-        when(response.headers()).thenReturn(headers.all().stream().reduce(HTTPHeaders.empty(), (a, b) -> a.add(new HTTPHeader(b.name(), b.values())), (a, b) -> b));
+        when(response.headers()).thenReturn(headers.all().stream().reduce(HTTPHeaders.empty(), (a, b) -> a.join(new HTTPHeader(b.name(), b.values())), (a, b) -> b));
         when(response.as(HTTPResponse.class)).thenCallRealMethod();
         when(request.execute()).then(a -> Promise.done(response));
 

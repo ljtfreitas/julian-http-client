@@ -44,16 +44,16 @@ public class HTTPClientFailureResponseException extends HTTPFailureResponseExcep
 
 	private static final long serialVersionUID = 1L;
 
-	HTTPClientFailureResponseException(HTTPStatusCode status, HTTPHeaders headers) {
-		super(status, headers);
+	HTTPClientFailureResponseException(HTTPStatusCode status, HTTPHeaders headers, String body) {
+		super(status, headers, body);
 	}
 
 	public static class BadRequest extends HTTPClientFailureResponseException {
 
 		private static final long serialVersionUID = 1L;
 
-		public BadRequest(HTTPHeaders headers) {
-			super(BAD_REQUEST, headers);
+		public BadRequest(HTTPHeaders headers, String body) {
+			super(BAD_REQUEST, headers, body);
 		}
 	}
 
@@ -61,8 +61,8 @@ public class HTTPClientFailureResponseException extends HTTPFailureResponseExcep
 
 		private static final long serialVersionUID = 1L;
 
-		public Unauthorized(HTTPHeaders headers) {
-			super(UNAUTHORIZED, headers);
+		public Unauthorized(HTTPHeaders headers, String body) {
+			super(UNAUTHORIZED, headers, body);
 		}
 	}
 
@@ -70,8 +70,8 @@ public class HTTPClientFailureResponseException extends HTTPFailureResponseExcep
 
 		private static final long serialVersionUID = 1L;
 
-		public Forbidden(HTTPHeaders headers) {
-			super(FORBIDDEN, headers);
+		public Forbidden(HTTPHeaders headers, String body) {
+			super(FORBIDDEN, headers, body);
 		}
 	}
 
@@ -79,8 +79,8 @@ public class HTTPClientFailureResponseException extends HTTPFailureResponseExcep
 
 		private static final long serialVersionUID = 1L;
 
-		public NotFound(HTTPHeaders headers) {
-			super(NOT_FOUND, headers);
+		public NotFound(HTTPHeaders headers, String body) {
+			super(NOT_FOUND, headers, body);
 		}
 	}
 
@@ -88,8 +88,8 @@ public class HTTPClientFailureResponseException extends HTTPFailureResponseExcep
 
 		private static final long serialVersionUID = 1L;
 
-		public MethodNotAllowed(HTTPHeaders headers) {
-			super(METHOD_NOT_ALLOWED, headers);
+		public MethodNotAllowed(HTTPHeaders headers, String body) {
+			super(METHOD_NOT_ALLOWED, headers, body);
 		}
 	}
 
@@ -97,8 +97,8 @@ public class HTTPClientFailureResponseException extends HTTPFailureResponseExcep
 
 		private static final long serialVersionUID = 1L;
 
-		public NotAcceptable(HTTPHeaders headers) {
-			super(NOT_ACCEPTABLE, headers);
+		public NotAcceptable(HTTPHeaders headers, String body) {
+			super(NOT_ACCEPTABLE, headers, body);
 		}
 	}
 
@@ -106,8 +106,8 @@ public class HTTPClientFailureResponseException extends HTTPFailureResponseExcep
 
 		private static final long serialVersionUID = 1L;
 
-		public ProxyAuthenticationRequired(HTTPHeaders headers) {
-			super(PROXY_AUTHENTATION_REQUIRED, headers);
+		public ProxyAuthenticationRequired(HTTPHeaders headers, String body) {
+			super(PROXY_AUTHENTATION_REQUIRED, headers, body);
 		}
 	}
 
@@ -115,8 +115,8 @@ public class HTTPClientFailureResponseException extends HTTPFailureResponseExcep
 
 		private static final long serialVersionUID = 1L;
 
-		public RequestTimeout(HTTPHeaders headers) {
-			super(REQUEST_TIMEOUT, headers);
+		public RequestTimeout(HTTPHeaders headers, String body) {
+			super(REQUEST_TIMEOUT, headers, body);
 		}
 	}
 
@@ -124,8 +124,8 @@ public class HTTPClientFailureResponseException extends HTTPFailureResponseExcep
 
 		private static final long serialVersionUID = 1L;
 
-		public Conflict(HTTPHeaders headers) {
-			super(CONFLICT, headers);
+		public Conflict(HTTPHeaders headers, String body) {
+			super(CONFLICT, headers, body);
 		}
 	}
 
@@ -133,8 +133,8 @@ public class HTTPClientFailureResponseException extends HTTPFailureResponseExcep
 
 		private static final long serialVersionUID = 1L;
 
-		public Gone(HTTPHeaders headers) {
-			super(GONE, headers);
+		public Gone(HTTPHeaders headers, String body) {
+			super(GONE, headers, body);
 		}
 	}
 
@@ -142,8 +142,8 @@ public class HTTPClientFailureResponseException extends HTTPFailureResponseExcep
 
 		private static final long serialVersionUID = 1L;
 
-		public LengthRequired(HTTPHeaders headers) {
-			super(LENGTH_REQUIRED, headers);
+		public LengthRequired(HTTPHeaders headers, String body) {
+			super(LENGTH_REQUIRED, headers, body);
 		}
 	}
 
@@ -151,8 +151,8 @@ public class HTTPClientFailureResponseException extends HTTPFailureResponseExcep
 
 		private static final long serialVersionUID = 1L;
 
-		public PreconditionFailed(HTTPHeaders headers) {
-			super(PRECONDITION_FAILED, headers);
+		public PreconditionFailed(HTTPHeaders headers, String body) {
+			super(PRECONDITION_FAILED, headers, body);
 		}
 	}
 
@@ -160,8 +160,8 @@ public class HTTPClientFailureResponseException extends HTTPFailureResponseExcep
 
 		private static final long serialVersionUID = 1L;
 
-		public RequestEntityTooLarge(HTTPHeaders headers) {
-			super(REQUEST_ENTITY_TOO_LARGE, headers);
+		public RequestEntityTooLarge(HTTPHeaders headers, String body) {
+			super(REQUEST_ENTITY_TOO_LARGE, headers, body);
 		}
 	}
 
@@ -169,8 +169,8 @@ public class HTTPClientFailureResponseException extends HTTPFailureResponseExcep
 
 		private static final long serialVersionUID = 1L;
 
-		public RequestURITooLong(HTTPHeaders headers) {
-			super(REQUEST_URI_TOO_LONG, headers);
+		public RequestURITooLong(HTTPHeaders headers, String body) {
+			super(REQUEST_URI_TOO_LONG, headers, body);
 		}
 	}
 
@@ -178,8 +178,8 @@ public class HTTPClientFailureResponseException extends HTTPFailureResponseExcep
 
 		private static final long serialVersionUID = 1L;
 
-		public UnsupportedMediaType(HTTPHeaders headers) {
-			super(UNSUPPORTED_MEDIA_TYPE, headers);
+		public UnsupportedMediaType(HTTPHeaders headers, String body) {
+			super(UNSUPPORTED_MEDIA_TYPE, headers, body);
 		}
 	}
 
@@ -187,8 +187,8 @@ public class HTTPClientFailureResponseException extends HTTPFailureResponseExcep
 
 		private static final long serialVersionUID = 1L;
 
-		public RequestedRangeNotSatisfiable(HTTPHeaders headers) {
-			super(REQUESTED_RANGE_NOT_SATISFIABLE, headers);
+		public RequestedRangeNotSatisfiable(HTTPHeaders headers, String body) {
+			super(REQUESTED_RANGE_NOT_SATISFIABLE, headers, body);
 		}
 	}
 
@@ -196,8 +196,8 @@ public class HTTPClientFailureResponseException extends HTTPFailureResponseExcep
 
 		private static final long serialVersionUID = 1L;
 
-		public ExpectationFailed(HTTPHeaders headers) {
-			super(EXPECTATION_FAILED, headers);
+		public ExpectationFailed(HTTPHeaders headers, String body) {
+			super(EXPECTATION_FAILED, headers, body);
 		}
 	}
 }

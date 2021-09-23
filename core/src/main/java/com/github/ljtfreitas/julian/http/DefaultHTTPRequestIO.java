@@ -22,22 +22,22 @@
 
 package com.github.ljtfreitas.julian.http;
 
+import com.github.ljtfreitas.julian.Bracket;
+import com.github.ljtfreitas.julian.Except;
+import com.github.ljtfreitas.julian.Promise;
+import com.github.ljtfreitas.julian.http.client.HTTPClient;
+import com.github.ljtfreitas.julian.http.client.HTTPClientException;
+import com.github.ljtfreitas.julian.http.client.HTTPClientResponse;
+import com.github.ljtfreitas.julian.http.codec.HTTPMessageCodecs;
+import com.github.ljtfreitas.julian.http.codec.HTTPMessageException;
+import com.github.ljtfreitas.julian.http.codec.HTTPResponseReader;
+import com.github.ljtfreitas.julian.http.codec.HTTPResponseReaderException;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
-
-import com.github.ljtfreitas.julian.Bracket;
-import com.github.ljtfreitas.julian.Promise;
-import com.github.ljtfreitas.julian.http.client.HTTPClient;
-import com.github.ljtfreitas.julian.http.client.HTTPClientException;
-import com.github.ljtfreitas.julian.http.client.HTTPClientResponse;
-import com.github.ljtfreitas.julian.http.codec.ContentType;
-import com.github.ljtfreitas.julian.http.codec.HTTPMessageCodecs;
-import com.github.ljtfreitas.julian.http.codec.HTTPMessageException;
-import com.github.ljtfreitas.julian.http.codec.HTTPResponseReader;
-import com.github.ljtfreitas.julian.http.codec.HTTPResponseReaderException;
 
 import static com.github.ljtfreitas.julian.Message.format;
 import static com.github.ljtfreitas.julian.http.HTTPHeader.CONTENT_TYPE;
@@ -88,10 +88,6 @@ class DefaultHTTPRequestIO<T> implements HTTPRequestIO<T> {
 						.orElseGet(() -> empty(response)));
 	}
 
-	private HTTPResponse<T> empty(HTTPClientResponse response) {
-		return new EmptyHTTPResponse<>(response.status(), response.headers());
-	}
-
 	private HTTPResponse<T> failure(HTTPClientResponse response) {
 		return failure.apply(response, source.returnType());
 	}
@@ -104,17 +100,20 @@ class DefaultHTTPRequestIO<T> implements HTTPRequestIO<T> {
 		return r.orElseGet(() -> empty(response));
 	}
 
+	private HTTPResponse<T> empty(HTTPClientResponse response) {
+		return new EmptyHTTPResponse<>(response.status(), response.headers());
+	}
+
 	@SuppressWarnings("unchecked")
 	private T deserialize(byte[] bodyAsBytes, HTTPHeaders headers) {
-		ContentType contentType = headers.select(CONTENT_TYPE)
-				.map(h -> ContentType.valueOf(h.value()))
-				.orElseGet(ContentType::wildcard);
+		MediaType mediaType = headers.select(CONTENT_TYPE)
+				.map(h -> MediaType.valueOf(h.value()))
+				.orElseGet(MediaType::wildcard);
 
-		HTTPResponseReader<?> reader = codecs.readers().select(contentType, source.returnType())
-				.orElseThrow(() -> new HTTPResponseReaderException(format("There is not a HTTPResponseReader able to convert {0} to {1}", contentType, source.returnType())));
+		HTTPResponseReader<?> reader = codecs.readers().select(mediaType, source.returnType())
+				.orElseThrow(() -> new HTTPResponseReaderException(format("There is not a HTTPResponseReader able to convert {0} to {1}", mediaType, source.returnType())));
 
-		return (T) Bracket.acquire(() -> new ByteArrayInputStream(bodyAsBytes))
-				.map(stream -> reader.read(stream, source.returnType()))
+		return (T) Except.run(() -> reader.read(bodyAsBytes, source.returnType()))
 				.prop(HTTPResponseReaderException::new);
 	}
 }

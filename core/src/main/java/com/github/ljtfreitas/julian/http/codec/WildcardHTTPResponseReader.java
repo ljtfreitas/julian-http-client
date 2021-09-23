@@ -22,15 +22,17 @@
 
 package com.github.ljtfreitas.julian.http.codec;
 
+import com.github.ljtfreitas.julian.http.MediaType;
+
 import java.util.Collection;
 import java.util.List;
 
 interface WildcardHTTPResponseReader<T> extends HTTPResponseReader<T> {
 
-	ContentType WILDCARD_CONTENT_TYPE = ContentType.valueOf("*/*");
+	MediaType WILDCARD_MEDIA_TYPE = MediaType.valueOf("*/*");
 
 	@Override
-	default Collection<ContentType> contentTypes() {
-		return List.of(WILDCARD_CONTENT_TYPE);
+	default Collection<MediaType> contentTypes() {
+		return List.of(WILDCARD_MEDIA_TYPE);
 	}
 }

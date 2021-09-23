@@ -27,5 +27,5 @@ module com.github.ljtfreitas.julian {
 	exports com.github.ljtfreitas.julian.http.client;
 	exports com.github.ljtfreitas.julian.http.codec;
 
-	requires java.net.http;
+	requires transitive java.net.http;
 }

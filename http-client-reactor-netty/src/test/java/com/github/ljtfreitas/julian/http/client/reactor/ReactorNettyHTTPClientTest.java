@@ -1,14 +1,16 @@
 package com.github.ljtfreitas.julian.http.client.reactor;
 
-import java.io.IOException;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
+import com.github.ljtfreitas.julian.Except;
+import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.http.DefaultHTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPHeader;
+import com.github.ljtfreitas.julian.http.HTTPHeaders;
+import com.github.ljtfreitas.julian.http.HTTPMethod;
+import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPRequestDefinition;
+import com.github.ljtfreitas.julian.http.HTTPStatusCode;
+import com.github.ljtfreitas.julian.http.client.HTTPClientResponse;
+import com.github.ljtfreitas.julian.http.codec.StringHTTPMessageCodec;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,18 +25,16 @@ import org.mockserver.model.HttpRequest;
 import org.mockserver.model.HttpResponse;
 import org.mockserver.model.NottableString;
 
-import com.github.ljtfreitas.julian.Except;
-import com.github.ljtfreitas.julian.JavaType;
-import com.github.ljtfreitas.julian.http.DefaultHTTPRequestBody;
-import com.github.ljtfreitas.julian.http.HTTPHeader;
-import com.github.ljtfreitas.julian.http.HTTPHeaders;
-import com.github.ljtfreitas.julian.http.HTTPMethod;
-import com.github.ljtfreitas.julian.http.HTTPRequestBody;
-import com.github.ljtfreitas.julian.http.HTTPRequestDefinition;
-import com.github.ljtfreitas.julian.http.HTTPStatusCode;
-import com.github.ljtfreitas.julian.http.client.HTTPClientResponse;
-import com.github.ljtfreitas.julian.http.codec.StringHTTPMessageCodec;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpRequest.BodyPublishers;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
+import static com.github.ljtfreitas.julian.http.codec.StringHTTPMessageCodec.TEXT_PLAIN_MEDIA_TYPE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.equalTo;
@@ -121,7 +121,7 @@ class ReactorNettyHTTPClientTest {
 
                     HTTPRequestDefinition request = new SimpleHTTPRequestDefinition("http://localhost:8090/hello", "POST",
                             HTTPHeaders.create(new HTTPHeader("Content-Type", "text/plain")),
-                            new DefaultHTTPRequestBody<>(requestBodyAsString, StandardCharsets.UTF_8, new StringHTTPMessageCodec()),
+                            new DefaultHTTPRequestBody(TEXT_PLAIN_MEDIA_TYPE, () -> BodyPublishers.ofString(requestBodyAsString)),
                             JavaType.valueOf(String.class));
 
                     HTTPClientResponse response = client.request(request).execute().join().unsafe();
@@ -265,17 +265,17 @@ class ReactorNettyHTTPClientTest {
                              arguments(request("/hello").withMethod("POST").withBody(requestBodyAsString),
                                 expectedResponse, new SimpleHTTPRequestDefinition("http://localhost:8090/hello", "POST",
                                              HTTPHeaders.create(new HTTPHeader("Content-Type", "text/plain")),
-                                             new DefaultHTTPRequestBody<>(requestBodyAsString, StandardCharsets.UTF_8, new StringHTTPMessageCodec()),
+                                             new DefaultHTTPRequestBody(TEXT_PLAIN_MEDIA_TYPE, () -> BodyPublishers.ofString(requestBodyAsString)),
                                              JavaType.valueOf(String.class))),
                              arguments(request("/hello").withMethod("PUT").withBody(requestBodyAsString),
                                 expectedResponse, new SimpleHTTPRequestDefinition("http://localhost:8090/hello", "POST",
                                              HTTPHeaders.create(new HTTPHeader("Content-Type", "text/plain")),
-                                             new DefaultHTTPRequestBody<>(requestBodyAsString, StandardCharsets.UTF_8, new StringHTTPMessageCodec()),
+                                             new DefaultHTTPRequestBody(TEXT_PLAIN_MEDIA_TYPE, () -> BodyPublishers.ofString(requestBodyAsString)),
                                              JavaType.valueOf(String.class))),
                              arguments(request("/hello").withMethod("PATCH").withBody(requestBodyAsString),
                                 expectedResponse, new SimpleHTTPRequestDefinition("http://localhost:8090/hello", "PATCH",
                                              HTTPHeaders.create(new HTTPHeader("Content-Type", "text/plain")),
-                                             new DefaultHTTPRequestBody<>(requestBodyAsString, StandardCharsets.UTF_8, new StringHTTPMessageCodec()),
+                                             new DefaultHTTPRequestBody(TEXT_PLAIN_MEDIA_TYPE, () -> BodyPublishers.ofString(requestBodyAsString)),
                                              JavaType.valueOf(String.class))),
                              arguments(request("/hello").withMethod("DELETE"),
                                 expectedResponse, new SimpleHTTPRequestDefinition("http://localhost:8090/hello", "DELETE")),

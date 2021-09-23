@@ -20,25 +20,29 @@
  *  SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian.http.codec.json.jsonp;
+package com.github.ljtfreitas.julian.http.codec.json.jsonb;
 
+import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.http.DefaultHTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.MediaType;
+import com.github.ljtfreitas.julian.http.codec.HTTPRequestWriterException;
+import com.github.ljtfreitas.julian.http.codec.HTTPResponseReaderException;
+import com.github.ljtfreitas.julian.http.codec.JsonHTTPMessageCodec;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 import jakarta.json.bind.JsonbException;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.http.HttpRequest;
+import java.net.http.HttpRequest.BodyPublisher;
+import java.net.http.HttpRequest.BodyPublishers;
 import java.nio.charset.Charset;
-
-import com.github.ljtfreitas.julian.JavaType;
-import com.github.ljtfreitas.julian.http.codec.ContentType;
-import com.github.ljtfreitas.julian.http.codec.HTTPRequestWriterException;
-import com.github.ljtfreitas.julian.http.codec.HTTPResponseReaderException;
-import com.github.ljtfreitas.julian.http.codec.JsonHTTPMessageCodec;
 
 public class JsonbJsonHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
 
@@ -53,19 +57,24 @@ public class JsonbJsonHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
     }
 
     @Override
-    public boolean writable(ContentType candidate, Class<?> javaType) {
+    public boolean writable(MediaType candidate, Class<?> javaType) {
         return supports(candidate);
     }
 
     @Override
-    public byte[] write(T body, Charset encoding) {
+    public HTTPRequestBody write(T body, Charset encoding) {
+        return new DefaultHTTPRequestBody(APPLICATION_JSON_MEDIA_TYPE, () -> serialize(body, encoding));
+    }
+
+    private BodyPublisher serialize(T body, Charset encoding) {
         try (ByteArrayOutputStream output = new ByteArrayOutputStream();
              OutputStreamWriter writer = new OutputStreamWriter(output, encoding)) {
 
             jsonb.toJson(body, writer);
 
             output.flush();
-            return output.toByteArray();
+
+            return BodyPublishers.ofByteArray(output.toByteArray());
 
         } catch (JsonbException | IOException e) {
             throw new HTTPRequestWriterException("JSON serialization failed. Source: " + body, e);
@@ -73,14 +82,15 @@ public class JsonbJsonHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
     }
 
     @Override
-    public boolean readable(ContentType candidate, JavaType javaType) {
+    public boolean readable(MediaType candidate, JavaType javaType) {
         return supports(candidate);
     }
 
     @Override
-    public T read(InputStream body, JavaType javaType) {
-        try (InputStreamReader reader = new InputStreamReader(body);
-             BufferedReader buffered = new BufferedReader(reader)) {
+    public T read(byte[] body, JavaType javaType) {
+        try (ByteArrayInputStream stream = new ByteArrayInputStream(body);
+            InputStreamReader reader = new InputStreamReader(stream);
+            BufferedReader buffered = new BufferedReader(reader)) {
 
             return jsonb.fromJson(buffered, javaType.get());
         } catch (JsonbException | IOException e) {

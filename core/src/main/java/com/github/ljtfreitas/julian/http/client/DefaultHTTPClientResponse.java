@@ -33,6 +33,7 @@ import com.github.ljtfreitas.julian.http.DefaultHTTPResponseBody;
 import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.HTTPStatus;
 import com.github.ljtfreitas.julian.http.HTTPStatusCode;
+import com.github.ljtfreitas.julian.http.OptionalHTTPResponseBody;
 
 class DefaultHTTPClientResponse implements HTTPClientResponse {
 
@@ -71,15 +72,15 @@ class DefaultHTTPClientResponse implements HTTPClientResponse {
 		return status.success() || status.redirection() ? Optional.ofNullable(fn.apply(this)) : Optional.empty();
 	}
 
-	static DefaultHTTPClientResponse valueOf(HttpResponse<byte[]> response) {
+	static DefaultHTTPClientResponse valueOf(HttpResponse<HTTPResponseBody> response) {
 		HTTPStatus status = HTTPStatusCode.select(response.statusCode()).map(HTTPStatus::new)
 				.orElseGet(() -> HTTPStatus.valueOf(response.statusCode()));
 
 		HTTPHeaders headers = response.headers().map().entrySet().stream()
 				.map(e -> HTTPHeader.create(e.getKey(), e.getValue()))
-				.reduce(HTTPHeaders.empty(), HTTPHeaders::add, (a, b) -> b);
+				.reduce(HTTPHeaders.empty(), HTTPHeaders::join, (a, b) -> b);
 
-		HTTPResponseBody body = new DefaultHTTPResponseBody(status, headers, response.body());
+		HTTPResponseBody body = new OptionalHTTPResponseBody(status, headers, response.body());
 
 		return new DefaultHTTPClientResponse(status, headers, body);
 	}

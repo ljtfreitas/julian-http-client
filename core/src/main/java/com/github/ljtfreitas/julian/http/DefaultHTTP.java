@@ -22,10 +22,6 @@
 
 package com.github.ljtfreitas.julian.http;
 
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.util.stream.Stream;
-
 import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.Cookies;
 import com.github.ljtfreitas.julian.Endpoint;
@@ -34,9 +30,12 @@ import com.github.ljtfreitas.julian.Headers;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.http.client.HTTPClient;
-import com.github.ljtfreitas.julian.http.codec.ContentType;
 import com.github.ljtfreitas.julian.http.codec.HTTPMessageCodecs;
 import com.github.ljtfreitas.julian.http.codec.HTTPRequestWriterException;
+
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.stream.Stream;
 
 import static com.github.ljtfreitas.julian.Message.format;
 
@@ -59,7 +58,7 @@ public class DefaultHTTP implements HTTP {
 
 		HTTPHeaders headers = headers(endpoint, arguments).merge(cookies(endpoint, arguments)).all().stream()
 				.map(h -> new HTTPHeader(h.name(), h.values()))
-				.reduce(HTTPHeaders.empty(), HTTPHeaders::add, (a, b) -> b);
+				.reduce(HTTPHeaders.empty(), HTTPHeaders::join, (a, b) -> b);
 
 		HTTPRequestBody body = body(endpoint, arguments, headers);
 
@@ -73,10 +72,10 @@ public class DefaultHTTP implements HTTP {
 		return endpoint.parameters().body()
 				.flatMap(p -> arguments.of(p.position()))
 				.map(b -> headers.select(HTTPHeader.CONTENT_TYPE).map(HTTPHeader::value)
-							.map(ContentType::valueOf)
+							.map(MediaType::valueOf)
 							.map(contentType -> codecs.writers().select(contentType, b.getClass())
+									.map(writer -> writer.write(b, StandardCharsets.UTF_8))
 									.orElseThrow(() -> new HTTPRequestWriterException(format("There isn't any HTTPRequestWriter able to convert {0} to {1}", b.getClass(), contentType))))
-							.map(writer -> new DefaultHTTPRequestBody<>(b, StandardCharsets.UTF_8, writer))
 							.orElseThrow(() -> new HTTPRequestWriterException("The HTTP request has a body, but doesn't have a Content-Type header.")))
 				.orElse(null);
 	}

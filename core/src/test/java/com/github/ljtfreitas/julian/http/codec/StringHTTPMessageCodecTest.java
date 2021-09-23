@@ -1,8 +1,12 @@
 package com.github.ljtfreitas.julian.http.codec;
 
 import java.io.ByteArrayInputStream;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.Flow;
 
+import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.MediaType;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -12,22 +16,23 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class StringHTTPMessageCodecTest {
 
-    private StringHTTPMessageCodec codec = new StringHTTPMessageCodec();
+    private final StringHTTPMessageCodec codec = new StringHTTPMessageCodec();
 
     @Nested
     class Readable {
 
         @Test
         void unsupported() {
-            assertFalse(codec.readable(ContentType.valueOf("text/plain"), JavaType.valueOf(Object.class)));
+            assertFalse(codec.readable(MediaType.valueOf("text/plain"), JavaType.valueOf(Object.class)));
         }
 
         @Test
         void supported() {
-            assertTrue(codec.readable(ContentType.valueOf("text/plain"), JavaType.valueOf(String.class)));
+            assertTrue(codec.readable(MediaType.valueOf("text/plain"), JavaType.valueOf(String.class)));
         }
 
         @Nested
@@ -37,7 +42,7 @@ class StringHTTPMessageCodecTest {
             void read() {
                 String value = "response body";
 
-                Object output = codec.read(new ByteArrayInputStream(value.getBytes()), JavaType.valueOf(String.class));
+                Object output = codec.read(value.getBytes(), JavaType.valueOf(String.class));
 
                 assertEquals(value, output);
             }
@@ -49,12 +54,12 @@ class StringHTTPMessageCodecTest {
 
         @Test
         void unsupported() {
-            assertFalse(codec.writable(ContentType.valueOf("text/plain"), Object.class));
+            assertFalse(codec.writable(MediaType.valueOf("text/plain"), Object.class));
         }
 
         @Test
         void supported() {
-            assertTrue(codec.writable(ContentType.valueOf("text/plain"), String.class));
+            assertTrue(codec.writable(MediaType.valueOf("text/plain"), String.class));
         }
 
         @Nested
@@ -64,9 +69,29 @@ class StringHTTPMessageCodecTest {
             void write() {
                 String value = "request body";
 
-                byte[] output = codec.write(value, StandardCharsets.UTF_8);
+                HTTPRequestBody output = codec.write(value, StandardCharsets.UTF_8);
 
-                assertArrayEquals(value.getBytes(), output);
+                output.serialize().subscribe(new Flow.Subscriber<>() {
+
+                    @Override
+                    public void onSubscribe(Flow.Subscription subscription) {
+                        subscription.request(1);
+                    }
+
+                    @Override
+                    public void onNext(ByteBuffer item) {
+                        assertArrayEquals(value.getBytes(), item.array());
+                    }
+
+                    @Override
+                    public void onError(Throwable throwable) {
+                        fail(throwable);
+                    }
+
+                    @Override
+                    public void onComplete() {
+                    }
+                });
             }
         }
     }

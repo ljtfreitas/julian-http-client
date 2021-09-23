@@ -22,6 +22,10 @@
 
 package com.github.ljtfreitas.julian.http.codec;
 
+import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.MediaType;
+
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -30,16 +34,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.github.ljtfreitas.julian.JavaType;
-
 import static com.github.ljtfreitas.julian.Message.format;
 import static com.github.ljtfreitas.julian.Preconditions.state;
 
 public class ScalarHTTPMessageCodec implements HTTPRequestWriter<Object>, HTTPResponseReader<Object> {
 
+	private static final MediaType TEXT_PLAIN_CONTENT_TYPE = MediaType.valueOf("text/plain");
 	private static final ScalarHTTPMessageCodec SINGLE_INSTANCE = new ScalarHTTPMessageCodec();
 
-	private static final ContentType TEXT_PLAIN_CONTENT_TYPE = ContentType.valueOf("text/plain");
 	private static final Set<Class<?>> SCALAR_TYPES = new HashSet<>();
 
 	private final StringHTTPMessageCodec codec = StringHTTPMessageCodec.get();
@@ -63,13 +65,13 @@ public class ScalarHTTPMessageCodec implements HTTPRequestWriter<Object>, HTTPRe
 		SCALAR_TYPES.add(Character.class);
 	}
 
-    @Override
-	public Collection<ContentType> contentTypes() {
+	@Override
+	public Collection<MediaType> contentTypes() {
 		return List.of(TEXT_PLAIN_CONTENT_TYPE);
 	}
 
 	@Override
-	public boolean readable(ContentType candidate, JavaType javaType) {
+	public boolean readable(MediaType candidate, JavaType javaType) {
 		return supports(candidate) && isScalarType(javaType);
 	}
 
@@ -78,19 +80,19 @@ public class ScalarHTTPMessageCodec implements HTTPRequestWriter<Object>, HTTPRe
 	}
 
 	@Override
-	public Object read(InputStream body, JavaType javaType) {
+	public Object read(byte[] body, JavaType javaType) {
 		String responseAsString = codec.read(body, javaType);
 
 		return ScalarType.valueOf(javaType).convert(responseAsString);
 	}
 
 	@Override
-	public boolean writable(ContentType candidate, Class<?> javaType) {
+	public boolean writable(MediaType candidate, Class<?> javaType) {
 		return supports(candidate) && isScalarType(JavaType.valueOf(javaType));
 	}
 
 	@Override
-	public byte[] write(Object body, Charset encoding) {
+	public HTTPRequestBody write(Object body, Charset encoding) {
 		return codec.write(body.toString(), encoding);
 	}
 	

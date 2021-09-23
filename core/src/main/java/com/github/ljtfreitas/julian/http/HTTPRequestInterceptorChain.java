@@ -20,23 +20,42 @@
  *  SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian.http.auth;
+package com.github.ljtfreitas.julian.http;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Stream;
 
 import com.github.ljtfreitas.julian.Promise;
-import com.github.ljtfreitas.julian.http.HTTPHeader;
-import com.github.ljtfreitas.julian.http.HTTPRequest;
-import com.github.ljtfreitas.julian.http.HTTPRequestInterceptor;
 
-public class HTTPAuthenticationInterceptor implements HTTPRequestInterceptor {
+import static java.util.Collections.emptyList;
 
-    private final Authentication authentication;
+public class HTTPRequestInterceptorChain implements HTTPRequestInterceptor {
 
-    public HTTPAuthenticationInterceptor(Authentication authentication) {
-        this.authentication = authentication;
+    private static final RewriteContentTypeHTTPRequestInterceptor REWRITE_CONTENT_TYPE_HTTP_REQUEST_INTERCEPTOR = new RewriteContentTypeHTTPRequestInterceptor();
+
+    private final Collection<HTTPRequestInterceptor> interceptors;
+
+    public HTTPRequestInterceptorChain() {
+        this(emptyList());
+    }
+
+    public HTTPRequestInterceptorChain(Collection<HTTPRequestInterceptor> interceptors) {
+        this.interceptors = all(interceptors);
+    }
+
+    private Collection<HTTPRequestInterceptor> all(Collection<HTTPRequestInterceptor> interceptors) {
+        Collection<HTTPRequestInterceptor> all = new ArrayList<>();
+        all.add(REWRITE_CONTENT_TYPE_HTTP_REQUEST_INTERCEPTOR);
+        all.addAll(interceptors);
+        return all;
     }
 
     @Override
     public <T> Promise<HTTPRequest<T>> intercepts(Promise<HTTPRequest<T>> request) {
-        return request.then(r -> r.headers(r.headers().join(new HTTPHeader(HTTPHeader.AUTHORIZATION, authentication.content()))));
+        return interceptors.stream().reduce(request, (r, i) -> i.intercepts(r), (a, b) -> b);
     }
 }

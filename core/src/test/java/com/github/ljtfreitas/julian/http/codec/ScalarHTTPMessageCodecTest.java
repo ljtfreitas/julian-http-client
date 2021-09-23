@@ -1,17 +1,8 @@
 package com.github.ljtfreitas.julian.http.codec;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.stream.Stream;
-
+import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.MediaType;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -20,26 +11,37 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
-import com.github.ljtfreitas.julian.JavaType;
-import com.github.ljtfreitas.julian.http.codec.ContentType;
-import com.github.ljtfreitas.julian.http.codec.ScalarHTTPMessageCodec;
+import java.io.ByteArrayInputStream;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.Flow;
+import java.util.stream.Stream;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class ScalarHTTPMessageCodecTest {
 
-	private ScalarHTTPMessageCodec codec = new ScalarHTTPMessageCodec();
+	private final ScalarHTTPMessageCodec codec = new ScalarHTTPMessageCodec();
 
 	@Nested
 	class Readable {
 
 		@Test
 		void unsupported() {
-			assertFalse(codec.readable(ContentType.valueOf("text/plain"), JavaType.valueOf(String.class)));
+			assertFalse(codec.readable(MediaType.valueOf("text/plain"), JavaType.valueOf(String.class)));
 		}
 		
 		@ParameterizedTest
 		@ArgumentsSource(ScalarTypesProvider.class)
 		void supported(Class<?> scalarClassType) {
-			assertTrue(codec.readable(ContentType.valueOf("text/plain"), JavaType.valueOf(scalarClassType)));
+			assertTrue(codec.readable(MediaType.valueOf("text/plain"), JavaType.valueOf(scalarClassType)));
 		}
 		
 		@Nested
@@ -49,7 +51,7 @@ class ScalarHTTPMessageCodecTest {
 			@ArgumentsSource(ScalarTypesProvider.class)
 			void read(Class<?> scalarClassType, Object value) {
 				
-				Object output = codec.read(new ByteArrayInputStream(value.toString().getBytes()), JavaType.valueOf(scalarClassType));
+				Object output = codec.read(value.toString().getBytes(), JavaType.valueOf(scalarClassType));
 				
 				assertAll(() -> assertEquals(value, output),
 						  () -> assertThat(output, instanceOf(scalarClassType)));
@@ -62,13 +64,13 @@ class ScalarHTTPMessageCodecTest {
 
 		@Test
 		void unsupported() {
-			assertFalse(codec.writable(ContentType.valueOf("text/plain"), String.class));
+			assertFalse(codec.writable(MediaType.valueOf("text/plain"), String.class));
 		}
 		
 		@ParameterizedTest
 		@ArgumentsSource(ScalarTypesProvider.class)
 		void supported(Class<?> scalarClassType) {
-			assertTrue(codec.writable(ContentType.valueOf("text/plain"), scalarClassType));
+			assertTrue(codec.writable(MediaType.valueOf("text/plain"), scalarClassType));
 		}
 
 		@Nested
@@ -77,10 +79,29 @@ class ScalarHTTPMessageCodecTest {
 			@ParameterizedTest
 			@ArgumentsSource(ScalarTypesProvider.class)
 			void write(Class<?> scalarClassType, Object value) {
-				
-				byte[] output = codec.write(value, StandardCharsets.UTF_8);
+				HTTPRequestBody output = codec.write(value, StandardCharsets.UTF_8);
 
-				assertArrayEquals(value.toString().getBytes(), output);
+				output.serialize().subscribe(new Flow.Subscriber<ByteBuffer>() {
+
+					@Override
+					public void onSubscribe(Flow.Subscription subscription) {
+						subscription.request(1);
+					}
+
+					@Override
+					public void onNext(ByteBuffer item) {
+						assertArrayEquals(value.toString().getBytes(), item.array());
+					}
+
+					@Override
+					public void onError(Throwable throwable) {
+						fail(throwable);
+					}
+
+					@Override
+					public void onComplete() {
+					}
+				});
 			}
 		}
 	}

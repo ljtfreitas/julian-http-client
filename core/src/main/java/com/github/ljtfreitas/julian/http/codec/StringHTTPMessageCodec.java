@@ -22,59 +22,66 @@
 
 package com.github.ljtfreitas.julian.http.codec;
 
+import com.github.ljtfreitas.julian.Bracket;
+import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.http.DefaultHTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.MediaType;
+
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.http.HttpRequest;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.List;
-
-import com.github.ljtfreitas.julian.Bracket;
-import com.github.ljtfreitas.julian.JavaType;
 
 import static java.util.stream.Collectors.joining;
 
 public class StringHTTPMessageCodec implements HTTPRequestWriter<String>, HTTPResponseReader<String> {
 
-	private static final ContentType TEXT_CONTENT_TYPE = ContentType.valueOf("text/*");
+	public static final MediaType TEXT_PLAIN_MEDIA_TYPE = MediaType.valueOf("text/plain");
+
+	public static final MediaType TEXT_WILDCARD_MEDIA_TYPE = MediaType.valueOf("text/*");
 
 	private static final StringHTTPMessageCodec SINGLE_INSTANCE = new StringHTTPMessageCodec();
 
-	private final Collection<ContentType> contentTypes;
+	private final Collection<MediaType> mediaTypes;
 
 	public StringHTTPMessageCodec() {
-		this(WildcardHTTPResponseReader.WILDCARD_CONTENT_TYPE, TEXT_CONTENT_TYPE);
+		this(WildcardHTTPResponseReader.WILDCARD_MEDIA_TYPE, TEXT_WILDCARD_MEDIA_TYPE);
 	}
 
-	public StringHTTPMessageCodec(ContentType... contentTypes) {
-		this.contentTypes = List.of(contentTypes);
-	}
-
-    @Override
-	public Collection<ContentType> contentTypes() {
-		return contentTypes;
+	public StringHTTPMessageCodec(MediaType... mediaTypes) {
+		this.mediaTypes = List.of(mediaTypes);
 	}
 
 	@Override
-	public boolean readable(ContentType candidate, JavaType javaType) {
+	public Collection<MediaType> contentTypes() {
+		return mediaTypes;
+	}
+
+	@Override
+	public boolean readable(MediaType candidate, JavaType javaType) {
 		return supports(candidate) && javaType.is(String.class);
 	}
 
 	@Override
-	public boolean writable(ContentType candidate, Class<?> javaType) {
+	public boolean writable(MediaType candidate, Class<?> javaType) {
 		return supports(candidate) && javaType.equals(String.class);
 	}
 
 	@Override
-	public String read(InputStream body, JavaType javaType) {
-		return Bracket.acquire(() -> new BufferedReader(new InputStreamReader(body)))
+	public String read(byte[] body, JavaType javaType) {
+		return Bracket.acquire(() -> new BufferedReader(new InputStreamReader(new ByteArrayInputStream(body))))
 				.map(reader -> reader.lines().collect(joining("\n")))
 				.prop(HTTPResponseReaderException::new);
 	}
 
 	@Override
-	public byte[] write(String body, Charset encoding) {
-		return body.getBytes(encoding);
+	public HTTPRequestBody write(String body, Charset encoding) {
+		return new DefaultHTTPRequestBody(TEXT_PLAIN_MEDIA_TYPE, () -> HttpRequest.BodyPublishers.ofByteArray(body.getBytes(encoding)));
 	}
 
 	public static StringHTTPMessageCodec get() {

@@ -22,14 +22,15 @@
 
 package com.github.ljtfreitas.julian.http.codec;
 
-import java.io.InputStream;
-
 import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.http.MediaType;
+
+import java.io.InputStream;
 
 public interface HTTPResponseReader<T> extends HTTPMessageCodec {
 
-	boolean readable(ContentType candidate, JavaType javaType);
+	boolean readable(MediaType candidate, JavaType javaType);
 
-	T read(InputStream body, JavaType javaType);
+	T read(byte[] body, JavaType javaType);
 
 }

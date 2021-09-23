@@ -22,11 +22,12 @@
 
 package com.github.ljtfreitas.julian.http.codec;
 
+import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.http.MediaType;
+
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
-
-import com.github.ljtfreitas.julian.JavaType;
 
 public class NonReadableHTTPResponseReader implements WildcardHTTPResponseReader<Void> {
 
@@ -39,13 +40,13 @@ public class NonReadableHTTPResponseReader implements WildcardHTTPResponseReader
 		SKIPPABLES_TYPES.add(Void.class);
 	}
 
-    @Override
-	public boolean readable(ContentType candidate, JavaType javaType) {
+	@Override
+	public boolean readable(MediaType candidate, JavaType javaType) {
 		return supports(candidate) && javaType.classType().map(SKIPPABLES_TYPES::contains).orElse(false);
 	}
 
 	@Override
-	public Void read(InputStream body, JavaType javaType) {
+	public Void read(byte[] body, JavaType javaType) {
 		return null;
 	}
 

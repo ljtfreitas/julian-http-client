@@ -26,6 +26,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.ljtfreitas.julian.Preconditions;
 
@@ -34,6 +36,7 @@ import static com.github.ljtfreitas.julian.Preconditions.check;
 import static com.github.ljtfreitas.julian.Preconditions.isFalse;
 import static com.github.ljtfreitas.julian.Preconditions.nonNull;
 import static java.util.Collections.unmodifiableCollection;
+import static java.util.stream.Collectors.toUnmodifiableList;
 
 public class HTTPHeader {
 
@@ -62,6 +65,10 @@ public class HTTPHeader {
 
 	public Collection<String> values() {
 		return values;
+	}
+
+	public HTTPHeader join(HTTPHeader that) {
+		return (is(that.name)) ? new HTTPHeader(name, Stream.concat(values.stream(), that.values.stream()).collect(toUnmodifiableList())) : this;
 	}
 
 	boolean is(String name) {

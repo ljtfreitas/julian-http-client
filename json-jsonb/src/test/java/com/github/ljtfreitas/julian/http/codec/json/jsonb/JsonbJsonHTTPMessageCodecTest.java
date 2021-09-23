@@ -20,37 +20,41 @@
  *  SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian.http.codec.json.jsonp;
+package com.github.ljtfreitas.julian.http.codec.json.jsonb;
 
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
-
+import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.MediaType;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import com.github.ljtfreitas.julian.JavaType;
-import com.github.ljtfreitas.julian.http.codec.ContentType;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.Flow;
+import java.util.concurrent.Flow.Subscriber;
 
+import static com.github.ljtfreitas.julian.http.codec.JsonHTTPMessageCodec.APPLICATION_JSON_MEDIA_TYPE;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class JsonbJsonHTTPMessageCodecTest {
 
-    private JsonbJsonHTTPMessageCodec<Person> codec = new JsonbJsonHTTPMessageCodec<>();
+    private final JsonbJsonHTTPMessageCodec<Person> codec = new JsonbJsonHTTPMessageCodec<>();
 
     @Nested
     class Readable {
 
         @Test
         void unsupported() {
-            assertFalse(codec.readable(ContentType.valueOf("text/plain"), JavaType.valueOf(Object.class)));
+            assertFalse(codec.readable(MediaType.valueOf("text/plain"), JavaType.valueOf(Object.class)));
         }
 
         @Test
         void supported() {
-            assertTrue(codec.readable(ContentType.valueOf("application/json"), JavaType.valueOf(Person.class)));
+            assertTrue(codec.readable(MediaType.valueOf("application/json"), JavaType.valueOf(Person.class)));
         }
 
         @Nested
@@ -60,7 +64,7 @@ class JsonbJsonHTTPMessageCodecTest {
             void read() {
                 String value = "{\"name\":\"Tiago\",\"age\":35}";
 
-                Person person = codec.read(new ByteArrayInputStream(value.getBytes()), JavaType.valueOf(Person.class));
+                Person person = codec.read(value.getBytes(), JavaType.valueOf(Person.class));
 
                 assertAll(() -> assertEquals("Tiago", person.name),
                           () -> assertEquals(35, person.age));
@@ -73,12 +77,12 @@ class JsonbJsonHTTPMessageCodecTest {
 
         @Test
         void unsupported() {
-            assertFalse(codec.writable(ContentType.valueOf("text/plain"), Object.class));
+            assertFalse(codec.writable(MediaType.valueOf("text/plain"), Object.class));
         }
 
         @Test
         void supported() {
-            assertTrue(codec.writable(ContentType.valueOf("application/json"), Person.class));
+            assertTrue(codec.writable(MediaType.valueOf("application/json"), Person.class));
         }
 
         @Nested
@@ -86,9 +90,29 @@ class JsonbJsonHTTPMessageCodecTest {
 
             @Test
             void write() {
-                byte[] output = codec.write(new Person("Tiago", 35), StandardCharsets.UTF_8);
+                HTTPRequestBody output = codec.write(new Person("Tiago", 35), StandardCharsets.UTF_8);
 
-                assertEquals("{\"age\":35,\"name\":\"Tiago\"}", new String(output));
+                assertEquals(APPLICATION_JSON_MEDIA_TYPE, output.contentType());
+
+                output.serialize().subscribe(new Subscriber<>() {
+                    @Override
+                    public void onSubscribe(Flow.Subscription subscription) {
+                    }
+
+                    @Override
+                    public void onNext(ByteBuffer item) {
+                        assertEquals("{\"age\":35,\"name\":\"Tiago\"}", new String(item.array()));
+                    }
+
+                    @Override
+                    public void onError(Throwable throwable) {
+                        fail(throwable);
+                    }
+
+                    @Override
+                    public void onComplete() {
+                    }
+                });
             }
         }
     }

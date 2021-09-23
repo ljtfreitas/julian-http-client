@@ -22,49 +22,65 @@
 
 package com.github.ljtfreitas.julian.http;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
-import com.github.ljtfreitas.julian.Headers;
-
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.unmodifiableMap;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.reducing;
+import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toUnmodifiableList;
 
 public class HTTPHeaders implements Iterable<HTTPHeader> {
 
-	private final Collection<HTTPHeader> headers;
+	private final Map<String, HTTPHeader> headers;
+
+	private HTTPHeaders() {
+		this.headers = emptyMap();
+	}
+
+	private HTTPHeaders(Map<String, HTTPHeader> headers) {
+		this.headers = unmodifiableMap(headers);
+	}
 
 	public HTTPHeaders(Collection<HTTPHeader> headers) {
-		this.headers = Collections.unmodifiableCollection(headers);
+		this(headers.stream().collect(toMap(HTTPHeader::name, identity(), HTTPHeader::join)));
 	}
 
-	private HTTPHeaders(Stream<HTTPHeader> headers) {
-		this.headers = headers.collect(toUnmodifiableList());
-	}
-
-	Optional<HTTPHeader> select(String name) {
-		return headers.stream().filter(h -> h.is(name)).findFirst();
+	public Optional<HTTPHeader> select(String name) {
+		return headers.entrySet().stream()
+				.filter(e -> e.getKey().equalsIgnoreCase(name))
+				.map(Map.Entry::getValue)
+				.findFirst();
 	}
 
 	public Collection<HTTPHeader> all() {
-		return headers;
+		return headers.values().stream().collect(toUnmodifiableList());
 	}
 
-	public HTTPHeaders add(HTTPHeader header) {
-		return new HTTPHeaders(Stream.concat(headers.stream(), Stream.of(header)));
+	public HTTPHeaders join(HTTPHeader header) {
+		Map<String, HTTPHeader> headers = new LinkedHashMap<>(this.headers);
+		headers.put(header.name(), header);
+		return new HTTPHeaders(headers);
 	}
 
 	@Override
 	public Iterator<HTTPHeader> iterator() {
-		return headers.iterator();
+		return headers.values().iterator();
 	}
 
 	public static HTTPHeaders empty() {
-		return new HTTPHeaders(Stream.empty());
+		return new HTTPHeaders();
 	}
 
 	public static HTTPHeaders create(HTTPHeader... headers) {

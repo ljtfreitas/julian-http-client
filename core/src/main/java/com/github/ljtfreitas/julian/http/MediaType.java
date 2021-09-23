@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian.http.codec;
+package com.github.ljtfreitas.julian.http;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -33,17 +33,17 @@ import static com.github.ljtfreitas.julian.Preconditions.nonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 
-public class ContentType {
+public class MediaType {
 
-	private static final ContentType WILDCARD_CONTENT_TYPE = ContentType.valueOf("*/*");
+	private static final MediaType WILDCARD_CONTENT_TYPE = MediaType.valueOf("*/*");
 
 	private final MimeType mediaType;
 
-	private ContentType(MimeType mediaType) {
+	private MediaType(MimeType mediaType) {
 		this.mediaType = nonNull(mediaType);
 	}
 
-	boolean compatible(ContentType candidate) {
+	public boolean compatible(MediaType candidate) {
 		return mediaType.compatible(candidate.mediaType);
 	}
 
@@ -59,8 +59,8 @@ public class ContentType {
 		return Optional.ofNullable(mediaType.parameters.get(name));
 	}
 
-	ContentType parameter(String name, String value) {
-		return new ContentType(mediaType.parameter(name, value));
+	MediaType parameter(String name, String value) {
+		return new MediaType(mediaType.parameter(name, value));
 	}
 
 	@Override
@@ -70,10 +70,10 @@ public class ContentType {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (!(obj instanceof ContentType))
+		if (!(obj instanceof MediaType))
 			return false;
 
-		ContentType that = (ContentType) obj;
+		MediaType that = (MediaType) obj;
 
 		return this.mediaType.equals(that.mediaType);
 	}
@@ -83,11 +83,11 @@ public class ContentType {
 		return mediaType.toString();
 	}
 
-	public static ContentType valueOf(String value) {
-		return new ContentType(MimeType.valueOf(value));
+	public static MediaType valueOf(String value) {
+		return new MediaType(MimeType.valueOf(value));
 	}
 
-	public static ContentType wildcard() {
+	public static MediaType wildcard() {
 		return WILDCARD_CONTENT_TYPE;
 	}
 

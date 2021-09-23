@@ -2,6 +2,7 @@ package com.github.ljtfreitas.julian.http.codec;
 
 import java.io.ByteArrayInputStream;
 
+import com.github.ljtfreitas.julian.http.MediaType;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -20,18 +21,18 @@ class ByteArrayHTTPResponseReaderTest {
 		
 		@Test
 		void supported() {
-			assertTrue(reader.readable(ContentType.valueOf("text/plain"), JavaType.valueOf(byte[].class)));
+			assertTrue(reader.readable(MediaType.valueOf("text/plain"), JavaType.valueOf(byte[].class)));
 		}
 	
 		@Test
 		void unsupported() {
-			assertFalse(reader.readable(ContentType.valueOf("text/plain"), JavaType.valueOf(String.class)));
+			assertFalse(reader.readable(MediaType.valueOf("text/plain"), JavaType.valueOf(String.class)));
 		}
 	}
 	
 	@Test
 	void read() {
 		byte[] expected = "response body".getBytes();
-		assertArrayEquals(expected, reader.read(new ByteArrayInputStream(expected), JavaType.valueOf(byte[].class)));
+		assertArrayEquals(expected, reader.read(expected, JavaType.valueOf(byte[].class)));
 	}
 }

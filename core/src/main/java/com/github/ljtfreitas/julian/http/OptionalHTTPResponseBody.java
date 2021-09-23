@@ -20,26 +20,30 @@
  * SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian.http.codec;
+package com.github.ljtfreitas.julian.http;
 
-import com.github.ljtfreitas.julian.JavaType;
-import com.github.ljtfreitas.julian.http.MediaType;
-
-import java.util.Collection;
 import java.util.Optional;
+import java.util.function.Function;
 
-import static java.util.Collections.unmodifiableCollection;
+public class OptionalHTTPResponseBody implements HTTPResponseBody {
 
-public class HTTPResponseReaders {
+    private final HTTPStatus status;
+    private final HTTPHeaders headers;
+    private final HTTPResponseBody content;
 
-	private final Collection<HTTPResponseReader<?>> readers;
+    public OptionalHTTPResponseBody(HTTPStatus status, HTTPHeaders headers, HTTPResponseBody content) {
+        this.status = status;
+        this.headers = headers;
+        this.content = content;
+    }
 
-	HTTPResponseReaders(Collection<HTTPResponseReader<?>> collect) {
-		this.readers = unmodifiableCollection(collect);
-	}
+    @Override
+    public <T> Optional<T> deserialize(Function<byte[], T> fn) {
+        return (status.readable() && hasContentLength()) ? content.deserialize(fn) : Optional.empty();
+    }
 
-	public Optional<HTTPResponseReader<?>> select(MediaType mediaType, JavaType javaType) {
-		return readers.stream().filter(w -> w.readable(mediaType, javaType)).findFirst();
-	}
-
+    private boolean hasContentLength() {
+        int length = headers.select("Content-Length").map(HTTPHeader::value).map(Integer::valueOf).orElse(-1);
+        return length != 0;
+    }
 }

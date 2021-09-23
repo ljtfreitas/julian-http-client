@@ -22,15 +22,14 @@
 
 package com.github.ljtfreitas.julian.http.codec.json.jsonp;
 
+import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.MediaType;
+import com.github.ljtfreitas.julian.http.codec.JsonHTTPMessageCodec;
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonStructure;
-
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.stream.Stream;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -40,34 +39,39 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
-import com.github.ljtfreitas.julian.JavaType;
-import com.github.ljtfreitas.julian.http.codec.ContentType;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.Flow;
+import java.util.concurrent.Flow.Subscriber;
+import java.util.stream.Stream;
 
+import static com.github.ljtfreitas.julian.http.codec.JsonHTTPMessageCodec.APPLICATION_JSON_MEDIA_TYPE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class JsonpJsonHTTPMessageCodecTest {
 
-    private JsonpJsonHTTPMessageCodec codec = new JsonpJsonHTTPMessageCodec();
+    private final JsonpJsonHTTPMessageCodec codec = new JsonpJsonHTTPMessageCodec();
 
     @Nested
     class AsReader {
 
         @Test
         @DisplayName("It should not support content types that are not application/json")
-        void shouldNotSupportContentTypesThatAreNotApplicationJson() {
-            assertFalse(codec.readable(ContentType.valueOf("text/plain"), JavaType.valueOf(Object.class)));
+        void shouldNotSupportMediaTypesThatAreNotApplicationJson() {
+            assertFalse(codec.readable(MediaType.valueOf("text/plain"), JavaType.valueOf(Object.class)));
         }
 
         @ParameterizedTest
         @ArgumentsSource(SupportedJsonStructureTypesProvider.class)
         @DisplayName("It should support application/json as content type and classes compatible with JsonStructure")
-        void shouldSupportApplicationJsonAsContentTypeWithJsonStructureTypes(Class<?> supportedType) {
-            assertTrue(codec.readable(ContentType.valueOf("application/json"), JavaType.valueOf(supportedType)));
+        void shouldSupportApplicationJsonAsMediaTypeWithJsonStructureTypes(Class<?> supportedType) {
+            assertTrue(codec.readable(MediaType.valueOf("application/json"), JavaType.valueOf(supportedType)));
         }
 
         @Test
@@ -75,7 +79,7 @@ class JsonpJsonHTTPMessageCodecTest {
         void shouldBeAbleToReadJsonObjectValue() {
             String value = "{\"name\":\"Tiago\",\"age\":35}";
 
-            JsonStructure jsonStructure = codec.read(new ByteArrayInputStream(value.getBytes()), JavaType.valueOf(JsonObject.class));
+            JsonStructure jsonStructure = codec.read(value.getBytes(), JavaType.valueOf(JsonObject.class));
 
             assertTrue(jsonStructure instanceof JsonObject);
 
@@ -90,7 +94,7 @@ class JsonpJsonHTTPMessageCodecTest {
         void shouldBeAbleToReadJsonArrayValue() {
             String value = "[{\"name\":\"Tiago\",\"age\":35}]";
 
-            JsonStructure jsonStructure = codec.read(new ByteArrayInputStream(value.getBytes()), JavaType.valueOf(JsonArray.class));
+            JsonStructure jsonStructure = codec.read(value.getBytes(), JavaType.valueOf(JsonArray.class));
 
             assertTrue(jsonStructure instanceof JsonArray);
 
@@ -110,15 +114,15 @@ class JsonpJsonHTTPMessageCodecTest {
 
         @Test
         @DisplayName("It should not support content types that are not application/json")
-        void shouldNotSupportContentTypesThatAreNotApplicationJson() {
-            assertFalse(codec.writable(ContentType.valueOf("text/plain"), Object.class));
+        void shouldNotSupportMediaTypesThatAreNotApplicationJson() {
+            assertFalse(codec.writable(MediaType.valueOf("text/plain"), Object.class));
         }
 
         @ParameterizedTest
         @ArgumentsSource(SupportedJsonStructureTypesProvider.class)
         @DisplayName("It should support application/json as content type and classes compatible with JsonStructure")
-        void shouldSupportApplicationJsonAsContentTypeWithJsonStructureTypes(Class<?> supportedType) {
-            assertTrue(codec.writable(ContentType.valueOf("application/json"), supportedType));
+        void shouldSupportApplicationJsonAsMediaTypeWithJsonStructureTypes(Class<?> supportedType) {
+            assertTrue(codec.writable(MediaType.valueOf("application/json"), supportedType));
         }
 
         @Test
@@ -126,9 +130,29 @@ class JsonpJsonHTTPMessageCodecTest {
         void shouldBeAbleToWriteJsonObjectValue() {
             JsonObject jsonObject = Json.createObjectBuilder().add("name", "Tiago").add("age", 35).build();
 
-            byte[] output = codec.write(jsonObject, StandardCharsets.UTF_8);
+            HTTPRequestBody output = codec.write(jsonObject, StandardCharsets.UTF_8);
 
-            assertEquals(jsonObject.toString(), new String(output));
+            assertEquals(APPLICATION_JSON_MEDIA_TYPE, output.contentType());
+
+            output.serialize().subscribe(new Subscriber<>() {
+                @Override
+                public void onSubscribe(Flow.Subscription subscription) {
+                }
+
+                @Override
+                public void onNext(ByteBuffer item) {
+                    assertEquals(jsonObject.toString(), new String(item.array()));
+                }
+
+                @Override
+                public void onError(Throwable throwable) {
+                    fail(throwable);
+                }
+
+                @Override
+                public void onComplete() {
+                }
+            });
         }
 
         @Test
@@ -138,9 +162,30 @@ class JsonpJsonHTTPMessageCodecTest {
                     .add(0, Json.createObjectBuilder().add("name", "Tiago").add("age", 35).build())
                     .build();
 
-            byte[] output = codec.write(jsonArray, StandardCharsets.UTF_8);
+            HTTPRequestBody output = codec.write(jsonArray, StandardCharsets.UTF_8);
 
-            assertEquals(jsonArray.toString(), new String(output));
+            assertEquals(APPLICATION_JSON_MEDIA_TYPE, output.contentType());
+
+            output.serialize().subscribe(new Subscriber<>() {
+                @Override
+                public void onSubscribe(Flow.Subscription subscription) {
+                }
+
+                @Override
+                public void onNext(ByteBuffer item) {
+                    assertEquals(jsonArray.toString(), new String(item.array()));
+                }
+
+                @Override
+                public void onError(Throwable throwable) {
+                    fail(throwable);
+                }
+
+                @Override
+                public void onComplete() {
+                }
+            });
+
         }
     }
 

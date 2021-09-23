@@ -34,6 +34,7 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.ProxySelector;
 import java.net.URI;
+import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
@@ -132,7 +133,7 @@ class DefaultHTTPClientTest {
 
                     HTTPRequestDefinition request = new SimpleHTTPRequestDefinition("http://localhost:8090/hello", "POST",
                             HTTPHeaders.create(new HTTPHeader("Content-Type", "text/plain")),
-                            new DefaultHTTPRequestBody<>(requestBodyAsString, StandardCharsets.UTF_8, new StringHTTPMessageCodec()),
+                            new DefaultHTTPRequestBody(StringHTTPMessageCodec.TEXT_PLAIN_MEDIA_TYPE, () -> BodyPublishers.ofString(requestBodyAsString)),
                             JavaType.valueOf(String.class));
 
                     HTTPClientResponse response = client.request(request).execute().join().unsafe();
@@ -256,8 +257,6 @@ class DefaultHTTPClientTest {
                     mockServer.when(request("/proxy").withMethod("GET"))
                             .respond(response("it's working..."));
 
-                    Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("localhost", 8090));
-
                     ProxySelector proxySelector = ProxySelector.of(new InetSocketAddress("localhost", 8090));
 
                     HTTPClient httpClient = new DefaultHTTPClient(new HTTPClient.Specification()
@@ -301,17 +300,17 @@ class DefaultHTTPClientTest {
                     arguments(request("/hello").withMethod("POST").withBody(requestBodyAsString),
                             expectedResponse, new SimpleHTTPRequestDefinition("http://localhost:8090/hello", "POST",
                                     HTTPHeaders.create(new HTTPHeader("Content-Type", "text/plain")),
-                                    new DefaultHTTPRequestBody<>(requestBodyAsString, StandardCharsets.UTF_8, new StringHTTPMessageCodec()),
+                                    new DefaultHTTPRequestBody(StringHTTPMessageCodec.TEXT_PLAIN_MEDIA_TYPE, () -> BodyPublishers.ofString(requestBodyAsString)),
                                     JavaType.valueOf(String.class))),
                     arguments(request("/hello").withMethod("PUT").withBody(requestBodyAsString),
                             expectedResponse, new SimpleHTTPRequestDefinition("http://localhost:8090/hello", "POST",
                                     HTTPHeaders.create(new HTTPHeader("Content-Type", "text/plain")),
-                                    new DefaultHTTPRequestBody<>(requestBodyAsString, StandardCharsets.UTF_8, new StringHTTPMessageCodec()),
+                                    new DefaultHTTPRequestBody(StringHTTPMessageCodec.TEXT_PLAIN_MEDIA_TYPE, () -> BodyPublishers.ofString(requestBodyAsString)),
                                     JavaType.valueOf(String.class))),
                     arguments(request("/hello").withMethod("PATCH").withBody(requestBodyAsString),
                             expectedResponse, new SimpleHTTPRequestDefinition("http://localhost:8090/hello", "PATCH",
                                     HTTPHeaders.create(new HTTPHeader("Content-Type", "text/plain")),
-                                    new DefaultHTTPRequestBody<>(requestBodyAsString, StandardCharsets.UTF_8, new StringHTTPMessageCodec()),
+                                    new DefaultHTTPRequestBody(StringHTTPMessageCodec.TEXT_PLAIN_MEDIA_TYPE, () -> BodyPublishers.ofString(requestBodyAsString)),
                                     JavaType.valueOf(String.class))),
                     arguments(request("/hello").withMethod("DELETE"),
                             expectedResponse, new SimpleHTTPRequestDefinition("http://localhost:8090/hello", "DELETE")),

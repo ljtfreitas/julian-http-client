@@ -22,27 +22,16 @@
 
 package com.github.ljtfreitas.julian.http;
 
-import java.util.Collection;
-import java.util.Collections;
-
 import com.github.ljtfreitas.julian.Promise;
 
-import static java.util.Collections.emptyList;
+import static com.github.ljtfreitas.julian.http.HTTPHeader.CONTENT_TYPE;
 
-public class DefaultHTTPRequestInterceptor implements HTTPRequestInterceptor {
-
-    private final Collection<HTTPRequestInterceptor> interceptors;
-
-    public DefaultHTTPRequestInterceptor() {
-        this(emptyList());
-    }
-
-    public DefaultHTTPRequestInterceptor(Collection<HTTPRequestInterceptor> interceptors) {
-        this.interceptors = interceptors;
-    }
+class RewriteContentTypeHTTPRequestInterceptor implements HTTPRequestInterceptor  {
 
     @Override
     public <T> Promise<HTTPRequest<T>> intercepts(Promise<HTTPRequest<T>> request) {
-        return interceptors.stream().reduce(request, (r, i) -> i.intercepts(r), (a, b) -> b);
+        return request.then(r -> r.body()
+                .map(b -> r.headers(r.headers().join(new HTTPHeader(CONTENT_TYPE, b.contentType().toString()))))
+                .orElse(r));
     }
 }

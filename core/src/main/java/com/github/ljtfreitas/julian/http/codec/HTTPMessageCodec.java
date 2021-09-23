@@ -22,13 +22,15 @@
 
 package com.github.ljtfreitas.julian.http.codec;
 
+import com.github.ljtfreitas.julian.http.MediaType;
+
 import java.util.Collection;
 
 public interface HTTPMessageCodec {
 
-	Collection<ContentType> contentTypes();
-	
-	default boolean supports(ContentType candidate) {
+	Collection<MediaType> contentTypes();
+
+	default boolean supports(MediaType candidate) {
 		return contentTypes().stream().anyMatch(contentType -> contentType.compatible(candidate));
 	}
 }

@@ -36,90 +36,91 @@ public class DefaultHTTPResponseFailure implements HTTPResponseFailure {
 		HTTPStatus status = response.status();
 		HTTPHeaders headers = response.headers();
 
+		String responseBody = response.body().deserialize(String::new).orElse("");
+
 		Supplier<HTTPResponseException> ex = () -> HTTPStatusCode.select(status.code())
-				.<HTTPResponseException> map(httpStatusCode -> failure(httpStatusCode, headers))
-				.orElseGet(() -> unknown(status, headers));
+				.<HTTPResponseException> map(httpStatusCode -> failure(httpStatusCode, headers, responseBody))
+				.orElseGet(() -> unknown(status, headers, responseBody));
 
 		return new FailureHTTPResponse<>(status, headers, ex);
 	}
 
-	private HTTPUknownFailureResponseException unknown(HTTPStatus status, HTTPHeaders headers) {
-		return new HTTPUknownFailureResponseException(status, headers);
+	private HTTPUknownFailureResponseException unknown(HTTPStatus status, HTTPHeaders headers, String responseBody) {
+		return new HTTPUknownFailureResponseException(status, headers, responseBody);
 	}
-
-	private HTTPFailureResponseException failure(HTTPStatusCode status, HTTPHeaders headers) {
+	private HTTPFailureResponseException failure(HTTPStatusCode status, HTTPHeaders headers, String responseBody) {
 		switch (status) {
 			case BAD_REQUEST:
-				return new HTTPClientFailureResponseException.BadRequest(headers);
+				return new HTTPClientFailureResponseException.BadRequest(headers, responseBody);
 	
 			case UNAUTHORIZED:
-				return new HTTPClientFailureResponseException.Unauthorized(headers);
+				return new HTTPClientFailureResponseException.Unauthorized(headers, responseBody);
 		
 			case FORBIDDEN:
-				return new HTTPClientFailureResponseException.Forbidden(headers);
+				return new HTTPClientFailureResponseException.Forbidden(headers, responseBody);
 		
 			case NOT_FOUND:
-				return new HTTPClientFailureResponseException.NotFound(headers);
+				return new HTTPClientFailureResponseException.NotFound(headers, responseBody);
 			
 			case METHOD_NOT_ALLOWED:
-				return new HTTPClientFailureResponseException.MethodNotAllowed(headers);
+				return new HTTPClientFailureResponseException.MethodNotAllowed(headers, responseBody);
 			
 			case NOT_ACCEPTABLE:
-				return new HTTPClientFailureResponseException.NotAcceptable(headers);
+				return new HTTPClientFailureResponseException.NotAcceptable(headers, responseBody);
 			
 			case PROXY_AUTHENTATION_REQUIRED:
-				return new HTTPClientFailureResponseException.ProxyAuthenticationRequired(headers);
+				return new HTTPClientFailureResponseException.ProxyAuthenticationRequired(headers, responseBody);
 			
 			case REQUEST_TIMEOUT:
-				return new HTTPClientFailureResponseException.RequestTimeout(headers);
+				return new HTTPClientFailureResponseException.RequestTimeout(headers, responseBody);
 			
 			case CONFLICT:
-				return new HTTPClientFailureResponseException.Conflict(headers);
+				return new HTTPClientFailureResponseException.Conflict(headers, responseBody);
 			
 			case GONE:
-				return new HTTPClientFailureResponseException.Gone(headers);
+				return new HTTPClientFailureResponseException.Gone(headers, responseBody);
 			
 			case LENGTH_REQUIRED:
-				return new HTTPClientFailureResponseException.LengthRequired(headers);
+				return new HTTPClientFailureResponseException.LengthRequired(headers, responseBody);
 			
 			case PRECONDITION_FAILED:
-				return new HTTPClientFailureResponseException.PreconditionFailed(headers);
+				return new HTTPClientFailureResponseException.PreconditionFailed(headers, responseBody);
 			
 			case REQUEST_ENTITY_TOO_LARGE:
-				return new HTTPClientFailureResponseException.RequestEntityTooLarge(headers);
+				return new HTTPClientFailureResponseException.RequestEntityTooLarge(headers, responseBody);
 			
 			case REQUEST_URI_TOO_LONG:
-				return new HTTPClientFailureResponseException.RequestURITooLong(headers);
+				return new HTTPClientFailureResponseException.RequestURITooLong(headers, responseBody);
 			
 			case UNSUPPORTED_MEDIA_TYPE:
-				return new HTTPClientFailureResponseException.UnsupportedMediaType(headers);
+				return new HTTPClientFailureResponseException.UnsupportedMediaType(headers, responseBody);
 			
 			case REQUESTED_RANGE_NOT_SATISFIABLE:
-				return new HTTPClientFailureResponseException.RequestedRangeNotSatisfiable(headers);
+				return new HTTPClientFailureResponseException.RequestedRangeNotSatisfiable(headers, responseBody);
 			
 			case EXPECTATION_FAILED:
-				return new HTTPClientFailureResponseException.ExpectationFailed(headers);
+				return new HTTPClientFailureResponseException.ExpectationFailed(headers, responseBody);
 			
 			case INTERNAL_SERVER_ERROR:
-				return new HTTPServerFailureResponseException.InternalServerError(headers);
+				return new HTTPServerFailureResponseException.InternalServerError(headers, responseBody);
 			
 			case NOT_IMPLEMENTED:
-				return new HTTPServerFailureResponseException.NotImplemented(headers);
+				return new HTTPServerFailureResponseException.NotImplemented(headers, responseBody);
 			
 			case BAD_GATEWAY:
-				return new HTTPServerFailureResponseException.BadGateway(headers);
+				return new HTTPServerFailureResponseException.BadGateway(headers, responseBody);
 			
 			case SERVICE_UNAVAILABLE:
-				return new HTTPServerFailureResponseException.ServiceUnavailable(headers);
+				return new HTTPServerFailureResponseException.ServiceUnavailable(headers, responseBody);
 			
 			case GATEWAY_TIMEOUT:
-				return new HTTPServerFailureResponseException.GatewayTimeout(headers);
+				return new HTTPServerFailureResponseException.GatewayTimeout(headers, responseBody);
 			
 			case HTTP_VERSION_NOT_SUPPORTED:
-				return new HTTPServerFailureResponseException.HTTPVersionNotSupported(headers);
+				return new HTTPServerFailureResponseException.HTTPVersionNotSupported(headers, responseBody);
 			
 			default:
-				return new HTTPFailureResponseException(status, headers);
+				return new HTTPFailureResponseException(status, headers, responseBody);
 		}
 	}
 

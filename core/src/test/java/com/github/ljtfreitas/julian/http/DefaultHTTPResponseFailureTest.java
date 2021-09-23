@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import java.io.ByteArrayInputStream;
@@ -50,6 +51,7 @@ class DefaultHTTPResponseFailureTest {
 	@MethodSource("failureHTTPStatuses")
 	void shouldCreateTheFailureResponse(HTTPStatus status, Class<? extends HTTPResponseException> exception) {
 		HTTPHeaders headers = HTTPHeaders.empty();
+		String responseBody = "response body";
 
 		HTTPClientResponse source = new HTTPClientResponse() {
 
@@ -65,7 +67,7 @@ class DefaultHTTPResponseFailureTest {
 
 			@Override
 			public DefaultHTTPResponseBody body() {
-				return new DefaultHTTPResponseBody(status, headers, "response body".getBytes());
+				return new DefaultHTTPResponseBody(responseBody.getBytes());
 			}
 
 			@Override
@@ -83,8 +85,13 @@ class DefaultHTTPResponseFailureTest {
 
 		assertAll(()-> assertNotNull(failed), 
 				  () -> assertEquals(status, failed.status()),
-				  () -> assertEquals(headers, failed.headers()),
-				  () -> assertThrows(exception, failed::body));
+				  () -> assertEquals(headers, failed.headers()));
+
+		HTTPResponseException httpResponseException = assertThrows(exception, failed::body);
+
+		assertAll(() -> assertEquals(status, httpResponseException.status()),
+				  () -> assertEquals(headers, httpResponseException.headers()),
+				  () -> assertEquals(responseBody, httpResponseException.body()));
 	}
 
 	static Stream<Arguments> failureHTTPStatuses() {

@@ -1,14 +1,16 @@
 package com.github.ljtfreitas.julian.http.codec;
 
+import com.github.ljtfreitas.julian.http.MediaType;
+
 import java.util.Collection;
 import java.util.List;
 
 public interface JsonHTTPMessageCodec<T> extends HTTPRequestWriter<T>, HTTPResponseReader<T> {
 
-    ContentType APPLICATION_JSON_CONTENT_TYPE = ContentType.valueOf("application/json");
+    MediaType APPLICATION_JSON_MEDIA_TYPE = MediaType.valueOf("application/json");
 
     @Override
-    default Collection<ContentType> contentTypes() {
-        return List.of(APPLICATION_JSON_CONTENT_TYPE);
+    default Collection<MediaType> contentTypes() {
+        return List.of(APPLICATION_JSON_MEDIA_TYPE);
     }
 }

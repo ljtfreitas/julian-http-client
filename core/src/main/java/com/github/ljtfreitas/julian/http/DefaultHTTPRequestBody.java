@@ -26,24 +26,29 @@ import java.io.ByteArrayInputStream;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.concurrent.Flow;
 import java.util.concurrent.Flow.Publisher;
+import java.util.function.Supplier;
 
 import com.github.ljtfreitas.julian.http.codec.HTTPRequestWriter;
 
-public class DefaultHTTPRequestBody<T> implements HTTPRequestBody {
+public class DefaultHTTPRequestBody implements HTTPRequestBody {
 
-	private final T value;
-	private final Charset charset;
-	private final HTTPRequestWriter<T> writer;
+	private final MediaType mediaType;
+	private final Supplier<Publisher<ByteBuffer>> publisher;
 
-	public DefaultHTTPRequestBody(T value, Charset charset, HTTPRequestWriter<T> writer) {
-		this.value = value;
-		this.charset = charset;
-		this.writer = writer;
+	public DefaultHTTPRequestBody(MediaType mediaType, Supplier<Publisher<ByteBuffer>> publisher) {
+		this.mediaType = mediaType;
+		this.publisher = publisher;
+	}
+
+	@Override
+	public MediaType contentType() {
+		return mediaType;
 	}
 
 	@Override
 	public Publisher<ByteBuffer> serialize() {
-		return BodyPublishers.ofInputStream(() -> new ByteArrayInputStream(writer.write(value, charset)));
+		return publisher.get();
 	}
 }

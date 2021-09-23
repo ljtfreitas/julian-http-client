@@ -33,16 +33,16 @@ public class HTTPServerFailureResponseException extends HTTPFailureResponseExcep
 
 	private static final long serialVersionUID = 1L;
 
-	HTTPServerFailureResponseException(HTTPStatusCode status, HTTPHeaders headers) {
-		super(status, headers);
+	HTTPServerFailureResponseException(HTTPStatusCode status, HTTPHeaders headers, String body) {
+		super(status, headers, body);
 	}
 
 	public static class InternalServerError extends HTTPServerFailureResponseException {
 
 		private static final long serialVersionUID = 1L;
 
-		public InternalServerError(HTTPHeaders headers) {
-			super(INTERNAL_SERVER_ERROR, headers);
+		public InternalServerError(HTTPHeaders headers, String body) {
+			super(INTERNAL_SERVER_ERROR, headers, body);
 		}
 	}
 
@@ -50,8 +50,8 @@ public class HTTPServerFailureResponseException extends HTTPFailureResponseExcep
 
 		private static final long serialVersionUID = 1L;
 
-		public NotImplemented(HTTPHeaders headers) {
-			super(NOT_IMPLEMENTED, headers);
+		public NotImplemented(HTTPHeaders headers, String body) {
+			super(NOT_IMPLEMENTED, headers, body);
 		}
 	}
 
@@ -59,8 +59,8 @@ public class HTTPServerFailureResponseException extends HTTPFailureResponseExcep
 
 		private static final long serialVersionUID = 1L;
 
-		public BadGateway(HTTPHeaders headers) {
-			super(BAD_GATEWAY, headers);
+		public BadGateway(HTTPHeaders headers, String body) {
+			super(BAD_GATEWAY, headers, body);
 		}
 	}
 
@@ -68,8 +68,8 @@ public class HTTPServerFailureResponseException extends HTTPFailureResponseExcep
 
 		private static final long serialVersionUID = 1L;
 
-		public ServiceUnavailable(HTTPHeaders headers) {
-			super(SERVICE_UNAVAILABLE, headers);
+		public ServiceUnavailable(HTTPHeaders headers, String body) {
+			super(SERVICE_UNAVAILABLE, headers, body);
 		}
 	}
 
@@ -77,8 +77,8 @@ public class HTTPServerFailureResponseException extends HTTPFailureResponseExcep
 
 		private static final long serialVersionUID = 1L;
 
-		public GatewayTimeout(HTTPHeaders headers) {
-			super(GATEWAY_TIMEOUT, headers);
+		public GatewayTimeout(HTTPHeaders headers, String body) {
+			super(GATEWAY_TIMEOUT, headers, body);
 		}
 	}
 
@@ -86,8 +86,8 @@ public class HTTPServerFailureResponseException extends HTTPFailureResponseExcep
 
 		private static final long serialVersionUID = 1L;
 
-		public HTTPVersionNotSupported(HTTPHeaders headers) {
-			super(HTTP_VERSION_NOT_SUPPORTED, headers);
+		public HTTPVersionNotSupported(HTTPHeaders headers, String body) {
+			super(HTTP_VERSION_NOT_SUPPORTED, headers, body);
 		}
 	}
 }

@@ -52,6 +52,15 @@ public interface Except<T> {
 		}
 	}
 
+	static Except<Void> just(ThrowableRunnable runnable) {
+		try {
+			runnable.run();
+			return new Success<>(null);
+		} catch (Throwable t) {
+			return new Failure<>(t);
+		}
+	}
+
 	class Success<T> implements Except<T> {
 
 		private final T value;
@@ -191,5 +200,10 @@ public interface Except<T> {
 		static <T> ThrowableFunction<T, T> identity() {
 			return t -> t;
 		}
+	}
+
+	interface ThrowableRunnable {
+
+		void run() throws Throwable;
 	}
 }

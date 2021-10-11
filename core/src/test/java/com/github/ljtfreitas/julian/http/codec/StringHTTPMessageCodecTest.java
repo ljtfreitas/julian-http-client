@@ -54,12 +54,12 @@ class StringHTTPMessageCodecTest {
 
         @Test
         void unsupported() {
-            assertFalse(codec.writable(MediaType.valueOf("text/plain"), Object.class));
+            assertFalse(codec.writable(MediaType.valueOf("text/plain"), JavaType.valueOf(Object.class)));
         }
 
         @Test
         void supported() {
-            assertTrue(codec.writable(MediaType.valueOf("text/plain"), String.class));
+            assertTrue(codec.writable(MediaType.valueOf("text/plain"), JavaType.valueOf(String.class)));
         }
 
         @Nested

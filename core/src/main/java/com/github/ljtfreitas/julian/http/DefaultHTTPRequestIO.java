@@ -22,7 +22,6 @@
 
 package com.github.ljtfreitas.julian.http;
 
-import com.github.ljtfreitas.julian.Bracket;
 import com.github.ljtfreitas.julian.Except;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.http.client.HTTPClient;
@@ -33,7 +32,6 @@ import com.github.ljtfreitas.julian.http.codec.HTTPMessageException;
 import com.github.ljtfreitas.julian.http.codec.HTTPResponseReader;
 import com.github.ljtfreitas.julian.http.codec.HTTPResponseReaderException;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.CompletionException;

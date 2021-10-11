@@ -22,6 +22,7 @@
 
 package com.github.ljtfreitas.julian.http.codec;
 
+import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.HTTPRequestBody;
 import com.github.ljtfreitas.julian.http.MediaType;
 
@@ -29,9 +30,7 @@ import java.nio.charset.Charset;
 
 public interface HTTPRequestWriter<T> extends HTTPMessageCodec {
 
-	boolean writable(MediaType candidate, Class<?> javaType);
-
-//	byte[] write(T body, Charset encoding);
+	boolean writable(MediaType candidate, JavaType javaType);
 
 	HTTPRequestBody write(T body, Charset encoding);
 }

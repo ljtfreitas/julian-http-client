@@ -81,7 +81,7 @@ class ReactorNettyHTTPClientResponse implements HTTPClientResponse {
                 .reduce(HTTPHeaders.empty(), HTTPHeaders::join, (a, b) -> b);
 
         return bodyAsBuffer.asByteArray()
-                .map(bodyAsByteArray -> new OptionalHTTPResponseBody(status, headers, new DefaultHTTPResponseBody(bodyAsByteArray)))
+                .map(bodyAsByteArray -> new OptionalHTTPResponseBody(status, headers, () -> new DefaultHTTPResponseBody(bodyAsByteArray)))
                 .map(body -> new ReactorNettyHTTPClientResponse(HTTPClientResponse.create(status, headers, body)))
                 .switchIfEmpty(Mono.fromCallable(() -> new ReactorNettyHTTPClientResponse(HTTPClientResponse.empty(status, headers))));
     }

@@ -58,7 +58,7 @@ class DefaultPromise<T> implements Promise<T> {
 
 	@Override
 	public Except<T> join() {
-		return run(future::join)
+		return Except.run(future::join)
 				.failure(CompletionException.class, Exception::getCause)
 				.failure(ExecutionException.class, Exception::getCause);
 	}

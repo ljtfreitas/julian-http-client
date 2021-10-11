@@ -47,19 +47,19 @@ public class MediaType {
 		return mediaType.compatible(candidate.mediaType);
 	}
 
-	String mime() {
+	public String mime() {
 		return mediaType.value();
 	}
 
-	Map<String, String> parameters() {
+	public Map<String, String> parameters() {
 		return mediaType.parameters;
 	}
 
-	Optional<String> parameter(String name) {
+	public Optional<String> parameter(String name) {
 		return Optional.ofNullable(mediaType.parameters.get(name));
 	}
 
-	MediaType parameter(String name, String value) {
+	public MediaType parameter(String name, String value) {
 		return new MediaType(mediaType.parameter(name, value));
 	}
 
@@ -137,7 +137,7 @@ public class MediaType {
 		@Override
 		public String toString() {
 			return parameters.isEmpty() ? format("{0}/{1}", type, subType) 
-										: format("{0}/{1};{2}", type, subType, parameters.entrySet().stream()
+										: format("{0}/{1}; {2}", type, subType, parameters.entrySet().stream()
 												.map(e -> e.getKey() + "=" + e.getValue())
 												.collect(joining(";")));
 			

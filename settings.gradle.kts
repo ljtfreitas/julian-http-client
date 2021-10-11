@@ -22,6 +22,7 @@
 
 rootProject.name = "julian-http-client"
 include("core")
+include("form-url-encoded-multipart")
 include("json-jackson")
 include("json-gson")
 include("json-jsonb")

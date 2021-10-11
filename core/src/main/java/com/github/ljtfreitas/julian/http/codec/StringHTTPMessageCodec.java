@@ -68,8 +68,8 @@ public class StringHTTPMessageCodec implements HTTPRequestWriter<String>, HTTPRe
 	}
 
 	@Override
-	public boolean writable(MediaType candidate, Class<?> javaType) {
-		return supports(candidate) && javaType.equals(String.class);
+	public boolean writable(MediaType candidate, JavaType javaType) {
+		return supports(candidate) && javaType.is(String.class);
 	}
 
 	@Override

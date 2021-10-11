@@ -31,7 +31,7 @@ class MediaTypeTest {
 
 			@Test
 			void one() {
-				String mimeType = "application/json;charset=UTF-8";
+				String mimeType = "application/json; charset=UTF-8";
 
 				MediaType mediaType = MediaType.valueOf(mimeType);
 
@@ -44,7 +44,7 @@ class MediaTypeTest {
 
 			@Test
 			void multiple() {
-				String mimeType = "multipart/form-data;charset=UTF-8;boundary=abc1234";
+				String mimeType = "multipart/form-data; charset=UTF-8;boundary=abc1234";
 
 				MediaType mediaType = MediaType.valueOf(mimeType);
 
@@ -65,7 +65,7 @@ class MediaTypeTest {
 						  () -> assertFalse(withCharset.parameters().isEmpty()),
 						  () -> assertEquals("application/json", withCharset.mime()),
 						  () -> assertEquals("UTF-8", withCharset.parameter("charset").get()),
-						  () -> assertEquals("application/json;charset=UTF-8", withCharset.toString()));
+						  () -> assertEquals("application/json; charset=UTF-8", withCharset.toString()));
 			}
 		}
 		

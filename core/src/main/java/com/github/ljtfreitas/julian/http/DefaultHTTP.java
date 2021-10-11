@@ -70,13 +70,14 @@ public class DefaultHTTP implements HTTP {
 
 	private HTTPRequestBody body(Endpoint endpoint, Arguments arguments, HTTPHeaders headers) {
 		return endpoint.parameters().body()
-				.flatMap(p -> arguments.of(p.position()))
-				.map(b -> headers.select(HTTPHeader.CONTENT_TYPE).map(HTTPHeader::value)
+				.flatMap(p -> arguments.of(p.position())
+					.map(b -> headers.select(HTTPHeader.CONTENT_TYPE)
+							.map(HTTPHeader::value)
 							.map(MediaType::valueOf)
-							.map(contentType -> codecs.writers().select(contentType, b.getClass())
-									.map(writer -> writer.write(b, StandardCharsets.UTF_8))
+							.map(contentType -> codecs.writers().select(contentType, p.javaType())
 									.orElseThrow(() -> new HTTPRequestWriterException(format("There isn't any HTTPRequestWriter able to convert {0} to {1}", b.getClass(), contentType))))
-							.orElseThrow(() -> new HTTPRequestWriterException("The HTTP request has a body, but doesn't have a Content-Type header.")))
+							.map(writer -> writer.write(b, StandardCharsets.UTF_8))
+							.orElseThrow(() -> new HTTPRequestWriterException("The HTTP request has a body, but doesn't have a Content-Type header."))))
 				.orElse(null);
 	}
 

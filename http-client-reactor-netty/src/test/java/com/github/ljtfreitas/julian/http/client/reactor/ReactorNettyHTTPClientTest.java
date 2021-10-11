@@ -24,8 +24,10 @@ import org.mockserver.junit.jupiter.MockServerSettings;
 import org.mockserver.model.HttpRequest;
 import org.mockserver.model.HttpResponse;
 import org.mockserver.model.NottableString;
+import reactor.core.Exceptions;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.URI;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.util.List;
@@ -246,7 +248,7 @@ class ReactorNettyHTTPClientTest {
                 Except<HTTPClientResponse> response = client.request(request).execute().join();
 
                 response.consumes(r -> fail("a connection error was expected..."))
-                        .failure(e -> assertThat(e, instanceOf(IOException.class)));
+                        .failure(e -> assertThat(e.getCause(), instanceOf(ConnectException.class)));
             }
         }
     }

@@ -22,6 +22,7 @@
 
 package com.github.ljtfreitas.julian.http.codec;
 
+import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.MediaType;
 
 import java.util.Collection;
@@ -37,7 +38,7 @@ public class HTTPRequestWriters {
 		this.writers = unmodifiableCollection(collect);
 	}
 
-	public Optional<HTTPRequestWriter<? super Object>> select(MediaType mediaType, Class<?> javaType) {
+	public Optional<HTTPRequestWriter<? super Object>> select(MediaType mediaType, JavaType javaType) {
 		return writers.stream().filter(w -> w.writable(mediaType, javaType)).findFirst();
 	}
 

@@ -11,7 +11,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
-import java.io.ByteArrayInputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Flow;
@@ -64,13 +63,13 @@ class ScalarHTTPMessageCodecTest {
 
 		@Test
 		void unsupported() {
-			assertFalse(codec.writable(MediaType.valueOf("text/plain"), String.class));
+			assertFalse(codec.writable(MediaType.valueOf("text/plain"), JavaType.valueOf(String.class)));
 		}
 		
 		@ParameterizedTest
 		@ArgumentsSource(ScalarTypesProvider.class)
 		void supported(Class<?> scalarClassType) {
-			assertTrue(codec.writable(MediaType.valueOf("text/plain"), scalarClassType));
+			assertTrue(codec.writable(MediaType.valueOf("text/plain"), JavaType.valueOf(scalarClassType)));
 		}
 
 		@Nested

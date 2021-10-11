@@ -26,7 +26,6 @@ import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.HTTPRequestBody;
 import com.github.ljtfreitas.julian.http.MediaType;
 
-import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collection;
@@ -87,8 +86,8 @@ public class ScalarHTTPMessageCodec implements HTTPRequestWriter<Object>, HTTPRe
 	}
 
 	@Override
-	public boolean writable(MediaType candidate, Class<?> javaType) {
-		return supports(candidate) && isScalarType(JavaType.valueOf(javaType));
+	public boolean writable(MediaType candidate, JavaType javaType) {
+		return supports(candidate) && isScalarType(javaType);
 	}
 
 	@Override

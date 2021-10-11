@@ -80,7 +80,7 @@ class DefaultHTTPClientResponse implements HTTPClientResponse {
 				.map(e -> HTTPHeader.create(e.getKey(), e.getValue()))
 				.reduce(HTTPHeaders.empty(), HTTPHeaders::join, (a, b) -> b);
 
-		HTTPResponseBody body = new OptionalHTTPResponseBody(status, headers, response.body());
+		HTTPResponseBody body = new OptionalHTTPResponseBody(status, headers, response::body);
 
 		return new DefaultHTTPClientResponse(status, headers, body);
 	}

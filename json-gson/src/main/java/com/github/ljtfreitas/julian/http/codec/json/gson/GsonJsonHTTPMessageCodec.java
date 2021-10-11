@@ -58,7 +58,7 @@ public class GsonJsonHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
     }
 
     @Override
-    public boolean writable(MediaType candidate, Class<?> javaType) {
+    public boolean writable(MediaType candidate, JavaType javaType) {
         return supports(candidate);
     }
 

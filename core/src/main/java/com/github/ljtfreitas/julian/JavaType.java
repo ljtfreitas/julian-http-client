@@ -58,6 +58,10 @@ public class JavaType {
 		return javaType;
     }
 
+	public Class<?> rawClassType() {
+		return rawClass;
+	}
+
     public boolean is(Class<?> candidate) {
 		return rawClass.equals(candidate);
 	}
@@ -94,7 +98,7 @@ public class JavaType {
 	}
 
 	public <R> Optional<R> when(Class<?> candidate, Supplier<R> fn) {
-		return is(candidate) ? Optional.ofNullable(fn.get()) : Optional.empty();
+		return compatible(candidate) ? Optional.ofNullable(fn.get()) : Optional.empty();
 	}
 
 	@Override
@@ -144,7 +148,6 @@ public class JavaType {
 	public static JavaType genericArrayOf(Type arrayType) {
 		return new JavaType(GenericArray.valueOf(arrayType));
 	}
-
 
     static class Kind {
 

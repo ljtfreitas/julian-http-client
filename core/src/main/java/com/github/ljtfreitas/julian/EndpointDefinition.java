@@ -146,7 +146,7 @@ public class EndpointDefinition implements Endpoint {
 		}
 
 		public Except<URI> expand(Arguments arguments) {
-			return run(() -> {
+			return Except.run(() -> {
 				URI source = URI.create(new DynamicParameters(path, parameters.stream().filter(PathParameter.class::isInstance).collect(toUnmodifiableList()))
 						.interpolate(arguments));
 	
@@ -404,25 +404,18 @@ public class EndpointDefinition implements Endpoint {
 			StringBuffer buffer = new StringBuffer();
 
 			Matcher matcher = DYNAMIC_PARAMETER_PATTERN.matcher(input);
-			
-			while (matcher.find()) {
-				MatchResult match = matcher.toMatchResult();
 
-				String name = match.group(1);
+			Function<MatchResult, String> group = m -> m.group(1);
 
-				parameters.stream()
+			return matcher.replaceAll(group.andThen(name -> parameters.stream()
 						.filter(p -> p.is(name))
 						.filter(StringSerializableParameter.class::isInstance)
 						.map(StringSerializableParameter.class::cast)
 						.findFirst()
-						.ifPresent(p -> matcher.appendReplacement(buffer, arguments.of(p.position())
-									.flatMap(p::resolve)
-									.orElseThrow(() -> new IllegalArgumentException("The argument [" + name + "] cannot be null."))));
-			}
-
-			matcher.appendTail(buffer);
-
-			return buffer.toString();
+						.map(p -> arguments.of(p.position())
+								.flatMap(p::resolve)
+								.orElseThrow(() -> new IllegalArgumentException("The argument [" + name + "] cannot be null.")))
+						.orElse(name)));
 		}
 		
 		static Stream<String> find(String input) {

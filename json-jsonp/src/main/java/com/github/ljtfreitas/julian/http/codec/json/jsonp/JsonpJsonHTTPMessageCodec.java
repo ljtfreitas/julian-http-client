@@ -78,8 +78,8 @@ public class JsonpJsonHTTPMessageCodec implements JsonHTTPMessageCodec<JsonStruc
 
 
     @Override
-    public boolean writable(MediaType candidate, Class<?> javaType) {
-        return supports(candidate) && JsonStructure.class.isAssignableFrom(javaType);
+    public boolean writable(MediaType candidate, JavaType javaType) {
+        return supports(candidate) && javaType.compatible(JsonStructure.class);
     }
 
     @Override

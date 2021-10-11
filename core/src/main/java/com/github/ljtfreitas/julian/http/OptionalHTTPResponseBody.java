@@ -24,14 +24,15 @@ package com.github.ljtfreitas.julian.http;
 
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class OptionalHTTPResponseBody implements HTTPResponseBody {
 
     private final HTTPStatus status;
     private final HTTPHeaders headers;
-    private final HTTPResponseBody content;
+    private final Supplier<HTTPResponseBody> content;
 
-    public OptionalHTTPResponseBody(HTTPStatus status, HTTPHeaders headers, HTTPResponseBody content) {
+    public OptionalHTTPResponseBody(HTTPStatus status, HTTPHeaders headers, Supplier<HTTPResponseBody> content) {
         this.status = status;
         this.headers = headers;
         this.content = content;
@@ -39,7 +40,7 @@ public class OptionalHTTPResponseBody implements HTTPResponseBody {
 
     @Override
     public <T> Optional<T> deserialize(Function<byte[], T> fn) {
-        return (status.readable() && hasContentLength()) ? content.deserialize(fn) : Optional.empty();
+        return (status.readable() && hasContentLength()) ? content.get().deserialize(fn) : Optional.empty();
     }
 
     private boolean hasContentLength() {

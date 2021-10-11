@@ -77,12 +77,12 @@ class JsonbJsonHTTPMessageCodecTest {
 
         @Test
         void unsupported() {
-            assertFalse(codec.writable(MediaType.valueOf("text/plain"), Object.class));
+            assertFalse(codec.writable(MediaType.valueOf("text/plain"), JavaType.valueOf(Object.class)));
         }
 
         @Test
         void supported() {
-            assertTrue(codec.writable(MediaType.valueOf("application/json"), Person.class));
+            assertTrue(codec.writable(MediaType.valueOf("application/json"), JavaType.valueOf(Person.class)));
         }
 
         @Nested
@@ -97,6 +97,7 @@ class JsonbJsonHTTPMessageCodecTest {
                 output.serialize().subscribe(new Subscriber<>() {
                     @Override
                     public void onSubscribe(Flow.Subscription subscription) {
+                        subscription.request(1);
                     }
 
                     @Override

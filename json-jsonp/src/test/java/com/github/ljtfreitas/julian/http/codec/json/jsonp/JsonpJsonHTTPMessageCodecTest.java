@@ -115,14 +115,14 @@ class JsonpJsonHTTPMessageCodecTest {
         @Test
         @DisplayName("It should not support content types that are not application/json")
         void shouldNotSupportMediaTypesThatAreNotApplicationJson() {
-            assertFalse(codec.writable(MediaType.valueOf("text/plain"), Object.class));
+            assertFalse(codec.writable(MediaType.valueOf("text/plain"), JavaType.valueOf(Object.class)));
         }
 
         @ParameterizedTest
         @ArgumentsSource(SupportedJsonStructureTypesProvider.class)
         @DisplayName("It should support application/json as content type and classes compatible with JsonStructure")
         void shouldSupportApplicationJsonAsMediaTypeWithJsonStructureTypes(Class<?> supportedType) {
-            assertTrue(codec.writable(MediaType.valueOf("application/json"), supportedType));
+            assertTrue(codec.writable(MediaType.valueOf("application/json"), JavaType.valueOf(supportedType)));
         }
 
         @Test
@@ -137,6 +137,7 @@ class JsonpJsonHTTPMessageCodecTest {
             output.serialize().subscribe(new Subscriber<>() {
                 @Override
                 public void onSubscribe(Flow.Subscription subscription) {
+                    subscription.request(1);
                 }
 
                 @Override
@@ -169,6 +170,7 @@ class JsonpJsonHTTPMessageCodecTest {
             output.serialize().subscribe(new Subscriber<>() {
                 @Override
                 public void onSubscribe(Flow.Subscription subscription) {
+                    subscription.request(1);
                 }
 
                 @Override

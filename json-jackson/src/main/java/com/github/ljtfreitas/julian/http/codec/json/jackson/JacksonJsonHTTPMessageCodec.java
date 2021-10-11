@@ -68,8 +68,8 @@ public class JacksonJsonHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
     }
 
     @Override
-    public boolean writable(MediaType candidate, Class<?> javaType) {
-        return supports(candidate) && jsonMapper.canSerialize(javaType);
+    public boolean writable(MediaType candidate, JavaType javaType) {
+        return supports(candidate) && jsonMapper.canSerialize(javaType.rawClassType());
     }
 
     @Override

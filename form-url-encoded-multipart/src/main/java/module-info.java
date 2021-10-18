@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-module com.github.ljtfreitas.julian.http.form {
+module com.github.ljtfreitas.julian.form {
     exports com.github.ljtfreitas.julian.multipart;
     exports com.github.ljtfreitas.julian.http.codec.form;
 

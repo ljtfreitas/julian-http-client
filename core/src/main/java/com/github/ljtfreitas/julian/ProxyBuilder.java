@@ -26,7 +26,6 @@ import com.github.ljtfreitas.julian.contract.Contract;
 import com.github.ljtfreitas.julian.contract.ContractReader;
 import com.github.ljtfreitas.julian.contract.DefaultContractReader;
 import com.github.ljtfreitas.julian.http.ConditionalHTTPResponseFailure;
-import com.github.ljtfreitas.julian.http.DebugHTTPClient;
 import com.github.ljtfreitas.julian.http.DefaultHTTP;
 import com.github.ljtfreitas.julian.http.DefaultHTTPResponseFailure;
 import com.github.ljtfreitas.julian.http.HTTP;
@@ -38,6 +37,8 @@ import com.github.ljtfreitas.julian.http.HTTPStatusCode;
 import com.github.ljtfreitas.julian.http.HTTPStatusCodeResponseT;
 import com.github.ljtfreitas.julian.http.HTTPStatusResponseT;
 import com.github.ljtfreitas.julian.http.InterceptedHTTP;
+import com.github.ljtfreitas.julian.http.client.ComposedHTTPClient;
+import com.github.ljtfreitas.julian.http.client.DebugHTTPClient;
 import com.github.ljtfreitas.julian.http.client.DefaultHTTPClient;
 import com.github.ljtfreitas.julian.http.client.HTTPClient;
 import com.github.ljtfreitas.julian.http.codec.ByteArrayHTTPResponseReader;
@@ -62,6 +63,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toUnmodifiableList;
@@ -175,11 +177,14 @@ public class ProxyBuilder {
     public class HTTPSpec {
 
         private final HTTPClientSpec client = new HTTPClientSpec();
+        private final HTTPRequestInterceptors interceptors = new HTTPRequestInterceptors();
         private final HTTPResponseFailureSpec failure = new HTTPResponseFailureSpec();
 
         public HTTPClientSpec client() {
             return client;
         }
+
+        public HTTPRequestInterceptors interceptors() { return interceptors; }
 
         public HTTPResponseFailureSpec failure() {
             return failure;
@@ -193,8 +198,7 @@ public class ProxyBuilder {
 
             private HTTPClient httpClient = null;
 
-            private final Debug debug = new Debug();
-            private final Interceptors interceptors = new Interceptors();
+            private final Decorators decorators = new Decorators();
             private final Configuration configuration = new Configuration();
 
             public HTTPClientSpec using(HTTPClient httpClient) {
@@ -202,11 +206,9 @@ public class ProxyBuilder {
                 return this;
             }
 
-            public HTTPClientSpec.Debug debug() {
-                return debug;
+            public HTTPClientSpec.Decorators decorators() {
+                return decorators;
             }
-
-            public HTTPClientSpec.Interceptors interceptors() { return interceptors; }
 
             public HTTPClientSpec.Configuration configure() { return configuration; }
 
@@ -216,53 +218,53 @@ public class ProxyBuilder {
 
             private HTTPClient build() {
                 HTTPClient client = this.httpClient == null ? new DefaultHTTPClient(configuration.specification) : this.httpClient;
-                return debug.enabled ? new DebugHTTPClient(client) : client;
+                return decorators.decorate(client);
             }
 
-            public class Debug {
+            public class Decorators {
 
-                private boolean enabled = false;
+                private final Debug debug = new Debug();
 
-                public Debug enabled() {
-                    this.enabled = true;
-                    return this;
-                }
-
-                public Debug disabled() {
-                    this.enabled = false;
-                    return this;
-                }
-
-                public Debug enabled(boolean enabled) {
-                    this.enabled = enabled;
-                    return this;
-                }
-
-                public HTTPClientSpec and() {
-                    return HTTPClientSpec.this;
-                }
-            }
-
-            public class Interceptors {
-
-                private final Collection<HTTPRequestInterceptor> interceptors = new ArrayList<>();
-
-                public Interceptors add(HTTPRequestInterceptor... interceptors) {
-                    this.interceptors.addAll(Arrays.asList(interceptors));
-                    return this;
-                }
-
-                public Interceptors add(Collection<HTTPRequestInterceptor> interceptors) {
-                    this.interceptors.addAll(interceptors);
-                    return this;
+                public HTTPClientSpec.Decorators.Debug debug() {
+                    return debug;
                 }
 
                 public HTTPClientSpec and() {
                     return HTTPClientSpec.this;
                 }
 
-                private Collection<HTTPRequestInterceptor> all() {
-                    return interceptors;
+                private HTTPClient decorate(HTTPClient client) {
+                    Collection<Function<HTTPClient, HTTPClient>> constructors = new ArrayList<>();
+                    return new ComposedHTTPClient(client, debug.add(constructors));
+                }
+
+                public class Debug {
+
+                    private boolean enabled = false;
+
+                    public Debug enabled() {
+                        this.enabled = true;
+                        return this;
+                    }
+
+                    public Debug disabled() {
+                        this.enabled = false;
+                        return this;
+                    }
+
+                    public Debug enabled(boolean enabled) {
+                        this.enabled = enabled;
+                        return this;
+                    }
+
+                    public HTTPClientSpec.Decorators and() {
+                        return Decorators.this;
+                    }
+
+                    private Collection<Function<HTTPClient, HTTPClient>> add(Collection<Function<HTTPClient, HTTPClient>> constructors) {
+                        if (enabled) constructors.add(DebugHTTPClient::new);
+                        return constructors;
+                    }
                 }
             }
 
@@ -354,7 +356,7 @@ public class ProxyBuilder {
 
                 public class SSL {
 
-                    private HTTPClient.Specification specification;
+                    private final HTTPClient.Specification specification;
 
                     private SSL(HTTPClient.Specification specification) {
                         this.specification = specification;
@@ -374,6 +376,29 @@ public class ProxyBuilder {
                         return HTTPClientSpec.Configuration.this;
                     }
                 }
+            }
+        }
+
+        public class HTTPRequestInterceptors {
+
+            private final Collection<HTTPRequestInterceptor> interceptors = new ArrayList<>();
+
+            public HTTPRequestInterceptors add(HTTPRequestInterceptor... interceptors) {
+                this.interceptors.addAll(Arrays.asList(interceptors));
+                return this;
+            }
+
+            public HTTPRequestInterceptors add(Collection<HTTPRequestInterceptor> interceptors) {
+                this.interceptors.addAll(interceptors);
+                return this;
+            }
+
+            public HTTPSpec and() {
+                return HTTPSpec.this;
+            }
+
+            private Collection<HTTPRequestInterceptor> all() {
+                return interceptors;
             }
         }
 
@@ -401,7 +426,7 @@ public class ProxyBuilder {
             }
 
             public class HTTPResponseFailures {
-                private Map<HTTPStatusCode, HTTPResponseFailure> failures = new HashMap<>();
+                private final Map<HTTPStatusCode, HTTPResponseFailure> failures = new HashMap<>();
 
                 private void add(HTTPStatusCode status, HTTPResponseFailure failure) {
                     failures.put(status, failure);
@@ -499,6 +524,6 @@ public class ProxyBuilder {
     }
 
     private HTTPRequestInterceptor interceptor() {
-        return new HTTPRequestInterceptorChain(httpSpec.client.interceptors.all());
+        return new HTTPRequestInterceptorChain(httpSpec.interceptors.all());
     }
 }

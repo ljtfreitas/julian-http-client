@@ -28,6 +28,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 
 import static com.github.ljtfreitas.julian.Except.run;
+import static java.util.concurrent.CompletableFuture.completedFuture;
+import static java.util.concurrent.CompletableFuture.failedFuture;
 
 class DefaultPromise<T> implements Promise<T> {
 
@@ -39,17 +41,17 @@ class DefaultPromise<T> implements Promise<T> {
 
 	@Override
 	public <R> Promise<R> then(Function<? super T, R> fn) {
-		return new DefaultPromise<>(future.thenApply(fn));
+		return new DefaultPromise<>(future.thenApplyAsync(fn));
 	}
 
 	@Override
 	public <R> Promise<R> bind(Function<? super T, Promise<R>> fn) {
-		return new DefaultPromise<>(future.thenCompose(t -> fn.apply(t).future()));
+		return new DefaultPromise<>(future.thenComposeAsync(t -> fn.apply(t).future()));
 	}
 
 	@Override
 	public Promise<T> failure(Function<Throwable, ? extends Exception> fn) {
-		return new DefaultPromise<>(future.handle((r, e) -> { if (e == null) return r; else throw failure(fn.apply(e));}));
+		return new DefaultPromise<>(future.handleAsync((r, e) -> { if (e == null) return r; else throw failure(fn.apply(e));}));
 	}
 	
 	private RuntimeException failure(Exception e) {
@@ -69,10 +71,10 @@ class DefaultPromise<T> implements Promise<T> {
 	}
 
 	static <T> Promise<T> done(T value) {
-		return new DefaultPromise<>(CompletableFuture.completedFuture(value));
+		return new DefaultPromise<>(completedFuture(value));
 	}
 
 	static <T> Promise<T> failed(Throwable t) {
-		return new DefaultPromise<>(CompletableFuture.failedFuture(t));
+		return new DefaultPromise<>(failedFuture(t));
 	}
 }

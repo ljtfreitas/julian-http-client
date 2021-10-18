@@ -20,39 +20,28 @@
  * SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian;
+package com.github.ljtfreitas.julian.http.client;
 
-import java.util.concurrent.CompletableFuture;
+import com.github.ljtfreitas.julian.http.HTTPRequestDefinition;
+
+import java.util.Collection;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
-import static java.util.concurrent.CompletableFuture.supplyAsync;
+import static java.util.Collections.unmodifiableCollection;
 
-public interface Promise<T> {
+public class ComposedHTTPClient implements HTTPClient {
 
-	<R> Promise<R> then(Function<? super T, R> fn);
+    private final HTTPClient client;
+    private final Collection<Function<HTTPClient, HTTPClient>> constructors;
 
-	<R> Promise<R> bind(Function<? super T, Promise<R>> fn);
+    public ComposedHTTPClient(HTTPClient client, Collection<Function<HTTPClient, HTTPClient>> constructors) {
+        this.client = client;
+        this.constructors = unmodifiableCollection(constructors);
+    }
 
-	Promise<T> failure(Function<Throwable, ? extends Exception> fn);
-
-	Except<T> join();
-
-	CompletableFuture<T> future();
-
-    static <T> Promise<T> done(T value) {
-		return DefaultPromise.done(value);
-	}
-
-	static <T> Promise<T> failed(Throwable t) {
-		return DefaultPromise.failed(t);
-	}
-
-	static <T, F> Promise<T> pending(CompletableFuture<T> future) {
-		return new DefaultPromise<>(future);
-	}
-
-	static <T> Promise<T> pending(Supplier<T> fn) {
-		return new DefaultPromise<>(supplyAsync(fn));
-	}
+    @Override
+    public HTTPClientRequest request(HTTPRequestDefinition request) {
+        return constructors.stream().reduce(client, (a, b) -> b.apply(a), (a, b) -> b)
+                .request(request);
+    }
 }

@@ -1,7 +1,10 @@
-package com.github.ljtfreitas.julian.http;
+package com.github.ljtfreitas.julian.http.client;
 
-import com.github.ljtfreitas.julian.http.client.DefaultHTTPClient;
-import com.github.ljtfreitas.julian.http.client.HTTPClientRequest;
+import com.github.ljtfreitas.julian.http.DefaultHTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPHeader;
+import com.github.ljtfreitas.julian.http.HTTPHeaders;
+import com.github.ljtfreitas.julian.http.HTTPMethod;
+import com.github.ljtfreitas.julian.http.HTTPRequest;
 import com.github.ljtfreitas.julian.http.codec.StringHTTPMessageCodec;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -14,7 +14,6 @@ import com.github.ljtfreitas.julian.http.client.HTTPClient;
 import com.github.ljtfreitas.julian.http.client.HTTPClientException;
 import com.github.ljtfreitas.julian.http.client.HTTPClientRequest;
 import com.github.ljtfreitas.julian.http.client.HTTPClientResponse;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -37,11 +36,9 @@ import org.mockserver.socket.tls.KeyStoreFactory;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLParameters;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.SocketTimeoutException;
 import java.net.http.HttpTimeoutException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
@@ -92,7 +89,17 @@ class ProxyBuilderTest {
         @MockServerSettings(ports = 8090)
         class Codecs {
 
-            private SimpleApi simpleApi = new ProxyBuilder().build(SimpleApi.class, "http://localhost:8090");
+            private final SimpleApi simpleApi = new ProxyBuilder()
+                    .http()
+                        .client()
+                            .decorators()
+                                .debug()
+                                    .enabled()
+                                    .and()
+                                .and()
+                            .and()
+                        .and()
+                    .build(SimpleApi.class, "http://localhost:8090");
 
             @BeforeEach
             void before() {
@@ -131,7 +138,7 @@ class ProxyBuilderTest {
         @MockServerSettings(ports = 8090)
         class Responses {
 
-            private ResponsesApi responsesApi = new ProxyBuilder().build(ResponsesApi.class, "http://localhost:8090");
+            private final ResponsesApi responsesApi = new ProxyBuilder().build(ResponsesApi.class, "http://localhost:8090");
 
             @ParameterizedTest
             @ArgumentsSource(DefaultResponseTypesProvider.class)
@@ -191,10 +198,8 @@ class ProxyBuilderTest {
                 void shouldRunAnInterceptedHTTPRequest(@Mock HTTPRequestInterceptor interceptor) {
                     SimpleApi simpleApi = new ProxyBuilder()
                             .http()
-                                .client()
-                                    .interceptors()
-                                        .add(interceptor)
-                                        .and()
+                                .interceptors()
+                                    .add(interceptor)
                                     .and()
                                 .and()
                             .build(SimpleApi.class, "http://localhost:8090");

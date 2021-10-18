@@ -65,7 +65,7 @@ public class DefaultHTTP implements HTTP {
 		HTTPMethod method = HTTPMethod.select(endpoint.method())
 				.orElseThrow(() -> new IllegalArgumentException(format("Unsupported HTTP method: {0}", endpoint.method())));
 
-		return Promise.done(new DefaultHTTPRequest<>(returnType, uri, method, body, headers, httpClient, codecs, failure));
+		return Promise.pending(() -> new DefaultHTTPRequest<>(returnType, uri, method, body, headers, httpClient, codecs, failure));
 	}
 
 	private HTTPRequestBody body(Endpoint endpoint, Arguments arguments, HTTPHeaders headers) {

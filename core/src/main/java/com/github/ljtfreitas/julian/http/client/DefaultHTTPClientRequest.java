@@ -23,18 +23,14 @@
 package com.github.ljtfreitas.julian.http.client;
 
 import com.github.ljtfreitas.julian.Promise;
-import com.github.ljtfreitas.julian.http.ByteArrayHTTPResponseBody;
 import com.github.ljtfreitas.julian.http.DefaultHTTPResponseBody;
 import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandler;
-import java.net.http.HttpResponse.BodyHandlers;
 import java.net.http.HttpResponse.BodySubscriber;
 import java.net.http.HttpResponse.BodySubscribers;
-import java.util.function.Function;
 
 class DefaultHTTPClientRequest implements HTTPClientRequest {
 
@@ -53,6 +49,6 @@ class DefaultHTTPClientRequest implements HTTPClientRequest {
 		BodyHandler<HTTPResponseBody> handler = r -> BodySubscribers.mapping(upstream, DefaultHTTPResponseBody::new);
 
 		return Promise.pending(client.sendAsync(httpRequest, handler)
-				.thenApply(DefaultHTTPClientResponse::valueOf));
+				.thenApplyAsync(DefaultHTTPClientResponse::valueOf));
 	}
 }

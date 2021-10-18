@@ -20,12 +20,12 @@
  * SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian.http;
+package com.github.ljtfreitas.julian.http.client;
 
 import com.github.ljtfreitas.julian.Promise;
-import com.github.ljtfreitas.julian.http.client.HTTPClient;
-import com.github.ljtfreitas.julian.http.client.HTTPClientRequest;
-import com.github.ljtfreitas.julian.http.client.HTTPClientResponse;
+import com.github.ljtfreitas.julian.http.HTTPHeader;
+import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPRequestDefinition;
 
 import java.lang.System.Logger.Level;
 import java.nio.Buffer;
@@ -73,16 +73,20 @@ public class DebugHTTPClient implements HTTPClient {
     private void info(HTTPRequestDefinition request, HTTPRequestBody body) {
         body.serialize().subscribe(new Subscriber<>() {
 
+            private Subscription subscription;
+
             private final Collection<ByteBuffer> received = new ArrayList<>();
 
             @Override
             public void onSubscribe(Subscription subscription) {
-                subscription.request(Integer.MAX_VALUE);
+                this.subscription = subscription;
+                subscription.request(1);
             }
 
             @Override
             public void onNext(ByteBuffer buffer) {
                 received.add(buffer);
+                subscription.request(1);
             }
 
             @Override
@@ -93,10 +97,10 @@ public class DebugHTTPClient implements HTTPClient {
             public void onComplete() {
                 int size = received.stream().mapToInt(Buffer::remaining).sum();
 
-                byte[] buffer = new byte[size];
-                received.forEach(b -> b.get(buffer));
+                ByteBuffer buffer = ByteBuffer.allocate(size);
+                received.forEach(buffer::put);
 
-                String bodyAsString = new String(buffer);
+                String bodyAsString = new String(buffer.array());
 
                 info(request, bodyAsString);
             }

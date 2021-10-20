@@ -495,7 +495,7 @@ public class ProxyBuilder {
     }
 
     private InvocationHandler handler(Class<?> javaClass, URL endpoint) {
-        return new DefaultInvocationHandler(contract(javaClass, endpoint), runner());
+        return new DefaultInvocationHandler(contract(javaClass, endpoint), client());
     }
 
     private Contract contract(Class<?> javaClass, URL endpoint) {
@@ -506,9 +506,9 @@ public class ProxyBuilder {
         return contractSpec.build();
     }
 
-    private RequestRunner runner() {
+    private Client client() {
         HTTP http = intercepted(new DefaultHTTP(httpClient(), codecs.build(), failure()));
-        return new RequestRunner(responseTs.build(), http);
+        return new Client(responseTs.build(), http);
     }
 
     private HTTPClient httpClient() {

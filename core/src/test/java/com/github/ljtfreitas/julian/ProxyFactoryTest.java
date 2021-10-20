@@ -1,6 +1,8 @@
 package com.github.ljtfreitas.julian;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -8,19 +10,15 @@ import static org.mockito.Mockito.when;
 import java.lang.reflect.InvocationHandler;
 import java.util.Optional;
 
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.github.ljtfreitas.julian.Arguments;
-import com.github.ljtfreitas.julian.DefaultInvocationHandler;
-import com.github.ljtfreitas.julian.Endpoint;
-import com.github.ljtfreitas.julian.EndpointDefinition;
 import com.github.ljtfreitas.julian.EndpointDefinition.Path;
-import com.github.ljtfreitas.julian.ProxyFactory;
-import com.github.ljtfreitas.julian.RequestRunner;
 import com.github.ljtfreitas.julian.contract.Contract;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,7 +28,7 @@ class ProxyFactoryTest {
 	Contract contract;
 
 	@Mock
-	RequestRunner requestRunner;
+	Client client;
 
 	InvocationHandler invocationHandler;
 
@@ -38,7 +36,7 @@ class ProxyFactoryTest {
 
 	@BeforeEach
 	void setup() {		
-		this.proxyFactory = new ProxyFactory<>(MyApiType.class, new DefaultInvocationHandler(contract, requestRunner));
+		this.proxyFactory = new ProxyFactory<>(MyApiType.class, new DefaultInvocationHandler(contract, client));
 	}
 
 	@Test
@@ -46,7 +44,7 @@ class ProxyFactoryTest {
 		Endpoint endpoint = new EndpointDefinition(new Path("http://my.api.com"));
 
 		when(contract.endpoints().select(any())).then(a -> Optional.of(endpoint));
-		when(requestRunner.run(endpoint, Arguments.create("argument"))).thenReturn("expected");
+		when(client.run(endpoint, Arguments.create("argument"))).thenReturn("expected");
 
 		MyApiType myApiType = proxyFactory.create();
 
@@ -65,6 +63,15 @@ class ProxyFactoryTest {
 	@Test
 	void staticMethod() {
 		assertEquals("static method", MyApiType.staticMethod());
+	}
+
+	@Test
+	void objectMethod() {
+		when(contract.endpoints().select(any())).thenReturn(Optional.empty());
+
+		MyApiType myApiType = proxyFactory.create();
+
+		MatcherAssert.assertThat(myApiType.toString(), containsString("DefaultInvocationHandler"));
 	}
 
 	interface MyApiType {

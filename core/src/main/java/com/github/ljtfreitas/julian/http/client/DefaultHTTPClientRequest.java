@@ -28,9 +28,11 @@ import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandler;
 import java.net.http.HttpResponse.BodySubscriber;
 import java.net.http.HttpResponse.BodySubscribers;
+import java.util.concurrent.CompletionStage;
 
 class DefaultHTTPClientRequest implements HTTPClientRequest {
 

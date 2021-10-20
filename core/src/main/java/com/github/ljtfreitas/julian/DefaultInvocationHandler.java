@@ -31,21 +31,21 @@ import com.github.ljtfreitas.julian.contract.Contract;
 class DefaultInvocationHandler implements InvocationHandler {
 
 	private final Contract contract;
-	private final RequestRunner requestRunner;
+	private final Client client;
 
-	DefaultInvocationHandler(Contract contract, RequestRunner requestRunner) {
+	DefaultInvocationHandler(Contract contract, Client client) {
 		this.contract = contract;
-		this.requestRunner = requestRunner;
+		this.client = client;
 	}
 
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) {
 		Optional<? extends Endpoint> endpoint = contract.endpoints().select(method);
-		return endpoint.isEmpty() ? runAsMethod(proxy, method, args) : runAsEndpoint(endpoint.get(), args);
+		return endpoint.map(e -> runAsEndpoint(e, args)).orElseGet(() -> runAsMethod(proxy, method, args));
 	}
 
 	private Object runAsEndpoint(Endpoint endpoint, Object[] args) {
-		return requestRunner.run(endpoint, Arguments.create(args));
+		return client.run(endpoint, Arguments.create(args));
 	}
 
 	private Object runAsMethod(Object proxy, Method method, Object[] args) {

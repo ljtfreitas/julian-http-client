@@ -22,8 +22,6 @@
 
 package com.github.ljtfreitas.julian;
 
-import java.net.URI;
-
 public interface Request {
 
 	JavaType returnType();

@@ -25,12 +25,12 @@ package com.github.ljtfreitas.julian;
 import com.github.ljtfreitas.julian.http.HTTP;
 import com.github.ljtfreitas.julian.http.HTTPRequest;
 
-class RequestRunner {
+class Client {
 
 	private final Responses requests;
 	private final HTTP http;
 
-	RequestRunner(Responses requests, HTTP http) {
+	Client(Responses requests, HTTP http) {
 		this.requests = requests;
 		this.http = http;
 	}

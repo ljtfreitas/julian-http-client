@@ -50,28 +50,28 @@ import java.util.Map;
 
 import static java.util.Collections.emptyMap;
 
-public class JsonpJsonHTTPMessageCodec implements JsonHTTPMessageCodec<JsonStructure> {
+public class JsonPHTTPMessageCodec implements JsonHTTPMessageCodec<JsonStructure> {
 
     private final JsonReaderFactory jsonReaderFactory;
     private final JsonWriterFactory jsonWriterFactory;
 
-    public JsonpJsonHTTPMessageCodec() {
+    public JsonPHTTPMessageCodec() {
         this(emptyMap());
     }
 
-    public JsonpJsonHTTPMessageCodec(Map<String, ?> jsonConfiguration) {
+    public JsonPHTTPMessageCodec(Map<String, ?> jsonConfiguration) {
         this(Json.createReaderFactory(jsonConfiguration), Json.createWriterFactory(jsonConfiguration));
     }
 
-    public JsonpJsonHTTPMessageCodec(JsonReaderFactory jsonReaderFactory) {
+    public JsonPHTTPMessageCodec(JsonReaderFactory jsonReaderFactory) {
         this(jsonReaderFactory, Json.createWriterFactory(emptyMap()));
     }
 
-    public JsonpJsonHTTPMessageCodec(JsonWriterFactory jsonWriterFactory) {
+    public JsonPHTTPMessageCodec(JsonWriterFactory jsonWriterFactory) {
         this(Json.createReaderFactory(emptyMap()), jsonWriterFactory);
     }
 
-    public JsonpJsonHTTPMessageCodec(JsonReaderFactory jsonReaderFactory, JsonWriterFactory jsonWriterFactory) {
+    public JsonPHTTPMessageCodec(JsonReaderFactory jsonReaderFactory, JsonWriterFactory jsonWriterFactory) {
         this.jsonReaderFactory = jsonReaderFactory;
         this.jsonWriterFactory = jsonWriterFactory;
     }

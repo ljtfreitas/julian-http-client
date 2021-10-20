@@ -1,27 +1,9 @@
-/*
- * Copyright (C) 2021 Tiago de Freitas Lima
- *
- *  Permission is hereby granted, free of charge, to any person obtaining a copy
- *  of this software and associated documentation files (the "Software"), to deal
- *  in the Software without restriction, including without limitation the rights
- *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- *  copies of the Software, and to permit persons to whom the Software is
- *  furnished to do so, subject to the following conditions:
- *
- *  The above copyright notice and this permission notice shall be included in
- *  all copies or substantial portions of the Software.
- *
- *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- *  SOFTWARE.
- */
+package com.github.ljtfreitas.julian.http.codec.xml.jackson;
 
-package com.github.ljtfreitas.julian.http.codec.json.jsonb;
-
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.HTTPRequestBody;
 import com.github.ljtfreitas.julian.http.MediaType;
@@ -33,16 +15,16 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Flow;
 import java.util.concurrent.Flow.Subscriber;
 
-import static com.github.ljtfreitas.julian.http.codec.JsonHTTPMessageCodec.APPLICATION_JSON_MEDIA_TYPE;
+import static com.github.ljtfreitas.julian.http.codec.XMLHTTPMessageCodec.APPLICATION_XML_MEDIA_TYPE;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-class JsonbJsonHTTPMessageCodecTest {
+class JacksonXMLHTTPMessageCodecTest {
 
-    private final JsonbJsonHTTPMessageCodec<Person> codec = new JsonbJsonHTTPMessageCodec<>();
+    private final JacksonXMLHTTPMessageCodec<Person> codec = new JacksonXMLHTTPMessageCodec<>();
 
     @Nested
     class Readable {
@@ -54,7 +36,7 @@ class JsonbJsonHTTPMessageCodecTest {
 
         @Test
         void supported() {
-            assertTrue(codec.readable(MediaType.valueOf("application/json"), JavaType.valueOf(Person.class)));
+            assertTrue(codec.readable(MediaType.valueOf("application/xml"), JavaType.valueOf(Person.class)));
         }
 
         @Nested
@@ -62,7 +44,7 @@ class JsonbJsonHTTPMessageCodecTest {
 
             @Test
             void read() {
-                String value = "{\"name\":\"Tiago\",\"age\":35}";
+                String value = "<person><name>Tiago</name><age>35</age></person>";
 
                 Person person = codec.read(value.getBytes(), JavaType.valueOf(Person.class));
 
@@ -82,7 +64,7 @@ class JsonbJsonHTTPMessageCodecTest {
 
         @Test
         void supported() {
-            assertTrue(codec.writable(MediaType.valueOf("application/json"), JavaType.valueOf(Person.class)));
+            assertTrue(codec.writable(MediaType.valueOf("application/xml"), JavaType.valueOf(Person.class)));
         }
 
         @Nested
@@ -92,7 +74,7 @@ class JsonbJsonHTTPMessageCodecTest {
             void write() {
                 HTTPRequestBody output = codec.write(new Person("Tiago", 35), StandardCharsets.UTF_8);
 
-                assertEquals(APPLICATION_JSON_MEDIA_TYPE, output.contentType());
+                assertEquals(APPLICATION_XML_MEDIA_TYPE, output.contentType());
 
                 output.serialize().subscribe(new Subscriber<>() {
                     @Override
@@ -102,7 +84,7 @@ class JsonbJsonHTTPMessageCodecTest {
 
                     @Override
                     public void onNext(ByteBuffer item) {
-                        assertEquals("{\"age\":35,\"name\":\"Tiago\"}", new String(item.array()));
+                        assertEquals("<person><name>Tiago</name><age>35</age></person>", new String(item.array()));
                     }
 
                     @Override
@@ -118,31 +100,18 @@ class JsonbJsonHTTPMessageCodecTest {
         }
     }
 
-    public static class Person {
+    @JacksonXmlRootElement(localName = "person")
+    private static class Person {
 
-        String name;
-        int age;
+        @JacksonXmlProperty
+        final String name;
 
-        public Person(){};
+        @JacksonXmlProperty
+        final int age;
 
-        private Person(String name, int age) {
+        @JsonCreator
+        private Person(@JsonProperty("name") String name, @JsonProperty("age") int age) {
             this.name = name;
-            this.age = age;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public int getAge() {
-            return age;
-        }
-
-        public void setAge(int age) {
             this.age = age;
         }
     }

@@ -20,19 +20,16 @@
  * SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian.http.codec;
+plugins {
+    modules
+}
 
-import com.github.ljtfreitas.julian.http.MediaType;
+tasks.jar.configure {
+    archiveBaseName.set("julian-http-client-xml-jaxb")
+}
 
-import java.util.Collection;
-import java.util.List;
-
-public interface JsonHTTPMessageCodec<T> extends HTTPRequestWriter<T>, HTTPResponseReader<T> {
-
-    MediaType APPLICATION_JSON_MEDIA_TYPE = MediaType.valueOf("application/json");
-
-    @Override
-    default Collection<MediaType> contentTypes() {
-        return List.of(APPLICATION_JSON_MEDIA_TYPE);
-    }
+dependencies {
+    implementation(project(":core"))
+    implementation("jakarta.xml.bind:jakarta.xml.bind-api:3.0.1")
+    implementation("com.sun.xml.bind:jaxb-impl:3.0.2")
 }

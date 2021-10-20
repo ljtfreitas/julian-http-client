@@ -39,20 +39,19 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.nio.charset.Charset;
 
-public class JsonbJsonHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
+public class JsonBHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
 
     private final Jsonb jsonb;
 
-    public JsonbJsonHTTPMessageCodec() {
+    public JsonBHTTPMessageCodec() {
         this(JsonbBuilder.create());
     }
 
-    public JsonbJsonHTTPMessageCodec(Jsonb jsonb) {
+    public JsonBHTTPMessageCodec(Jsonb jsonb) {
         this.jsonb = jsonb;
     }
 

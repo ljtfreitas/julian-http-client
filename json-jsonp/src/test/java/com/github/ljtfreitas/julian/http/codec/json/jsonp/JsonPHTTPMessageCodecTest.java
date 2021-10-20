@@ -25,7 +25,6 @@ package com.github.ljtfreitas.julian.http.codec.json.jsonp;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.HTTPRequestBody;
 import com.github.ljtfreitas.julian.http.MediaType;
-import com.github.ljtfreitas.julian.http.codec.JsonHTTPMessageCodec;
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
@@ -54,9 +53,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-class JsonpJsonHTTPMessageCodecTest {
+class JsonPHTTPMessageCodecTest {
 
-    private final JsonpJsonHTTPMessageCodec codec = new JsonpJsonHTTPMessageCodec();
+    private final JsonPHTTPMessageCodec codec = new JsonPHTTPMessageCodec();
 
     @Nested
     class AsReader {

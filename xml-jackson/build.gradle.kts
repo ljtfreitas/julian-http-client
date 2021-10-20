@@ -20,19 +20,16 @@
  * SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian.http.codec;
+plugins {
+    modules
+}
 
-import com.github.ljtfreitas.julian.http.MediaType;
+tasks.jar.configure {
+    archiveBaseName.set("julian-http-client-xml-jackson")
+}
 
-import java.util.Collection;
-import java.util.List;
-
-public interface JsonHTTPMessageCodec<T> extends HTTPRequestWriter<T>, HTTPResponseReader<T> {
-
-    MediaType APPLICATION_JSON_MEDIA_TYPE = MediaType.valueOf("application/json");
-
-    @Override
-    default Collection<MediaType> contentTypes() {
-        return List.of(APPLICATION_JSON_MEDIA_TYPE);
-    }
+dependencies {
+    implementation(project(":core"))
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.13.0")
+    implementation("com.fasterxml.woodstox:woodstox-core:6.2.6")
 }

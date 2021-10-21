@@ -27,5 +27,8 @@ module com.github.ljtfreitas.julian {
 	exports com.github.ljtfreitas.julian.http.client;
 	exports com.github.ljtfreitas.julian.http.codec;
 
+	uses com.github.ljtfreitas.julian.ResponseT;
+	uses com.github.ljtfreitas.julian.http.codec.HTTPMessageCodec;
+
 	requires transitive java.net.http;
 }

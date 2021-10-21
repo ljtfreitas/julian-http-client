@@ -23,6 +23,9 @@
 module com.github.ljtfreitas.julian.json.jackson {
     exports com.github.ljtfreitas.julian.http.codec.json.jackson;
 
+    provides com.github.ljtfreitas.julian.http.codec.HTTPMessageCodec
+        with com.github.ljtfreitas.julian.http.codec.json.jackson.JacksonJsonHTTPMessageCodec;
+
     requires com.fasterxml.jackson.databind;
     requires com.github.ljtfreitas.julian;
 }

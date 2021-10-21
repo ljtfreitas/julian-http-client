@@ -23,6 +23,9 @@
 module com.github.ljtfreitas.julian.json.gson {
     exports com.github.ljtfreitas.julian.http.codec.json.gson;
 
+    provides com.github.ljtfreitas.julian.http.codec.HTTPMessageCodec
+        with com.github.ljtfreitas.julian.http.codec.json.gson.GsonJsonHTTPMessageCodec;
+
     requires com.github.ljtfreitas.julian;
     requires com.google.gson;
 }

@@ -41,7 +41,7 @@ class DefaultInvocationHandler implements InvocationHandler {
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) {
 		Optional<? extends Endpoint> endpoint = contract.endpoints().select(method);
-		return endpoint.map(e -> runAsEndpoint(e, args)).orElseGet(() -> runAsMethod(proxy, method, args));
+		return endpoint.isEmpty() ? runAsMethod(proxy, method, args) : runAsEndpoint(endpoint.get(), args);
 	}
 
 	private Object runAsEndpoint(Endpoint endpoint, Object[] args) {

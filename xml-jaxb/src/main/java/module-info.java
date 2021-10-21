@@ -23,5 +23,8 @@
 module com.github.ljtfreitas.julian.xml.jaxb {
     requires com.github.ljtfreitas.julian;
 
+    provides com.github.ljtfreitas.julian.http.codec.HTTPMessageCodec
+        with com.github.ljtfreitas.julian.http.codec.xml.jaxb.JaxBHTTPMessageCodec;
+
     requires jakarta.xml.bind;
 }

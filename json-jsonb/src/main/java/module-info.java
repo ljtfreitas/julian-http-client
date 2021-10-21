@@ -23,6 +23,9 @@
 module com.github.ljtfreitas.julian.json.jsonb {
     exports com.github.ljtfreitas.julian.http.codec.json.jsonb;
 
+    provides com.github.ljtfreitas.julian.http.codec.HTTPMessageCodec
+        with com.github.ljtfreitas.julian.http.codec.json.jsonb.JsonBHTTPMessageCodec;
+
     requires com.github.ljtfreitas.julian;
     requires jakarta.json.bind;
 }

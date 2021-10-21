@@ -47,6 +47,7 @@ import com.github.ljtfreitas.julian.http.codec.InputStreamHTTPResponseReader;
 import com.github.ljtfreitas.julian.http.codec.NonReadableHTTPResponseReader;
 import com.github.ljtfreitas.julian.http.codec.ScalarHTTPMessageCodec;
 import com.github.ljtfreitas.julian.http.codec.StringHTTPMessageCodec;
+import com.github.ljtfreitas.julian.spi.Plugins;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
@@ -58,7 +59,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +66,9 @@ import java.util.concurrent.Executor;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static java.util.Collections.unmodifiableCollection;
 import static java.util.stream.Collectors.toUnmodifiableList;
+import static java.util.stream.Stream.concat;
 
 public class ProxyBuilder {
 
@@ -75,18 +77,34 @@ public class ProxyBuilder {
     private final ResponsesTs responseTs = new ResponsesTs();
     private final HTTPMessageCodecs codecs = new HTTPMessageCodecs();
 
+    private final Plugins plugins = new Plugins();
+
     private ClassLoader classLoader = null;
 
     public class HTTPMessageCodecs {
 
         private final Collection<HTTPMessageCodec> codecs = new ArrayList<>();
 
+        public HTTPMessageCodecs add(HTTPMessageCodec... codecs) {
+            this.codecs.addAll(Arrays.asList(codecs));
+            return this;
+        }
+
+        public HTTPMessageCodecs add(Collection<HTTPMessageCodec> codecs) {
+            this.codecs.addAll(codecs);
+            return this;
+        }
+
         private com.github.ljtfreitas.julian.http.codec.HTTPMessageCodecs build() {
             return new com.github.ljtfreitas.julian.http.codec.HTTPMessageCodecs(codecs());
         }
 
         private Collection<HTTPMessageCodec> codecs() {
-            return codecs.isEmpty() ? all() : Collections.unmodifiableCollection(codecs);
+            return codecs.isEmpty() ? all() : concat(codecs.stream(), discovered()).collect(toUnmodifiableList());
+        }
+
+        private Stream<HTTPMessageCodec> discovered() {
+            return plugins.all(HTTPMessageCodec.class);
         }
 
         private Collection<HTTPMessageCodec> all() {
@@ -127,8 +145,14 @@ public class ProxyBuilder {
         }
 
         private Collection<ResponseT<?, ?>> responses() {
-            return Stream.concat((responses.isEmpty() ? all() : Collections.unmodifiableCollection(responses)).stream(), async.all())
+            return concat(concat((responses.isEmpty() ? all() : unmodifiableCollection(responses)).stream(), async.all()), discovered())
+                    .map(c -> (ResponseT<?, ?>) c)
                     .collect(toUnmodifiableList());
+        }
+
+        @SuppressWarnings("rawtypes")
+        private Stream<ResponseT> discovered() {
+            return plugins.all(ResponseT.class);
         }
 
         private Collection<ResponseT<?,?>> all() {
@@ -471,6 +495,10 @@ public class ProxyBuilder {
 
     public ResponsesTs responses() {
         return responseTs;
+    }
+
+    public HTTPMessageCodecs codecs() {
+        return codecs;
     }
 
     public ProxyBuilder classLoader(ClassLoader classLoader) {

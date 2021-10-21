@@ -24,5 +24,10 @@ module com.github.ljtfreitas.julian.form {
     exports com.github.ljtfreitas.julian.multipart;
     exports com.github.ljtfreitas.julian.http.codec.form;
 
+    provides com.github.ljtfreitas.julian.http.codec.HTTPMessageCodec
+        with com.github.ljtfreitas.julian.http.codec.form.FormObjectURLEncodedHTTPMessageCodec,
+             com.github.ljtfreitas.julian.http.codec.form.SimpleMapFormURLEncodedHTTPMessageCodec,
+             com.github.ljtfreitas.julian.http.codec.form.MultiMapFormURLEncodedHTTPMessageCodec;
+
     requires com.github.ljtfreitas.julian;
 }

@@ -20,16 +20,19 @@
  * SOFTWARE.
  */
 
-plugins {
-    `java-library`
-}
+package com.github.ljtfreitas.julian.spi;
 
-repositories {
-    mavenLocal()
-    mavenCentral()
-}
+import java.util.Optional;
+import java.util.ServiceLoader;
+import java.util.stream.Stream;
 
-allprojects {
-    group = "com.github.ljtfreitas.julian-http-client"
-    version = "0.0.1-SNAPSHOT"
+public class Plugins {
+
+    public <T> Stream<T> all(Class<T> classType) {
+        return ServiceLoader.load(classType).stream().map(ServiceLoader.Provider::get);
+    }
+
+    public <T> Optional<T> one(Class<T> classType) {
+        return ServiceLoader.load(classType).findFirst();
+    }
 }

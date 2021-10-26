@@ -40,6 +40,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.http.HttpTimeoutException;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -91,6 +92,9 @@ class ProxyBuilderTest {
 
             private final SimpleApi simpleApi = new ProxyBuilder()
                     .http()
+                        .encoding()
+                            .using(StandardCharsets.UTF_8)
+                            .and()
                         .client()
                             .decorators()
                                 .debug()

@@ -12,16 +12,13 @@ import java.util.Map;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import com.github.ljtfreitas.julian.Arguments;
-import com.github.ljtfreitas.julian.EndpointDefinition.Parameter;
-import com.github.ljtfreitas.julian.EndpointDefinition.Parameters;
-import com.github.ljtfreitas.julian.EndpointDefinition.Path;
-import com.github.ljtfreitas.julian.JavaType;
-import com.github.ljtfreitas.julian.QueryString;
+import com.github.ljtfreitas.julian.Endpoint.Parameter;
+import com.github.ljtfreitas.julian.Endpoint.Parameters;
+import com.github.ljtfreitas.julian.Endpoint.Path;
 import com.github.ljtfreitas.julian.contract.ParameterSerializer;
-import com.github.ljtfreitas.julian.contract.QueryStringSerializer;
+import com.github.ljtfreitas.julian.contract.QueryParameterSerializer;
 
-class EndpointDefinitionTest {
+class EndpointTest {
 
 	@Nested
 	class Paths {
@@ -56,7 +53,7 @@ class EndpointDefinitionTest {
 		}
 
 		@Nested
-		class WithQueryString {
+		class WithQueryParameters {
 
 			@Test
 			void onPath() {
@@ -69,9 +66,9 @@ class EndpointDefinitionTest {
 
 			@Test
 			void defindOnEndpoint() throws URISyntaxException {
-				QueryString queryString = QueryString.create(Map.of("param1", "value1", "param2", "value2"));
+				QueryParameters queryParameters = QueryParameters.create(Map.of("param1", "value1", "param2", "value2"));
 
-				Path path = new Path("http://my.api.com", queryString, Parameters.empty());
+				Path path = new Path("http://my.api.com", queryParameters, Parameters.empty());
 
 				URI uri = path.expand(Arguments.empty()).unsafe();
 
@@ -81,12 +78,12 @@ class EndpointDefinitionTest {
 			@Nested
 			class WithDynamicParameters {
 
-				private QueryStringSerializer queryStringSerializer = new QueryStringSerializer();
+				private QueryParameterSerializer queryParameterSerializer = new QueryParameterSerializer();
 
 				@Test
 				void simple() {	
-					Parameters parameters = Parameters.create(Parameter.query(0, "param1", JavaType.valueOf(String.class), queryStringSerializer),
-															  Parameter.query(1, "param2", JavaType.valueOf(String.class), queryStringSerializer));
+					Parameters parameters = Parameters.create(Parameter.query(0, "param1", JavaType.valueOf(String.class), queryParameterSerializer),
+															  Parameter.query(1, "param2", JavaType.valueOf(String.class), queryParameterSerializer));
 	
 					Path path = new Path("http://my.api.com", parameters);
 		
@@ -99,7 +96,7 @@ class EndpointDefinitionTest {
 				void collection() {
 					Collection<String> values = List.of("value1", "value2");
 
-					Parameters parameters = Parameters.create(Parameter.query(0, "params", JavaType.parameterized(Collection.class, String.class), queryStringSerializer));
+					Parameters parameters = Parameters.create(Parameter.query(0, "params", JavaType.parameterized(Collection.class, String.class), queryParameterSerializer));
 	
 					Path path = new Path("http://my.api.com", parameters);
 		
@@ -109,14 +106,14 @@ class EndpointDefinitionTest {
 				}
 
 				@Test
-				void queryString() throws URISyntaxException {
-					QueryString queryString = QueryString.create(Map.of("param1", "value1", "param2", "value2"));
+				void queryString() {
+					QueryParameters queryParameters = QueryParameters.create(Map.of("param1", "value1", "param2", "value2"));
 
-					Parameters parameters = Parameters.create(Parameter.query(0, "queryString", JavaType.valueOf(QueryString.class), queryStringSerializer));
+					Parameters parameters = Parameters.create(Parameter.query(0, "queryString", JavaType.valueOf(QueryParameters.class), queryParameterSerializer));
 	
 					Path path = new Path("http://my.api.com", parameters);
 
-					URI uri = path.expand(Arguments.create(queryString)).unsafe();
+					URI uri = path.expand(Arguments.create(queryParameters)).unsafe();
 
 					assertEquals("http://my.api.com?param1=value1&param2=value2", uri.toString());
 				}
@@ -125,7 +122,7 @@ class EndpointDefinitionTest {
 				void mapOfCollection() throws URISyntaxException {
 					Map<String, Collection<String>> values = Map.of("params", List.of("value1", "value2"));
 
-					Parameters parameters = Parameters.create(Parameter.query(0, "params", JavaType.parameterized(Map.class, String.class, JavaType.Parameterized.valueOf(Collection.class, String.class)), queryStringSerializer));
+					Parameters parameters = Parameters.create(Parameter.query(0, "params", JavaType.parameterized(Map.class, String.class, JavaType.Parameterized.valueOf(Collection.class, String.class)), queryParameterSerializer));
 	
 					Path path = new Path("http://my.api.com", parameters);
 
@@ -138,7 +135,7 @@ class EndpointDefinitionTest {
 				void mapOfString() throws URISyntaxException {
 					Map<String, String> values = Map.of("param1", "value1", "param2", "value2");
 
-					Parameters parameters = Parameters.create(Parameter.query(0, "params", JavaType.parameterized(Map.class, String.class, String.class), queryStringSerializer));
+					Parameters parameters = Parameters.create(Parameter.query(0, "params", JavaType.parameterized(Map.class, String.class, String.class), queryParameterSerializer));
 
 					Path path = new Path("http://my.api.com", parameters);
 		
@@ -151,7 +148,7 @@ class EndpointDefinitionTest {
 				void array() throws URISyntaxException {
 					String[] values = new String[] { "value1", "value2" };
 
-					Parameters parameters = Parameters.create(Parameter.query(0, "params", JavaType.valueOf(String[].class), queryStringSerializer));
+					Parameters parameters = Parameters.create(Parameter.query(0, "params", JavaType.valueOf(String[].class), queryParameterSerializer));
 
 					Path path = new Path("http://my.api.com", parameters);
 

@@ -22,7 +22,9 @@
 
 package com.github.ljtfreitas.julian.http.auth;
 
-public interface Authentication {
+import com.github.ljtfreitas.julian.Content;
+
+public interface Authentication extends Content {
 
     String content();
 }

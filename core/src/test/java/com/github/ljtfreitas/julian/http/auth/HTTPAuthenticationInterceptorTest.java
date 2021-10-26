@@ -36,6 +36,7 @@ import com.github.ljtfreitas.julian.http.HTTPHeader;
 import com.github.ljtfreitas.julian.http.HTTPHeaders;
 import com.github.ljtfreitas.julian.http.HTTPRequest;
 
+import static com.github.ljtfreitas.julian.http.HTTPHeader.AUTHORIZATION;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.contains;
@@ -59,6 +60,6 @@ class HTTPAuthenticationInterceptorTest {
 
         Promise<HTTPRequest<Void>> authorized = interceptor.intercepts(Promise.done(request));
 
-        assertThat(authorized.join().unsafe().headers(), contains(new HTTPHeader(HTTPHeader.AUTHORIZATION, "abc1234")));
+        assertThat(authorized.join().unsafe().headers(), contains(new HTTPHeader(AUTHORIZATION, "abc1234")));
     }
 }

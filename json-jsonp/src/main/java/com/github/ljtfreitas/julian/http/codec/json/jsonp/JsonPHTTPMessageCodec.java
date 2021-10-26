@@ -48,6 +48,7 @@ import java.net.http.HttpRequest.BodyPublishers;
 import java.nio.charset.Charset;
 import java.util.Map;
 
+import static com.github.ljtfreitas.julian.http.MediaType.APPLICATION_JSON;
 import static java.util.Collections.emptyMap;
 
 public class JsonPHTTPMessageCodec implements JsonHTTPMessageCodec<JsonStructure> {
@@ -84,7 +85,7 @@ public class JsonPHTTPMessageCodec implements JsonHTTPMessageCodec<JsonStructure
 
     @Override
     public HTTPRequestBody write(JsonStructure body, Charset encoding) {
-        return new DefaultHTTPRequestBody(APPLICATION_JSON_MEDIA_TYPE, () -> serialize(body, encoding));
+        return new DefaultHTTPRequestBody(APPLICATION_JSON, () -> serialize(body, encoding));
     }
 
     private BodyPublisher serialize(JsonStructure body, Charset encoding) {

@@ -55,6 +55,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Flow.Publisher;
 
+import static com.github.ljtfreitas.julian.http.MediaType.APPLICATION_XML;
 import static jakarta.xml.bind.Marshaller.JAXB_ENCODING;
 
 public class JaxBHTTPMessageCodec<T> implements XMLHTTPMessageCodec<T> {
@@ -72,7 +73,7 @@ public class JaxBHTTPMessageCodec<T> implements XMLHTTPMessageCodec<T> {
 
     @Override
     public HTTPRequestBody write(T body, Charset encoding) {
-        return new DefaultHTTPRequestBody(APPLICATION_XML_MEDIA_TYPE, () -> serialize(body, encoding));
+        return new DefaultHTTPRequestBody(APPLICATION_XML, () -> serialize(body, encoding));
     }
 
     private Publisher<ByteBuffer> serialize(T body, Charset encoding) {

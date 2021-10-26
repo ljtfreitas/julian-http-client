@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import com.github.ljtfreitas.julian.Content;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -20,11 +21,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 import com.github.ljtfreitas.julian.Header;
 import com.github.ljtfreitas.julian.Headers;
 import com.github.ljtfreitas.julian.JavaType;
-import com.github.ljtfreitas.julian.contract.HeadersParameterSerializer;
 
 class HeadersParameterSerializerTest {
 
-	private HeadersParameterSerializer serializer = new HeadersParameterSerializer();
+	private final HeadersParameterSerializer serializer = new HeadersParameterSerializer();
 
 	@ParameterizedTest
 	@MethodSource("headers")
@@ -57,15 +57,24 @@ class HeadersParameterSerializerTest {
 						 arguments("headers", JavaType.valueOf(Headers.class), 
 								 	Headers.create(new Header("X-Header-1", "value1"), new Header("X-Header-2", "value2")), 
 								 	List.of(new Header("X-Header-1", "value1"), new Header("X-Header-2", "value2"))),
+						 arguments("X-Header-Name", JavaType.valueOf(String[].class),
+									new String[] { "value1", "value2" },
+									List.of(new Header("X-Header-Name", "value1", "value2"))),
 						 arguments("X-Header-Name", JavaType.genericArrayOf(String.class),
-								 	new String[] { "value1", "value2" }, 
+								 	new String[] { "value1", "value2" },
 								 	List.of(new Header("X-Header-Name", "value1", "value2"))),
 						 arguments("headers", JavaType.genericArrayOf(Header.class),
 								 	new Header[] { new Header("X-Header-1", "value1"), new Header("X-Header-2", "value2") }, 
 								 	List.of(new Header("X-Header-1", "value1"), new Header("X-Header-2", "value2"))),
 						 arguments("headers", JavaType.parameterized(Map.class, String.class, String.class),
 								    Map.of("X-Header-1", "value1", "X-Header-2", "value2"),
-								 	List.of(new Header("X-Header-1", "value1"), new Header("X-Header-2", "value2"))));
+								 	List.of(new Header("X-Header-1", "value1"), new Header("X-Header-2", "value2"))),
+						 arguments("X-Show-Header", JavaType.valueOf(Content.class), new Content() {
+									 	@Override
+									 	public String show() {
+									 		return "header-content";
+									 	}
+								 	}, List.of(new Header("X-Show-Header", "header-content"))));
 	}
 
 	static Stream<Arguments> restrictions() {

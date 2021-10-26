@@ -47,6 +47,7 @@ import java.nio.charset.Charset;
 import java.util.stream.Stream;
 
 import static com.github.ljtfreitas.julian.Preconditions.nonNull;
+import static com.github.ljtfreitas.julian.http.MediaType.APPLICATION_XML;
 
 public class JacksonXMLHTTPMessageCodec<T> implements XMLHTTPMessageCodec<T> {
 
@@ -71,7 +72,7 @@ public class JacksonXMLHTTPMessageCodec<T> implements XMLHTTPMessageCodec<T> {
 
     @Override
     public HTTPRequestBody write(T body, Charset encoding) {
-        return new DefaultHTTPRequestBody(APPLICATION_XML_MEDIA_TYPE, () -> serialize(body, encoding));
+        return new DefaultHTTPRequestBody(APPLICATION_XML, () -> serialize(body, encoding));
     }
 
     private BodyPublisher serialize(T body, Charset encoding) {

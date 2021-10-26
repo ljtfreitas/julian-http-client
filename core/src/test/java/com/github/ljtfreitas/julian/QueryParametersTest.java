@@ -11,9 +11,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-import com.github.ljtfreitas.julian.QueryString;
-
-class QueryStringTest {
+class QueryParametersTest {
 
 	@Test
 	void shouldSerializeAsQueryString() {
@@ -21,39 +19,39 @@ class QueryStringTest {
 		parameters.put("param1", List.of("some-value-1", "other-value-1"));
 		parameters.put("param2", List.of("some-value-2"));
 
-		QueryString queryString = new QueryString(parameters);
+		QueryParameters queryParameters = new QueryParameters(parameters);
 
-		assertEquals("param1=some-value-1&param1=other-value-1&param2=some-value-2", queryString.serialize());
+		assertEquals("param1=some-value-1&param1=other-value-1&param2=some-value-2", queryParameters.serialize());
 	}
 	
 	@Test
 	void shouldEncodeParameterValues() {
-		QueryString queryString = new QueryString(Map.of("name", List.of("John Doe")));
+		QueryParameters queryParameters = new QueryParameters(Map.of("name", List.of("John Doe")));
 
-		assertEquals("name=John+Doe", queryString.serialize());
+		assertEquals("name=John+Doe", queryParameters.serialize());
 	}
 
 	@Test
 	void shouldBeAbleToAppendNewParameters() {
-		QueryString queryString = new QueryString(Map.of("first-name", List.of("John")));
+		QueryParameters queryParameters = new QueryParameters(Map.of("first-name", List.of("John")));
 
-		QueryString newQueryString = queryString.append("last-name", "Doe");
+		QueryParameters newQueryParameters = queryParameters.append("last-name", "Doe");
 
-		assertAll(() -> assertNotSame(queryString, newQueryString),
-				  () -> assertEquals("first-name=John&last-name=Doe", newQueryString.serialize()));
+		assertAll(() -> assertNotSame(queryParameters, newQueryParameters),
+				  () -> assertEquals("first-name=John&last-name=Doe", newQueryParameters.serialize()));
 	}
 	
 	@Test
 	void shouldBeAbleToParseStringInTheQueryFormat() {
 		String source = "param1=some-value&param1=other-value&param2=some-value";
 
-		QueryString queryString = QueryString.parse(source);
+		QueryParameters queryParameters = QueryParameters.parse(source);
 
-		assertEquals(source, queryString.serialize());
+		assertEquals(source, queryParameters.serialize());
 	}
 
 	@Test
 	void shouldSerializeAsEmptyStringWhenParametersAreEmpty() {
-		assertEquals("", QueryString.empty().serialize());
+		assertEquals("", QueryParameters.empty().serialize());
 	}
 }

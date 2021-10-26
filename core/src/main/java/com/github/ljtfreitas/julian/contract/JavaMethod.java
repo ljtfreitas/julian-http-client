@@ -30,7 +30,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import com.github.ljtfreitas.julian.EndpointDefinition.Parameters;
+import com.github.ljtfreitas.julian.Endpoint.Parameters;
 import com.github.ljtfreitas.julian.Except;
 import com.github.ljtfreitas.julian.JavaType;
 

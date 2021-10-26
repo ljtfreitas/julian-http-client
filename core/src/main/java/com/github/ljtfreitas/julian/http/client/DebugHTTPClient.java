@@ -108,7 +108,7 @@ public class DebugHTTPClient implements HTTPClient {
     }
 
     private void info(HTTPRequestDefinition request, String body) {
-        String headers = request.headers().all().stream().map(HTTPHeader::toString).collect(Collectors.joining("\n"));
+        String headers = request.headers().toString();
 
         String message = new StringBuilder()
                 .append("HTTP request ->>>>>")
@@ -124,7 +124,7 @@ public class DebugHTTPClient implements HTTPClient {
     }
 
     private HTTPClientResponse info(HTTPClientResponse response) {
-        String headers = response.headers().all().stream().map(HTTPHeader::toString).collect(Collectors.joining("\n"));
+        String headers = response.headers().toString();
         String body = response.body().deserialize(String::new).map(s -> s.concat("\n")).orElse("");
 
         String message = new StringBuilder()

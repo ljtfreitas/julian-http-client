@@ -33,7 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Flow;
 import java.util.concurrent.Flow.Subscriber;
 
-import static com.github.ljtfreitas.julian.http.codec.JsonHTTPMessageCodec.APPLICATION_JSON_MEDIA_TYPE;
+import static com.github.ljtfreitas.julian.http.MediaType.APPLICATION_JSON;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -92,7 +92,7 @@ class JsonBHTTPMessageCodecTest {
             void write() {
                 HTTPRequestBody output = codec.write(new Person("Tiago", 35), StandardCharsets.UTF_8);
 
-                assertEquals(APPLICATION_JSON_MEDIA_TYPE, output.contentType());
+                assertEquals(APPLICATION_JSON, output.contentType());
 
                 output.serialize().subscribe(new Subscriber<>() {
                     @Override

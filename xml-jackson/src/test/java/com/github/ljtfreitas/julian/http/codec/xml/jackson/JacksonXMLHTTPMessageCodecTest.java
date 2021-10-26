@@ -15,7 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Flow;
 import java.util.concurrent.Flow.Subscriber;
 
-import static com.github.ljtfreitas.julian.http.codec.XMLHTTPMessageCodec.APPLICATION_XML_MEDIA_TYPE;
+import static com.github.ljtfreitas.julian.http.MediaType.APPLICATION_XML;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -74,7 +74,7 @@ class JacksonXMLHTTPMessageCodecTest {
             void write() {
                 HTTPRequestBody output = codec.write(new Person("Tiago", 35), StandardCharsets.UTF_8);
 
-                assertEquals(APPLICATION_XML_MEDIA_TYPE, output.contentType());
+                assertEquals(APPLICATION_XML, output.contentType());
 
                 output.serialize().subscribe(new Subscriber<>() {
                     @Override

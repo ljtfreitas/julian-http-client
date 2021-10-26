@@ -30,9 +30,9 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import com.github.ljtfreitas.julian.EndpointDefinition;
-import com.github.ljtfreitas.julian.EndpointDefinition.Parameter;
-import com.github.ljtfreitas.julian.EndpointDefinition.Parameters;
+import com.github.ljtfreitas.julian.Endpoint;
+import com.github.ljtfreitas.julian.Endpoint.Parameter;
+import com.github.ljtfreitas.julian.Endpoint.Parameters;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.JavaType.Parameterized;
 import com.github.ljtfreitas.julian.Preconditions.Precondition;
@@ -79,7 +79,7 @@ class JavaMethodParameters {
 		Predicate<JavaType> isThrowable = jt -> jt.is(Throwable.class);
 
 		return p -> state(p, m -> {
-			Collection<Parameter> parameters = m.getOrDefault(EndpointDefinition.CallbackParameter.class, emptyList());
+			Collection<Parameter> parameters = m.getOrDefault(Endpoint.CallbackParameter.class, emptyList());
 			return parameters.isEmpty() 
 				|| parameters.stream().anyMatch(c -> c.javaType().when(Consumer.class, () -> c.javaType().parameterized().map(Parameterized::firstArg).map(JavaType::valueOf).filter(not(isException)).isPresent())
 				 						   .or(() -> c.javaType().when(BiConsumer.class, () -> c.javaType().parameterized().map(t -> t.getActualTypeArguments()[1]).map(JavaType::valueOf).filter(isThrowable).isPresent()))
@@ -88,7 +88,7 @@ class JavaMethodParameters {
 	}
 
 	private <T> Precondition<Map<Class<? extends Parameter>, List<Parameter>>, Map<Class<? extends Parameter>, List<Parameter>>> justOneBodyParameter() {
-		return p -> state(p, m -> m.getOrDefault(EndpointDefinition.BodyParameter.class, emptyList()).size() <= 1, 
+		return p -> state(p, m -> m.getOrDefault(Endpoint.BodyParameter.class, emptyList()).size() <= 1,
 				() -> format("Method {0} is invalid; it's allowed just one parameter annotated with @BodyParameter.", javaMethod));
 	}
 

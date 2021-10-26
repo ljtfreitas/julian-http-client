@@ -24,6 +24,7 @@ package com.github.ljtfreitas.julian.contract;
 
 import static java.util.stream.Collectors.toUnmodifiableList;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Type;
 import java.util.Arrays;
@@ -34,6 +35,7 @@ import java.util.Optional;
 import com.github.ljtfreitas.julian.Header;
 import com.github.ljtfreitas.julian.Headers;
 import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.Content;
 
 public class HeadersParameterSerializer implements ParameterSerializer<Object, Headers> {
 
@@ -44,11 +46,14 @@ public class HeadersParameterSerializer implements ParameterSerializer<Object, H
 
 	private Headers serializeByJavaType(String name, JavaType javaType, Object value) {
 		return javaType.when(Collection.class, () -> serializeAsCollection(name, javaType, value))
-					   .or(() -> javaType.when(Headers.class, () -> serializeAsHeaders(value)))
-					   .or(() -> javaType.when(Map.class, () -> serializeAsMap(javaType, value)))
-					   .or(() -> javaType.genericArray().map(GenericArrayType::getGenericComponentType)
-							   					 .map(arrayType -> serializeAsArray(name, arrayType, value)))
-					   .orElseGet(() -> serializeAsString(name, value));
+						.or(() -> javaType.when(Headers.class, () -> serializeAsHeaders(value)))
+					   	.or(() -> javaType.when(Map.class, () -> serializeAsMap(javaType, value)))
+					   	.or(() -> javaType.genericArray()
+									.map(GenericArrayType::getGenericComponentType)
+									.or(() -> javaType.array().map(Class::getComponentType))
+									.map(arrayType -> serializeAsArray(name, arrayType, value)))
+					   	.or(() -> javaType.when(Content.class, () -> serializeAsContent(name, value)))
+					   	.orElseGet(() -> serializeAsString(name, value));
 	}
 
 	private Headers serializeAsMap(JavaType javaType, Object value) {
@@ -71,6 +76,11 @@ public class HeadersParameterSerializer implements ParameterSerializer<Object, H
 
 	private Headers serializeAsHeaders(Object value) {
 		return (Headers) value;
+	}
+
+	private Headers serializeAsContent(String name, Object value) {
+		Content content = (Content) value;
+		return serializeAsString(name, content.show());
 	}
 
 	private Headers serializeAsString(String name, Object value) {

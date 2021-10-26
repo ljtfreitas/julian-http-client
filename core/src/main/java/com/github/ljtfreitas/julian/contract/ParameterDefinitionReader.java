@@ -26,8 +26,8 @@ import java.lang.annotation.Annotation;
 import java.util.Optional;
 import java.util.function.Function;
 
-import com.github.ljtfreitas.julian.EndpointDefinition;
-import com.github.ljtfreitas.julian.EndpointDefinition.Parameter;
+import com.github.ljtfreitas.julian.Endpoint;
+import com.github.ljtfreitas.julian.Endpoint.Parameter;
 import com.github.ljtfreitas.julian.Except;
 import com.github.ljtfreitas.julian.JavaType;
 
@@ -49,17 +49,17 @@ class ParameterDefinitionReader {
 	}
 
 	Parameter parameter(int position, String name, JavaType returnType) {
-		return annotationType(QueryParameter.class, a -> EndpointDefinition.Parameter.query(position, name, returnType,
-					instantiate(a.serializer()).unsafe()))
-				.or(() -> annotationType(Header.class, a -> EndpointDefinition.Parameter.header(position, name, returnType,
-					instantiate(a.serializer()).unsafe())))
-				.or(() -> annotationType(Cookie.class, a -> EndpointDefinition.Parameter.cookie(position, name, returnType,
-					instantiate(a.serializer()).unsafe())))
-				.or(() -> annotationType(Body.class, a -> EndpointDefinition.Parameter.body(position, name, returnType)))
-				.or(() -> annotationType(Callback.class, a -> EndpointDefinition.Parameter.callback(position, name, returnType)))
-				.or(() -> annotationType(Path.class, a -> EndpointDefinition.Parameter.path(position, name, returnType,
-					instantiate(a.serializer()).recover(DefaultParameterSerializer::new))))
-				.get();
+		return annotationType(QueryParameter.class, a -> Endpoint.Parameter.query(position, name, returnType,
+					instantiate(a.serializer()).unsafe(), a.value()))
+				.or(() -> annotationType(Header.class, a -> Endpoint.Parameter.header(position, name, returnType,
+					instantiate(a.serializer()).unsafe(), a.value())))
+				.or(() -> annotationType(Cookie.class, a -> Endpoint.Parameter.cookie(position, name, returnType,
+					instantiate(a.serializer()).unsafe(), a.value())))
+				.or(() -> annotationType(Body.class, a -> Endpoint.Parameter.body(position, name, returnType, a.value())))
+				.or(() -> annotationType(Callback.class, a -> Endpoint.Parameter.callback(position, name, returnType)))
+				.or(() -> annotationType(Path.class, a -> Endpoint.Parameter.path(position, name, returnType,
+					instantiate(a.serializer()).recover(DefaultParameterSerializer::new), a.value())))
+				.orElseThrow();
 	}
 
 	private <T> Except<ParameterSerializer<? super Object, T>> instantiate(Class<? extends ParameterSerializer<? super Object, T>> serializerClassType) {

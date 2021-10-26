@@ -37,6 +37,7 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.reducing;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toUnmodifiableList;
@@ -72,6 +73,11 @@ public class HTTPHeaders implements Iterable<HTTPHeader> {
 		Map<String, HTTPHeader> headers = new LinkedHashMap<>(this.headers);
 		headers.put(header.name(), header);
 		return new HTTPHeaders(headers);
+	}
+
+	@Override
+	public String toString() {
+		return headers.values().stream().map(HTTPHeader::toString).collect(joining(", "));
 	}
 
 	@Override

@@ -44,7 +44,7 @@ import java.util.concurrent.Flow;
 import java.util.concurrent.Flow.Subscriber;
 import java.util.stream.Stream;
 
-import static com.github.ljtfreitas.julian.http.codec.JsonHTTPMessageCodec.APPLICATION_JSON_MEDIA_TYPE;
+import static com.github.ljtfreitas.julian.http.MediaType.APPLICATION_JSON;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -131,7 +131,7 @@ class JsonPHTTPMessageCodecTest {
 
             HTTPRequestBody output = codec.write(jsonObject, StandardCharsets.UTF_8);
 
-            assertEquals(APPLICATION_JSON_MEDIA_TYPE, output.contentType());
+            assertEquals(APPLICATION_JSON, output.contentType());
 
             output.serialize().subscribe(new Subscriber<>() {
                 @Override
@@ -164,7 +164,7 @@ class JsonPHTTPMessageCodecTest {
 
             HTTPRequestBody output = codec.write(jsonArray, StandardCharsets.UTF_8);
 
-            assertEquals(APPLICATION_JSON_MEDIA_TYPE, output.contentType());
+            assertEquals(APPLICATION_JSON, output.contentType());
 
             output.serialize().subscribe(new Subscriber<>() {
                 @Override

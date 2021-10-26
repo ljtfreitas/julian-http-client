@@ -41,8 +41,6 @@ import static java.util.stream.Collectors.joining;
 
 public class StringHTTPMessageCodec implements HTTPRequestWriter<String>, HTTPResponseReader<String> {
 
-	public static final MediaType TEXT_PLAIN_MEDIA_TYPE = MediaType.valueOf("text/plain");
-
 	public static final MediaType TEXT_WILDCARD_MEDIA_TYPE = MediaType.valueOf("text/*");
 
 	private static final StringHTTPMessageCodec SINGLE_INSTANCE = new StringHTTPMessageCodec();
@@ -50,7 +48,7 @@ public class StringHTTPMessageCodec implements HTTPRequestWriter<String>, HTTPRe
 	private final Collection<MediaType> mediaTypes;
 
 	public StringHTTPMessageCodec() {
-		this(WildcardHTTPResponseReader.WILDCARD_MEDIA_TYPE, TEXT_WILDCARD_MEDIA_TYPE);
+		this(MediaType.ALL, TEXT_WILDCARD_MEDIA_TYPE);
 	}
 
 	public StringHTTPMessageCodec(MediaType... mediaTypes) {
@@ -81,7 +79,7 @@ public class StringHTTPMessageCodec implements HTTPRequestWriter<String>, HTTPRe
 
 	@Override
 	public HTTPRequestBody write(String body, Charset encoding) {
-		return new DefaultHTTPRequestBody(TEXT_PLAIN_MEDIA_TYPE, () -> HttpRequest.BodyPublishers.ofByteArray(body.getBytes(encoding)));
+		return new DefaultHTTPRequestBody(MediaType.TEXT_PLAIN, () -> HttpRequest.BodyPublishers.ofByteArray(body.getBytes(encoding)));
 	}
 
 	public static StringHTTPMessageCodec get() {

@@ -36,14 +36,11 @@ import java.util.stream.Stream;
 import com.github.ljtfreitas.julian.Cookie;
 import com.github.ljtfreitas.julian.Cookies;
 import com.github.ljtfreitas.julian.Endpoint;
-import com.github.ljtfreitas.julian.EndpointDefinition;
-import com.github.ljtfreitas.julian.EndpointDefinition.Parameters;
+import com.github.ljtfreitas.julian.Endpoint.Parameters;
 import com.github.ljtfreitas.julian.Header;
 import com.github.ljtfreitas.julian.Headers;
 import com.github.ljtfreitas.julian.MethodEndpoint;
-import com.github.ljtfreitas.julian.QueryString;
-import com.github.ljtfreitas.julian.contract.EndpointMetadata;
-import com.github.ljtfreitas.julian.contract.JavaClass;
+import com.github.ljtfreitas.julian.QueryParameters;
 
 class DefaultEndpointMetadata implements EndpointMetadata {
 
@@ -60,8 +57,8 @@ class DefaultEndpointMetadata implements EndpointMetadata {
 		return new MethodEndpoint(definition(root), javaMethod.source());
 	}
 
-	private EndpointDefinition definition(Optional<URL> root) {
-		return new EndpointDefinition(path(root, javaMethod.parameters()), javaMethod.httpMethod(), headers(), cookies(), javaMethod.parameters(), javaMethod.returnType());
+	private Endpoint definition(Optional<URL> root) {
+		return new Endpoint(path(root, javaMethod.parameters()), javaMethod.httpMethod(), headers(), cookies(), javaMethod.parameters(), javaMethod.returnType());
 	}
 
 	private Headers headers() {
@@ -76,12 +73,12 @@ class DefaultEndpointMetadata implements EndpointMetadata {
 				.collect(toUnmodifiableList()));
 	}
 
-	private EndpointDefinition.Path path(Optional<URL> root, Parameters parameters) {
-		return new EndpointDefinition.Path(path(root), queryString(), parameters);
+	private Endpoint.Path path(Optional<URL> root, Parameters parameters) {
+		return new Endpoint.Path(path(root), queryParameters(), parameters);
 	}
 
-	private QueryString queryString() {
-		return new QueryString(Stream.concat(javaClass.query(), javaMethod.query())
+	private QueryParameters queryParameters() {
+		return new QueryParameters(Stream.concat(javaClass.query(), javaMethod.query())
 				.collect(groupingBy(Entry::getKey, flatMapping(e -> e.getValue().stream(), toUnmodifiableList()))));
 	}
 

@@ -22,10 +22,10 @@
 
 package com.github.ljtfreitas.julian.contract;
 
+import com.github.ljtfreitas.julian.Endpoint;
+
 import java.net.URL;
 import java.util.Optional;
-
-import com.github.ljtfreitas.julian.Endpoint;
 
 public interface EndpointMetadata {
 

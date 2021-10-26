@@ -38,7 +38,6 @@ import static com.github.ljtfreitas.julian.Preconditions.state;
 
 public class ScalarHTTPMessageCodec implements HTTPRequestWriter<Object>, HTTPResponseReader<Object> {
 
-	private static final MediaType TEXT_PLAIN_CONTENT_TYPE = MediaType.valueOf("text/plain");
 	private static final ScalarHTTPMessageCodec SINGLE_INSTANCE = new ScalarHTTPMessageCodec();
 
 	private static final Set<Class<?>> SCALAR_TYPES = new HashSet<>();
@@ -66,7 +65,7 @@ public class ScalarHTTPMessageCodec implements HTTPRequestWriter<Object>, HTTPRe
 
 	@Override
 	public Collection<MediaType> contentTypes() {
-		return List.of(TEXT_PLAIN_CONTENT_TYPE);
+		return List.of(MediaType.TEXT_PLAIN);
 	}
 
 	@Override

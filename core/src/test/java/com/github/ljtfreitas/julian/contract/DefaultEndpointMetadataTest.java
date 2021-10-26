@@ -1,5 +1,30 @@
 package com.github.ljtfreitas.julian.contract;
 
+import com.github.ljtfreitas.julian.Arguments;
+import com.github.ljtfreitas.julian.Cookies;
+import com.github.ljtfreitas.julian.Endpoint;
+import com.github.ljtfreitas.julian.Endpoint.Parameter;
+import com.github.ljtfreitas.julian.Endpoint.Parameters;
+import com.github.ljtfreitas.julian.Headers;
+import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.JavaType.Wildcard;
+import com.github.ljtfreitas.julian.http.MediaType;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ArgumentsProvider;
+import org.junit.jupiter.params.provider.ArgumentsSource;
+
+import java.lang.reflect.Method;
+import java.net.URI;
+import java.util.Collection;
+import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+
+import static com.github.ljtfreitas.julian.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.contains;
@@ -13,57 +38,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-import java.lang.reflect.Method;
-import java.net.URI;
-import java.util.Collection;
-import java.util.Map;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
-
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ArgumentsProvider;
-import org.junit.jupiter.params.provider.ArgumentsSource;
-
-import com.github.ljtfreitas.julian.Arguments;
-import com.github.ljtfreitas.julian.Cookies;
-import com.github.ljtfreitas.julian.Endpoint;
-import com.github.ljtfreitas.julian.EndpointDefinition.Parameter;
-import com.github.ljtfreitas.julian.EndpointDefinition.Parameters;
-import com.github.ljtfreitas.julian.Headers;
-import com.github.ljtfreitas.julian.JavaType;
-import com.github.ljtfreitas.julian.JavaType.Wildcard;
-import com.github.ljtfreitas.julian.contract.AcceptAll;
-import com.github.ljtfreitas.julian.contract.AcceptJson;
-import com.github.ljtfreitas.julian.contract.AcceptXml;
-import com.github.ljtfreitas.julian.contract.Body;
-import com.github.ljtfreitas.julian.contract.Cookie;
-import com.github.ljtfreitas.julian.contract.CookiesParameterSerializer;
-import com.github.ljtfreitas.julian.contract.DefaultEndpointMetadata;
-import com.github.ljtfreitas.julian.contract.DefaultParameterSerializer;
-import com.github.ljtfreitas.julian.contract.Delete;
-import com.github.ljtfreitas.julian.contract.EndpointMetadata;
-import com.github.ljtfreitas.julian.contract.FormUrlEncoded;
-import com.github.ljtfreitas.julian.contract.Get;
-import com.github.ljtfreitas.julian.contract.Head;
-import com.github.ljtfreitas.julian.contract.HeadersParameterSerializer;
-import com.github.ljtfreitas.julian.contract.JsonContent;
-import com.github.ljtfreitas.julian.contract.MultipartFormData;
-import com.github.ljtfreitas.julian.contract.Options;
-import com.github.ljtfreitas.julian.contract.ParameterSerializer;
-import com.github.ljtfreitas.julian.contract.Patch;
-import com.github.ljtfreitas.julian.contract.Path;
-import com.github.ljtfreitas.julian.contract.Post;
-import com.github.ljtfreitas.julian.contract.Put;
-import com.github.ljtfreitas.julian.contract.QueryParameter;
-import com.github.ljtfreitas.julian.contract.QueryStringSerializer;
-import com.github.ljtfreitas.julian.contract.SerializableContent;
-import com.github.ljtfreitas.julian.contract.Trace;
-import com.github.ljtfreitas.julian.contract.XmlContent;
-
 class DefaultEndpointMetadataTest {
 
 	@Nested
@@ -71,7 +45,7 @@ class DefaultEndpointMetadataTest {
 
 		@ParameterizedTest(name = "HTTP Method: {0}")
 		@ArgumentsSource(HTTPMethodProvider.class)
-		void httpMethods(String httpMethod, URI path, Method javaMethod) throws Exception {
+		void httpMethods(String httpMethod, URI path, Method javaMethod) {
 			EndpointMetadata endpointMetadata = new DefaultEndpointMetadata(MyType.class, javaMethod);
 
 			Endpoint endpoint = endpointMetadata.endpoint();
@@ -91,8 +65,7 @@ class DefaultEndpointMetadataTest {
 
 		@ParameterizedTest(name = "@ParameterDefinition: {0}")
 		@ArgumentsSource(ParameterDefinitionsProvider.class)
-		void parameterDefinitions(String parameterDefinition, String httpMethod, URI path, Parameter parameter, Method javaMethod, Arguments arguments) 
-				throws Exception {
+		void parameterDefinitions(String parameterDefinition, String httpMethod, URI path, Parameter parameter, Method javaMethod, Arguments arguments) {
 
 			EndpointMetadata endpointMetadata = new DefaultEndpointMetadata(WithParameters.class, javaMethod);
 
@@ -122,6 +95,38 @@ class DefaultEndpointMetadataTest {
 				  () -> assertThat(endpoint.cookies(), emptyIterable()),
 				  () -> assertThat(endpoint.parameters(), emptyIterable()),
 				  () -> assertEquals("GET", endpoint.method()));
+	}
+
+	@Nested
+	class MetaHeaders {
+
+		@Test
+		void authorization() throws Exception {
+			EndpointMetadata endpointMetadata = new DefaultEndpointMetadata(WithMetaHeaders.class, WithMetaHeaders.class.getDeclaredMethod("authorization", String.class));
+
+			Endpoint endpoint = endpointMetadata.endpoint();
+
+			assertAll(() -> assertNotNull(endpoint),
+					() -> assertEquals(URI.create("http://my.api.com/headers/authorization"), endpoint.path().expand().unsafe()),
+					() -> assertThat(endpoint.headers(), emptyIterable()),
+					() -> assertThat(endpoint.cookies(), emptyIterable()),
+					() -> assertThat(endpoint.parameters(), contains(Parameter.header(0, "Authorization", JavaType.valueOf(String.class), new HeadersParameterSerializer()))),
+					() -> assertEquals("GET", endpoint.method()));
+		}
+
+		@Test
+		void contentType() throws Exception {
+			EndpointMetadata endpointMetadata = new DefaultEndpointMetadata(WithMetaHeaders.class, WithMetaHeaders.class.getDeclaredMethod("contentType", MediaType.class));
+
+			Endpoint endpoint = endpointMetadata.endpoint();
+
+			assertAll(() -> assertNotNull(endpoint),
+					() -> assertEquals(URI.create("http://my.api.com/headers/content-type"), endpoint.path().expand().unsafe()),
+					() -> assertThat(endpoint.headers(), emptyIterable()),
+					() -> assertThat(endpoint.cookies(), emptyIterable()),
+					() -> assertThat(endpoint.parameters(), contains(Parameter.header(0, "Content-Type", JavaType.valueOf(MediaType.class), new HeadersParameterSerializer()))),
+					() -> assertEquals("GET", endpoint.method()));
+		}
 	}
 
 	@Test
@@ -163,7 +168,7 @@ class DefaultEndpointMetadataTest {
 		
 		@ParameterizedTest(name = "Meta-annotation: {0}")
 		@ArgumentsSource(MetaAnnotationsProvider.class)
-		void metaAnnotations(String annotation, String httpMethod, URI path, com.github.ljtfreitas.julian.Header header, Method javaMethod) throws Exception {
+		void metaAnnotations(String annotation, String httpMethod, URI path, com.github.ljtfreitas.julian.Header header, Method javaMethod) {
 			EndpointMetadata endpointMetadata = new DefaultEndpointMetadata(WithMetaAnnotations.class, javaMethod);
 
 			Endpoint endpoint = endpointMetadata.endpoint();
@@ -183,8 +188,7 @@ class DefaultEndpointMetadataTest {
 
 		@ParameterizedTest(name = "Inherited operation: {7}")
 		@ArgumentsSource(InheritedDefinitionsProvider.class)
-		void inheritedDefinitions(String httpMethod, URI path, Headers headers, Cookies cookies, Parameters parameters, JavaType returnType, Arguments arguments, Method javaMethod)
-				throws Exception {
+		void inheritedDefinitions(String httpMethod, URI path, Headers headers, Cookies cookies, Parameters parameters, JavaType returnType, Arguments arguments, Method javaMethod) {
 
 			EndpointMetadata endpointMetadata = new DefaultEndpointMetadata(SomeExtendedApi.class, javaMethod);
 
@@ -204,27 +208,27 @@ class DefaultEndpointMetadataTest {
 	class Restrictions {
 		
 		@Test
-		void rejectMethodWithMoreThanOneBodyParameter() throws Exception {
+		void rejectMethodWithMoreThanOneBodyParameter() {
 			assertThrows(IllegalStateException.class, () -> new DefaultEndpointMetadata(Wrong.class, Wrong.class.getMethod("moreThanOneBody", Object.class, Object.class)));
 		}
 
 		@Test
-		void rejectCallbackWithInvalidConsumer() throws Exception {
+		void rejectCallbackWithInvalidConsumer() {
 			assertThrows(IllegalStateException.class, () -> new DefaultEndpointMetadata(Wrong.class, Wrong.class.getMethod("invalidConsumerCallback", Consumer.class)));
 		}
 
 		@Test
-		void rejectCallbackWithInvalidBiConsumer() throws Exception {
+		void rejectCallbackWithInvalidBiConsumer() {
 			assertThrows(IllegalStateException.class, () -> new DefaultEndpointMetadata(Wrong.class, Wrong.class.getMethod("invalidBiConsumerCallback", BiConsumer.class)));
 		}
 
 		@Test
-		void rejectMethodWithoutHTTPMethod() throws Exception {
+		void rejectMethodWithoutHTTPMethod() {
 			assertThrows(IllegalStateException.class, () -> new DefaultEndpointMetadata(Wrong.class, Wrong.class.getMethod("withoutHTTPMethod")));
 		}
 
 		@Test
-		void rejectMethodWithMoreThanOneHTTPMethod() throws Exception {
+		void rejectMethodWithMoreThanOneHTTPMethod() {
 			assertThrows(IllegalStateException.class, () -> new DefaultEndpointMetadata(Wrong.class, Wrong.class.getMethod("moreThanOneHTTPMethod")));
 		}
 	}
@@ -251,11 +255,11 @@ class DefaultEndpointMetadataTest {
 									 WithParameters.class.getMethod("cookie", String.class), arguments),
 						 	 arguments("@CookieParameter", "GET", URI.create("http://my.api.com/cookie"), Parameter.cookie(0, "session-id", JavaType.valueOf(String.class), new CookiesParameterSerializer()),
 						 			 WithParameters.class.getMethod("cookieWithAnotherName", String.class), arguments),
-						 	 arguments("@QueryParameter", "GET", URI.create("http://my.api.com/query?name=whatever"), Parameter.query(0, "name", JavaType.valueOf(String.class), new QueryStringSerializer()),
+						 	 arguments("@QueryParameter", "GET", URI.create("http://my.api.com/query?name=whatever"), Parameter.query(0, "name", JavaType.valueOf(String.class), new QueryParameterSerializer()),
 						 			 WithParameters.class.getMethod("query", String.class), arguments),
-						 	 arguments("@QueryParameter", "GET", URI.create("http://my.api.com/query?another-name=whatever"), Parameter.query(0, "another-name", JavaType.valueOf(String.class), new QueryStringSerializer()),
+						 	 arguments("@QueryParameter", "GET", URI.create("http://my.api.com/query?another-name=whatever"), Parameter.query(0, "another-name", JavaType.valueOf(String.class), new QueryParameterSerializer()),
 						 			 WithParameters.class.getMethod("queryWithAnotherName", String.class), arguments),
-						 	 arguments("@QueryParameter", "GET", URI.create("http://my.api.com/query?parameters=whatever"), Parameter.query(0, "parameters", JavaType.parameterized(Map.class, String.class, String.class), new QueryStringSerializer()),
+						 	 arguments("@QueryParameter", "GET", URI.create("http://my.api.com/query?parameters=whatever"), Parameter.query(0, "parameters", JavaType.parameterized(Map.class, String.class, String.class), new QueryParameterSerializer()),
 						 			 WithParameters.class.getMethod("queryParameters", Map.class), Arguments.create(Map.of("parameters", "whatever"))),
 							 arguments("@BodyParameter", "POST", URI.create("http://my.api.com/body"), Parameter.body(0, "body", JavaType.object()),
 									 WithParameters.class.getMethod("body", Object.class), arguments),
@@ -319,13 +323,20 @@ class DefaultEndpointMetadataTest {
 			Headers headers = Headers.create(new com.github.ljtfreitas.julian.Header("X-Base-Header", "some-header-value"), new com.github.ljtfreitas.julian.Header("X-Other-Header", "other-header-value"));
 			Cookies cookies = Cookies.create(new com.github.ljtfreitas.julian.Cookie("some-cookie", "some-cookie-value"), new com.github.ljtfreitas.julian.Cookie("other-cookie", "other-cookie-value"));
 
-			return Stream.of(arguments("POST", URI.create("http://my.api.com/some"), 
-									headers.add(new com.github.ljtfreitas.julian.Header("Content-Type", "application/json")),
+			return Stream.of(arguments("POST", URI.create("http://my.api.com/some"),
+									headers,
 									cookies, 
-									Parameters.create(Parameter.body(0, "body", JavaType.valueOf(SomePojo.class))), 
+									Parameters.create(Parameter.body(0, "body", JavaType.valueOf(SomePojo.class), "application/json")),
 									JavaType.valueOf(void.class),
 									Arguments.empty(),
 									SomeExtendedApi.class.getMethod("create", Object.class)),
+							 arguments("POST", URI.create("http://my.api.com/some"),
+									headers,
+									cookies,
+									Parameters.create(Parameter.body(0, "body", JavaType.valueOf(SomePojo.class), "application/json")),
+									JavaType.valueOf(void.class),
+									Arguments.empty(),
+									SomeExtendedApi.class.getMethod("createSomething", Object.class)),
 							arguments("GET", URI.create("http://my.api.com/some/1"), 
 									headers.add(new com.github.ljtfreitas.julian.Header("Accept", "application/json")),
 									cookies, 
@@ -334,9 +345,9 @@ class DefaultEndpointMetadataTest {
 									Arguments.create("1"),
 									SomeExtendedApi.class.getMethod("read", String.class)),
 							arguments("PUT", URI.create("http://my.api.com/some/1"), 
-									headers.add(new com.github.ljtfreitas.julian.Header("Content-Type", "application/json")),
+									headers,
 									cookies, 
-									Parameters.create(Parameter.path(0, "id", JavaType.valueOf(String.class), new DefaultParameterSerializer()), Parameter.body(1, "body", JavaType.valueOf(SomePojo.class))), 
+									Parameters.create(Parameter.path(0, "id", JavaType.valueOf(String.class), new DefaultParameterSerializer()), Parameter.body(1, "body", JavaType.valueOf(SomePojo.class), "application/json")),
 									JavaType.valueOf(void.class),
 									Arguments.create("1"),
 									SomeExtendedApi.class.getMethod("update", String.class, Object.class)),
@@ -364,7 +375,7 @@ class DefaultEndpointMetadataTest {
 							arguments("POST", URI.create("http://my.api.com/some"), 
 									Headers.create(new com.github.ljtfreitas.julian.Header("X-Base-Header", "some-header-value")),
 									Cookies.create(new com.github.ljtfreitas.julian.Cookie("some-cookie", "some-cookie-value")),
-									Parameters.create(Parameter.body(0, "some", JavaType.valueOf(SomePojo.class))), 
+									Parameters.create(Parameter.body(0, "some", JavaType.valueOf(SomePojo.class))),
 									JavaType.valueOf(SomePojo.class),
 									Arguments.empty(),
 									SomeExtendedApi.class.getMethod("whatever", SomePojo.class)));
@@ -467,6 +478,16 @@ class DefaultEndpointMetadataTest {
 	}
 
 	@Path("http://my.api.com")
+	private interface WithMetaHeaders {
+
+		@Get("/headers/authorization")
+		String authorization(@Authorization String content);
+
+		@Get("/headers/content-type")
+		String contentType(@ContentType MediaType mediaType);
+	}
+
+	@Path("http://my.api.com")
 	@Cookie(name = "some-cookie-1", value = "cookie-1")
 	@Cookie(name = "some-cookie-2", value = "cookie-2")
 	private interface WithCookies {
@@ -497,8 +518,7 @@ class DefaultEndpointMetadataTest {
 		String formUrlEncoded();
 
 		@Post("/json-content")
-		@JsonContent
-		String jsonContent();
+		String jsonContent(@JsonContent Object body);
 
 		@Post("/multipart-form-data")
 		@MultipartFormData
@@ -519,16 +539,14 @@ class DefaultEndpointMetadataTest {
 	interface CrudOperations<T> {
 
 		@Post
-		@JsonContent
 		@Header(name = "X-Other-Header", value = "other-header-value")
 		@Cookie(name = "other-cookie", value = "other-cookie-value")
-		void create(@Body T body);
+		void create(@JsonContent T body);
 		
 		@Post
-		@JsonContent
 		@Header(name = "X-Other-Header", value = "other-header-value")
 		@Cookie(name = "other-cookie", value = "other-cookie-value")
-		void createSomething(@Body T body);
+		void createSomething(@Body(APPLICATION_JSON_VALUE) T body);
 		
 		@Get("/{id}")
 		@AcceptJson
@@ -537,10 +555,9 @@ class DefaultEndpointMetadataTest {
 		T read(@Path String id);
 
 		@Put("/{id}")
-		@JsonContent
 		@Header(name = "X-Other-Header", value = "other-header-value")
 		@Cookie(name = "other-cookie", value = "other-cookie-value")
-		void update(@Path String id, @Body T body);
+		void update(@Path String id, @JsonContent T body);
 
 		@Delete("/{id}")
 		@Header(name = "X-Other-Header", value = "other-header-value")

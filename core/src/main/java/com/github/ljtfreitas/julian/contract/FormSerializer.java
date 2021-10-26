@@ -54,7 +54,7 @@ public class FormSerializer implements ParameterSerializer<Object, Form> {
 				.or(() -> javaType.when(Map.class, () -> serializeAsMap(javaType, value)))
 				.or(() -> javaType.genericArray()
 						.map(GenericArrayType::getGenericComponentType)
-						.or(javaType::array)
+						.or(() -> javaType.array().map(Class::getComponentType))
 						.map(arrayType -> serializeAsArray(name, value)))
 				.orElseGet(() -> serializeAsString(name, value));
 	}

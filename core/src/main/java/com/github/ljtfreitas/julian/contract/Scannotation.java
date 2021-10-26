@@ -30,7 +30,9 @@ import java.util.stream.Stream;
 
 class Scannotation {
 
-	private AnnotatedElement element;
+	private static final String JAVA_LANG_PACKAGE = "java.lang";
+
+	private final AnnotatedElement element;
 
 	Scannotation(AnnotatedElement element) {
 		this.element = element;
@@ -46,7 +48,9 @@ class Scannotation {
 	}
 
 	<A extends Annotation> Stream<Annotation> meta(Class<A> annotation) {
-		return Arrays.stream(element.getAnnotations()).filter(a -> a.annotationType().isAnnotationPresent(annotation));
+		return Arrays.stream(element.getAnnotations())
+				.filter(a -> !a.annotationType().getPackageName().startsWith(JAVA_LANG_PACKAGE))
+				.flatMap(a -> Stream.concat(Stream.of(a).filter(m -> m.annotationType().isAnnotationPresent(annotation)),
+						new Scannotation(a.annotationType()).meta(annotation)));
 	}
-
 }

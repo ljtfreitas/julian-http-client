@@ -55,6 +55,7 @@ import java.lang.reflect.InvocationHandler;
 import java.net.ProxySelector;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,13 +63,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
-import static java.util.Collections.unmodifiableCollection;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toUnmodifiableList;
-import static java.util.stream.Stream.concat;
 
 public class ProxyBuilder {
 
@@ -95,16 +95,23 @@ public class ProxyBuilder {
             return this;
         }
 
+        public ProxyBuilder and() {
+            return ProxyBuilder.this;
+        }
+
         private com.github.ljtfreitas.julian.http.codec.HTTPMessageCodecs build() {
             return new com.github.ljtfreitas.julian.http.codec.HTTPMessageCodecs(codecs());
         }
 
         private Collection<HTTPMessageCodec> codecs() {
-            return codecs.isEmpty() ? all() : concat(codecs.stream(), discovered()).collect(toUnmodifiableList());
+            Collection<HTTPMessageCodec> all = new ArrayList<>(codecs);
+            all.addAll(all());
+            all.addAll(plugins());
+            return all;
         }
 
-        private Stream<HTTPMessageCodec> discovered() {
-            return plugins.all(HTTPMessageCodec.class);
+        private Collection<HTTPMessageCodec> plugins() {
+            return plugins.all(HTTPMessageCodec.class).collect(toUnmodifiableList());
         }
 
         private Collection<HTTPMessageCodec> all() {
@@ -145,14 +152,17 @@ public class ProxyBuilder {
         }
 
         private Collection<ResponseT<?, ?>> responses() {
-            return concat(concat((responses.isEmpty() ? all() : unmodifiableCollection(responses)).stream(), async.all()), discovered())
-                    .map(c -> (ResponseT<?, ?>) c)
-                    .collect(toUnmodifiableList());
+            Collection<ResponseT<?, ?>> all = new ArrayList<>(responses);
+            all.addAll(all());
+            all.addAll(async.all());
+            all.addAll(plugins());
+            return all;
         }
 
-        @SuppressWarnings("rawtypes")
-        private Stream<ResponseT> discovered() {
-            return plugins.all(ResponseT.class);
+        private Collection<ResponseT<?, ?>> plugins() {
+            return plugins.all(ResponseT.class)
+                    .map(r -> (ResponseT<?, ?>) r)
+                    .collect(toUnmodifiableList());
         }
 
         private Collection<ResponseT<?,?>> all() {
@@ -192,8 +202,10 @@ public class ProxyBuilder {
                 return ResponsesTs.this;
             }
 
-            private Stream<ResponseT<?, ?>> all() {
-                return Stream.of(executor == null ? PublisherResponseT.get() : new PublisherResponseT<>(executor));
+            private Collection<ResponseT<?, ?>> all() {
+                Collection<ResponseT<?, ?>> all = new ArrayList<>();
+                all.add(executor == null ? PublisherResponseT.get() : new PublisherResponseT<>(executor));
+                return all;
             }
         }
     }
@@ -203,6 +215,7 @@ public class ProxyBuilder {
         private final HTTPClientSpec client = new HTTPClientSpec();
         private final HTTPRequestInterceptors interceptors = new HTTPRequestInterceptors();
         private final HTTPResponseFailureSpec failure = new HTTPResponseFailureSpec();
+        private final Encoding encoding = new Encoding();
 
         public HTTPClientSpec client() {
             return client;
@@ -212,6 +225,10 @@ public class ProxyBuilder {
 
         public HTTPResponseFailureSpec failure() {
             return failure;
+        }
+
+        public Encoding encoding() {
+            return encoding;
         }
 
         public ProxyBuilder and() {
@@ -445,11 +462,11 @@ public class ProxyBuilder {
                 return HTTPSpec.this;
             }
 
-            public HTTPResponseFailure build() {
+            private HTTPResponseFailure build() {
                 return failures.has() ? failures.build() : failure == null ? DefaultHTTPResponseFailure.get() : failure;
             }
 
-            public class HTTPResponseFailures {
+            private class HTTPResponseFailures {
                 private final Map<HTTPStatusCode, HTTPResponseFailure> failures = new HashMap<>();
 
                 private void add(HTTPStatusCode status, HTTPResponseFailure failure) {
@@ -463,6 +480,25 @@ public class ProxyBuilder {
                 private HTTPResponseFailure build() {
                     return new ConditionalHTTPResponseFailure(failures);
                 }
+            }
+        }
+
+        public class Encoding {
+
+            private Charset charset = StandardCharsets.UTF_8;
+
+            public Encoding using(Charset charset) {
+                this.charset = requireNonNull(charset);
+                return this;
+            }
+
+            public Encoding using(String charset) {
+                this.charset = Charset.forName(Objects.requireNonNull(charset));
+                return this;
+            }
+
+            public HTTPSpec and() {
+                return HTTPSpec.this;
             }
         }
     }
@@ -535,8 +571,12 @@ public class ProxyBuilder {
     }
 
     private Client client() {
-        HTTP http = intercepted(new DefaultHTTP(httpClient(), codecs.build(), failure()));
+        HTTP http = intercepted(new DefaultHTTP(httpClient(), codecs.build(), failure(), encoding()));
         return new Client(responseTs.build(), http);
+    }
+
+    private Charset encoding() {
+        return httpSpec.encoding.charset;
     }
 
     private HTTPClient httpClient() {

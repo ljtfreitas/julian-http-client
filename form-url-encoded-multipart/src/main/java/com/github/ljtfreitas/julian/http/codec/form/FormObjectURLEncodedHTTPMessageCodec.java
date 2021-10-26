@@ -39,6 +39,8 @@ import java.net.http.HttpRequest.BodyPublishers;
 import java.nio.charset.Charset;
 import java.util.stream.Collectors;
 
+import static com.github.ljtfreitas.julian.http.MediaType.APPLICATION_FORM_URLENCODED;
+
 public class FormObjectURLEncodedHTTPMessageCodec implements FormURLEncodedHTTPMessageCodec<Form> {
 
     @Override
@@ -48,7 +50,7 @@ public class FormObjectURLEncodedHTTPMessageCodec implements FormURLEncodedHTTPM
 
     @Override
     public HTTPRequestBody write(Form form, Charset encoding) {
-        return new DefaultHTTPRequestBody(FORM_URL_ENCODED_MEDIA_TYPE, () -> BodyPublishers.ofString(form.serialize(), encoding));
+        return new DefaultHTTPRequestBody(APPLICATION_FORM_URLENCODED, () -> BodyPublishers.ofString(form.serialize(), encoding));
     }
 
     @Override

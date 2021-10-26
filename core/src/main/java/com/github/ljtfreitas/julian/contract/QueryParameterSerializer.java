@@ -30,31 +30,33 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.github.ljtfreitas.julian.JavaType;
-import com.github.ljtfreitas.julian.QueryString;
+import com.github.ljtfreitas.julian.QueryParameters;
+import com.github.ljtfreitas.julian.Content;
 
 import static java.util.stream.Collectors.flatMapping;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toUnmodifiableList;
 
-public class QueryStringSerializer implements ParameterSerializer<Object, QueryString> {
+public class QueryParameterSerializer implements ParameterSerializer<Object, QueryParameters> {
 
 	@Override
-	public Optional<QueryString> serialize(String name, JavaType javaType, Object value) {
+	public Optional<QueryParameters> serialize(String name, JavaType javaType, Object value) {
 		return Optional.ofNullable(value).map(v -> serializeByJavaType(name, javaType, v));
 	}
 
-	private QueryString serializeByJavaType(String name, JavaType javaType, Object value) {
+	private QueryParameters serializeByJavaType(String name, JavaType javaType, Object value) {
 		return javaType.when(Collection.class, () -> serializeAsCollection(name, value))
-					   .or(() -> javaType.when(QueryString.class, () -> serializeAsQueryString(value)))
+					   .or(() -> javaType.when(QueryParameters.class, () -> serializeAsQueryParameters(value)))
 					   .or(() -> javaType.when(Map.class, () -> serializeAsMap(javaType, value)))
 					   .or(() -> javaType.genericArray()
 							   			 .map(GenericArrayType::getGenericComponentType)
-							   			 .or(javaType::array)
+							   			 .or(() -> javaType.array().map(Class::getComponentType))
 					   					 .map(arrayType -> serializeAsArray(name, value)))
+					   .or(() -> javaType.when(Content.class, () -> serializeAsContent(name, value)))
 					   .orElseGet(() -> serializeAsString(name, value));
 	}
 
-	private QueryString serializeAsMap(JavaType javaType, Object value) {
+	private QueryParameters serializeAsMap(JavaType javaType, Object value) {
 		return javaType.parameterized()
 				   .filter(p -> JavaType.Parameterized.firstArg(p).equals(String.class))
 				   .map(p -> JavaType.valueOf(p.getActualTypeArguments()[1]))
@@ -64,10 +66,10 @@ public class QueryStringSerializer implements ParameterSerializer<Object, QueryS
 	}
 
 	@SuppressWarnings("unchecked")
-	private QueryString serializeAsMultiMap(Object value) {
+	private QueryParameters serializeAsMultiMap(Object value) {
 		Map<String, ? extends Collection<?>> values = (Map<String, ? extends Collection<?>>) value;
 
-		return new QueryString(values.entrySet().stream()
+		return new QueryParameters(values.entrySet().stream()
 				.map(e -> Map.entry(e.getKey(), e.getValue().stream()
 						.map(Object::toString)
 						.collect(toUnmodifiableList())))
@@ -75,30 +77,35 @@ public class QueryStringSerializer implements ParameterSerializer<Object, QueryS
 	}
 
 	@SuppressWarnings("unchecked")
-	private QueryString serializeAsStringMap(Object value) {
+	private QueryParameters serializeAsStringMap(Object value) {
 		Map<String, ?> values = (Map<String, ?>) value;
 
-		return new QueryString(values.entrySet().stream()
+		return new QueryParameters(values.entrySet().stream()
 				.map(e -> Map.entry(e.getKey(), e.getValue().toString()))
 				.collect(groupingBy(Map.Entry::getKey, Collectors.mapping(Map.Entry::getValue, toUnmodifiableList()))));
 	}
 
-	private QueryString serializeAsArray(String name, Object value) {
+	private QueryParameters serializeAsArray(String name, Object value) {
 		Object[] array = (Object[]) value;
 		return serializeAsCollection(name, Arrays.asList(array));
 	}
 
-	private QueryString serializeAsQueryString(Object value) {
-		return (QueryString) value;
+	private QueryParameters serializeAsQueryParameters(Object value) {
+		return (QueryParameters) value;
 	}
 
-	private QueryString serializeAsString(String name, Object value) {
-		return QueryString.create(name, value.toString());
+	private QueryParameters serializeAsContent(String name, Object value) {
+		Content content = (Content) value;
+		return serializeAsString(name, content.show());
 	}
 
-	private QueryString serializeAsCollection(String name, Object value) {
+	private QueryParameters serializeAsString(String name, Object value) {
+		return QueryParameters.create(name, value.toString());
+	}
+
+	private QueryParameters serializeAsCollection(String name, Object value) {
 		Collection<?> values = (Collection<?>) value;
-		return new QueryString(Map.of(name, values.stream().map(Object::toString).collect(toUnmodifiableList())));
+		return new QueryParameters(Map.of(name, values.stream().map(Object::toString).collect(toUnmodifiableList())));
 	}
 
 }

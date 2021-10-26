@@ -37,6 +37,8 @@ import java.util.Map;
 import java.util.concurrent.Flow.Publisher;
 import java.util.stream.Collectors;
 
+import static com.github.ljtfreitas.julian.http.MediaType.APPLICATION_FORM_URLENCODED;
+
 public class MultiMapFormURLEncodedHTTPMessageCodec implements FormURLEncodedHTTPMessageCodec<Map<String, ? extends Iterable<?>>> {
 
     private final FormObjectURLEncodedHTTPMessageCodec codec = new FormObjectURLEncodedHTTPMessageCodec();
@@ -57,7 +59,7 @@ public class MultiMapFormURLEncodedHTTPMessageCodec implements FormURLEncodedHTT
 
     @Override
     public HTTPRequestBody write(Map<String, ? extends Iterable<?>> map, Charset encoding) {
-        return new DefaultHTTPRequestBody(FORM_URL_ENCODED_MEDIA_TYPE, () -> serialize(map, encoding));
+        return new DefaultHTTPRequestBody(APPLICATION_FORM_URLENCODED, () -> serialize(map, encoding));
     }
 
     private Publisher<ByteBuffer> serialize(Map<String, ? extends Iterable<?>> map, Charset encoding) {

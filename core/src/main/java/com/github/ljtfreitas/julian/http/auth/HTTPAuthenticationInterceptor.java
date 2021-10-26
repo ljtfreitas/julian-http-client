@@ -27,6 +27,8 @@ import com.github.ljtfreitas.julian.http.HTTPHeader;
 import com.github.ljtfreitas.julian.http.HTTPRequest;
 import com.github.ljtfreitas.julian.http.HTTPRequestInterceptor;
 
+import static com.github.ljtfreitas.julian.http.HTTPHeader.AUTHORIZATION;
+
 public class HTTPAuthenticationInterceptor implements HTTPRequestInterceptor {
 
     private final Authentication authentication;
@@ -37,6 +39,6 @@ public class HTTPAuthenticationInterceptor implements HTTPRequestInterceptor {
 
     @Override
     public <T> Promise<HTTPRequest<T>> intercepts(Promise<HTTPRequest<T>> request) {
-        return request.then(r -> r.headers(r.headers().join(new HTTPHeader(HTTPHeader.AUTHORIZATION, authentication.content()))));
+        return request.then(r -> r.headers(r.headers().join(new HTTPHeader(AUTHORIZATION, authentication.content()))));
     }
 }

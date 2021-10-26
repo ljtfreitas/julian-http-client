@@ -43,6 +43,8 @@ import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.nio.charset.Charset;
 
+import static com.github.ljtfreitas.julian.http.MediaType.APPLICATION_JSON;
+
 public class JsonBHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
 
     private final Jsonb jsonb;
@@ -62,7 +64,7 @@ public class JsonBHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
 
     @Override
     public HTTPRequestBody write(T body, Charset encoding) {
-        return new DefaultHTTPRequestBody(APPLICATION_JSON_MEDIA_TYPE, () -> serialize(body, encoding));
+        return new DefaultHTTPRequestBody(APPLICATION_JSON, () -> serialize(body, encoding));
     }
 
     private BodyPublisher serialize(T body, Charset encoding) {

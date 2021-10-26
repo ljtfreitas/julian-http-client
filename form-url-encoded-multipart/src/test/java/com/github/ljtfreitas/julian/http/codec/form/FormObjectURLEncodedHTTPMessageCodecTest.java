@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.concurrent.Flow;
 import java.util.concurrent.Flow.Subscriber;
 
-import static com.github.ljtfreitas.julian.http.codec.FormURLEncodedHTTPMessageCodec.FORM_URL_ENCODED_MEDIA_TYPE;
+import static com.github.ljtfreitas.julian.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -46,7 +46,7 @@ class FormObjectURLEncodedHTTPMessageCodecTest {
             void write() {
                 HTTPRequestBody output = codec.write(Form.create(Map.of("name", List.of("Tiago de Freitas Lima"), "age", List.of(35))), StandardCharsets.UTF_8);
 
-                assertEquals(FORM_URL_ENCODED_MEDIA_TYPE, output.contentType());
+                assertEquals(APPLICATION_FORM_URLENCODED, output.contentType());
 
                 output.serialize().subscribe(new Subscriber<>() {
 

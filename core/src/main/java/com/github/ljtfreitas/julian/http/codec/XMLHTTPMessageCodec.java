@@ -29,10 +29,8 @@ import java.util.List;
 
 public interface XMLHTTPMessageCodec<T> extends HTTPRequestWriter<T>, HTTPResponseReader<T> {
 
-    MediaType APPLICATION_XML_MEDIA_TYPE = MediaType.valueOf("application/xml");
-
     @Override
     default Collection<MediaType> contentTypes() {
-        return List.of(APPLICATION_XML_MEDIA_TYPE);
+        return List.of(MediaType.APPLICATION_XML);
     }
 }

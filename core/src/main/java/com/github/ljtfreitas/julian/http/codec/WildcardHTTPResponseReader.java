@@ -29,10 +29,8 @@ import java.util.List;
 
 interface WildcardHTTPResponseReader<T> extends HTTPResponseReader<T> {
 
-	MediaType WILDCARD_MEDIA_TYPE = MediaType.valueOf("*/*");
-
 	@Override
 	default Collection<MediaType> contentTypes() {
-		return List.of(WILDCARD_MEDIA_TYPE);
+		return List.of(MediaType.ALL);
 	}
 }

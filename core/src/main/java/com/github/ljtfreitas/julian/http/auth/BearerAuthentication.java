@@ -22,10 +22,11 @@
 
 package com.github.ljtfreitas.julian.http.auth;
 
-import java.util.Base64;
 import java.util.function.Supplier;
 
 public class BearerAuthentication implements Authentication {
+
+    private static final String BEARER_SCHEMA = "Bearer ";
 
     private final Supplier<String> supplier;
 
@@ -39,7 +40,15 @@ public class BearerAuthentication implements Authentication {
 
     @Override
     public String content() {
-        return "Bearer " + supplier.get();
+        return bearer();
     }
 
+    private String bearer() {
+        return BEARER_SCHEMA + supplier.get();
+    }
+
+    @Override
+    public String show() {
+        return bearer();
+    }
 }

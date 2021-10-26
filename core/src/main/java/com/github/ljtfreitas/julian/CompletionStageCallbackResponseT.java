@@ -30,8 +30,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import com.github.ljtfreitas.julian.EndpointDefinition.CallbackParameter;
-import com.github.ljtfreitas.julian.EndpointDefinition.Parameters;
+import com.github.ljtfreitas.julian.Endpoint.CallbackParameter;
+import com.github.ljtfreitas.julian.Endpoint.Parameters;
 import com.github.ljtfreitas.julian.JavaType.Parameterized;
 
 class CompletionStageCallbackResponseT<T> implements ResponseT<Void, T> {

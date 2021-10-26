@@ -20,48 +20,16 @@
  * SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian;
+package com.github.ljtfreitas.julian.contract;
 
-import com.github.ljtfreitas.julian.EndpointDefinition.Parameters;
-import com.github.ljtfreitas.julian.EndpointDefinition.Path;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-class DelegatedEndpoint implements Endpoint {
-
-	private final Endpoint endpoint;
-	private final JavaType adapted;
-
-	DelegatedEndpoint(Endpoint endpoint, JavaType adapted) {
-		this.endpoint = endpoint;
-		this.adapted = adapted;
-	}
-
-	@Override
-	public JavaType returnType() {
-		return adapted;
-	}
-
-	@Override
-	public Path path() {
-		return endpoint.path();
-	}
-
-	@Override
-	public String method() {
-		return endpoint.method();
-	}
-
-	@Override
-	public Headers headers() {
-		return endpoint.headers();
-	}
-
-	@Override
-	public Cookies cookies() {
-		return endpoint.cookies();
-	}
-
-	@Override
-	public Parameters parameters() {
-		return endpoint.parameters();
-	}
-}
+@Target(ElementType.PARAMETER)
+@Retention(RetentionPolicy.RUNTIME)
+@Inherited
+@Header(name = "Content-Type")
+public @interface ContentType {}

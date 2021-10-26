@@ -25,43 +25,15 @@ package com.github.ljtfreitas.julian;
 import java.lang.reflect.Method;
 import java.util.function.Predicate;
 
-import com.github.ljtfreitas.julian.EndpointDefinition.Parameters;
-import com.github.ljtfreitas.julian.EndpointDefinition.Path;
+public class MethodEndpoint extends Endpoint implements Predicate<Method> {
 
-public class MethodEndpoint implements Endpoint, Predicate<Method> {
-
-	private final Endpoint endpoint;
 	private final Method source;
 
 	public MethodEndpoint(Endpoint endpoint, Method source) {
-		this.endpoint = endpoint;
+		super(endpoint);
 		this.source = source;
 	}
 
-	public Path path() {
-		return endpoint.path();
-	}
-
-	public String method() {
-		return endpoint.method();
-	}
-
-	public Headers headers() {
-		return endpoint.headers();
-	}
-
-	public Cookies cookies() {
-		return endpoint.cookies();
-	}
-
-	public Parameters parameters() {
-		return endpoint.parameters();
-	}
-
-	public JavaType returnType() {
-		return endpoint.returnType();
-	}
-	
 	@Override
 	public boolean test(Method t) {
 		return source.equals(t);

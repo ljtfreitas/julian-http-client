@@ -11,14 +11,13 @@ import java.lang.reflect.InvocationHandler;
 import java.util.Optional;
 
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.github.ljtfreitas.julian.EndpointDefinition.Path;
+import com.github.ljtfreitas.julian.Endpoint.Path;
 import com.github.ljtfreitas.julian.contract.Contract;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,7 +40,7 @@ class ProxyFactoryTest {
 
 	@Test
 	void simple() {
-		Endpoint endpoint = new EndpointDefinition(new Path("http://my.api.com"));
+		Endpoint endpoint = new Endpoint(new Path("http://my.api.com"));
 
 		when(contract.endpoints().select(any())).then(a -> Optional.of(endpoint));
 		when(client.run(endpoint, Arguments.create("argument"))).thenReturn("expected");

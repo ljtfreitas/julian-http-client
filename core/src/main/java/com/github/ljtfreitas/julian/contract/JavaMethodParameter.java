@@ -25,6 +25,7 @@ package com.github.ljtfreitas.julian.contract;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
 
+import com.github.ljtfreitas.julian.Endpoint;
 import com.github.ljtfreitas.julian.JavaType;
 
 import static com.github.ljtfreitas.julian.Preconditions.isTrue;
@@ -44,7 +45,7 @@ class JavaMethodParameter {
 		this.reader = reader;
 	}
 
-	com.github.ljtfreitas.julian.EndpointDefinition.Parameter kind() {
+	Endpoint.Parameter kind() {
 		return reader.parameter(position, name, returnType);
 	}
 

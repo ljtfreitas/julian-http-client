@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.concurrent.Flow.Subscriber;
 import java.util.concurrent.Flow.Subscription;
 
-import static com.github.ljtfreitas.julian.http.codec.MultipartFormDataHTTPRequestWriter.MULTIPART_FORM_DATA_MEDIA_TYPE;
+import static com.github.ljtfreitas.julian.http.MediaType.MULTIPART_FORM_DATA;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,12 +38,12 @@ class MultipartFormObjectHTTPRequestWriterTest {
 
     @Test
     void shouldSupports() {
-        assertTrue(writer.writable(MULTIPART_FORM_DATA_MEDIA_TYPE, JavaType.valueOf(MultipartForm.class)));
+        assertTrue(writer.writable(MULTIPART_FORM_DATA, JavaType.valueOf(MultipartForm.class)));
     }
 
     @Test
     void shouldNotSupports() {
-        assertFalse(writer.writable(MULTIPART_FORM_DATA_MEDIA_TYPE, JavaType.parameterized(Map.class, String.class, String.class)));
+        assertFalse(writer.writable(MULTIPART_FORM_DATA, JavaType.parameterized(Map.class, String.class, String.class)));
     }
 
     @Nested

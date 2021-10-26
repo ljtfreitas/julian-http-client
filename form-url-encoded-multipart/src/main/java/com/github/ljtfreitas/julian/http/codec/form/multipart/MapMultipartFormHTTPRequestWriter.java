@@ -37,8 +37,6 @@ import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.concurrent.Flow.Publisher;
 
-import static java.util.stream.Collectors.groupingBy;
-
 public class MapMultipartFormHTTPRequestWriter implements MultipartFormDataHTTPRequestWriter<Map<String, ?>> {
 
     private final BoundaryGen boundaryGen;
@@ -61,7 +59,7 @@ public class MapMultipartFormHTTPRequestWriter implements MultipartFormDataHTTPR
     public HTTPRequestBody write(Map<String, ?> map, Charset encoding) {
         String boundary = boundaryGen.run();
 
-        MediaType mediaType = MULTIPART_FORM_DATA_MEDIA_TYPE.parameter("boundary", boundary);
+        MediaType mediaType = MediaType.MULTIPART_FORM_DATA.parameter("boundary", boundary);
 
         return new DefaultHTTPRequestBody(mediaType, () -> serialize(map, encoding, "----" + boundary));
     }

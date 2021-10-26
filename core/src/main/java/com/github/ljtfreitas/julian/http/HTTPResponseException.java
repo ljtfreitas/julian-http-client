@@ -22,6 +22,10 @@
 
 package com.github.ljtfreitas.julian.http;
 
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.joining;
+
 public class HTTPResponseException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
@@ -55,7 +59,7 @@ public class HTTPResponseException extends RuntimeException {
 					.append("\n")
 				.append("headers: ")
 					.append("[")
-						.append(headers)
+						.append(headers.all().stream().map(HTTPHeader::toString).collect(joining(", ")))
 					.append("]")
 				.append("\n")
 				.append(body)

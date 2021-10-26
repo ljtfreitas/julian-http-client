@@ -29,11 +29,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.github.ljtfreitas.julian.QueryString;
+import com.github.ljtfreitas.julian.QueryParameters;
 
 @Target({ ElementType.TYPE, ElementType.METHOD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
-@Repeatable(QueryParameters.class)
+@Repeatable(com.github.ljtfreitas.julian.contract.QueryParameters.class)
 @ParameterDefinition
 @Inherited
 public @interface QueryParameter {
@@ -42,5 +42,5 @@ public @interface QueryParameter {
 
     String[] value() default "";
 
-    Class<? extends ParameterSerializer<? super Object, QueryString>> serializer() default QueryStringSerializer.class;
+    Class<? extends ParameterSerializer<? super Object, QueryParameters>> serializer() default QueryParameterSerializer.class;
 }

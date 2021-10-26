@@ -26,6 +26,8 @@ import java.util.Base64;
 
 public class BasicAuthentication implements Authentication {
 
+    private static final String BASIC_SCHEMA = "Basic ";
+
     private final Credentials credentials;
 
     public BasicAuthentication(String username, String password) {
@@ -38,10 +40,19 @@ public class BasicAuthentication implements Authentication {
 
     @Override
     public String content() {
-        return "Basic " + base64(credentials);
+        return basic();
     }
 
-    private String base64(Credentials credentials) {
+    private String basic() {
+        return BASIC_SCHEMA + base64();
+    }
+
+    private String base64() {
         return Base64.getEncoder().encodeToString((credentials.username() + ":" + credentials.password()).getBytes());
+    }
+
+    @Override
+    public String show() {
+        return basic();
     }
 }

@@ -8,29 +8,18 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.github.ljtfreitas.julian.Arguments;
-import com.github.ljtfreitas.julian.CompletionStageResponseT;
-import com.github.ljtfreitas.julian.EndpointDefinition;
-import com.github.ljtfreitas.julian.JavaType;
-import com.github.ljtfreitas.julian.OptionalResponseT;
-import com.github.ljtfreitas.julian.Promise;
-import com.github.ljtfreitas.julian.RequestIO;
-import com.github.ljtfreitas.julian.Response;
-import com.github.ljtfreitas.julian.ResponseFn;
-
 @ExtendWith(MockitoExtension.class)
 class ResponsesTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
-    void test(@Mock EndpointDefinition endpoint, @Mock RequestIO<String> request) {
+    void test(@Mock Endpoint endpoint, @Mock RequestIO<String> request) {
 		JavaType completableFutureType = JavaType.parameterized(CompletableFuture.class, JavaType.Parameterized.valueOf(Optional.class, String.class));
 
 		when(endpoint.returnType()).thenReturn(completableFutureType);

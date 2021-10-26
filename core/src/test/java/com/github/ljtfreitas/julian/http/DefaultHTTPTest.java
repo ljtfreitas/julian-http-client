@@ -4,10 +4,9 @@ import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.Cookie;
 import com.github.ljtfreitas.julian.Cookies;
 import com.github.ljtfreitas.julian.Endpoint;
-import com.github.ljtfreitas.julian.EndpointDefinition;
-import com.github.ljtfreitas.julian.EndpointDefinition.Parameter;
-import com.github.ljtfreitas.julian.EndpointDefinition.Parameters;
-import com.github.ljtfreitas.julian.EndpointDefinition.Path;
+import com.github.ljtfreitas.julian.Endpoint.Parameter;
+import com.github.ljtfreitas.julian.Endpoint.Parameters;
+import com.github.ljtfreitas.julian.Endpoint.Path;
 import com.github.ljtfreitas.julian.Except;
 import com.github.ljtfreitas.julian.Header;
 import com.github.ljtfreitas.julian.Headers;
@@ -121,7 +120,7 @@ class DefaultHTTPTest {
 
 		@Test
 		void shouldThrowExceptionToUnsupportedHTTPMethod() {
-			Endpoint endpoint = new EndpointDefinition(new Path("http://my.api.com"), "WHATEVER");
+			Endpoint endpoint = new Endpoint(new Path("http://my.api.com"), "WHATEVER");
 			assertThrows(IllegalArgumentException.class, () -> http.request(endpoint, Arguments.empty(), JavaType.none()));
 		}
 	}
@@ -166,14 +165,38 @@ class DefaultHTTPTest {
 					String expectedResponse = "it works!";
 
 					mockServer.when(request("/hello")
-							.withMethod("POST")
-							.withBody(requestBodyAsString))
+									.withMethod("POST")
+									.withBody(requestBodyAsString)
+									.withContentType(TEXT_PLAIN))
 							.respond(response(expectedResponse)
 									.withContentType(TEXT_PLAIN));
 
-					Endpoint endpoint = new EndpointDefinition(new Path("http://localhost:8090/hello"), "POST",
+					Endpoint endpoint = new Endpoint(new Path("http://localhost:8090/hello"), "POST",
 							Headers.create(new Header("Content-Type", "text/plain")), Cookies.empty(),
-							Parameters.create(EndpointDefinition.Parameter.body(0, "body", JavaType.valueOf(String.class))));
+							Parameters.create(Endpoint.Parameter.body(0, "body", JavaType.valueOf(String.class))));
+
+					Promise<HTTPRequest<String>> request = http.request(endpoint, Arguments.create(requestBodyAsString), JavaType.valueOf(String.class));
+
+					String response = request.bind(HTTPRequest::execute).then(HTTPResponse::body).join().unsafe();
+
+					assertEquals(expectedResponse, response);
+				}
+
+				@Test
+				void shouldSerializeTheContentToHTTPRequestBodyUsingTheContentTypeDefinedOnBodyParameter() {
+					String requestBodyAsString = "{\"message\":\"hello\"}";
+					String expectedResponse = "it works!";
+
+					mockServer.when(request("/hello")
+									.withMethod("POST")
+									.withBody(requestBodyAsString)
+									.withContentType(TEXT_PLAIN))
+							.respond(response(expectedResponse)
+									.withContentType(TEXT_PLAIN));
+
+					Endpoint endpoint = new Endpoint(new Path("http://localhost:8090/hello"), "POST",
+							Headers.empty(), Cookies.empty(),
+							Parameters.create(Endpoint.Parameter.body(0, "body", JavaType.valueOf(String.class), "text/plain")));
 
 					Promise<HTTPRequest<String>> request = http.request(endpoint, Arguments.create(requestBodyAsString), JavaType.valueOf(String.class));
 
@@ -191,9 +214,9 @@ class DefaultHTTPTest {
 				void missingContentType() {
 					class MyObjectBody {}
 
-					Endpoint endpoint = new EndpointDefinition(new Path("http://localhost:8090/hello"), "POST",
+					Endpoint endpoint = new Endpoint(new Path("http://localhost:8090/hello"), "POST",
 							Headers.empty(), Cookies.empty(),
-							Parameters.create(EndpointDefinition.Parameter.body(0, "body", JavaType.valueOf(MyObjectBody.class))));
+							Parameters.create(Endpoint.Parameter.body(0, "body", JavaType.valueOf(MyObjectBody.class))));
 
 					assertThrows(HTTPRequestWriterException.class, () -> http.request(endpoint, Arguments.create(new MyObjectBody()), JavaType.none()));
 				}
@@ -202,18 +225,18 @@ class DefaultHTTPTest {
 				void unsupportedContentObject() {
 					class MyObjectBody {}
 
-					Endpoint endpoint = new EndpointDefinition(new Path("http://localhost:8090/hello"), "POST",
+					Endpoint endpoint = new Endpoint(new Path("http://localhost:8090/hello"), "POST",
 							Headers.create(new Header("Content-Type", "text/plain")), Cookies.empty(),
-							Parameters.create(EndpointDefinition.Parameter.body(0, "body", JavaType.valueOf(MyObjectBody.class))));
+							Parameters.create(Endpoint.Parameter.body(0, "body", JavaType.valueOf(MyObjectBody.class))));
 
 					assertThrows(HTTPRequestWriterException.class, () -> http.request(endpoint, Arguments.create(new MyObjectBody()), JavaType.none()));
 				}
 
 				@Test
 				void unsupportedContentType() {
-					Endpoint endpoint = new EndpointDefinition(new Path("http://localhost:8090/hello"), "POST",
+					Endpoint endpoint = new Endpoint(new Path("http://localhost:8090/hello"), "POST",
 							Headers.create(new Header("Content-Type", "application/json")), Cookies.empty(),
-							Parameters.create(EndpointDefinition.Parameter.body(0, "body", JavaType.valueOf(String.class))));
+							Parameters.create(Endpoint.Parameter.body(0, "body", JavaType.valueOf(String.class))));
 
 					assertThrows(HTTPRequestWriterException.class, () -> http.request(endpoint, Arguments.create("body"), JavaType.none()));
 				}
@@ -240,7 +263,7 @@ class DefaultHTTPTest {
 
 					JavaType responseType = JavaType.valueOf(String.class);
 
-					Endpoint endpoint = new EndpointDefinition(new Path("http://localhost:8090/hello"), "GET",
+					Endpoint endpoint = new Endpoint(new Path("http://localhost:8090/hello"), "GET",
 							Headers.empty(), Cookies.empty(),
 							Parameters.empty(), responseType);
 
@@ -267,7 +290,7 @@ class DefaultHTTPTest {
 
 					JavaType responseType = JavaType.valueOf(MyObjectBody.class);
 
-					Endpoint endpoint = new EndpointDefinition(new Path("http://localhost:8090/hello"), "GET",
+					Endpoint endpoint = new Endpoint(new Path("http://localhost:8090/hello"), "GET",
 													Headers.empty(), Cookies.empty(),
 													Parameters.empty(), responseType);
 
@@ -288,7 +311,7 @@ class DefaultHTTPTest {
 
 					JavaType responseType = JavaType.valueOf(String.class);
 
-					Endpoint endpoint = new EndpointDefinition(new Path("http://localhost:8090/hello"), "GET",
+					Endpoint endpoint = new Endpoint(new Path("http://localhost:8090/hello"), "GET",
 													Headers.empty(), Cookies.empty(),
 													Parameters.empty(), responseType);
 
@@ -320,7 +343,7 @@ class DefaultHTTPTest {
 							.withReasonPhrase(reason)
 							.withHeader("X-Whatever", "whatever"));
 
-				Endpoint endpoint = new EndpointDefinition(new Path("http://localhost:8090/hello/" + statusCode), "GET",
+				Endpoint endpoint = new Endpoint(new Path("http://localhost:8090/hello/" + statusCode), "GET",
 												Headers.empty(), Cookies.empty(), Parameters.empty());
 
 				HTTPResponse<Void> response = http.<Void> request(endpoint, Arguments.empty(), JavaType.none())
@@ -349,7 +372,7 @@ class DefaultHTTPTest {
 							.withMethod("GET"))
 						.respond(response().withStatusCode(statusCode.value()));
 
-				Endpoint endpoint = new EndpointDefinition(new Path("http://localhost:8090/hello/" + statusCode), "GET",
+				Endpoint endpoint = new Endpoint(new Path("http://localhost:8090/hello/" + statusCode), "GET",
 												Headers.empty(), Cookies.empty(), Parameters.empty());
 
 				HTTPResponse<String> response = http.<String> request(endpoint, Arguments.empty(), JavaType.none())
@@ -372,7 +395,7 @@ class DefaultHTTPTest {
 
 			@Test
 			void unknownHost() {
-				Endpoint endpoint = new EndpointDefinition(new Path("http://localhost:8091/hello"), "GET",
+				Endpoint endpoint = new Endpoint(new Path("http://localhost:8091/hello"), "GET",
 						Headers.empty(), Cookies.empty(), Parameters.empty());
 
 				Except<HTTPResponse<Void>> response = http.<Void> request(endpoint, Arguments.empty(), JavaType.none())
@@ -397,36 +420,36 @@ class DefaultHTTPTest {
 
 			return Stream.of(arguments(request("/hello").withMethod("GET"), 
 									   expectedResponse,
-									   new EndpointDefinition(new Path("http://localhost:8090/hello")),
+									   new Endpoint(new Path("http://localhost:8090/hello")),
 									   Arguments.empty(),
 									   JavaType.valueOf(String.class)),
 							 arguments(request("/hello").withMethod("POST").withBody(requestBodyAsString), 
 							  		   expectedResponse,
-							  		   new EndpointDefinition(new Path("http://localhost:8090/hello"), "POST",
+							  		   new Endpoint(new Path("http://localhost:8090/hello"), "POST",
 							  				   		Headers.create(new Header("Content-Type", "text/plain")),
 							  				   		Cookies.empty(),
-							  				   		Parameters.create(EndpointDefinition.Parameter.body(0, "body", JavaType.valueOf(String.class)))),
+							  				   		Parameters.create(Endpoint.Parameter.body(0, "body", JavaType.valueOf(String.class)))),
 									   Arguments.create(requestBodyAsString),
 									   JavaType.valueOf(String.class)),
 							 arguments(request("/hello").withMethod("PUT").withBody(requestBodyAsString), 
 							  		   expectedResponse,
-							  		   new EndpointDefinition(new Path("http://localhost:8090/hello"), "POST",
+							  		   new Endpoint(new Path("http://localhost:8090/hello"), "POST",
 							  				   		Headers.create(new Header("Content-Type", "text/plain")),
 							  				   		Cookies.empty(),
-							  				   		Parameters.create(EndpointDefinition.Parameter.body(0, "body", JavaType.valueOf(String.class)))),
+							  				   		Parameters.create(Endpoint.Parameter.body(0, "body", JavaType.valueOf(String.class)))),
 									   Arguments.create(requestBodyAsString),
 									   JavaType.valueOf(String.class)),
 							 arguments(request("/hello").withMethod("PATCH").withBody(requestBodyAsString), 
 							  		   expectedResponse,
-							  		   new EndpointDefinition(new Path("http://localhost:8090/hello"), "PATCH",
+							  		   new Endpoint(new Path("http://localhost:8090/hello"), "PATCH",
 							  				   		Headers.create(new Header("Content-Type", "text/plain")),
 							  				   		Cookies.empty(),
-							  				   		Parameters.create(EndpointDefinition.Parameter.body(0, "body", JavaType.valueOf(String.class)))),
+							  				   		Parameters.create(Endpoint.Parameter.body(0, "body", JavaType.valueOf(String.class)))),
 									   Arguments.create(requestBodyAsString),
 									   JavaType.valueOf(String.class)),
 							 arguments(request("/hello").withMethod("DELETE"), 
 							  		   expectedResponse,
-							  		   new EndpointDefinition(new Path("http://localhost:8090/hello"), "DELETE",
+							  		   new Endpoint(new Path("http://localhost:8090/hello"), "DELETE",
 							  				   		Headers.empty(),
 							  				   		Cookies.empty(),
 							  				   		Parameters.empty()),
@@ -434,7 +457,7 @@ class DefaultHTTPTest {
 									   JavaType.valueOf(String.class)),
 							 arguments(request("/hello").withMethod("TRACE"), 
 							  		   response().withStatusCode(200),
-							  		   new EndpointDefinition(new Path("http://localhost:8090/hello"), "TRACE",
+							  		   new Endpoint(new Path("http://localhost:8090/hello"), "TRACE",
 							  				   		Headers.empty(),
 							  				   		Cookies.empty(),
 							  				   		Parameters.empty()),
@@ -442,7 +465,7 @@ class DefaultHTTPTest {
 									   JavaType.none()),
 							 arguments(request("/hello").withMethod("HEAD"), 
 							  		   response().withStatusCode(200),
-							  		   new EndpointDefinition(new Path("http://localhost:8090/hello"), "HEAD",
+							  		   new Endpoint(new Path("http://localhost:8090/hello"), "HEAD",
 							  				   		Headers.empty(),
 							  				   		Cookies.empty(),
 							  				   		Parameters.empty()),
@@ -469,7 +492,7 @@ class DefaultHTTPTest {
 														.withHeader("X-Whatever-2", "whatever-header-value-2")
 														.withHeader("X-Whatever-3", "value1", "value2"),
 									   expectedResponse,
-									   new EndpointDefinition(new Path("http://localhost:8090/hello"), "GET",
+									   new Endpoint(new Path("http://localhost:8090/hello"), "GET",
 						  				   			Headers.create(new Header("X-Whatever-1", "whatever-header-value-1"),
 						  				   						   new Header("X-Whatever-2", "whatever-header-value-2"),
 						  				   						   new Header("X-Whatever-3", "value1", "value2")),
@@ -481,7 +504,7 @@ class DefaultHTTPTest {
 													    .withHeader("X-Whatever-2", "whatever-header-value-2")
 													    .withHeader("X-Whatever-3", "value1", "value2"),
 								       expectedResponse,
-						       		   new EndpointDefinition(new Path("http://localhost:8090/hello"), "GET",
+						       		   new Endpoint(new Path("http://localhost:8090/hello"), "GET",
 						       				   		Headers.empty(),
 						       				   		Cookies.empty(),
 						       				   		Parameters.create(Parameter.header(0, "X-Whatever-1",  JavaType.valueOf(String.class), headersParameterSerializer),
@@ -491,7 +514,7 @@ class DefaultHTTPTest {
 							 arguments(request("/hello").withMethod("GET")
 													    .withCookie("session-id", "abc1234"),
 								       expectedResponse,
-						       		   new EndpointDefinition(new Path("http://localhost:8090/hello"), "GET",
+						       		   new Endpoint(new Path("http://localhost:8090/hello"), "GET",
 						       				   		Headers.empty(),
 						       				   		Cookies.create(new Cookie("session-id", "abc1234")),
 						       				   		Parameters.empty()),
@@ -501,7 +524,7 @@ class DefaultHTTPTest {
 									 					.withCookie("csrftoken", "xyz9876")
 									 					.withCookie("_gat", "1"),
 								       expectedResponse,
-						       		   new EndpointDefinition(new Path("http://localhost:8090/hello"), "GET",
+						       		   new Endpoint(new Path("http://localhost:8090/hello"), "GET",
 						       				   		Headers.empty(),
 						       				   		Cookies.empty(),
 						       				   		Parameters.create(Parameter.cookie(0, "session-id",  JavaType.valueOf(String.class), cookiesParameterSerializer),

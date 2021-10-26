@@ -19,14 +19,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.github.ljtfreitas.julian.Arguments;
-import com.github.ljtfreitas.julian.CompletionStageResponseT;
-import com.github.ljtfreitas.julian.Endpoint;
-import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.JavaType.Parameterized;
-import com.github.ljtfreitas.julian.Promise;
-import com.github.ljtfreitas.julian.RequestIO;
-import com.github.ljtfreitas.julian.ResponseFn;
 
 @ExtendWith(MockitoExtension.class)
 class CompletionStageResponseTTest {

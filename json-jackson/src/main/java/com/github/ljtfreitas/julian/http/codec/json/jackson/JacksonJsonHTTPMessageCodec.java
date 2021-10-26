@@ -49,7 +49,7 @@ import java.nio.charset.Charset;
 import java.util.stream.Stream;
 
 import static com.github.ljtfreitas.julian.Preconditions.nonNull;
-import static com.github.ljtfreitas.julian.http.codec.JsonHTTPMessageCodec.APPLICATION_JSON_MEDIA_TYPE;
+import static com.github.ljtfreitas.julian.http.MediaType.APPLICATION_JSON;
 
 public class JacksonJsonHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
 
@@ -74,7 +74,7 @@ public class JacksonJsonHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
 
     @Override
     public HTTPRequestBody write(T body, Charset encoding) {
-        return new DefaultHTTPRequestBody(APPLICATION_JSON_MEDIA_TYPE, () -> serialize(body, encoding));
+        return new DefaultHTTPRequestBody(APPLICATION_JSON, () -> serialize(body, encoding));
     }
 
     private BodyPublisher serialize(T body, Charset encoding) {

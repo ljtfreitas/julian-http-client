@@ -22,6 +22,9 @@
 
 package com.github.ljtfreitas.julian.http;
 
+import com.github.ljtfreitas.julian.Content;
+
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -30,14 +33,132 @@ import java.util.Optional;
 
 import static com.github.ljtfreitas.julian.Message.format;
 import static com.github.ljtfreitas.julian.Preconditions.nonNull;
+import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 
-public class MediaType {
+public class MediaType implements Content {
 
-	private static final MediaType WILDCARD_CONTENT_TYPE = MediaType.valueOf("*/*");
+	public static final MediaType ALL;
+	public static final String ALL_VALUE = "*/*";
+
+	public static final MediaType APPLICATION_ATOM_XML;
+	public static final String APPLICATION_ATOM_XML_VALUE = "application/atom+xml";
+
+	public static final MediaType APPLICATION_CBOR;
+	public static final String APPLICATION_CBOR_VALUE = "application/cbor";
+
+	public static final MediaType APPLICATION_FORM_URLENCODED;
+	public static final String APPLICATION_FORM_URLENCODED_VALUE = "application/x-www-form-urlencoded";
+
+	public static final MediaType APPLICATION_JSON;
+	public static final String APPLICATION_JSON_VALUE = "application/json";
+
+	public static final MediaType APPLICATION_JSON_UTF8;
+	public static final String APPLICATION_JSON_UTF8_VALUE = "application/json;charset=UTF-8";
+
+	public static final MediaType APPLICATION_OCTET_STREAM;
+	public static final String APPLICATION_OCTET_STREAM_VALUE = "application/octet-stream";
+
+	public static final MediaType APPLICATION_PDF;
+	public static final String APPLICATION_PDF_VALUE = "application/pdf";
+
+	public static final MediaType APPLICATION_PROBLEM_JSON;
+	public static final String APPLICATION_PROBLEM_JSON_VALUE = "application/problem+json";
+
+	public static final MediaType APPLICATION_PROBLEM_JSON_UTF8;
+	public static final String APPLICATION_PROBLEM_JSON_UTF8_VALUE = "application/problem+json;charset=UTF-8";
+
+	public static final MediaType APPLICATION_PROBLEM_XML;
+	public static final String APPLICATION_PROBLEM_XML_VALUE = "application/problem+xml";
+
+	public static final MediaType APPLICATION_RSS_XML;
+	public static final String APPLICATION_RSS_XML_VALUE = "application/rss+xml";
+
+	public static final MediaType APPLICATION_NDJSON;
+	public static final String APPLICATION_NDJSON_VALUE = "application/x-ndjson";
+
+	public static final MediaType APPLICATION_STREAM_JSON;
+	public static final String APPLICATION_STREAM_JSON_VALUE = "application/stream+json";
+
+	public static final MediaType APPLICATION_XHTML_XML;
+	public static final String APPLICATION_XHTML_XML_VALUE = "application/xhtml+xml";
+
+	public static final MediaType APPLICATION_XML;
+	public static final String APPLICATION_XML_VALUE = "application/xml";
+
+	public static final MediaType IMAGE_GIF;
+	public static final String IMAGE_GIF_VALUE = "image/gif";
+
+	public static final MediaType IMAGE_JPEG;
+	public static final String IMAGE_JPEG_VALUE = "image/jpeg";
+
+	public static final MediaType IMAGE_PNG;
+	public static final String IMAGE_PNG_VALUE = "image/png";
+
+	public static final MediaType MULTIPART_FORM_DATA;
+	public static final String MULTIPART_FORM_DATA_VALUE = "multipart/form-data";
+
+	public static final MediaType MULTIPART_MIXED;
+	public static final String MULTIPART_MIXED_VALUE = "multipart/mixed";
+
+	public static final MediaType MULTIPART_RELATED;
+	public static final String MULTIPART_RELATED_VALUE = "multipart/related";
+
+	public static final MediaType TEXT_EVENT_STREAM;
+	public static final String TEXT_EVENT_STREAM_VALUE = "text/event-stream";
+
+	public static final MediaType TEXT_HTML;
+	public static final String TEXT_HTML_VALUE = "text/html";
+
+	public static final MediaType TEXT_MARKDOWN;
+	public static final String TEXT_MARKDOWN_VALUE = "text/markdown";
+
+	public static final MediaType TEXT_PLAIN;
+	public static final String TEXT_PLAIN_VALUE = "text/plain";
+
+	public static final MediaType TEXT_XML;
+	public static final String TEXT_XML_VALUE = "text/xml";
+
+	static {
+		ALL = new MediaType("*", "*");
+		APPLICATION_ATOM_XML = new MediaType("application", "atom+xml");
+		APPLICATION_CBOR = new MediaType("application", "cbor");
+		APPLICATION_FORM_URLENCODED = new MediaType("application", "x-www-form-urlencoded");
+		APPLICATION_JSON = new MediaType("application", "json");
+		APPLICATION_JSON_UTF8 = new MediaType("application", "json", Map.of("charset", StandardCharsets.UTF_8.name()));
+		APPLICATION_NDJSON = new MediaType("application", "x-ndjson");
+		APPLICATION_OCTET_STREAM = new MediaType("application", "octet-stream");
+		APPLICATION_PDF = new MediaType("application", "pdf");
+		APPLICATION_PROBLEM_JSON = new MediaType("application", "problem+json");
+		APPLICATION_PROBLEM_JSON_UTF8 = new MediaType("application", "problem+json", Map.of("charset", StandardCharsets.UTF_8.name()));
+		APPLICATION_PROBLEM_XML = new MediaType("application", "problem+xml");
+		APPLICATION_RSS_XML = new MediaType("application", "rss+xml");
+		APPLICATION_STREAM_JSON = new MediaType("application", "stream+json");
+		APPLICATION_XHTML_XML = new MediaType("application", "xhtml+xml");
+		APPLICATION_XML = new MediaType("application", "xml");
+		IMAGE_GIF = new MediaType("image", "gif");
+		IMAGE_JPEG = new MediaType("image", "jpeg");
+		IMAGE_PNG = new MediaType("image", "png");
+		MULTIPART_FORM_DATA = new MediaType("multipart", "form-data");
+		MULTIPART_MIXED = new MediaType("multipart", "mixed");
+		MULTIPART_RELATED = new MediaType("multipart", "related");
+		TEXT_EVENT_STREAM = new MediaType("text", "event-stream");
+		TEXT_HTML = new MediaType("text", "html");
+		TEXT_MARKDOWN = new MediaType("text", "markdown");
+		TEXT_PLAIN = new MediaType("text", "plain");
+		TEXT_XML = new MediaType("text", "xml");
+	}
 
 	private final MimeType mediaType;
+
+	private MediaType(String type, String subType) {
+		this(type, subType, emptyMap());
+	}
+
+	private MediaType(String type, String subType, Map<String, String> parameters) {
+		this.mediaType = new MimeType(type, subType, parameters);
+	}
 
 	private MediaType(MimeType mediaType) {
 		this.mediaType = nonNull(mediaType);
@@ -79,6 +200,11 @@ public class MediaType {
 	}
 
 	@Override
+	public String show() {
+		return mediaType.toString();
+	}
+
+	@Override
 	public String toString() {
 		return mediaType.toString();
 	}
@@ -88,7 +214,7 @@ public class MediaType {
 	}
 
 	public static MediaType wildcard() {
-		return WILDCARD_CONTENT_TYPE;
+		return ALL;
 	}
 
 	private static class MimeType {

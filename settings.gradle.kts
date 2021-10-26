@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-rootProject.name = "julian-http-client"
+rootProject.name = "julian-http-client-parent"
 include("core")
 include("form-url-encoded-multipart")
 include("json-jackson")
@@ -30,3 +30,4 @@ include("json-jsonp")
 include("xml-jackson")
 include("http-client-reactor-netty")
 include("xml-jaxb")
+include("samples")

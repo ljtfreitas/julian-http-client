@@ -43,11 +43,11 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toUnmodifiableList;
 
-public class QueryString {
+public class QueryParameters {
 
 	private final Map<String, Collection<String>> parameters;
 
-	public QueryString(Map<String, ? extends Collection<String>> parameters) {
+	public QueryParameters(Map<String, ? extends Collection<String>> parameters) {
 		this.parameters = unmodifiableMap(parameters);
 	}
 
@@ -63,7 +63,7 @@ public class QueryString {
 				.unsafe();
 	}
 
-	public QueryString append(String name, String... values) {
+	public QueryParameters append(String name, String... values) {
 		Map<String, Collection<String>> parameters = new LinkedHashMap<>(this.parameters);
 
 		parameters.merge(name, asList(values), (a, b) -> {
@@ -72,10 +72,10 @@ public class QueryString {
 			return e;
 		});
 
-		return new QueryString(parameters);
+		return new QueryParameters(parameters);
 	}
 
-	public QueryString append(QueryString that) {
+	public QueryParameters append(QueryParameters that) {
 		Map<String, Collection<String>> parameters = new LinkedHashMap<>(this.parameters);
 
 		that.parameters.forEach((name, values) -> {
@@ -86,25 +86,25 @@ public class QueryString {
 			});
 		});
 
-		return new QueryString(parameters);
+		return new QueryParameters(parameters);
 	}
 
-	public static QueryString empty() {
-		return new QueryString(emptyMap());
+	public static QueryParameters empty() {
+		return new QueryParameters(emptyMap());
 	}
 
-	public static QueryString create(String name, String... values) {
-		return new QueryString(Map.of(name, asList(values)));
+	public static QueryParameters create(String name, String... values) {
+		return new QueryParameters(Map.of(name, asList(values)));
 	}
 
-	public static QueryString create(Map<String, String> parameters) {
-		return new QueryString(nonNull(parameters).entrySet().stream()
+	public static QueryParameters create(Map<String, String> parameters) {
+		return new QueryParameters(nonNull(parameters).entrySet().stream()
 				.map(e -> Map.entry(e.getKey(), singleton(e.getValue())))
 				.collect(groupingBy(Entry::getKey, flatMapping(e -> e.getValue().stream(), toUnmodifiableList()))));
 	}
 
-	public static QueryString parse(String source) {
-		return new QueryString(Arrays.stream(nonNull(source).split("&"))
+	public static QueryParameters parse(String source) {
+		return new QueryParameters(Arrays.stream(nonNull(source).split("&"))
 				.map(parameter -> parameter.split("="))
 				.filter(parameter -> parameter.length == 2)
 				.collect(groupingBy(parameter -> parameter[0], mapping(parameter -> parameter[1], toUnmodifiableList()))));

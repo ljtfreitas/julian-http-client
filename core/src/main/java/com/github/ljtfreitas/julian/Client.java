@@ -27,16 +27,16 @@ import com.github.ljtfreitas.julian.http.HTTPRequest;
 
 class Client {
 
-	private final Responses requests;
+	private final Responses responses;
 	private final HTTP http;
 
-	Client(Responses requests, HTTP http) {
-		this.requests = requests;
+	Client(Responses responses, HTTP http) {
+		this.responses = responses;
 		this.http = http;
 	}
 
 	<T> T run(Endpoint endpoint, Arguments arguments) {
-		ResponseFn<T, Object> responseFn = requests.select(endpoint);
+		ResponseFn<T, Object> responseFn = responses.select(endpoint);
 
 		Promise<HTTPRequest<Object>> request = http.request(endpoint, arguments, responseFn.returnType());
 

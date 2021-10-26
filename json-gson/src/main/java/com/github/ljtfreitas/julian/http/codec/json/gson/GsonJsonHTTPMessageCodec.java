@@ -45,6 +45,8 @@ import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.nio.charset.Charset;
 
+import static com.github.ljtfreitas.julian.http.MediaType.APPLICATION_JSON;
+
 public class GsonJsonHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
 
     private final Gson gson;
@@ -64,7 +66,7 @@ public class GsonJsonHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
 
     @Override
     public HTTPRequestBody write(T body, Charset encoding) {
-        return new DefaultHTTPRequestBody(JsonHTTPMessageCodec.APPLICATION_JSON_MEDIA_TYPE, () -> serialize(body, encoding));
+        return new DefaultHTTPRequestBody(APPLICATION_JSON, () -> serialize(body, encoding));
     }
 
     private BodyPublisher serialize(T body, Charset encoding) {

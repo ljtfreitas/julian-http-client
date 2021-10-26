@@ -5,6 +5,7 @@ import com.github.ljtfreitas.julian.http.HTTPHeader;
 import com.github.ljtfreitas.julian.http.HTTPHeaders;
 import com.github.ljtfreitas.julian.http.HTTPMethod;
 import com.github.ljtfreitas.julian.http.HTTPRequest;
+import com.github.ljtfreitas.julian.http.MediaType;
 import com.github.ljtfreitas.julian.http.codec.StringHTTPMessageCodec;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,7 +55,7 @@ class DebugHTTPClientTest {
         when(httpRequest.method()).thenReturn(HTTPMethod.GET);
         when(httpRequest.headers()).thenReturn(new HTTPHeaders(List.of(new HTTPHeader("X-Some-Header", "some-content"),
                                                                        new HTTPHeader("Accept", "text/plain"))));
-        when(httpRequest.body()).thenReturn(Optional.of(new DefaultHTTPRequestBody(StringHTTPMessageCodec.TEXT_PLAIN_MEDIA_TYPE, () -> BodyPublishers.ofString("request body"))));
+        when(httpRequest.body()).thenReturn(Optional.of(new DefaultHTTPRequestBody(MediaType.TEXT_PLAIN, () -> BodyPublishers.ofString("request body"))));
 
         HTTPClientRequest intercepted = debugHTTPClient.request(httpRequest);
 

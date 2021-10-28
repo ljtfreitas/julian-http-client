@@ -25,7 +25,6 @@ package com.github.ljtfreitas.julian;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Flow;
 import java.util.concurrent.Flow.Publisher;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.SubmissionPublisher;
 
 public class PublisherResponseT<T> implements ResponseT<Publisher<T>, T> {
@@ -51,7 +50,7 @@ public class PublisherResponseT<T> implements ResponseT<Publisher<T>, T> {
                 SubmissionPublisher<T> publisher = executor == null ?
                         new SubmissionPublisher<>() : new SubmissionPublisher<>(executor, Flow.defaultBufferSize());
 
-                request.comp(fn, arguments).future()
+                request.run(fn, arguments).future()
                         .thenAccept(publisher::submit)
                         .thenRun(publisher::close)
                         .whenComplete((r, t) -> { if (t != null) publisher.closeExceptionally(t);});

@@ -34,7 +34,7 @@ class FutureResponseT<T> implements ResponseT<Future<T>, T> {
 
 			@Override
 			public Future<T> join(RequestIO<A> request, Arguments arguments) {
-				return request.comp(fn, arguments).future();
+				return request.run(fn, arguments).future();
 			}
 
 			@Override

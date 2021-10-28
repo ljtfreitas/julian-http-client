@@ -74,7 +74,7 @@ class QueueResponseTTest {
 		
 		@Test
 		void compose() throws Exception {
-			when(request.comp(fn, Arguments.empty())).thenReturn(Promise.done(List.of("expected")));
+			when(request.run(fn, Arguments.empty())).thenReturn(Promise.done(List.of("expected")));
 
 			Queue<String> response = responseT.comp(endpoint, fn).join(request, Arguments.empty());
 
@@ -83,7 +83,7 @@ class QueueResponseTTest {
 
 		@Test
 		void empty() throws Exception {
-			when(request.comp(fn, Arguments.empty())).thenReturn(Promise.done(Collections.emptyList()));
+			when(request.run(fn, Arguments.empty())).thenReturn(Promise.done(Collections.emptyList()));
 
 			Queue<String> response = responseT.comp(endpoint, fn).join(request, Arguments.empty());
 

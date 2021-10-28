@@ -61,7 +61,7 @@ class FutureResponseTTest {
 	void compose(@Mock ResponseFn<String, String> fn, @Mock RequestIO<String> request) throws Exception {
 		Arguments arguments = Arguments.empty();
 
-		when(request.comp(fn, arguments)).thenReturn(Promise.done("expected"));
+		when(request.run(fn, arguments)).thenReturn(Promise.done("expected"));
 		
 		Future<String> future = responseT.comp(endpoint, fn).join(request, arguments);
 

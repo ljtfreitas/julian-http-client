@@ -10,7 +10,7 @@ class PromiseResponseT<T> implements ResponseT<Promise<T>, T> {
 
             @Override
             public Promise<T> join(RequestIO<A> request, Arguments arguments) {
-                return request.comp(fn, arguments);
+                return request.run(fn, arguments);
             }
 
             @Override

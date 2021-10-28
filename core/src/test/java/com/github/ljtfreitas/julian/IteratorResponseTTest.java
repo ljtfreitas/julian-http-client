@@ -65,7 +65,7 @@ class IteratorResponseTTest {
 	void compose(@Mock ResponseFn<Collection<String>, Collection<String>> fn, @Mock RequestIO<Collection<String>> request) throws Exception {
 		Arguments arguments = Arguments.empty();
 
-		when(request.comp(fn, arguments)).thenReturn(Promise.done(List.of("expected")));
+		when(request.run(fn, arguments)).thenReturn(Promise.done(List.of("expected")));
 
 		Iterator<String> iterator = responseT.comp(endpoint, fn).join(request, arguments);
 

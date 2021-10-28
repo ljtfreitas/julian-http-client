@@ -67,10 +67,10 @@ class PublisherResponseTTest {
     void compose(@Mock ResponseFn<String, String> fn, @Mock RequestIO<String> request, TestReporter reporter) throws InterruptedException {
         Arguments arguments = Arguments.empty();
 
-        when(request.comp(fn, arguments)).thenReturn(Promise.pending(CompletableFuture.supplyAsync(() -> "expected",
+        when(request.run(fn, arguments)).thenReturn(Promise.pending(CompletableFuture.supplyAsync(() -> "expected",
                 CompletableFuture.delayedExecutor(1000, TimeUnit.MILLISECONDS))));
 
-        when(request.comp(fn, arguments)).thenReturn(Promise.done("expected"));
+        when(request.run(fn, arguments)).thenReturn(Promise.done("expected"));
 
         Publisher<String> publisher = responseT.comp(endpoint, fn).join(request, arguments);
 

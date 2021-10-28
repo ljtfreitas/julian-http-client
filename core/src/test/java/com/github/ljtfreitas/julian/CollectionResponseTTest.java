@@ -91,7 +91,7 @@ class CollectionResponseTTest {
 		void compose(JavaType javaType) throws Exception {
 			when(endpoint.returnType()).thenReturn(javaType);
 
-			when(request.comp(fn, Arguments.empty())).thenReturn(Promise.done(List.of("expected")));
+			when(request.run(fn, Arguments.empty())).thenReturn(Promise.done(List.of("expected")));
 
 			Collection<String> response = responseT.comp(endpoint, fn).join(request, Arguments.empty());
 
@@ -103,7 +103,7 @@ class CollectionResponseTTest {
 		void empty(JavaType javaType, Class<?> expectedCollectionType) throws Exception {
 			when(endpoint.returnType()).thenReturn(javaType);
 
-			when(request.comp(fn, Arguments.empty())).thenReturn(Promise.done(Collections.emptyList()));
+			when(request.run(fn, Arguments.empty())).thenReturn(Promise.done(Collections.emptyList()));
 
 			Collection<String> response = responseT.comp(endpoint, fn).join(request, Arguments.empty());
 

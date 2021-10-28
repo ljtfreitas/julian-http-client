@@ -37,7 +37,7 @@ class QueueResponseT<T> implements ResponseT<Queue<T>, Collection<T>> {
 
 			@Override
 			public Promise<Queue<T>> run(RequestIO<A> request, Arguments arguments) {
-				return request.comp(fn, arguments).then(c -> Optional.ofNullable(c).map(LinkedList::new).orElseGet(LinkedList::new));
+				return request.run(fn, arguments).then(c -> Optional.ofNullable(c).map(LinkedList::new).orElseGet(LinkedList::new));
 			}
 
 			@Override

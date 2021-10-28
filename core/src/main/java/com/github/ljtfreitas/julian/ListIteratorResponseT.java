@@ -37,7 +37,7 @@ class ListIteratorResponseT<T> implements ResponseT<ListIterator<T>, List<T>> {
 
 			@Override
 			public Promise<ListIterator<T>> run(RequestIO<A> request, Arguments arguments) {
-				return request.comp(fn, arguments).then(l -> Optional.ofNullable(l).map(List::listIterator).orElseGet(Collections::emptyListIterator));
+				return request.run(fn, arguments).then(l -> Optional.ofNullable(l).map(List::listIterator).orElseGet(Collections::emptyListIterator));
 			}
 
 			@Override

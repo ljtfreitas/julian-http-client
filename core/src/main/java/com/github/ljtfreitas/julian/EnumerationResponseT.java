@@ -37,7 +37,7 @@ class EnumerationResponseT<T> implements ResponseT<Enumeration<T>, Collection<T>
 
 			@Override
 			public Promise<Enumeration<T>> run(RequestIO<A> request, Arguments arguments) {
-				return request.comp(fn, arguments)
+				return request.run(fn, arguments)
 						.then(c -> Optional.ofNullable(c).map(Collections::enumeration).orElseGet(Collections::emptyEnumeration));
 			}
 

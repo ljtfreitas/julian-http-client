@@ -193,7 +193,7 @@ public class ProxyBuilder {
 
             private Executor executor = null;
 
-            public Async executor(Executor executor) {
+            public Async using(Executor executor) {
                 this.executor = executor;
                 return this;
             }
@@ -205,6 +205,7 @@ public class ProxyBuilder {
             private Collection<ResponseT<?, ?>> all() {
                 Collection<ResponseT<?, ?>> all = new ArrayList<>();
                 all.add(executor == null ? PublisherResponseT.get() : new PublisherResponseT<>(executor));
+                all.add(new SubscriberCallbackResponseT<>());
                 return all;
             }
         }

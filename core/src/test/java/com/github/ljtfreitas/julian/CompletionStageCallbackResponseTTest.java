@@ -50,7 +50,7 @@ class CompletionStageCallbackResponseTTest {
 
 			@ParameterizedTest
 			@ArgumentsSource(AcceptableCallbackParametersProvider.class)
-			void accepted(Parameter parameter) throws Exception {
+			void accepted(Parameter parameter) {
 				when(endpoint.parameters()).thenReturn(new Parameters(List.of(parameter)));
 
 				assertTrue(responseT.test(endpoint));
@@ -102,7 +102,7 @@ class CompletionStageCallbackResponseTTest {
 
 			Arguments arguments = Arguments.create(check.andThen(success));
 
-			when(request.comp(fn, arguments)).thenReturn(Promise.done(expected));
+			when(request.run(fn, arguments)).thenReturn(Promise.done(expected));
 
 			responseT.comp(endpoint, fn).join(request, arguments);
 
@@ -120,7 +120,7 @@ class CompletionStageCallbackResponseTTest {
 
 			Arguments arguments = Arguments.create(check.andThen(failure));
 
-			when(request.comp(fn, arguments)).thenReturn(Promise.failed(e));
+			when(request.run(fn, arguments)).thenReturn(Promise.failed(e));
 
 			responseT.comp(endpoint, fn).join(request, arguments);
 
@@ -141,7 +141,7 @@ class CompletionStageCallbackResponseTTest {
 
 				Arguments arguments = Arguments.create(check.andThen(subscriber));
 
-				when(request.comp(fn, arguments)).thenReturn(Promise.done(expected));
+				when(request.run(fn, arguments)).thenReturn(Promise.done(expected));
 
 				responseT.comp(endpoint, fn).join(request, arguments);
 
@@ -159,7 +159,7 @@ class CompletionStageCallbackResponseTTest {
 
 				Arguments arguments = Arguments.create(check.andThen(subscriber));
 
-				when(request.comp(fn, arguments)).thenReturn(Promise.failed(e));
+				when(request.run(fn, arguments)).thenReturn(Promise.failed(e));
 
 				responseT.comp(endpoint, fn).join(request, arguments);
 

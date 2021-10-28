@@ -28,7 +28,7 @@ class ResponsesTest {
 		Response<String> response = Response.done("oi");
 
 		when(request.execute()).then(a -> Promise.done(response));
-		when(request.comp(any(), eq(Arguments.empty()))).thenCallRealMethod();
+		when(request.run(any(), eq(Arguments.empty()))).thenCallRealMethod();
 
 		Responses requests = new Responses(List.of(new CompletionStageResponseT<>(), new OptionalResponseT<>()));
 

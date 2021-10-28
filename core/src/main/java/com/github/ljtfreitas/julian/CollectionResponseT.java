@@ -38,7 +38,7 @@ class CollectionResponseT<T> implements ResponseT<Collection<T>, Collection<T>> 
 
 			@Override
 			public Promise<Collection<T>> run(RequestIO<A> request, Arguments arguments) {
-				return request.comp(fn, arguments).then(c -> Optional.ofNullable(c).map(this::collectionByType).orElseGet(this::emptyCollectionByType));
+				return request.run(fn, arguments).then(c -> Optional.ofNullable(c).map(this::collectionByType).orElseGet(this::emptyCollectionByType));
 			}
 
 			private Collection<T> collectionByType(Collection<T> source) {

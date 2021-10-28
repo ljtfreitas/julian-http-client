@@ -28,9 +28,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target({ElementType.TYPE, ElementType.METHOD})
+@Target({ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-@Header(name = "Content-Type", value = "multipart/form-data")
+@Body("multipart/form-data")
 @Inherited
 public @interface MultipartFormData {
 }

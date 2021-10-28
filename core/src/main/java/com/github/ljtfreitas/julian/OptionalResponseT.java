@@ -24,10 +24,6 @@ package com.github.ljtfreitas.julian;
 
 import java.util.Optional;
 
-import com.github.ljtfreitas.julian.Arguments;
-import com.github.ljtfreitas.julian.JavaType;
-import com.github.ljtfreitas.julian.RequestIO;
-
 class OptionalResponseT<T> implements ResponseT<Optional<T>, T> {
 
 	private static final OptionalResponseT<Object> SINGLE_INSTANCE = new OptionalResponseT<>();
@@ -38,7 +34,7 @@ class OptionalResponseT<T> implements ResponseT<Optional<T>, T> {
 
 			@Override
 			public Promise<Optional<T>> run(RequestIO<A> request, Arguments arguments) {
-				return request.comp(fn, arguments).then(Optional::ofNullable);
+				return request.run(fn, arguments).then(Optional::ofNullable);
 			}
 
 			@Override

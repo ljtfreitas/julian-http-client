@@ -82,6 +82,7 @@ public class DefaultHTTP implements HTTP {
 		return endpoint.parameters().body()
 				.flatMap(p -> arguments.of(p.position())
 					.map(b -> p.contentType()
+						.map(MediaType::valueOf)
 						.or(() -> headers.select(CONTENT_TYPE)
 								.map(HTTPHeader::value)
 								.map(MediaType::valueOf))
@@ -101,7 +102,7 @@ public class DefaultHTTP implements HTTP {
 	private Headers headers(Endpoint endpoint, Arguments arguments) {
 		Stream<Headers> bodyContentType = endpoint.parameters().body()
 				.flatMap(BodyParameter::contentType)
-				.map(m -> new Header(CONTENT_TYPE, m.show()))
+				.map(c -> new Header(CONTENT_TYPE, c))
 				.map(Headers::create)
 				.stream();
 

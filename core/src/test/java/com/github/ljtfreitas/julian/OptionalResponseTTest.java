@@ -63,7 +63,7 @@ class OptionalResponseTTest {
 			throws Exception {
 		Arguments arguments = Arguments.empty();
 
-		when(request.comp(fn, arguments)).thenReturn(Promise.done("expected"));
+		when(request.run(fn, arguments)).thenReturn(Promise.done("expected"));
 
 		Optional<String> optional = responseT.comp(endpoint, fn).join(request, arguments);
 

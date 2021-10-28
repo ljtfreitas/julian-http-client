@@ -36,7 +36,7 @@ class IterableResponseT<T> implements ResponseT<Iterable<T>, Collection<T>> {
 
 			@Override
 			public Promise<Iterable<T>> run(RequestIO<A> request, Arguments arguments) {
-				return request.comp(fn, arguments).then(c -> Optional.ofNullable(c).orElseGet(Collections::emptyList));
+				return request.run(fn, arguments).then(c -> Optional.ofNullable(c).orElseGet(Collections::emptyList));
 			}
 
 			@Override

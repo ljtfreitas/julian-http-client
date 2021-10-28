@@ -3,7 +3,6 @@ package com.github.ljtfreitas.julian;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -63,7 +62,7 @@ class PromiseResponseTTest {
         Arguments arguments = Arguments.empty();
 
         when(fn.run(any(), eq(arguments))).thenReturn(Promise.done("expected"));
-        when(request.comp(fn, arguments)).thenCallRealMethod();
+        when(request.run(fn, arguments)).thenCallRealMethod();
 
         Promise<String> actual = responseT.comp(endpoint, fn).join(request, arguments);
 

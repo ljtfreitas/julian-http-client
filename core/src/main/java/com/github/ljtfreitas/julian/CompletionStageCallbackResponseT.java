@@ -44,7 +44,7 @@ class CompletionStageCallbackResponseT<T> implements ResponseT<Void, T> {
 
 			@Override
 			public Void join(RequestIO<A> request, Arguments arguments) {
-				CompletableFuture<T> future = request.comp(fn, arguments).future();
+				CompletableFuture<T> future = request.run(fn, arguments).future();
 
 				success(endpoint.parameters(), arguments)
 						.ifPresent(future::thenAccept);
@@ -61,7 +61,7 @@ class CompletionStageCallbackResponseT<T> implements ResponseT<Void, T> {
 			@SuppressWarnings("unchecked")
 			private Optional<Consumer<T>> success(Parameters parameters, Arguments arguments) {
 				return parameters.callbacks()
-						.filter(c -> c.javaType().is(Consumer.class))
+						.filter(c -> c.javaType().compatible(Consumer.class))
 						.findFirst()
 						.flatMap(c -> arguments.of(c.position()))
 						.map(arg -> (Consumer<T>) arg);
@@ -107,7 +107,7 @@ class CompletionStageCallbackResponseT<T> implements ResponseT<Void, T> {
 
 	private boolean consumer(CallbackParameter callback) {
 		JavaType javaType = callback.javaType();
-		return javaType.is(Consumer.class) && javaType.parameterized().isPresent();
+		return javaType.compatible(Consumer.class) && javaType.parameterized().isPresent();
 	}
 
 	private boolean biConsumer(CallbackParameter callback) {

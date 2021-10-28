@@ -24,7 +24,6 @@ package com.github.ljtfreitas.julian;
 
 import com.github.ljtfreitas.julian.Preconditions.Precondition;
 import com.github.ljtfreitas.julian.contract.ParameterSerializer;
-import com.github.ljtfreitas.julian.http.MediaType;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -380,14 +379,14 @@ public class Endpoint {
 
     public static class BodyParameter extends Parameter {
 
-        private final MediaType contentType;
+        private final String contentType;
 
         private BodyParameter(int position, String name, JavaType javaType, String contentType) {
             super(position, name, javaType);
-            this.contentType = contentType == null || contentType.trim().isEmpty() ? null : MediaType.valueOf(contentType);
+            this.contentType = contentType == null || contentType.trim().isEmpty() ? null : contentType;
         }
 
-        public Optional<MediaType> contentType() {
+        public Optional<String> contentType() {
             return Optional.ofNullable(contentType);
         }
 

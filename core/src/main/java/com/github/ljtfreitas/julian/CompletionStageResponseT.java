@@ -34,7 +34,7 @@ class CompletionStageResponseT<T> implements ResponseT<CompletionStage<T>, T> {
 
 			@Override
 			public CompletionStage<T> join(RequestIO<A> request, Arguments arguments) {
-				return request.comp(fn, arguments).future();
+				return request.run(fn, arguments).future();
 			}
 
 			@Override

@@ -36,7 +36,7 @@ class StreamResponseT<T> implements ResponseT<Stream<T>, Collection<T>> {
 
 			@Override
 			public Promise<Stream<T>> run(RequestIO<A> request, Arguments arguments) {
-				return request.comp(fn, arguments).then(c -> Optional.ofNullable(c).stream().flatMap(Collection::stream));
+				return request.run(fn, arguments).then(c -> Optional.ofNullable(c).stream().flatMap(Collection::stream));
 			}
 
 			@Override

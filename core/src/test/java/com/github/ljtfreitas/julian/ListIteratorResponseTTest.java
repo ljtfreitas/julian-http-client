@@ -64,7 +64,7 @@ class ListIteratorResponseTTest {
 	void compose(@Mock ResponseFn<List<String>, List<String>> fn, @Mock RequestIO<List<String>> request) throws Exception {
 		Arguments arguments = Arguments.empty();
 
-		when(request.comp(fn, arguments)).thenReturn(Promise.done(List.of("expected")));
+		when(request.run(fn, arguments)).thenReturn(Promise.done(List.of("expected")));
 
 		ListIterator<String> listIterator = responseT.comp(endpoint, fn).join(request, arguments);
 

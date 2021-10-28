@@ -3,12 +3,12 @@ package com.github.ljtfreitas.julian.contract;
 import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.Cookies;
 import com.github.ljtfreitas.julian.Endpoint;
+import com.github.ljtfreitas.julian.Endpoint.BodyParameter;
 import com.github.ljtfreitas.julian.Endpoint.Parameter;
 import com.github.ljtfreitas.julian.Endpoint.Parameters;
 import com.github.ljtfreitas.julian.Headers;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.JavaType.Wildcard;
-import com.github.ljtfreitas.julian.http.MediaType;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -31,6 +31,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.emptyIterable;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -116,7 +117,7 @@ class DefaultEndpointMetadataTest {
 
 		@Test
 		void contentType() throws Exception {
-			EndpointMetadata endpointMetadata = new DefaultEndpointMetadata(WithMetaHeaders.class, WithMetaHeaders.class.getDeclaredMethod("contentType", MediaType.class));
+			EndpointMetadata endpointMetadata = new DefaultEndpointMetadata(WithMetaHeaders.class, WithMetaHeaders.class.getDeclaredMethod("contentType", String.class));
 
 			Endpoint endpoint = endpointMetadata.endpoint();
 
@@ -124,7 +125,7 @@ class DefaultEndpointMetadataTest {
 					() -> assertEquals(URI.create("http://my.api.com/headers/content-type"), endpoint.path().expand().unsafe()),
 					() -> assertThat(endpoint.headers(), emptyIterable()),
 					() -> assertThat(endpoint.cookies(), emptyIterable()),
-					() -> assertThat(endpoint.parameters(), contains(Parameter.header(0, "Content-Type", JavaType.valueOf(MediaType.class), new HeadersParameterSerializer()))),
+					() -> assertThat(endpoint.parameters(), contains(Parameter.header(0, "Content-Type", JavaType.valueOf(String.class), new HeadersParameterSerializer()))),
 					() -> assertEquals("GET", endpoint.method()));
 		}
 	}
@@ -181,6 +182,26 @@ class DefaultEndpointMetadataTest {
 					() -> assertThat(endpoint.parameters(), emptyIterable()),
 					() -> assertEquals(JavaType.valueOf(String.class), endpoint.returnType()));
 		}
+
+		@ParameterizedTest(name = "Meta-annotation: {0}")
+		@ArgumentsSource(MetaAnnotationsOnBodyProvider.class)
+		void metaAnnotationsOnBodyParameter(String annotation, String httpMethod, URI path, String contentType, Method javaMethod) {
+			EndpointMetadata endpointMetadata = new DefaultEndpointMetadata(WithMetaAnnotations.class, javaMethod);
+
+			Endpoint endpoint = endpointMetadata.endpoint();
+
+			assertAll(() -> assertNotNull(endpoint),
+					() -> assertEquals(path, endpoint.path().expand().unsafe()),
+					() -> assertEquals(httpMethod, endpoint.method()),
+					() -> assertThat(endpoint.headers(), emptyIterable()),
+					() -> assertThat(endpoint.cookies(), emptyIterable()),
+					() -> assertThat(endpoint.parameters(), contains(instanceOf(BodyParameter.class))),
+					() -> assertEquals(JavaType.valueOf(String.class), endpoint.returnType()));
+
+			BodyParameter bodyParameter = endpoint.parameters().body().get();
+			assertEquals(contentType, bodyParameter.contentType().get());
+		}
+
 	}
 
 	@Nested
@@ -300,17 +321,26 @@ class DefaultEndpointMetadataTest {
 					         arguments("@AcceptJson", "GET", URI.create("http://my.api.com/accept-json"), new com.github.ljtfreitas.julian.Header("Accept", "application/json"),
 					        		 WithMetaAnnotations.class.getMethod("acceptJson")),
 					         arguments("@AcceptXml", "GET", URI.create("http://my.api.com/accept-xml"), new com.github.ljtfreitas.julian.Header("Accept", "application/xml"),
-					        		 WithMetaAnnotations.class.getMethod("acceptXml")),
-					         arguments("@FormUrlEncoded", "POST", URI.create("http://my.api.com/form-url-encoded"), new com.github.ljtfreitas.julian.Header("Content-Type", "application/x-www-form-urlencoded"),
-					        		 WithMetaAnnotations.class.getMethod("formUrlEncoded")),
-					         arguments("@JsonContent", "POST", URI.create("http://my.api.com/json-content"), new com.github.ljtfreitas.julian.Header("Content-Type", "application/json"),
-					        		 WithMetaAnnotations.class.getMethod("jsonContent")),
-					         arguments("@MultipartFormData", "POST", URI.create("http://my.api.com/multipart-form-data"), new com.github.ljtfreitas.julian.Header("Content-Type", "multipart/form-data"),
-					        		 WithMetaAnnotations.class.getMethod("multipartFormData")),
-					         arguments("@SerializableContent", "POST", URI.create("http://my.api.com/serializable-content"), new com.github.ljtfreitas.julian.Header("Content-Type", "application/octet-stream"),
-					        		 WithMetaAnnotations.class.getMethod("serializableContent")),
-					         arguments("@XmlContent", "POST", URI.create("http://my.api.com/xml-content"), new com.github.ljtfreitas.julian.Header("Content-Type", "application/xml"),
-					        		 WithMetaAnnotations.class.getMethod("xmlContent")));
+					        		 WithMetaAnnotations.class.getMethod("acceptXml")));
+		}
+	}
+
+	static class MetaAnnotationsOnBodyProvider implements ArgumentsProvider {
+
+		@Override
+		public Stream<? extends org.junit.jupiter.params.provider.Arguments> provideArguments(ExtensionContext context)
+				throws Exception {
+
+			return Stream.of(arguments("@FormUrlEncoded", "POST", URI.create("http://my.api.com/form-url-encoded"), "application/x-www-form-urlencoded",
+								WithMetaAnnotations.class.getMethod("formUrlEncoded", Object.class)),
+							 arguments("@JsonContent", "POST", URI.create("http://my.api.com/json-content"), "application/json",
+								WithMetaAnnotations.class.getMethod("jsonContent", Object.class)),
+							 arguments("@MultipartFormData", "POST", URI.create("http://my.api.com/multipart-form-data"), "multipart/form-data",
+								WithMetaAnnotations.class.getMethod("multipartFormData", Object.class)),
+							 arguments("@SerializableContent", "POST", URI.create("http://my.api.com/serializable-content"),  "application/octet-stream",
+								WithMetaAnnotations.class.getMethod("serializableContent", Object.class)),
+							 arguments("@XmlContent", "POST", URI.create("http://my.api.com/xml-content"),  "application/xml",
+								WithMetaAnnotations.class.getMethod("xmlContent", Object.class)));
 		}
 	}
 
@@ -484,7 +514,7 @@ class DefaultEndpointMetadataTest {
 		String authorization(@Authorization String content);
 
 		@Get("/headers/content-type")
-		String contentType(@ContentType MediaType mediaType);
+		String contentType(@ContentType String mediaType);
 	}
 
 	@Path("http://my.api.com")
@@ -514,23 +544,19 @@ class DefaultEndpointMetadataTest {
 		String acceptXml();
 
 		@Post("/form-url-encoded")
-		@FormUrlEncoded
-		String formUrlEncoded();
+		String formUrlEncoded(@FormUrlEncoded Object body);
 
 		@Post("/json-content")
 		String jsonContent(@JsonContent Object body);
 
 		@Post("/multipart-form-data")
-		@MultipartFormData
-		String multipartFormData();
+		String multipartFormData(@MultipartFormData Object body);
 
 		@Post("/serializable-content")
-		@SerializableContent
-		String serializableContent();
+		String serializableContent(@SerializableContent Object body);
 
 		@Post("/xml-content")
-		@XmlContent
-		String xmlContent();
+		String xmlContent(@XmlContent Object body);
 	}
 
 	@Path("http://my.api.com")

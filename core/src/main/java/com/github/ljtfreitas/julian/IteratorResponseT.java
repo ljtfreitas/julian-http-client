@@ -37,7 +37,7 @@ class IteratorResponseT<T> implements ResponseT<Iterator<T>, Collection<T>> {
 
 			@Override
 			public Promise<Iterator<T>> run(RequestIO<A> request, Arguments arguments) {
-				return request.comp(fn, arguments).then(c -> Optional.ofNullable(c).map(Collection::iterator).orElseGet(Collections::emptyIterator));
+				return request.run(fn, arguments).then(c -> Optional.ofNullable(c).map(Collection::iterator).orElseGet(Collections::emptyIterator));
 			}
 
 			@Override

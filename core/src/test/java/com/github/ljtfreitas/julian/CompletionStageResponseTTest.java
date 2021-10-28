@@ -72,7 +72,7 @@ class CompletionStageResponseTTest {
 	void compose(@Mock ResponseFn<String, String> fn, @Mock RequestIO<String> request) throws Exception {
 		Arguments arguments = Arguments.empty();
 
-		when(request.comp(fn, arguments)).thenReturn(Promise.done("expected"));
+		when(request.run(fn, arguments)).thenReturn(Promise.done("expected"));
 
 		CompletionStage<String> completionStage = responseT.comp(endpoint, fn).join(request, arguments);
 

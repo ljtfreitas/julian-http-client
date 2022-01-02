@@ -24,9 +24,9 @@ package com.github.ljtfreitas.julian;
 
 import java.util.function.Predicate;
 
-public interface ResponseT<M, T> extends Predicate<Endpoint> {
+public interface ResponseT<T, M> extends Predicate<Endpoint> {
 
-	<A> ResponseFn<M, A> comp(Endpoint endpoint, ResponseFn<T, A> fn);
+	<A> ResponseFn<A, M> bind(Endpoint endpoint, ResponseFn<A, T> fn);
 
 	JavaType adapted(Endpoint endpoint);
 }

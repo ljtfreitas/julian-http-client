@@ -25,12 +25,12 @@ package com.github.ljtfreitas.julian;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 
-class FutureTaskResponseT<T> implements ResponseT<FutureTask<T>, Callable<T>> {
+class FutureTaskResponseT<T> implements ResponseT<Callable<T>, FutureTask<T>> {
 
 	private static final FutureTaskResponseT<Object> SINGLE_INSTANCE = new FutureTaskResponseT<>();
 
 	@Override
-	public <A> ResponseFn<FutureTask<T>, A> comp(Endpoint endpoint, ResponseFn<Callable<T>, A> fn) {
+	public <A> ResponseFn<A, FutureTask<T>> bind(Endpoint endpoint, ResponseFn<A, Callable<T>> fn) {
 		return new ResponseFn<>() {
 
 			@Override

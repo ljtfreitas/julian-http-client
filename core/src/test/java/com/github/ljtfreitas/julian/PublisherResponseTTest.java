@@ -25,7 +25,7 @@ class PublisherResponseTTest {
     @Mock
     private Endpoint endpoint;
 
-    private PublisherResponseT<String> responseT = new PublisherResponseT<>();
+    private final PublisherResponseT<String> responseT = new PublisherResponseT<>();
 
     @Nested
     class Predicates {
@@ -67,12 +67,12 @@ class PublisherResponseTTest {
     void compose(@Mock ResponseFn<String, String> fn, @Mock RequestIO<String> request, TestReporter reporter) throws InterruptedException {
         Arguments arguments = Arguments.empty();
 
-        when(request.run(fn, arguments)).thenReturn(Promise.pending(CompletableFuture.supplyAsync(() -> "expected",
+        when(fn.run(request, arguments)).thenReturn(Promise.pending(CompletableFuture.supplyAsync(() -> "expected",
                 CompletableFuture.delayedExecutor(1000, TimeUnit.MILLISECONDS))));
 
-        when(request.run(fn, arguments)).thenReturn(Promise.done("expected"));
+        when(fn.run(request, arguments)).thenReturn(Promise.done("expected"));
 
-        Publisher<String> publisher = responseT.comp(endpoint, fn).join(request, arguments);
+        Publisher<String> publisher = responseT.bind(endpoint, fn).join(request, arguments);
 
         publisher.subscribe(new Subscriber<>() {
 

@@ -40,5 +40,7 @@ public @interface Header {
 
     String[] value() default {};
 
+    String[] defaultValue() default {};
+
     Class<? extends ParameterSerializer<? super Object, com.github.ljtfreitas.julian.Headers>> serializer() default HeadersParameterSerializer.class;
 }

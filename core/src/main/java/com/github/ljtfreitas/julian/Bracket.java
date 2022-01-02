@@ -24,17 +24,22 @@ package com.github.ljtfreitas.julian;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static com.github.ljtfreitas.julian.Except.ThrowableFunction.identity;
 
 public interface Bracket<T extends AutoCloseable> extends Except<T> {
 
+	static <T extends AutoCloseable> Bracket<T> resource(T resource) {
+		return new Acquired<>(() -> resource);
+	}
+
 	static <T extends AutoCloseable> Bracket<T> acquire(AutoCloseableSupplier<T> fn) {
 		return new Acquired<>(fn);
 	}
 	
-	<R extends AutoCloseable> Bracket<R> then(AutoCloseableFunction<? super T, R> fn);
+	<R extends AutoCloseable> Bracket<R> and(AutoCloseableFunction<? super T, R> fn);
 
 	class Acquired<T extends AutoCloseable> implements Bracket<T> {
 
@@ -63,40 +68,65 @@ public interface Bracket<T extends AutoCloseable> extends Except<T> {
 				return fn.apply(value);
 			}
 		}
-		
+
+		@Override
+		public <R> Except<R> bind(Function<? super T, Except<R>> fn) {
+			return id().bind(fn);
+		}
+
 		@Override
 		public <E extends Exception> T prop(Function<? super Throwable, E> fn) throws E {
 			return id().prop(fn);
 		}
 
 		@Override
+		public Except<T> recover(ThrowableFunction<? super Throwable, T> fn) {
+			return id().recover(fn);
+		}
+
+		@Override
 		public Except<T> recover(Class<? extends Throwable> candidate, Except.ThrowableSupplier<T> fn) {
 			return id().recover(candidate, fn);
 		}
-		
-		@Override
-		public <E extends Throwable> Except<T> failure(Class<E> candidate, Function<E, ? extends Throwable> fn) {
-			return id().failure(candidate, fn);
-		}
-		
+
 		@Override
 		public T recover(Supplier<T> fn) {
 			return id().recover(fn);
 		}
 
 		@Override
-		public Except<T> consumes(Except.ThrowableConsumer<? super T> fn) {
-			return id().consumes(fn);
+		public Except<T> recover(Predicate<? super Throwable> candidate, ThrowableSupplier<T> fn) {
+			return id().recover(candidate, fn);
 		}
 
 		@Override
-		public Except<T> failure(Consumer<? super Throwable> fn) {
-			return id().failure(fn);
+		public <E extends Throwable> Except<T> failure(Class<E> candidate, Function<? super E, ? extends Throwable> fn) {
+			return id().failure(candidate, fn);
+		}
+
+		@Override
+		public Except<T> failure(Predicate<? super Throwable> candidate, Function<? super Throwable, ? extends Throwable> fn) {
+			return id().failure(candidate, fn);
+		}
+
+		@Override
+		public Except<T> onSuccess(Except.ThrowableConsumer<? super T> fn) {
+			return id().onSuccess(fn);
+		}
+
+		@Override
+		public Except<T> onFailure(Consumer<? super Throwable> fn) {
+			return id().onFailure(fn);
 		}
 		
 		@Override
-		public <R extends AutoCloseable> Bracket<R> then(AutoCloseableFunction<? super T, R> fn) {
+		public <R extends AutoCloseable> Bracket<R> and(AutoCloseableFunction<? super T, R> fn) {
 			return new Acquired<>(() -> safe(fn::apply));
+		}
+
+		@Override
+		public <R> R fold(Function<T, R> success, Function<? super Throwable, R> failure) {
+			return id().fold(success, failure);
 		}
 	}
 

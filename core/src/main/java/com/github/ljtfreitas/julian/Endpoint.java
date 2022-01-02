@@ -25,9 +25,11 @@ package com.github.ljtfreitas.julian;
 import com.github.ljtfreitas.julian.Preconditions.Precondition;
 import com.github.ljtfreitas.julian.contract.ParameterSerializer;
 
+import java.lang.reflect.Parameter;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -116,6 +118,51 @@ public class Endpoint {
         return new Endpoint(path, method, headers, cookies, parameters, adapted);
     }
 
+    @Override
+    public boolean equals(Object that) {
+        if (this == that) return true;
+
+        if (that instanceof Endpoint) {
+            Endpoint endpoint = (Endpoint) that;
+
+            return Objects.equals(path, endpoint.path)
+                && Objects.equals(method, endpoint.method)
+                && Objects.equals(parameters, endpoint.parameters) && Objects.equals(returnType, endpoint.returnType);
+
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(path, method, parameters, returnType);
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder()
+                .append("path: ")
+                    .append(path.show())
+                    .append("\n")
+                .append("HTTP method: ")
+                    .append(method)
+                    .append("\n")
+                .append("headers: ")
+                    .append(headers)
+                    .append("\n")
+                .append("cookies: ")
+                    .append(cookies)
+                    .append("\n")
+                .append("parameters: ")
+                    .append(parameters)
+                    .append("\n")
+                .append("return type: ")
+                    .append(returnType)
+                    .append("\n")
+                .toString();
+    }
+
     public static class Path implements Content {
 
         private final String path;
@@ -166,6 +213,23 @@ public class Endpoint {
         }
 
         @Override
+        public boolean equals(Object that) {
+            if (this == that) return true;
+
+            if (that instanceof Path) {
+                return Objects.equals(path, ((Path) that).path);
+
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(path);
+        }
+
+        @Override
         public String show() {
             return path;
         }
@@ -178,7 +242,6 @@ public class Endpoint {
         public Parameters(Collection<Parameter> parameters) {
             this.parameters = parameters;
         }
-
 
         @SafeVarargs
         final Stream<Parameter> just(Class<? extends Parameter>... classes) {
@@ -215,6 +278,28 @@ public class Endpoint {
 
         public Collection<Parameter> all() {
             return unmodifiableCollection(parameters);
+        }
+
+        @Override
+        public boolean equals(Object that) {
+            if (this == that) return true;
+
+            if (that instanceof Parameters) {
+                return Objects.equals(parameters, ((Parameters) that).parameters);
+
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(parameters);
+        }
+
+        @Override
+        public String toString() {
+            return parameters.toString();
         }
 
         public static Parameters create(Parameter... parameters) {
@@ -448,8 +533,6 @@ public class Endpoint {
         }
 
         String interpolate(Arguments arguments) {
-            StringBuffer buffer = new StringBuffer();
-
             Matcher matcher = DYNAMIC_PARAMETER_PATTERN.matcher(input);
 
             Function<MatchResult, String> group = m -> m.group(1);

@@ -25,11 +25,11 @@ class RewriteContentTypeHTTPRequestInterceptorTest {
         HTTPHeaders headers = HTTPHeaders.create(new HTTPHeader(CONTENT_TYPE, "application/json"));
 
         MediaType bodyContentType = MediaType.valueOf("application/json; whatever=value");
-        when(body.contentType()).thenReturn(bodyContentType);
+        when(body.contentType()).thenReturn(Optional.of(bodyContentType));
 
         HTTPRequest<Void> request = new SimpleHTTPRequest(headers, body);
 
-        Promise<HTTPRequest<Void>> promise = interceptor.intercepts(Promise.done(request));
+        Promise<HTTPRequest<Void>, HTTPException> promise = interceptor.intercepts(Promise.done(request));
 
         HTTPRequest<Void> newRequest = promise.join().unsafe();
 
@@ -37,14 +37,30 @@ class RewriteContentTypeHTTPRequestInterceptorTest {
     }
 
     @Test
-    void doNotTouchTheContentTypeHeaderWhenBodyIsMissing() {
+    void dontTouchTheContentTypeHeaderWhenRequestBodyContentTypeIsMissing(@Mock HTTPRequestBody body) {
+        HTTPHeader header = new HTTPHeader(CONTENT_TYPE, "application/json");
+        HTTPHeaders headers = HTTPHeaders.create(header);
+
+        when(body.contentType()).thenReturn(Optional.empty());
+
+        HTTPRequest<Void> request = new SimpleHTTPRequest(headers, body);
+
+        Promise<HTTPRequest<Void>, HTTPException> promise = interceptor.intercepts(Promise.done(request));
+
+        HTTPRequest<Void> newRequest = promise.join().unsafe();
+
+        assertThat(newRequest.headers(), contains(header));
+    }
+
+    @Test
+    void dontTouchTheContentTypeHeaderWhenThereIsNotBody() {
         HTTPHeader contentType = new HTTPHeader(CONTENT_TYPE, "application/json");
 
         HTTPHeaders headers = HTTPHeaders.create(contentType);
 
         HTTPRequest<Void> request = new SimpleHTTPRequest(headers, null);
 
-        Promise<HTTPRequest<Void>> promise = interceptor.intercepts(Promise.done(request));
+        Promise<HTTPRequest<Void>, HTTPException> promise = interceptor.intercepts(Promise.done(request));
 
         HTTPRequest<Void> newRequest = promise.join().unsafe();
 
@@ -107,7 +123,7 @@ class RewriteContentTypeHTTPRequestInterceptorTest {
         }
 
         @Override
-        public Promise<HTTPResponse<Void>> execute() {
+        public Promise<HTTPResponse<Void>, HTTPException> execute() {
             return null;
         }
     }

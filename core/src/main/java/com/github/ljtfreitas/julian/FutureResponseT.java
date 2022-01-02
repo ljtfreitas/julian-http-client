@@ -24,17 +24,17 @@ package com.github.ljtfreitas.julian;
 
 import java.util.concurrent.Future;
 
-class FutureResponseT<T> implements ResponseT<Future<T>, T> {
+class FutureResponseT<T> implements ResponseT<T, Future<T>> {
 
 	private static final FutureResponseT<Object> SINGLE_INSTANCE = new FutureResponseT<>();
 
 	@Override
-	public <A> ResponseFn<Future<T>, A> comp(Endpoint endpoint, ResponseFn<T, A> fn) {
+	public <A> ResponseFn<A, Future<T>> bind(Endpoint endpoint, ResponseFn<A, T> fn) {
 		return new ResponseFn<>() {
 
 			@Override
 			public Future<T> join(RequestIO<A> request, Arguments arguments) {
-				return request.run(fn, arguments).future();
+				return fn.run(request, arguments).future();
 			}
 
 			@Override

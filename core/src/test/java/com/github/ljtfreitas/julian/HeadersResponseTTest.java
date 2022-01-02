@@ -44,7 +44,7 @@ class HeadersResponseTTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    void compose(@Mock ResponseFn<Void, Void> fn, @Mock RequestIO<Void> request, @Mock HTTPResponse<Void> response) throws Exception {
+    void compose(@Mock ResponseFn<Void, Void> fn, @Mock RequestIO<Void> request, @Mock HTTPResponse<Void> response) {
         Arguments arguments = Arguments.empty();
 
         Headers headers = Headers.create(new Header("X-Header", "x-header-content"));
@@ -53,7 +53,7 @@ class HeadersResponseTTest {
         when(response.as(HTTPResponse.class)).thenCallRealMethod();
         when(request.execute()).then(a -> Promise.done(response));
 
-        Headers actual = responseT.comp(endpoint, fn).join(request, arguments);
+        Headers actual = responseT.bind(endpoint, fn).join(request, arguments);
 
         assertThat(actual, contains(headers.all().toArray()));
     }

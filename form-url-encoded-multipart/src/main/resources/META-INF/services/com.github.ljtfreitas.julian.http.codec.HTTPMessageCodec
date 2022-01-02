@@ -1,0 +1,3 @@
+com.github.ljtfreitas.julian.http.codec.form.FormObjectURLEncodedHTTPMessageCodec
+com.github.ljtfreitas.julian.http.codec.form.SimpleMapFormURLEncodedHTTPMessageCodec
+com.github.ljtfreitas.julian.http.codec.form.MultiMapFormURLEncodedHTTPMessageCodec

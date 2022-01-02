@@ -244,8 +244,8 @@ class ReactorNettyHTTPClientTest {
 
                 Except<HTTPClientResponse> response = client.request(request).execute().join();
 
-                response.consumes(r -> fail("a connection error was expected..."))
-                        .failure(e -> assertThat(e.getCause(), instanceOf(ConnectException.class)));
+                response.onSuccess(r -> fail("a connection error was expected..."))
+                        .onFailure(e -> assertThat(e.getCause(), instanceOf(ConnectException.class)));
             }
         }
     }

@@ -22,6 +22,7 @@
 
 package com.github.ljtfreitas.julian.http.client.reactor;
 
+import com.github.ljtfreitas.julian.http.HTTPResponseException;
 import com.github.ljtfreitas.julian.http.OptionalHTTPResponseBody;
 import reactor.core.publisher.Mono;
 import reactor.netty.ByteBufMono;
@@ -63,12 +64,12 @@ class ReactorNettyHTTPClientResponse implements HTTPClientResponse {
     }
 
     @Override
-    public <T, R extends Response<T>> Optional<R> failure(Function<? super HTTPClientResponse, R> fn) {
+    public <T, R extends Response<T, HTTPResponseException>> Optional<R> failure(Function<? super HTTPClientResponse, R> fn) {
         return response.failure(fn);
     }
 
     @Override
-    public <T, R extends Response<T>> Optional<R> success(Function<? super HTTPClientResponse, R> fn) {
+    public <T, R extends Response<T, HTTPResponseException>> Optional<R> success(Function<? super HTTPClientResponse, R> fn) {
         return response.success(fn);
     }
 

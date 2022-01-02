@@ -1,16 +1,16 @@
 package com.github.ljtfreitas.julian;
 
-class PromiseResponseT<T> implements ResponseT<Promise<T>, T> {
+class PromiseResponseT<T> implements ResponseT<T, Promise<T, ?>> {
 
     private static final PromiseResponseT<Object> SINGLE_INSTANCE = new PromiseResponseT<>();
 
     @Override
-    public <A> ResponseFn<Promise<T>, A> comp(Endpoint endpoint, ResponseFn<T, A> fn) {
+    public <A> ResponseFn<A, Promise<T, ?>> bind(Endpoint endpoint, ResponseFn<A, T> fn) {
         return new ResponseFn<>() {
 
             @Override
-            public Promise<T> join(RequestIO<A> request, Arguments arguments) {
-                return request.run(fn, arguments);
+            public Promise<T, ?> join(RequestIO<A> request, Arguments arguments) {
+                return fn.run(request, arguments);
             }
 
             @Override

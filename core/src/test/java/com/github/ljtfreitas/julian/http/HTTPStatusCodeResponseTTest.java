@@ -46,7 +46,7 @@ class HTTPStatusCodeResponseTTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    void compose(@Mock ResponseFn<Void, Void> fn, @Mock RequestIO<Void> request, @Mock HTTPResponse<Void> response) throws Exception {
+    void compose(@Mock ResponseFn<Void, Void> fn, @Mock RequestIO<Void> request, @Mock HTTPResponse<Void> response) {
         Arguments arguments = Arguments.empty();
 
         HTTPStatusCode httpStatusCode = HTTPStatusCode.OK;
@@ -55,7 +55,7 @@ class HTTPStatusCodeResponseTTest {
         when(response.as(HTTPResponse.class)).thenCallRealMethod();
         when(request.execute()).then(a -> Promise.done(response));
 
-        HTTPStatusCode actual = responseT.comp(endpoint, fn).join(request, arguments);
+        HTTPStatusCode actual = responseT.bind(endpoint, fn).join(request, arguments);
 
         assertEquals(httpStatusCode, actual);
     }

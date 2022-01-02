@@ -26,17 +26,17 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class StreamResponseT<T> implements ResponseT<Stream<T>, Collection<T>> {
+class StreamResponseT<T> implements ResponseT<Collection<T>, Stream<T>> {
 
 	private static final StreamResponseT<Object> SINGLE_INSTANCE = new StreamResponseT<>();
 
 	@Override
-	public <A> ResponseFn<Stream<T>, A> comp(Endpoint endpoint, ResponseFn<Collection<T>, A> fn) {
+	public <A> ResponseFn<A, Stream<T>> bind(Endpoint endpoint, ResponseFn<A, Collection<T>> fn) {
 		return new ResponseFn<>() {
 
 			@Override
-			public Promise<Stream<T>> run(RequestIO<A> request, Arguments arguments) {
-				return request.run(fn, arguments).then(c -> Optional.ofNullable(c).stream().flatMap(Collection::stream));
+			public Promise<Stream<T>, ? extends Exception> run(RequestIO<A> request, Arguments arguments) {
+				return fn.run(request, arguments).then(c -> Optional.ofNullable(c).stream().flatMap(Collection::stream));
 			}
 
 			@Override

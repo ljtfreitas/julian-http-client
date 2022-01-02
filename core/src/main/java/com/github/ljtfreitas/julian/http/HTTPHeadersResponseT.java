@@ -32,21 +32,20 @@ import com.github.ljtfreitas.julian.RequestIO;
 import com.github.ljtfreitas.julian.ResponseFn;
 import com.github.ljtfreitas.julian.ResponseT;
 
-public class HTTPHeadersResponseT implements ResponseT<HTTPHeaders, Void> {
+public class HTTPHeadersResponseT implements ResponseT<Void, HTTPHeaders> {
 
     private static final HTTPHeadersResponseT SINGLE_INSTANCE = new HTTPHeadersResponseT();
 
     @Override
-    public <A> ResponseFn<HTTPHeaders, A> comp(Endpoint endpoint, ResponseFn<Void, A> fn) {
+    public <A> ResponseFn<A, HTTPHeaders> bind(Endpoint endpoint, ResponseFn<A, Void> fn) {
         return new ResponseFn<>() {
 
             @SuppressWarnings({"unchecked", "rawtypes"})
             @Override
-            public Promise<HTTPHeaders> run(RequestIO<A> request, Arguments arguments) {
+            public Promise<HTTPHeaders, ? extends Exception> run(RequestIO<A> request, Arguments arguments) {
                 return request.execute().then(r -> {
                     Optional<HTTPResponse> httpResponse = r.as(HTTPResponse.class);
-                    return httpResponse.map(HTTPResponse::headers)
-                            .orElseGet(HTTPHeaders::empty);
+                    return httpResponse.map(HTTPResponse::headers).orElseGet(HTTPHeaders::empty);
                 });
             }
 

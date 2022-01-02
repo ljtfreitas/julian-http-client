@@ -42,23 +42,53 @@ class ParameterDefinitionReader {
 	}
 
 	Optional<String> name() {
-		return annotationType(QueryParameter.class, QueryParameter::name).filter(not(String::isEmpty))
-				.or(() -> annotationType(Header.class, Header::name).filter(not(String::isEmpty)))
-				.or(() -> annotationType(Cookie.class, Cookie::name).filter(not(String::isEmpty)))
-				.or(() -> annotationType(Path.class, Path::name).filter(not(String::isEmpty)));
+		return queryParameterName().or(this::headerName).or(this::cookieName).or(this::pathName)
+				.filter(not(String::isEmpty));
+	}
+
+	private Optional<String> pathName() {
+		return annotationType(Path.class, Path::name)
+				.filter(not(String::isEmpty))
+				.or(() -> annotationType(Path.class, Path::value)
+						.filter(not(String::isEmpty)));
+	}
+
+	private Optional<String> cookieName() {
+		return annotationType(Cookie.class, Cookie::name)
+				.filter(not(String::isEmpty))
+				.or(() -> annotationType(Cookie.class, Cookie::value))
+						.filter(not(String::isEmpty));
+	}
+
+	private Optional<String> headerName() {
+		return annotationType(Header.class, Header::name)
+				.filter(not(String::isEmpty))
+				.or(() -> annotationType(Header.class, Header::value)
+						.filter(a -> a.length > 0)
+						.map(a -> a[0])
+						.filter(not(String::isEmpty)));
+	}
+
+	private Optional<String> queryParameterName() {
+		return annotationType(QueryParameter.class, QueryParameter::name)
+				.filter(not(String::isEmpty))
+				.or(() -> annotationType(QueryParameter.class, QueryParameter::value)
+						.filter(a -> a.length > 0)
+						.map(a -> a[0])
+						.filter(not(String::isEmpty)));
 	}
 
 	Parameter parameter(int position, String name, JavaType returnType) {
 		return annotationType(QueryParameter.class, a -> Endpoint.Parameter.query(position, name, returnType,
-					instantiate(a.serializer()).unsafe(), a.value()))
+					instantiate(a.serializer()).unsafe(), a.defaultValue()))
 				.or(() -> annotationType(Header.class, a -> Endpoint.Parameter.header(position, name, returnType,
-					instantiate(a.serializer()).unsafe(), a.value())))
+					instantiate(a.serializer()).unsafe(), a.defaultValue())))
 				.or(() -> annotationType(Cookie.class, a -> Endpoint.Parameter.cookie(position, name, returnType,
-					instantiate(a.serializer()).unsafe(), a.value())))
+					instantiate(a.serializer()).unsafe(), a.defaultValue())))
 				.or(() -> annotationType(Body.class, a -> Endpoint.Parameter.body(position, name, returnType, a.value())))
 				.or(() -> annotationType(Callback.class, a -> Endpoint.Parameter.callback(position, name, returnType)))
 				.or(() -> annotationType(Path.class, a -> Endpoint.Parameter.path(position, name, returnType,
-					instantiate(a.serializer()).recover(DefaultParameterSerializer::new), a.value())))
+					instantiate(a.serializer()).recover(DefaultParameterSerializer::new), a.defaultValue())))
 				.orElseThrow();
 	}
 

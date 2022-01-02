@@ -22,33 +22,47 @@
 
 package com.github.ljtfreitas.julian.http;
 
-import java.util.function.BiFunction;
+import com.github.ljtfreitas.julian.Except;
+
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
-
-import com.github.ljtfreitas.julian.Response;
 
 public class FailureHTTPResponse<T> implements HTTPResponse<T> {
 
 	private final HTTPStatus status;
 	private final HTTPHeaders headers;
-	private final Supplier<HTTPResponseException> exception;
+	private final HTTPResponseException exception;
 
-	public FailureHTTPResponse(HTTPStatus status, HTTPHeaders headers, Supplier<HTTPResponseException> exception) {
+	public FailureHTTPResponse(HTTPStatus status, HTTPHeaders headers, HTTPResponseException exception) {
 		this.status = status;
 		this.headers = headers;
 		this.exception = exception;
 	}
 
 	@Override
-	public T body() {
-		throw exception.get();
+	public Except<T> body() {
+		return Except.failed(exception);
 	}
 
 	@Override
-	public <R> Response<R> map(Function<? super T, R> fn) {
-		throw exception.get();
+	public <R> HTTPResponse<R> map(Function<? super T, R> fn) {
+		return new FailureHTTPResponse<>(status, headers, exception);
+	}
+
+	@Override
+	public <R> HTTPResponse<R> map(HTTPResponseFn<? super T, R> fn) {
+		return new FailureHTTPResponse<>(status, headers, exception);
+	}
+
+	@Override
+	public HTTPResponse<T> onSuccess(Consumer<? super T> fn) {
+		return this;
+	}
+
+	@Override
+	public HTTPResponse<T> onSuccess(HTTPResponseConsumer<? super T> fn) {
+		return this;
 	}
 
 	@Override
@@ -60,29 +74,35 @@ public class FailureHTTPResponse<T> implements HTTPResponse<T> {
 	public HTTPHeaders headers() {
 		return headers;
 	}
-	
-	@SuppressWarnings("unchecked")
+
 	@Override
-	public <E extends Exception> Response<T> recover(Class<? super E> expected, Function<? super E, T> fn) {
-		HTTPResponseException e = exception.get();
-		return expected.isInstance(e) ? new DefaultHTTPResponse<>(status, headers, fn.apply((E) e)) : this;
+	public HTTPResponse<T> onFailure(Consumer<? super HTTPResponseException> fn) {
+		fn.accept(exception);
+		return this;
 	}
-	
-	@SuppressWarnings("unchecked")
+
 	@Override
-	public <E extends Exception> Response<T> recover(Function<? super E, T> fn) {
-		return new DefaultHTTPResponse<>(status, headers, fn.apply((E) exception.get()));
+	public HTTPResponse<T> recover(Function<? super HTTPResponseException, T> fn) {
+		return new SuccessHTTPResponse<>(status, headers, fn.apply(exception));
 	}
-	
+
 	@Override
-	public Response<T> recover(HTTPStatusCode code, Function<HTTPResponse<T>, T> fn) {
-		return status.is(code) ? new DefaultHTTPResponse<>(status, headers, fn.apply(this)) : this;
+	public <Err extends HTTPResponseException> HTTPResponse<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
+		return expected.isInstance(exception) ? new SuccessHTTPResponse<>(status, headers, fn.apply(expected.cast(exception))) : this;
 	}
-	
-	@SuppressWarnings("unchecked")
+
 	@Override
-	public <E extends Exception> Response<T> recover(Predicate<? super E> p, Function<? super E, T> fn) {
-		E e = (E) exception.get();
-		return p.test(e) ? new DefaultHTTPResponse<>(status, headers, fn.apply(e)) : this;
+	public HTTPResponse<T> recover(Predicate<? super HTTPResponseException> p, Function<? super HTTPResponseException, T> fn) {
+		return p.test(exception) ? new SuccessHTTPResponse<>(status, headers, fn.apply(exception)) : this;
+	}
+
+	@Override
+	public HTTPResponse<T> recover(HTTPStatusCode code, Function<HTTPResponse<T>, T> fn) {
+		return status.is(code) ? new SuccessHTTPResponse<>(status, headers, fn.apply(this)) : this;
+	}
+
+	@Override
+	public <R> R fold(Function<T, R> success, Function<? super HTTPResponseException, R> failure) {
+		return failure.apply(exception);
 	}
 }

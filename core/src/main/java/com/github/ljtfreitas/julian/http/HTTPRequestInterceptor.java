@@ -26,5 +26,5 @@ import com.github.ljtfreitas.julian.Promise;
 
 public interface HTTPRequestInterceptor {
 
-    <T> Promise<HTTPRequest<T>> intercepts(Promise<HTTPRequest<T>> request);
+    <T> Promise<HTTPRequest<T>, HTTPException> intercepts(Promise<HTTPRequest<T>, HTTPException> request);
 }

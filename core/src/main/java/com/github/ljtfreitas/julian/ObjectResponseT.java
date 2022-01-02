@@ -24,14 +24,16 @@ package com.github.ljtfreitas.julian;
 
 class ObjectResponseT<T> implements ResponseT<T, T> {
 
+	private static final ObjectResponseT<Object> SINGLE_INSTANCE = new ObjectResponseT<>();
+
 	@SuppressWarnings("unchecked")
 	@Override
-	public <A> ResponseFn<T, A> comp(Endpoint endpoint, ResponseFn<T, A> fn) {
+	public <A> ResponseFn<A, T> bind(Endpoint endpoint, ResponseFn<A, T> fn) {
 		return new ResponseFn<>() {
 
 			@Override
-			public Promise<T> run(RequestIO<A> request, Arguments arguments) {
-				return request.execute().then(response -> response.map(value -> (T) value).body());
+			public Promise<T, ? extends Exception> run(RequestIO<A> request, Arguments arguments) {
+				return request.execute().bind(response -> response.map(r -> (T) r).fold(Promise::done, Promise::failed));
 			}
 
 			@Override
@@ -49,5 +51,9 @@ class ObjectResponseT<T> implements ResponseT<T, T> {
 	@Override
 	public JavaType adapted(Endpoint endpoint) {
 		return endpoint.returnType();
+	}
+
+	public static ObjectResponseT<Object> get() {
+		return SINGLE_INSTANCE;
 	}
 }

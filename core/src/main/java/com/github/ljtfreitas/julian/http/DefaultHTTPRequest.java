@@ -84,7 +84,7 @@ class DefaultHTTPRequest<T> implements HTTPRequest<T> {
 	}
 
 	@Override
-	public Promise<HTTPResponse<T>> execute() {
+	public Promise<HTTPResponse<T>, HTTPException> execute() {
 		return io.execute();
 	}
 

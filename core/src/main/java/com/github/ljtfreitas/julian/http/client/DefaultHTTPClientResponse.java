@@ -27,13 +27,16 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import com.github.ljtfreitas.julian.Response;
+import com.github.ljtfreitas.julian.http.HTTPException;
 import com.github.ljtfreitas.julian.http.HTTPHeader;
 import com.github.ljtfreitas.julian.http.HTTPHeaders;
 import com.github.ljtfreitas.julian.http.DefaultHTTPResponseBody;
 import com.github.ljtfreitas.julian.http.HTTPResponseBody;
+import com.github.ljtfreitas.julian.http.HTTPResponseException;
 import com.github.ljtfreitas.julian.http.HTTPStatus;
 import com.github.ljtfreitas.julian.http.HTTPStatusCode;
 import com.github.ljtfreitas.julian.http.OptionalHTTPResponseBody;
+import com.github.ljtfreitas.julian.http.codec.HTTPMessageException;
 
 class DefaultHTTPClientResponse implements HTTPClientResponse {
 
@@ -63,13 +66,13 @@ class DefaultHTTPClientResponse implements HTTPClientResponse {
 	}
 
 	@Override
-	public <T, R extends Response<T>> Optional<R> failure(Function<? super HTTPClientResponse, R> fn) {
-		return status.error() ? Optional.ofNullable(fn.apply(this)) : Optional.empty();
+	public <T, R extends Response<T, HTTPResponseException>> Optional<R> success(Function<? super HTTPClientResponse, R> fn) {
+		return status.success() || status.redirection() ? Optional.ofNullable(fn.apply(this)) : Optional.empty();
 	}
 
 	@Override
-	public <T, R extends Response<T>> Optional<R> success(Function<? super HTTPClientResponse, R> fn) {
-		return status.success() || status.redirection() ? Optional.ofNullable(fn.apply(this)) : Optional.empty();
+	public <T, R extends Response<T, HTTPResponseException>> Optional<R> failure(Function<? super HTTPClientResponse, R> fn) {
+		return status.error() ? Optional.ofNullable(fn.apply(this)) : Optional.empty();
 	}
 
 	static DefaultHTTPClientResponse valueOf(HttpResponse<HTTPResponseBody> response) {

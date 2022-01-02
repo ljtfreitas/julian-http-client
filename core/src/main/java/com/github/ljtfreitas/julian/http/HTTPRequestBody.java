@@ -23,11 +23,12 @@
 package com.github.ljtfreitas.julian.http;
 
 import java.nio.ByteBuffer;
+import java.util.Optional;
 import java.util.concurrent.Flow.Publisher;
 
 public interface HTTPRequestBody {
 
-    MediaType contentType();
+    Optional<MediaType> contentType();
 
     Publisher<ByteBuffer> serialize();
 

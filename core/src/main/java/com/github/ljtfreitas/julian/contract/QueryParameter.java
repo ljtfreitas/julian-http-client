@@ -42,5 +42,7 @@ public @interface QueryParameter {
 
     String[] value() default "";
 
+    String[] defaultValue() default {};
+
     Class<? extends ParameterSerializer<? super Object, QueryParameters>> serializer() default QueryParameterSerializer.class;
 }

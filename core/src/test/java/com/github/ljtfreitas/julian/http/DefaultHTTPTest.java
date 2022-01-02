@@ -110,12 +110,12 @@ class DefaultHTTPTest {
 
 			mockServer.when(expectedRequest).respond(expectedResponse);
 
-			Promise<HTTPRequest<String>> request = http.request(endpoint, arguments, returnType);
+			Promise<HTTPRequest<String>, HTTPException> request = http.request(endpoint, arguments, returnType);
 
 			HTTPResponse<String> response = request.bind(HTTPRequest::execute).join().unsafe();
 
 			assertAll(() -> assertEquals(expectedResponse.getStatusCode(), response.status().code()),
-					  () -> assertEquals(expectedResponse.getBodyAsString(), response.body()));
+					  () -> assertEquals(expectedResponse.getBodyAsString(), response.body().unsafe()));
 		}
 
 		@Test
@@ -134,7 +134,7 @@ class DefaultHTTPTest {
 		void shouldRunRequestAndReadTheResponse(HttpRequest expectedRequest, HttpResponse expectedResponse, Endpoint endpoint, Arguments arguments) {
 			mockServer.when(expectedRequest).respond(expectedResponse);
 
-			Promise<HTTPRequest<Void>> request = http.request(endpoint, arguments, JavaType.none());
+			Promise<HTTPRequest<Void>, HTTPException> request = http.request(endpoint, arguments, JavaType.none());
 
 			HTTPResponse<Void> response = request.bind(HTTPRequest::execute).join().unsafe();
 
@@ -175,9 +175,9 @@ class DefaultHTTPTest {
 							Headers.create(new Header("Content-Type", "text/plain")), Cookies.empty(),
 							Parameters.create(Endpoint.Parameter.body(0, "body", JavaType.valueOf(String.class))));
 
-					Promise<HTTPRequest<String>> request = http.request(endpoint, Arguments.create(requestBodyAsString), JavaType.valueOf(String.class));
+					Promise<HTTPRequest<String>, HTTPException> request = http.request(endpoint, Arguments.create(requestBodyAsString), JavaType.valueOf(String.class));
 
-					String response = request.bind(HTTPRequest::execute).then(HTTPResponse::body).join().unsafe();
+					String response = request.bind(HTTPRequest::execute).then(HTTPResponse::body).then(Except::unsafe).join().unsafe();
 
 					assertEquals(expectedResponse, response);
 				}
@@ -198,9 +198,9 @@ class DefaultHTTPTest {
 							Headers.empty(), Cookies.empty(),
 							Parameters.create(Endpoint.Parameter.body(0, "body", JavaType.valueOf(String.class), "text/plain")));
 
-					Promise<HTTPRequest<String>> request = http.request(endpoint, Arguments.create(requestBodyAsString), JavaType.valueOf(String.class));
+					Promise<HTTPRequest<String>, HTTPException> request = http.request(endpoint, Arguments.create(requestBodyAsString), JavaType.valueOf(String.class));
 
-					String response = request.bind(HTTPRequest::execute).then(HTTPResponse::body).join().unsafe();
+					String response = request.bind(HTTPRequest::execute).then(HTTPResponse::body).then(Except::unsafe).join().unsafe();
 
 					assertEquals(expectedResponse, response);
 				}
@@ -267,9 +267,9 @@ class DefaultHTTPTest {
 							Headers.empty(), Cookies.empty(),
 							Parameters.empty(), responseType);
 
-					Promise<HTTPRequest<String>> request = http.request(endpoint, Arguments.empty(), responseType);
+					Promise<HTTPRequest<String>, HTTPException> request = http.request(endpoint, Arguments.empty(), responseType);
 
-					String response = request.bind(HTTPRequest::execute).then(HTTPResponse::body).join().unsafe();
+					String response = request.bind(HTTPRequest::execute).then(HTTPResponse::body).then(Except::unsafe).join().unsafe();
 
 					assertEquals(expectedResponse, response);
 				}
@@ -298,8 +298,8 @@ class DefaultHTTPTest {
 							.bind(HTTPRequest::execute)
 							.join();
 
-					response.consumes(r -> fail("a HTTPResponseReaderException was expected."))
-							.failure(e -> assertThat(e, instanceOf(HTTPResponseReaderException.class)));
+					response.onSuccess(r -> fail("a HTTPResponseReaderException was expected."))
+							.onFailure(e -> assertThat(e, instanceOf(HTTPResponseReaderException.class)));
 				}
 
 				@Test
@@ -318,10 +318,11 @@ class DefaultHTTPTest {
 					Except<Object> response = http.request(endpoint, Arguments.empty(), responseType)
 							.bind(HTTPRequest::execute)
 							.then(HTTPResponse::body)
+							.then(Except::unsafe)
 							.join();
 
-					response.consumes(r -> fail("a HTTPResponseReaderException was expected, but the response is " + r))
-							.failure(e -> assertThat(e, instanceOf(HTTPResponseReaderException.class)));
+					response.onSuccess(r -> fail("a HTTPResponseReaderException was expected, but the response is " + r))
+							.onFailure(e -> assertThat(e, instanceOf(HTTPResponseReaderException.class)));
 				}
 			}
 		}
@@ -359,7 +360,7 @@ class DefaultHTTPTest {
 						  () -> assertThat(failure.status().message(), anyOf(equalTo(reason), nullValue())),
 						  () -> assertThat(failure.headers(), hasItems(new HTTPHeader("X-Whatever", List.of("whatever")))));
 
-				HTTPResponseException exception = assertThrows(HTTPResponseException.class, failure::body);
+				HTTPResponseException exception = assertThrows(HTTPResponseException.class, failure.body()::unsafe);
 
 				assertAll(() -> assertEquals(failure.status(), exception.status()),
 						  () -> assertEquals(failure.headers(), exception.headers()));
@@ -383,10 +384,10 @@ class DefaultHTTPTest {
 				String recovered = "recovered";
 				
 				assertAll(() -> assertThat(response, instanceOf(FailureHTTPResponse.class)),
-						  () -> assertEquals(recovered, response.recover(empty -> recovered).body()),
-						  () -> assertEquals(recovered, response.recover(exceptionType, e -> recovered).body()),
-						  () -> assertEquals(recovered, response.recover(statusCode, e -> recovered).body()),
-						  () -> assertEquals(recovered, response.recover(exceptionType::isInstance, e -> recovered).body()));
+						  () -> assertEquals(recovered, response.recover(empty -> recovered).body().unsafe()),
+						  () -> assertEquals(recovered, response.recover(exceptionType, e -> recovered).body().unsafe()),
+						  () -> assertEquals(recovered, response.recover(statusCode, e -> recovered).body().unsafe()),
+						  () -> assertEquals(recovered, response.recover(exceptionType::isInstance, e -> recovered).body().unsafe()));
 			}
 		}
 
@@ -402,9 +403,9 @@ class DefaultHTTPTest {
 						.bind(HTTPRequest::execute)
 						.join();
 
-				response.consumes(r -> fail("a connection error was expected..."))
-						.failure(e -> assertThat(e, instanceOf(HTTPClientException.class)))
-						.failure(e -> assertThat(e.getCause(), instanceOf(IOException.class)));
+				response.onSuccess(r -> fail("a connection error was expected..."))
+						.onFailure(e -> assertThat(e, instanceOf(HTTPClientException.class)))
+						.onFailure(e -> assertThat(e.getCause(), instanceOf(IOException.class)));
 			}
 		}
 	}

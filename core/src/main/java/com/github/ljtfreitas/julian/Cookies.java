@@ -25,6 +25,7 @@ package com.github.ljtfreitas.julian;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
@@ -49,7 +50,7 @@ public class Cookies implements Iterable<Cookie> {
 	}
 
 	public Optional<Header> header() {
-		return cookies.isEmpty() ? Optional.empty() : Optional.of(cookies.stream().reduce(Header.empty("Cookie"), (header, cookie) -> header.add(cookie.pair()), (a, b) -> b));
+		return cookies.isEmpty() ? Optional.empty() : Optional.of(new Header("Cookie", cookies.stream().map(Cookie::pair).collect(Collectors.joining("; "))));
 	}
 
 	@Override
@@ -59,6 +60,11 @@ public class Cookies implements Iterable<Cookie> {
 
 	public Collection<Cookie> all() {
 		return cookies;
+	}
+
+	@Override
+	public String toString() {
+		return cookies.toString();
 	}
 
 	public static Cookies empty() {

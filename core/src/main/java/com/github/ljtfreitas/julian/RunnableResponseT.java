@@ -22,13 +22,13 @@
 
 package com.github.ljtfreitas.julian;
 
-class RunnableResponseT implements ResponseT<Runnable, Void> {
+class RunnableResponseT implements ResponseT<Void, Runnable> {
 
 	private static final RunnableResponseT SINGLE_INSTANCE = new RunnableResponseT();
 
 	@Override
-	public <A> ResponseFn<Runnable, A> comp(Endpoint endpoint, ResponseFn<Void, A> fn) {
-		return new ResponseFn<Runnable, A>() {
+	public <A> ResponseFn<A, Runnable> bind(Endpoint endpoint, ResponseFn<A, Void> fn) {
+		return new ResponseFn<A, Runnable>() {
 
 			@Override
 			public Runnable join(RequestIO<A> request, Arguments arguments) {

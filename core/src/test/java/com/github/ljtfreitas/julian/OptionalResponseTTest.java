@@ -20,20 +20,20 @@ class OptionalResponseTTest {
 	@Mock
 	private Endpoint endpoint;
 
-	private OptionalResponseT<String> responseT = new OptionalResponseT<>();
+	private final OptionalResponseT<String> responseT = new OptionalResponseT<>();
 
 	@Nested
 	class Predicates {
 
 		@Test
-		void supported() throws Exception {
+		void supported() {
 			when(endpoint.returnType()).thenReturn(JavaType.parameterized(Optional.class, String.class));
 
 			assertTrue(responseT.test(endpoint));
 		}
 
 		@Test
-		void unsupported() throws Exception {
+		void unsupported() {
 			when(endpoint.returnType()).thenReturn(JavaType.valueOf(String.class));
 
 			assertFalse(responseT.test(endpoint));
@@ -44,14 +44,14 @@ class OptionalResponseTTest {
 	class Adapted {
 
 		@Test
-		void parameterized() throws Exception {
+		void parameterized() {
 			when(endpoint.returnType()).thenReturn(JavaType.parameterized(Optional.class, String.class));
 
 			assertEquals(JavaType.valueOf(String.class), responseT.adapted(endpoint));
 		}
 
 		@Test
-		void simple() throws Exception {
+		void simple() {
 			when(endpoint.returnType()).thenReturn(JavaType.object());
 
 			assertEquals(JavaType.object(), responseT.adapted(endpoint));
@@ -59,13 +59,12 @@ class OptionalResponseTTest {
 	}
 
 	@Test
-	void compose(@Mock ResponseFn<String, String> fn, @Mock RequestIO<String> request)
-			throws Exception {
+	void compose(@Mock ResponseFn<String, String> fn, @Mock RequestIO<String> request) {
 		Arguments arguments = Arguments.empty();
 
-		when(request.run(fn, arguments)).thenReturn(Promise.done("expected"));
+		when(fn.run(request, arguments)).thenReturn(Promise.done("expected"));
 
-		Optional<String> optional = responseT.comp(endpoint, fn).join(request, arguments);
+		Optional<String> optional = responseT.bind(endpoint, fn).join(request, arguments);
 
 		assertAll(() -> assertTrue(optional.isPresent()), () -> assertEquals("expected", optional.get()));
 	}

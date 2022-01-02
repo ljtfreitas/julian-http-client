@@ -24,14 +24,6 @@ plugins {
     modules
 }
 
-tasks.jar.configure {
-    archiveBaseName.set("julian-http-client-core")
-}
-
-tasks.compileJava.configure {
-    options.compilerArgs.add("-parameters")
-}
-
 tasks.compileTestJava.configure {
     options.compilerArgs.add("-parameters")
 }

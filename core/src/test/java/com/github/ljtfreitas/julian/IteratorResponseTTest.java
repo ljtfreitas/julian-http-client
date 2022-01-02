@@ -29,14 +29,14 @@ class IteratorResponseTTest {
 	class Predicates {
 		
 		@Test
-		void supported() throws Exception {
+		void supported() {
 			when(endpoint.returnType()).thenReturn(JavaType.parameterized(Iterator.class, String.class));
 
 			assertTrue(responseT.test(endpoint));
 		}
 		
 		@Test
-		void unsupported() throws Exception {
+		void unsupported() {
 			when(endpoint.returnType()).thenReturn(JavaType.valueOf(String.class));
 	
 			assertFalse(responseT.test(endpoint));
@@ -47,14 +47,14 @@ class IteratorResponseTTest {
 	class Adapted {
 	
 		@Test
-		void parameterized() throws Exception {
+		void parameterized() {
 			when(endpoint.returnType()).thenReturn(JavaType.parameterized(Iterator.class, String.class));
 
 			assertEquals(JavaType.parameterized(Collection.class, String.class), responseT.adapted(endpoint));
 		}
 
 		@Test
-		void simple() throws Exception {
+		void simple() {
 			when(endpoint.returnType()).thenReturn(JavaType.object());
 
 			assertEquals(JavaType.parameterized(Collection.class, Object.class), responseT.adapted(endpoint));
@@ -62,12 +62,12 @@ class IteratorResponseTTest {
 	}
 
 	@Test
-	void compose(@Mock ResponseFn<Collection<String>, Collection<String>> fn, @Mock RequestIO<Collection<String>> request) throws Exception {
+	void compose(@Mock ResponseFn<Collection<String>, Collection<String>> fn, @Mock RequestIO<Collection<String>> request) {
 		Arguments arguments = Arguments.empty();
 
-		when(request.run(fn, arguments)).thenReturn(Promise.done(List.of("expected")));
+		when(fn.run(request, arguments)).thenReturn(Promise.done(List.of("expected")));
 
-		Iterator<String> iterator = responseT.comp(endpoint, fn).join(request, arguments);
+		Iterator<String> iterator = responseT.bind(endpoint, fn).join(request, arguments);
 
 		assertThat(() -> iterator, hasItem("expected"));
 	}

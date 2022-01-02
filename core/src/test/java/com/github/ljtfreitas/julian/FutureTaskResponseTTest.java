@@ -28,14 +28,14 @@ class FutureTaskResponseTTest {
 	class Predicates {
 
 		@Test
-		void supported() throws Exception {
+		void supported() {
 			when(endpoint.returnType()).thenReturn(JavaType.parameterized(FutureTask.class, String.class));
 
 			assertTrue(responseT.test(endpoint));
 		}
 		
 		@Test
-		void unsupported() throws Exception {
+		void unsupported() {
 			when(endpoint.returnType()).thenReturn(JavaType.valueOf(String.class));
 
 			assertFalse(responseT.test(endpoint));
@@ -61,12 +61,12 @@ class FutureTaskResponseTTest {
 	}
 	
 	@Test
-	void compose(@Mock ResponseFn<Callable<String>, String> fn, @Mock RequestIO<String> request) throws Exception {
+	void compose(@Mock ResponseFn<String, Callable<String>> fn, @Mock RequestIO<String> request) throws Exception {
 		Arguments arguments = Arguments.empty();
 
 		when(fn.join(request, arguments)).thenReturn(() -> "expected");
 
-		FutureTask<String> task = responseT.comp(endpoint, fn).join(request, arguments);
+		FutureTask<String> task = responseT.bind(endpoint, fn).join(request, arguments);
 
 		Executors.newSingleThreadExecutor().submit(task);
 

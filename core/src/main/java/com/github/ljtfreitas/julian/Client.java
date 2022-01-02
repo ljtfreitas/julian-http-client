@@ -23,6 +23,7 @@
 package com.github.ljtfreitas.julian;
 
 import com.github.ljtfreitas.julian.http.HTTP;
+import com.github.ljtfreitas.julian.http.HTTPException;
 import com.github.ljtfreitas.julian.http.HTTPRequest;
 
 class Client {
@@ -36,9 +37,9 @@ class Client {
 	}
 
 	<T> T run(Endpoint endpoint, Arguments arguments) {
-		ResponseFn<T, Object> responseFn = responses.select(endpoint);
+		ResponseFn<Object, T> responseFn = responses.select(endpoint);
 
-		Promise<HTTPRequest<Object>> request = http.request(endpoint, arguments, responseFn.returnType());
+		Promise<HTTPRequest<Object>, HTTPException> request = http.request(endpoint, arguments, responseFn.returnType());
 
 		return request.bind(r -> responseFn.run(r, arguments)).join().unsafe();
 	}

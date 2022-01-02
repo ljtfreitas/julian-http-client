@@ -27,17 +27,17 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Optional;
 
-class ListIteratorResponseT<T> implements ResponseT<ListIterator<T>, List<T>> {
+class ListIteratorResponseT<T> implements ResponseT<List<T>, ListIterator<T>> {
 
 	private static final ListIteratorResponseT<Object> SINGLE_INSTANCE = new ListIteratorResponseT<>();
 
 	@Override
-	public <A> ResponseFn<ListIterator<T>, A> comp(Endpoint endpoint, ResponseFn<List<T>, A> fn) {
+	public <A> ResponseFn<A, ListIterator<T>> bind(Endpoint endpoint, ResponseFn<A, List<T>> fn) {
 		return new ResponseFn<>() {
 
 			@Override
-			public Promise<ListIterator<T>> run(RequestIO<A> request, Arguments arguments) {
-				return request.run(fn, arguments).then(l -> Optional.ofNullable(l).map(List::listIterator).orElseGet(Collections::emptyListIterator));
+			public Promise<ListIterator<T>, ? extends Exception> run(RequestIO<A> request, Arguments arguments) {
+				return fn.run(request, arguments).then(l -> Optional.ofNullable(l).map(List::listIterator).orElseGet(Collections::emptyListIterator));
 			}
 
 			@Override

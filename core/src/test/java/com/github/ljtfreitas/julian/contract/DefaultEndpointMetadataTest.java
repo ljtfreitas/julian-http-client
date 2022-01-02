@@ -415,74 +415,74 @@ class DefaultEndpointMetadataTest {
 	@Path("http://my.api.com")
 	private interface MyType {
 
-		@Get("/get")
+		@GET("/get")
 		void get();
 
-		@Post("/post")
+		@POST("/post")
 		void post();
 
-		@Put("/put")
+		@PUT("/put")
 		void put();
 
-		@Patch("/patch")
+		@PATCH("/patch")
 		void patch();
 
-		@Delete("/delete")
+		@DELETE("/delete")
 		void delete();
 
-		@Head("/head")
+		@HEAD("/head")
 		void head();
 
-		@Trace("/trace")
+		@TRACE("/trace")
 		void trace();
 
-		@Options("/options")
+		@OPTIONS("/options")
 		void options();
 	}
 
 	@Path("http://my.api.com")
 	private interface WithParameters {
 
-		@Get("/{name}")
+		@GET("/{name}")
 		String path(@Path String name);
 
-		@Get("/{another-name}")
+		@GET("/{another-name}")
 		String pathWithAnotherName(@Path(name = "another-name") String name);
 
-		@Get("/header")
+		@GET("/header")
 		String header(@Header String name);
 
-		@Get("/header")
+		@GET("/header")
 		String headerWithAnotherName(@Header(name = "X-Whatever") String name);
 
-		@Get("/cookie")
+		@GET("/cookie")
 		String cookie(@Cookie String sessionId);
 
-		@Get("/cookie")
+		@GET("/cookie")
 		String cookieWithAnotherName(@Cookie(name = "session-id") String sessionId);
 
-		@Get("/query")
+		@GET("/query")
 		String query();
 		
-		@Get("/query")
+		@GET("/query")
 		String query(@QueryParameter String name);
 
-		@Get("/query")
+		@GET("/query")
 		String queryWithAnotherName(@QueryParameter(name = "another-name") String name);
 
-		@Get("/query")
+		@GET("/query")
 		String queryParameters(@QueryParameter Map<String, String> parameters);
 
-		@Post("/body")
+		@POST("/body")
 		String body(@Body Object body);
 
-		@Get("/callback")
+		@GET("/callback")
 		void successCallback(@Callback Consumer<String> callback);
 
-		@Get("/callback")
+		@GET("/callback")
 		void failureCallback(@Callback Consumer<Throwable> callback);
 
-		@Get("/callback")
+		@GET("/callback")
 		void subscribe(@Callback BiConsumer<String, Throwable> callback);
 	}
 
@@ -491,7 +491,7 @@ class DefaultEndpointMetadataTest {
 	@QueryParameter(name = "param2", value = "value2")
 	private interface WithQueryParameters {
 		
-		@Get("/query?param3=value3")
+		@GET("/query?param3=value3")
 		@QueryParameter(name = "param4", value = "value4")
 		String query();
 	}
@@ -501,7 +501,7 @@ class DefaultEndpointMetadataTest {
 	@Header(name = "X-Header-2", value = "x-header-2")
 	private interface WithHeaders {
 
-		@Get("/headers")
+		@GET("/headers")
 		@Header(name = "X-Header-3", value = "x-header-3")
 		@Header(name = "X-Header-4", value = "x-header-4")
 		void headers();
@@ -510,10 +510,10 @@ class DefaultEndpointMetadataTest {
 	@Path("http://my.api.com")
 	private interface WithMetaHeaders {
 
-		@Get("/headers/authorization")
+		@GET("/headers/authorization")
 		String authorization(@Authorization String content);
 
-		@Get("/headers/content-type")
+		@GET("/headers/content-type")
 		String contentType(@ContentType String mediaType);
 	}
 
@@ -522,7 +522,7 @@ class DefaultEndpointMetadataTest {
 	@Cookie(name = "some-cookie-2", value = "cookie-2")
 	private interface WithCookies {
 
-		@Get("/headers")
+		@GET("/headers")
 		@Cookie(name = "some-cookie-3", value = "cookie-3")
 		@Cookie(name = "some-cookie-4", value = "cookie-4")
 		void cookies();
@@ -531,31 +531,31 @@ class DefaultEndpointMetadataTest {
 	@Path("http://my.api.com")
 	private interface WithMetaAnnotations {
 		
-		@Get("/accept-all")
+		@GET("/accept-all")
 		@AcceptAll
 		String acceptAll();
 		
-		@Get("/accept-json")
+		@GET("/accept-json")
 		@AcceptJson
 		String acceptJson();
 		
-		@Get("/accept-xml")
+		@GET("/accept-xml")
 		@AcceptXml
 		String acceptXml();
 
-		@Post("/form-url-encoded")
+		@POST("/form-url-encoded")
 		String formUrlEncoded(@FormUrlEncoded Object body);
 
-		@Post("/json-content")
+		@POST("/json-content")
 		String jsonContent(@JsonContent Object body);
 
-		@Post("/multipart-form-data")
+		@POST("/multipart-form-data")
 		String multipartFormData(@MultipartFormData Object body);
 
-		@Post("/serializable-content")
+		@POST("/serializable-content")
 		String serializableContent(@SerializableContent Object body);
 
-		@Post("/xml-content")
+		@POST("/xml-content")
 		String xmlContent(@XmlContent Object body);
 	}
 
@@ -564,39 +564,39 @@ class DefaultEndpointMetadataTest {
 	@Cookie(name = "some-cookie", value = "some-cookie-value")
 	interface CrudOperations<T> {
 
-		@Post
+		@POST
 		@Header(name = "X-Other-Header", value = "other-header-value")
 		@Cookie(name = "other-cookie", value = "other-cookie-value")
 		void create(@JsonContent T body);
 		
-		@Post
+		@POST
 		@Header(name = "X-Other-Header", value = "other-header-value")
 		@Cookie(name = "other-cookie", value = "other-cookie-value")
 		void createSomething(@Body(APPLICATION_JSON_VALUE) T body);
 		
-		@Get("/{id}")
+		@GET("/{id}")
 		@AcceptJson
 		@Header(name = "X-Other-Header", value = "other-header-value")
 		@Cookie(name = "other-cookie", value = "other-cookie-value")
 		T read(@Path String id);
 
-		@Put("/{id}")
+		@PUT("/{id}")
 		@Header(name = "X-Other-Header", value = "other-header-value")
 		@Cookie(name = "other-cookie", value = "other-cookie-value")
 		void update(@Path String id, @JsonContent T body);
 
-		@Delete("/{id}")
+		@DELETE("/{id}")
 		@Header(name = "X-Other-Header", value = "other-header-value")
 		@Cookie(name = "other-cookie", value = "other-cookie-value")
 		void delete(@Path String id);
 
-		@Get
+		@GET
 		@AcceptJson
 		@Header(name = "X-Other-Header", value = "other-header-value")
 		@Cookie(name = "other-cookie", value = "other-cookie-value")
 		Collection<? extends T> all();
 
-		@Get
+		@GET
 		@AcceptJson
 		@Header(name = "X-Other-Header", value = "other-header-value")
 		@Cookie(name = "other-cookie", value = "other-cookie-value")
@@ -606,7 +606,7 @@ class DefaultEndpointMetadataTest {
 	@Path("/some")
 	interface SomeExtendedApi extends CrudOperations<SomePojo> {
 
-		@Post
+		@POST
 		SomePojo whatever(@Body SomePojo some);
 	}
 
@@ -616,19 +616,19 @@ class DefaultEndpointMetadataTest {
 	@Path("http://my.api.com")
 	interface Wrong {
 
-		@Post
+		@POST
 		void moreThanOneBody(@Body Object body1, @Body Object body2);
 
-		@Post
+		@POST
 		void invalidConsumerCallback(@Callback Consumer<Exception> callback);
 		
-		@Post
+		@POST
 		void invalidBiConsumerCallback(@Callback BiConsumer<String, String> callback);
 
 		void withoutHTTPMethod();
 
-		@Get
-		@Put
+		@GET
+		@PUT
 		void moreThanOneHTTPMethod();
 	}
 }

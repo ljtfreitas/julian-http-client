@@ -7,8 +7,10 @@ import java.util.List;
 
 public interface MultipartFormDataHTTPRequestWriter<T> extends HTTPRequestWriter<T> {
 
+    Collection<MediaType> MULTIPART_FORM_DATA_MEDIA_TYPES = List.of(MediaType.MULTIPART_FORM_DATA);
+
     @Override
     default Collection<MediaType> contentTypes() {
-        return List.of(MediaType.MULTIPART_FORM_DATA);
+        return MULTIPART_FORM_DATA_MEDIA_TYPES;
     }
 }

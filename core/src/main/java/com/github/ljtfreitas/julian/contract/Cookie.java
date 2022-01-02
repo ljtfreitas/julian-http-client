@@ -40,5 +40,7 @@ public @interface Cookie {
 
     String value() default "";
 
+    String defaultValue() default "";
+
     Class<? extends ParameterSerializer<? super Object, com.github.ljtfreitas.julian.Cookies>> serializer() default CookiesParameterSerializer.class;
 }

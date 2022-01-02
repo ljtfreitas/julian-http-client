@@ -34,17 +34,17 @@ import com.github.ljtfreitas.julian.Endpoint.CallbackParameter;
 import com.github.ljtfreitas.julian.Endpoint.Parameters;
 import com.github.ljtfreitas.julian.JavaType.Parameterized;
 
-class CompletionStageCallbackResponseT<T> implements ResponseT<Void, T> {
+class CompletionStageCallbackResponseT<T> implements ResponseT<T, Void> {
 
 	private static final CompletionStageCallbackResponseT<Object> SINGLE_INSTANCE = new CompletionStageCallbackResponseT<>();
 
 	@Override
-	public <A> ResponseFn<Void, A> comp(Endpoint endpoint, ResponseFn<T, A> fn) {
+	public <A> ResponseFn<A, Void> bind(Endpoint endpoint, ResponseFn<A, T> fn) {
 		return new ResponseFn<>() {
 
 			@Override
 			public Void join(RequestIO<A> request, Arguments arguments) {
-				CompletableFuture<T> future = request.run(fn, arguments).future();
+				CompletableFuture<T> future = fn.run(request, arguments).future();
 
 				success(endpoint.parameters(), arguments)
 						.ifPresent(future::thenAccept);

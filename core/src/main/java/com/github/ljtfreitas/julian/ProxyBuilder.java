@@ -41,12 +41,14 @@ import com.github.ljtfreitas.julian.http.client.ComposedHTTPClient;
 import com.github.ljtfreitas.julian.http.client.DebugHTTPClient;
 import com.github.ljtfreitas.julian.http.client.DefaultHTTPClient;
 import com.github.ljtfreitas.julian.http.client.HTTPClient;
-import com.github.ljtfreitas.julian.http.codec.ByteArrayHTTPResponseReader;
+import com.github.ljtfreitas.julian.http.codec.ByteArrayHTTPMessageCodec;
+import com.github.ljtfreitas.julian.http.codec.ByteBufferHTTPMessageCodec;
 import com.github.ljtfreitas.julian.http.codec.HTTPMessageCodec;
-import com.github.ljtfreitas.julian.http.codec.InputStreamHTTPResponseReader;
-import com.github.ljtfreitas.julian.http.codec.NonReadableHTTPResponseReader;
+import com.github.ljtfreitas.julian.http.codec.InputStreamHTTPMessageCodec;
+import com.github.ljtfreitas.julian.http.codec.OctetStreamHTTPMessageCodec;
 import com.github.ljtfreitas.julian.http.codec.ScalarHTTPMessageCodec;
 import com.github.ljtfreitas.julian.http.codec.StringHTTPMessageCodec;
+import com.github.ljtfreitas.julian.http.codec.UnprocessableHTTPMessageCodec;
 import com.github.ljtfreitas.julian.spi.Plugins;
 
 import javax.net.ssl.SSLContext;
@@ -58,16 +60,19 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 
+import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toUnmodifiableList;
 
 public class ProxyBuilder {
@@ -83,16 +88,19 @@ public class ProxyBuilder {
 
     public class HTTPMessageCodecs {
 
-        private final Collection<HTTPMessageCodec> codecs = new ArrayList<>();
+        private final Map<Class<? extends HTTPMessageCodec>, HTTPMessageCodec> codecs = new LinkedHashMap<>();
 
         public HTTPMessageCodecs add(HTTPMessageCodec... codecs) {
-            this.codecs.addAll(Arrays.asList(codecs));
-            return this;
+            return add(asList(codecs));
         }
 
         public HTTPMessageCodecs add(Collection<HTTPMessageCodec> codecs) {
-            this.codecs.addAll(codecs);
+            this.codecs.putAll(asMap(codecs));
             return this;
+        }
+
+        private Map<? extends Class<? extends HTTPMessageCodec>, HTTPMessageCodec> asMap(Collection<HTTPMessageCodec> codecs) {
+            return codecs.stream().collect(toMap(HTTPMessageCodec::getClass, identity()));
         }
 
         public ProxyBuilder and() {
@@ -104,39 +112,46 @@ public class ProxyBuilder {
         }
 
         private Collection<HTTPMessageCodec> codecs() {
-            Collection<HTTPMessageCodec> all = new ArrayList<>(codecs);
-            all.addAll(all());
-            all.addAll(plugins());
-            return all;
+            Map<Class<? extends HTTPMessageCodec>, HTTPMessageCodec> all = new LinkedHashMap<>();
+            all.putAll(plugins());
+            all.putAll(all());
+            all.putAll(codecs);
+            return all.values();
         }
 
-        private Collection<HTTPMessageCodec> plugins() {
-            return plugins.all(HTTPMessageCodec.class).collect(toUnmodifiableList());
+        private Map<? extends Class<? extends HTTPMessageCodec>, HTTPMessageCodec> plugins() {
+            return asMap(plugins.all(HTTPMessageCodec.class).collect(toUnmodifiableList()));
         }
 
-        private Collection<HTTPMessageCodec> all() {
-            return List.of(
-                    ByteArrayHTTPResponseReader.get(),
-                    InputStreamHTTPResponseReader.get(),
-                    NonReadableHTTPResponseReader.get(),
+        private Map<? extends Class<? extends HTTPMessageCodec>, HTTPMessageCodec> all() {
+            return asMap(List.of(
+                    ByteArrayHTTPMessageCodec.get(),
+                    ByteBufferHTTPMessageCodec.get(),
+                    InputStreamHTTPMessageCodec.get(),
+                    UnprocessableHTTPMessageCodec.get(),
                     ScalarHTTPMessageCodec.get(),
-                    StringHTTPMessageCodec.get());
+                    StringHTTPMessageCodec.get()));
         }
     }
 
     public class ResponsesTs {
 
-        private final Collection<ResponseT<?, ?>> responses = new ArrayList<>();
+        @SuppressWarnings("rawtypes")
+        private final Map<Class<? extends ResponseT>, ResponseT<?, ?>> responses = new LinkedHashMap<>();
         private final Async async = new Async();
 
         public ResponsesTs add(ResponseT<?, ?>... responses) {
-            this.responses.addAll(Arrays.asList(responses));
-            return this;
+            return add(asList(responses));
         }
 
         public ResponsesTs add(Collection<ResponseT<?, ?>> responses) {
-            this.responses.addAll(responses);
+            this.responses.putAll(asMap(responses));
             return this;
+        }
+
+        @SuppressWarnings("rawtypes")
+        private Map<? extends Class<? extends ResponseT>, ResponseT<?, ?>> asMap(Collection<ResponseT<?,?>> responses) {
+            return responses.stream().collect(toMap(ResponseT::getClass, identity()));
         }
 
         public Async async() {
@@ -151,28 +166,33 @@ public class ProxyBuilder {
             return new Responses(responses());
         }
 
+        @SuppressWarnings("rawtypes")
         private Collection<ResponseT<?, ?>> responses() {
-            Collection<ResponseT<?, ?>> all = new ArrayList<>(responses);
-            all.addAll(all());
-            all.addAll(async.all());
-            all.addAll(plugins());
-            return all;
+            Map<Class<? extends ResponseT>, ResponseT<?, ?>> all = new LinkedHashMap<>();
+            all.putAll(plugins());
+            all.putAll(all());
+            all.putAll(asMap(async.all()));
+            all.putAll(responses);
+            return all.values();
         }
 
-        private Collection<ResponseT<?, ?>> plugins() {
-            return plugins.all(ResponseT.class)
+        @SuppressWarnings("rawtypes")
+        private Map<? extends Class<? extends ResponseT>, ResponseT<?, ?>> plugins() {
+            return asMap(plugins.all(ResponseT.class)
                     .map(r -> (ResponseT<?, ?>) r)
-                    .collect(toUnmodifiableList());
+                    .collect(toUnmodifiableList()));
         }
 
-        private Collection<ResponseT<?,?>> all() {
-            return List.of(
+        @SuppressWarnings("rawtypes")
+        private Map<? extends Class<? extends ResponseT>, ResponseT<?, ?>> all() {
+            return asMap(List.of(
                     CallableResponseT.get(),
                     CollectionResponseT.get(),
                     CompletionStageCallbackResponseT.get(),
                     CompletionStageResponseT.get(),
                     DefaultResponseT.get(),
                     EnumerationResponseT.get(),
+                    ExceptResponseT.get(),
                     FutureResponseT.get(),
                     FutureTaskResponseT.get(),
                     HeadersResponseT.get(),
@@ -181,12 +201,13 @@ public class ProxyBuilder {
                     ListIteratorResponseT.get(),
                     OptionalResponseT.get(),
                     PromiseResponseT.get(),
+                    LazyResponseT.get(),
                     QueueResponseT.get(),
                     RunnableResponseT.get(),
                     StreamResponseT.get(),
                     HTTPHeadersResponseT.get(),
                     HTTPStatusCodeResponseT.get(),
-                    HTTPStatusResponseT.get());
+                    HTTPStatusResponseT.get()));
         }
 
         public class Async {
@@ -426,7 +447,7 @@ public class ProxyBuilder {
             private final Collection<HTTPRequestInterceptor> interceptors = new ArrayList<>();
 
             public HTTPRequestInterceptors add(HTTPRequestInterceptor... interceptors) {
-                this.interceptors.addAll(Arrays.asList(interceptors));
+                this.interceptors.addAll(asList(interceptors));
                 return this;
             }
 

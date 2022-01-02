@@ -24,10 +24,6 @@ package com.github.ljtfreitas.julian.http;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.stream.Stream;
 
 import com.github.ljtfreitas.julian.Promise;
 
@@ -55,7 +51,7 @@ public class HTTPRequestInterceptorChain implements HTTPRequestInterceptor {
     }
 
     @Override
-    public <T> Promise<HTTPRequest<T>> intercepts(Promise<HTTPRequest<T>> request) {
+    public <T> Promise<HTTPRequest<T>, HTTPException> intercepts(Promise<HTTPRequest<T>, HTTPException> request) {
         return interceptors.stream().reduce(request, (r, i) -> i.intercepts(r), (a, b) -> b);
     }
 }

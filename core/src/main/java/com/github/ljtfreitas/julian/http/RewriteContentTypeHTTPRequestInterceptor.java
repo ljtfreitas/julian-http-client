@@ -29,9 +29,11 @@ import static com.github.ljtfreitas.julian.http.HTTPHeader.CONTENT_TYPE;
 class RewriteContentTypeHTTPRequestInterceptor implements HTTPRequestInterceptor  {
 
     @Override
-    public <T> Promise<HTTPRequest<T>> intercepts(Promise<HTTPRequest<T>> request) {
+    public <T> Promise<HTTPRequest<T>, HTTPException> intercepts(Promise<HTTPRequest<T>, HTTPException> request) {
         return request.then(r -> r.body()
-                .map(b -> r.headers(r.headers().join(new HTTPHeader(CONTENT_TYPE, b.contentType().toString()))))
+                .map(b -> b.contentType()
+                        .map(c -> r.headers(r.headers().join(new HTTPHeader(CONTENT_TYPE, c.show()))))
+                        .orElse(r))
                 .orElse(r));
     }
 }

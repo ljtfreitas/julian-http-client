@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.joining;
 
-public class HTTPResponseException extends RuntimeException {
+public class HTTPResponseException extends HTTPException {
 
 	private static final long serialVersionUID = 1L;
 

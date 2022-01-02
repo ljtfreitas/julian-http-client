@@ -22,6 +22,7 @@
 
 package com.github.ljtfreitas.julian.http.auth;
 
+import com.github.ljtfreitas.julian.http.HTTPException;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -58,7 +59,7 @@ class HTTPAuthenticationInterceptorTest {
             return newHTTPRequest;
         });
 
-        Promise<HTTPRequest<Void>> authorized = interceptor.intercepts(Promise.done(request));
+        Promise<HTTPRequest<Void>, HTTPException> authorized = interceptor.intercepts(Promise.done(request));
 
         assertThat(authorized.join().unsafe().headers(), contains(new HTTPHeader(AUTHORIZATION, "abc1234")));
     }

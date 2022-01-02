@@ -46,7 +46,7 @@ class FormObjectURLEncodedHTTPMessageCodecTest {
             void write() {
                 HTTPRequestBody output = codec.write(Form.create(Map.of("name", List.of("Tiago de Freitas Lima"), "age", List.of(35))), StandardCharsets.UTF_8);
 
-                assertEquals(APPLICATION_FORM_URLENCODED, output.contentType());
+                assertEquals(APPLICATION_FORM_URLENCODED, output.contentType().orElseThrow());
 
                 output.serialize().subscribe(new Subscriber<>() {
 

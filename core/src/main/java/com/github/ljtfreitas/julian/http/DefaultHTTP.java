@@ -62,7 +62,7 @@ public class DefaultHTTP implements HTTP {
 	}
 
 	@Override
-	public <T> Promise<HTTPRequest<T>> request(Endpoint endpoint, Arguments arguments, JavaType returnType) {
+	public <T> Promise<HTTPRequest<T>, HTTPException> request(Endpoint endpoint, Arguments arguments, JavaType returnType) {
 		URI uri = endpoint.path().expand(arguments)
 				.prop(cause -> new IllegalArgumentException(endpoint.path().show(), cause));
 

@@ -32,9 +32,9 @@ public class Cookie {
 	private final String name;
 	private final String value;
 
-	public Cookie(String name, Object value) {
+	public Cookie(String name, String value) {
 		this.name = nonNull(name);
-		this.value = nonNull(value).toString();
+		this.value = nonNull(value);
 	}
 
 	public String pair() {

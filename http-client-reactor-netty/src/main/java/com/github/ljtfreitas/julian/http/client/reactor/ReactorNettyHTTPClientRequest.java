@@ -22,6 +22,7 @@
 
 package com.github.ljtfreitas.julian.http.client.reactor;
 
+import com.github.ljtfreitas.julian.http.client.HTTPClientException;
 import reactor.netty.http.client.HttpClient.ResponseReceiver;
 
 import com.github.ljtfreitas.julian.Promise;
@@ -37,7 +38,7 @@ class ReactorNettyHTTPClientRequest implements HTTPClientRequest {
     }
 
     @Override
-    public Promise<HTTPClientResponse> execute() {
+    public Promise<HTTPClientResponse, Exception> execute() {
         return new MonoPromise<>(receiver.responseSingle(ReactorNettyHTTPClientResponse::valueOf)
                 .cast(HTTPClientResponse.class));
     }

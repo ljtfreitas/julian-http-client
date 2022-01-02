@@ -32,7 +32,7 @@ import java.util.concurrent.Flow.Publisher;
 import java.util.concurrent.Flow.Subscriber;
 import java.util.function.Predicate;
 
-public class SubscriberCallbackResponseT<T> implements ResponseT<Void, Publisher<T>> {
+public class SubscriberCallbackResponseT<T> implements ResponseT<Publisher<T>, Void> {
 
     private static final SubscriberCallbackResponseT<Object> SINGLE_INSTANCE = new SubscriberCallbackResponseT<>();
 
@@ -41,12 +41,12 @@ public class SubscriberCallbackResponseT<T> implements ResponseT<Void, Publisher
     }
 
     @Override
-    public <A> ResponseFn<Void, A> comp(Endpoint endpoint, ResponseFn<Publisher<T>, A> fn) {
+    public <A> ResponseFn<A, Void> bind(Endpoint endpoint, ResponseFn<A, Publisher<T>> fn) {
         return new ResponseFn<>() {
 
             @Override
             public Void join(RequestIO<A> request, Arguments arguments) {
-                request.run(fn, arguments)
+                fn.run(request, arguments)
                         .then(publisher -> {
                             subscriber(endpoint.parameters(), arguments).ifPresent(publisher::subscribe);
                             return publisher;

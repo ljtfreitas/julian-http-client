@@ -63,7 +63,7 @@ class CallableResponseTTest {
 
 		when(fn.join(request, arguments)).thenReturn("expected");
 
-		Callable<String> callable = responseT.comp(endpoint, fn).join(request, arguments);
+		Callable<String> callable = responseT.bind(endpoint, fn).join(request, arguments);
 		
 		assertEquals("expected", callable.call());
 	}

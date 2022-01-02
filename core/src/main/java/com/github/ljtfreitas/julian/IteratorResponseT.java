@@ -27,17 +27,17 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Optional;
 
-class IteratorResponseT<T> implements ResponseT<Iterator<T>, Collection<T>> {
+class IteratorResponseT<T> implements ResponseT<Collection<T>, Iterator<T>> {
 
 	private static final IteratorResponseT<Object> SINGLE_INSTANCE = new IteratorResponseT<>();
 
 	@Override
-	public <A> ResponseFn<Iterator<T>, A> comp(Endpoint endpoint, ResponseFn<Collection<T>, A> fn) {
+	public <A> ResponseFn<A, Iterator<T>> bind(Endpoint endpoint, ResponseFn<A, Collection<T>> fn) {
 		return new ResponseFn<>() {
 
 			@Override
-			public Promise<Iterator<T>> run(RequestIO<A> request, Arguments arguments) {
-				return request.run(fn, arguments).then(c -> Optional.ofNullable(c).map(Collection::iterator).orElseGet(Collections::emptyIterator));
+			public Promise<Iterator<T>, ? extends Exception> run(RequestIO<A> request, Arguments arguments) {
+				return fn.run(request, arguments).then(c -> Optional.ofNullable(c).map(Collection::iterator).orElseGet(Collections::emptyIterator));
 			}
 
 			@Override

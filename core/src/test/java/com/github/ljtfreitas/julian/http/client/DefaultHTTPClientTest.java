@@ -10,7 +10,6 @@ import com.github.ljtfreitas.julian.http.HTTPRequestBody;
 import com.github.ljtfreitas.julian.http.HTTPRequestDefinition;
 import com.github.ljtfreitas.julian.http.HTTPStatusCode;
 import com.github.ljtfreitas.julian.http.MediaType;
-import com.github.ljtfreitas.julian.http.codec.StringHTTPMessageCodec;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,12 +31,10 @@ import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.Proxy;
 import java.net.ProxySelector;
 import java.net.URI;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpTimeoutException;
-import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -218,8 +215,8 @@ class DefaultHTTPClientTest {
 
                     Except<HTTPClientResponse> response = httpClient.request(request).execute().join();
 
-                    response.consumes(r -> fail("a timeout error was expected..."))
-                            .failure(e -> assertThat(e, instanceOf(HttpTimeoutException.class)));
+                    response.onSuccess(r -> fail("a timeout error was expected..."))
+                            .onFailure(e -> assertThat(e, instanceOf(HttpTimeoutException.class)));
                 }
             }
 
@@ -281,8 +278,8 @@ class DefaultHTTPClientTest {
 
                 Except<HTTPClientResponse> response = client.request(request).execute().join();
 
-                response.consumes(r -> fail("a connection error was expected..."))
-                        .failure(e -> assertThat(e, instanceOf(IOException.class)));
+                response.onSuccess(r -> fail("a connection error was expected..."))
+                        .onFailure(e -> assertThat(e, instanceOf(IOException.class)));
             }
         }
     }

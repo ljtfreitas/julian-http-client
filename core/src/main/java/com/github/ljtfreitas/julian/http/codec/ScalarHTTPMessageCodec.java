@@ -40,6 +40,7 @@ public class ScalarHTTPMessageCodec implements HTTPRequestWriter<Object>, HTTPRe
 
 	private static final ScalarHTTPMessageCodec SINGLE_INSTANCE = new ScalarHTTPMessageCodec();
 
+	private static final Collection<MediaType> SCALAR_MEDIA_TYPES = List.of(MediaType.TEXT_PLAIN);
 	private static final Set<Class<?>> SCALAR_TYPES = new HashSet<>();
 
 	private final StringHTTPMessageCodec codec = StringHTTPMessageCodec.get();
@@ -65,7 +66,7 @@ public class ScalarHTTPMessageCodec implements HTTPRequestWriter<Object>, HTTPRe
 
 	@Override
 	public Collection<MediaType> contentTypes() {
-		return List.of(MediaType.TEXT_PLAIN);
+		return SCALAR_MEDIA_TYPES;
 	}
 
 	@Override

@@ -32,17 +32,17 @@ import com.github.ljtfreitas.julian.RequestIO;
 import com.github.ljtfreitas.julian.ResponseFn;
 import com.github.ljtfreitas.julian.ResponseT;
 
-public class HTTPStatusCodeResponseT implements ResponseT<HTTPStatusCode, Void> {
+public class HTTPStatusCodeResponseT implements ResponseT<Void, HTTPStatusCode> {
 
     private static final HTTPStatusCodeResponseT SINGLE_INSTANCE = new HTTPStatusCodeResponseT();
 
     @Override
-    public <A> ResponseFn<HTTPStatusCode, A> comp(Endpoint endpoint, ResponseFn<Void, A> fn) {
+    public <A> ResponseFn<A, HTTPStatusCode> bind(Endpoint endpoint, ResponseFn<A, Void> fn) {
         return new ResponseFn<>() {
 
             @SuppressWarnings({"unchecked", "rawtypes"})
             @Override
-            public Promise<HTTPStatusCode> run(RequestIO<A> request, Arguments arguments) {
+            public Promise<HTTPStatusCode, ? extends Exception> run(RequestIO<A> request, Arguments arguments) {
                 return request.execute().then(r -> {
                     Optional<HTTPResponse> httpResponse = r.as(HTTPResponse.class);
                     return httpResponse.map(HTTPResponse::status)

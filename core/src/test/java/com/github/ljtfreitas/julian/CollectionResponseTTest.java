@@ -33,21 +33,21 @@ class CollectionResponseTTest {
 	@Mock
 	private Endpoint endpoint;
 	
-	private CollectionResponseT<String> responseT = new CollectionResponseT<>();
+	private final CollectionResponseT<String> responseT = new CollectionResponseT<>();
 
 	@Nested
 	class Predicates {
 
 		@ParameterizedTest
 		@ArgumentsSource(AcceptableCollectionsProvider.class)
-		void supported() throws Exception {
+		void supported() {
 			when(endpoint.returnType()).thenReturn(JavaType.parameterized(Collection.class, String.class));
 
 			assertTrue(responseT.test(endpoint));
 		}
 
 		@Test
-		void unsupported() throws Exception {
+		void unsupported() {
 			when(endpoint.returnType()).thenReturn(JavaType.valueOf(String.class));
 	
 			assertFalse(responseT.test(endpoint));
@@ -59,7 +59,7 @@ class CollectionResponseTTest {
 
 		@ParameterizedTest
 		@ArgumentsSource(AcceptableCollectionsProvider.class)
-		void parameterized(JavaType javaType) throws Exception {
+		void parameterized(JavaType javaType) {
 			when(endpoint.returnType()).thenReturn(javaType);
 
 			JavaType expectedCollectionType = javaType.parameterized().map(Parameterized::firstArg)
@@ -70,7 +70,7 @@ class CollectionResponseTTest {
 		}
 
 		@Test
-		void simple() throws Exception {
+		void simple() {
 			when(endpoint.returnType()).thenReturn(JavaType.object());
 
 			assertEquals(JavaType.parameterized(Collection.class, Object.class), responseT.adapted(endpoint));
@@ -88,24 +88,24 @@ class CollectionResponseTTest {
 		
 		@ParameterizedTest
 		@ArgumentsSource(AcceptableCollectionsProvider.class)
-		void compose(JavaType javaType) throws Exception {
+		void compose(JavaType javaType) {
 			when(endpoint.returnType()).thenReturn(javaType);
 
-			when(request.run(fn, Arguments.empty())).thenReturn(Promise.done(List.of("expected")));
+			when(fn.run(request, Arguments.empty())).thenReturn(Promise.done(List.of("expected")));
 
-			Collection<String> response = responseT.comp(endpoint, fn).join(request, Arguments.empty());
+			Collection<String> response = responseT.bind(endpoint, fn).join(request, Arguments.empty());
 
 			assertThat(response, contains("expected"));
 		}
 
 		@ParameterizedTest
 		@ArgumentsSource(AcceptableCollectionsProvider.class)
-		void empty(JavaType javaType, Class<?> expectedCollectionType) throws Exception {
+		void empty(JavaType javaType, Class<?> expectedCollectionType) {
 			when(endpoint.returnType()).thenReturn(javaType);
 
-			when(request.run(fn, Arguments.empty())).thenReturn(Promise.done(Collections.emptyList()));
+			when(fn.run(request, Arguments.empty())).thenReturn(Promise.done(Collections.emptyList()));
 
-			Collection<String> response = responseT.comp(endpoint, fn).join(request, Arguments.empty());
+			Collection<String> response = responseT.bind(endpoint, fn).join(request, Arguments.empty());
 
 			assertAll(() -> assertTrue(response.isEmpty()),
 					  () -> assertTrue(expectedCollectionType.isInstance(response))); 
@@ -115,7 +115,7 @@ class CollectionResponseTTest {
 	static class AcceptableCollectionsProvider implements ArgumentsProvider {
 
 		@Override
-		public Stream<? extends org.junit.jupiter.params.provider.Arguments> provideArguments(ExtensionContext context) throws Exception {
+		public Stream<? extends org.junit.jupiter.params.provider.Arguments> provideArguments(ExtensionContext context) {
 			return Stream.of(arguments(JavaType.parameterized(Collection.class, String.class), Collection.class),
 							 arguments(JavaType.parameterized(List.class, String.class), List.class),
 							 arguments(JavaType.parameterized(Set.class, String.class), Set.class));

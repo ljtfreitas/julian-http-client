@@ -38,7 +38,7 @@ public class InterceptedHTTP implements HTTP {
     }
 
     @Override
-    public <T> Promise<HTTPRequest<T>> request(Endpoint endpoint, Arguments arguments, JavaType returnType) {
+    public <T> Promise<HTTPRequest<T>, HTTPException> request(Endpoint endpoint, Arguments arguments, JavaType returnType) {
         return interceptor.intercepts(http.request(endpoint, arguments, returnType));
     }
 }

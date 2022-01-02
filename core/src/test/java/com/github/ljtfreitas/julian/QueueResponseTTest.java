@@ -25,20 +25,20 @@ class QueueResponseTTest {
 	@Mock
 	private Endpoint endpoint;
 	
-	private QueueResponseT<String> responseT = new QueueResponseT<>();
+	private final QueueResponseT<String> responseT = new QueueResponseT<>();
 
 	@Nested
 	class Predicates {
 
 		@Test
-		void supported() throws Exception {
+		void supported() {
 			when(endpoint.returnType()).thenReturn(JavaType.parameterized(Queue.class, String.class));
 
 			assertTrue(responseT.test(endpoint));
 		}
 
 		@Test
-		void unsupported() throws Exception {
+		void unsupported() {
 			when(endpoint.returnType()).thenReturn(JavaType.valueOf(String.class));
 	
 			assertFalse(responseT.test(endpoint));
@@ -49,14 +49,14 @@ class QueueResponseTTest {
 	class Adapted {
 
 		@Test
-		void parameterized() throws Exception {
+		void parameterized() {
 			when(endpoint.returnType()).thenReturn(JavaType.parameterized(Queue.class, String.class));
 
 			assertEquals(JavaType.parameterized(Collection.class, String.class), responseT.adapted(endpoint));
 		}
 
 		@Test
-		void simple() throws Exception {
+		void simple() {
 			when(endpoint.returnType()).thenReturn(JavaType.object());
 
 			assertEquals(JavaType.parameterized(Collection.class, Object.class), responseT.adapted(endpoint));
@@ -73,19 +73,19 @@ class QueueResponseTTest {
 		private RequestIO<Collection<String>> request;
 		
 		@Test
-		void compose() throws Exception {
-			when(request.run(fn, Arguments.empty())).thenReturn(Promise.done(List.of("expected")));
+		void compose() {
+			when(fn.run(request, Arguments.empty())).thenReturn(Promise.done(List.of("expected")));
 
-			Queue<String> response = responseT.comp(endpoint, fn).join(request, Arguments.empty());
+			Queue<String> response = responseT.bind(endpoint, fn).join(request, Arguments.empty());
 
 			assertAll(() -> assertThat(response, contains("expected")), () -> assertEquals("expected", response.poll()));
 		}
 
 		@Test
-		void empty() throws Exception {
-			when(request.run(fn, Arguments.empty())).thenReturn(Promise.done(Collections.emptyList()));
+		void empty() {
+			when(fn.run(request, Arguments.empty())).thenReturn(Promise.done(Collections.emptyList()));
 
-			Queue<String> response = responseT.comp(endpoint, fn).join(request, Arguments.empty());
+			Queue<String> response = responseT.bind(endpoint, fn).join(request, Arguments.empty());
 
 			assertTrue(response.isEmpty());
 		}

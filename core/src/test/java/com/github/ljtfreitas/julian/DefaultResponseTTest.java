@@ -1,7 +1,5 @@
 package com.github.ljtfreitas.julian;
 
-import java.util.function.Function;
-
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,7 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -23,7 +20,7 @@ class DefaultResponseTTest {
     @Mock
     private Endpoint endpoint;
 
-    private DefaultResponseT<String> responseT = new DefaultResponseT<>();
+    private final DefaultResponseT<String> responseT = new DefaultResponseT<>();
 
     @Nested
     class Predicates {
@@ -62,16 +59,16 @@ class DefaultResponseTTest {
     }
 
     @Test
-    void compose(@Mock ResponseFn<String, String> fn, @Mock RequestIO<String> request) throws Exception {
+    void compose(@Mock ResponseFn<String, String> fn, @Mock RequestIO<String> request) {
         Arguments arguments = Arguments.empty();
 
-        Response<String> response = Response.done("expected");
+        Response<String, Exception> response = Response.done("expected");
 
-        when(fn.join(any(), eq(arguments))).thenReturn(response.body());
+        when(fn.join(any(), eq(arguments))).thenReturn(response.body().unsafe());
         when(request.execute()).then(a -> Promise.done(response));
 
-        Response<String> actual = responseT.comp(endpoint, fn).join(request, arguments);
+        Response<String, ? extends Exception> actual = responseT.bind(endpoint, fn).join(request, arguments);
 
-        assertEquals("expected", actual.body());
+        assertEquals("expected", actual.body().unsafe());
     }
 }

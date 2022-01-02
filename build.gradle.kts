@@ -33,3 +33,24 @@ allprojects {
     group = "com.github.ljtfreitas.julian-http-client"
     version = "0.0.1-SNAPSHOT"
 }
+
+tasks.register("cleanAll") {
+    description = "Clean all projects."
+    subprojects {
+        dependsOn(":${project.name}:clean")
+    }
+}
+
+tasks.register("publishAllToMavenLocal") {
+    description = "Publish all projects to Maven local."
+    subprojects {
+        dependsOn(":${project.name}:publishToMavenLocal")
+    }
+}
+
+tasks.register("publishAll") {
+    description = "Publish all projects to Maven central."
+    subprojects {
+        dependsOn(":${project.name}:publish")
+    }
+}

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.junit.jupiter.api.Nested;
@@ -19,20 +20,20 @@ class FutureResponseTTest {
 	@Mock
 	private Endpoint endpoint;
 
-	private FutureResponseT<String> responseT = new FutureResponseT<>();
+	private final FutureResponseT<String> responseT = new FutureResponseT<>();
 
 	@Nested
 	class Predicates {
 
 		@Test
-		void supported() throws Exception {
+		void supported() {
 			when(endpoint.returnType()).thenReturn(JavaType.parameterized(Future.class, String.class));
 
 			assertTrue(responseT.test(endpoint));
 		}
 		
 		@Test
-		void unsupported() throws Exception {
+		void unsupported() {
 			when(endpoint.returnType()).thenReturn(JavaType.valueOf(String.class));
 
 			assertFalse(responseT.test(endpoint));
@@ -43,14 +44,14 @@ class FutureResponseTTest {
 	class Adapted {
 	
 		@Test
-		void parameterized() throws Exception {
+		void parameterized() {
 			when(endpoint.returnType()).thenReturn(JavaType.parameterized(Future.class, String.class));
 
 			assertEquals(JavaType.valueOf(String.class), responseT.adapted(endpoint));
 		}
 
 		@Test
-		void simple() throws Exception {
+		void simple() {
 			when(endpoint.returnType()).thenReturn(JavaType.object());
 
 			assertEquals(JavaType.object(), responseT.adapted(endpoint));
@@ -61,9 +62,9 @@ class FutureResponseTTest {
 	void compose(@Mock ResponseFn<String, String> fn, @Mock RequestIO<String> request) throws Exception {
 		Arguments arguments = Arguments.empty();
 
-		when(request.run(fn, arguments)).thenReturn(Promise.done("expected"));
+		when(fn.run(request, arguments)).thenReturn(Promise.done("expected"));
 		
-		Future<String> future = responseT.comp(endpoint, fn).join(request, arguments);
+		Future<String> future = responseT.bind(endpoint, fn).join(request, arguments);
 
 		assertEquals("expected", future.get());
 	}

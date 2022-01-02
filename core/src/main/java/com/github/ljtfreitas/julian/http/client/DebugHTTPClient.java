@@ -23,7 +23,6 @@
 package com.github.ljtfreitas.julian.http.client;
 
 import com.github.ljtfreitas.julian.Promise;
-import com.github.ljtfreitas.julian.http.HTTPHeader;
 import com.github.ljtfreitas.julian.http.HTTPRequestBody;
 import com.github.ljtfreitas.julian.http.HTTPRequestDefinition;
 
@@ -34,7 +33,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.Flow.Subscriber;
 import java.util.concurrent.Flow.Subscription;
-import java.util.stream.Collectors;
 
 public class DebugHTTPClient implements HTTPClient {
 
@@ -60,7 +58,7 @@ public class DebugHTTPClient implements HTTPClient {
         }
 
         @Override
-        public Promise<HTTPClientResponse> execute() {
+        public Promise<HTTPClientResponse, Exception> execute() {
             return source.execute().then(DebugHTTPClient.this::info);
         }
     }

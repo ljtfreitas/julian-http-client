@@ -26,17 +26,17 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 
-class IterableResponseT<T> implements ResponseT<Iterable<T>, Collection<T>> {
+class IterableResponseT<T> implements ResponseT<Collection<T>, Iterable<T>> {
 
 	private static final IterableResponseT<Object> SINGLE_INSTANCE = new IterableResponseT<>();
 
 	@Override
-	public <A> ResponseFn<Iterable<T>, A> comp(Endpoint endpoint, ResponseFn<Collection<T>, A> fn) {
+	public <A> ResponseFn<A, Iterable<T>> bind(Endpoint endpoint, ResponseFn<A, Collection<T>> fn) {
 		return new ResponseFn<>() {
 
 			@Override
-			public Promise<Iterable<T>> run(RequestIO<A> request, Arguments arguments) {
-				return request.run(fn, arguments).then(c -> Optional.ofNullable(c).orElseGet(Collections::emptyList));
+			public Promise<Iterable<T>, ? extends Exception> run(RequestIO<A> request, Arguments arguments) {
+				return fn.run(request, arguments).then(c -> Optional.ofNullable(c).orElseGet(Collections::emptyList));
 			}
 
 			@Override

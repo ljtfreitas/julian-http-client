@@ -27,17 +27,17 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Optional;
 
-class EnumerationResponseT<T> implements ResponseT<Enumeration<T>, Collection<T>> {
+class EnumerationResponseT<T> implements ResponseT<Collection<T>, Enumeration<T>> {
 
 	private static final EnumerationResponseT<Object> SINGLE_INSTANCE = new EnumerationResponseT<>();
 
 	@Override
-	public <A> ResponseFn<Enumeration<T>, A> comp(Endpoint endpoint, ResponseFn<Collection<T>, A> fn) {
+	public <A> ResponseFn<A, Enumeration<T>> bind(Endpoint endpoint, ResponseFn<A, Collection<T>> fn) {
 		return new ResponseFn<>() {
 
 			@Override
-			public Promise<Enumeration<T>> run(RequestIO<A> request, Arguments arguments) {
-				return request.run(fn, arguments)
+			public Promise<Enumeration<T>, ? extends Exception> run(RequestIO<A> request, Arguments arguments) {
+				return fn.run(request, arguments)
 						.then(c -> Optional.ofNullable(c).map(Collections::enumeration).orElseGet(Collections::emptyEnumeration));
 			}
 

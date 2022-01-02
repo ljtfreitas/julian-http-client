@@ -1,21 +1,5 @@
 package com.github.ljtfreitas.julian.http;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
-
-import java.io.ByteArrayInputStream;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Stream;
-
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.BadRequest;
@@ -42,10 +26,23 @@ import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.Inte
 import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.NotImplemented;
 import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.ServiceUnavailable;
 import com.github.ljtfreitas.julian.http.client.HTTPClientResponse;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class DefaultHTTPResponseFailureTest {
 
-	private HTTPResponseFailure failure = new DefaultHTTPResponseFailure();
+	private final HTTPResponseFailure failure = new DefaultHTTPResponseFailure();
 
 	@ParameterizedTest(name = "HTTP Status: {0}")
 	@MethodSource("failureHTTPStatuses")
@@ -71,13 +68,13 @@ class DefaultHTTPResponseFailureTest {
 			}
 
 			@Override
-			public <T, R extends Response<T>> Optional<R> failure(Function<? super HTTPClientResponse, R> fn) {
-				return null;
+			public <T, R extends Response<T, HTTPResponseException>> Optional<R> failure(Function<? super HTTPClientResponse, R> fn) {
+				return Optional.empty();
 			}
 
 			@Override
-			public <T, R extends Response<T>> Optional<R> success(Function<? super HTTPClientResponse, R> fn) {
-				return null;
+			public <T, R extends Response<T, HTTPResponseException>> Optional<R> success(Function<? super HTTPClientResponse, R> fn) {
+				return Optional.empty();
 			}
 		};
 		
@@ -87,7 +84,7 @@ class DefaultHTTPResponseFailureTest {
 				  () -> assertEquals(status, failed.status()),
 				  () -> assertEquals(headers, failed.headers()));
 
-		HTTPResponseException httpResponseException = assertThrows(exception, failed::body);
+		HTTPResponseException httpResponseException = assertThrows(exception, failed.body()::unsafe);
 
 		assertAll(() -> assertEquals(status, httpResponseException.status()),
 				  () -> assertEquals(headers, httpResponseException.headers()),

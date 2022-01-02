@@ -31,9 +31,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.github.ljtfreitas.julian.Cookie;
 import com.github.ljtfreitas.julian.Cookies;
+import com.github.ljtfreitas.julian.Header;
+import com.github.ljtfreitas.julian.Headers;
 import com.github.ljtfreitas.julian.JavaType;
 
 public class CookiesParameterSerializer implements ParameterSerializer<Object, Cookies> {
@@ -44,17 +47,19 @@ public class CookiesParameterSerializer implements ParameterSerializer<Object, C
 	}
 
 	private Cookies serializeByJavaType(String name, JavaType javaType, Object value) {
-		return javaType.when(Collection.class, () -> serializeAsCollection(javaType, value))
+		return javaType.when(Collection.class, () -> serializeAsCollection(name, javaType, value))
 				   .or(() -> javaType.when(Cookies.class, () -> serializeAsCookies(value)))
 				   .or(() -> javaType.when(Map.class, () -> serializeAsMap(javaType, value)))
-				   .or(() -> javaType.genericArray().map(GenericArrayType::getGenericComponentType)
-						   					 .map(arrayType -> serializeAsArray(arrayType, value)))
+				   .or(() -> javaType.genericArray()
+						   .map(GenericArrayType::getGenericComponentType)
+						   .or(() -> javaType.array().map(Class::getComponentType))
+						   .map(arrayType -> serializeAsArray(name, arrayType, value)))
 				   .orElseGet(() -> serializeAsString(name, value));
 	}
 
-	private Cookies serializeAsArray(Type arrayType, Object value) {
+	private Cookies serializeAsArray(String name, Type arrayType, Object value) {
 		Object[] array = (Object[]) value;
-		return serializeAsCollection(JavaType.parameterized(Collection.class, arrayType), Arrays.asList(array));
+		return serializeAsCollection(name, JavaType.parameterized(Collection.class, arrayType), Arrays.asList(array));
 	}
 	
 	private Cookies serializeAsMap(JavaType javaType, Object value) {
@@ -70,14 +75,12 @@ public class CookiesParameterSerializer implements ParameterSerializer<Object, C
 		return new Cookies(values.entrySet().stream().map(e -> new Cookie(e.getKey(), e.getValue().toString())).collect(toUnmodifiableList()));
 	}
 	
-	private Cookies serializeAsCollection(JavaType javaType, Object value) {
+	private Cookies serializeAsCollection(String name, JavaType javaType, Object value) {
 		return javaType.parameterized()
 					   .map(JavaType.Parameterized::firstArg)
 					   .map(JavaType::valueOf)
-					   .map(arg -> arg.when(Cookie.class, () -> serializeAsCookieCollection(value))
-						   		   .orElseThrow(() -> new IllegalArgumentException(format("Collection arguments needs to be parameterized with <Cookie>."
-							   		   		+ "use Collection<Cookie> instead."))))
-					   .orElseThrow(() -> new IllegalArgumentException(format("Collection must be parameterized Cookie; use Collection<Cookie> instead.")));
+					   .flatMap(arg -> arg.when(Cookie.class, () -> serializeAsCookieCollection(value)))
+					   .orElseGet(() -> serializeAsStringCollection(name, value));
 	}
 
 	private Cookies serializeAsCookies(Object value) {
@@ -88,6 +91,11 @@ public class CookiesParameterSerializer implements ParameterSerializer<Object, C
 	private Cookies serializeAsCookieCollection(Object value) {
 		Collection<Cookie> values = (Collection<Cookie>) value;
 		return new Cookies(values);
+	}
+
+	private Cookies serializeAsStringCollection(String name, Object value) {
+		Collection<?> values = (Collection<?>) value;
+		return new Cookies(values.stream().map(v -> new Cookie(name, v.toString())).collect(Collectors.toUnmodifiableList()));
 	}
 
 	private Cookies serializeAsString(String name, Object value) {

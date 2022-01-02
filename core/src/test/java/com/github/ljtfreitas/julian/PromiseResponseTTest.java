@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -58,13 +59,12 @@ class PromiseResponseTTest {
     }
 
     @Test
-    void compose(@Mock ResponseFn<String, String> fn, @Mock RequestIO<String> request) throws Exception {
+    void compose(@Mock ResponseFn<String, String> fn, @Mock RequestIO<String> request) {
         Arguments arguments = Arguments.empty();
 
-        when(fn.run(any(), eq(arguments))).thenReturn(Promise.done("expected"));
-        when(request.run(fn, arguments)).thenCallRealMethod();
+        when(fn.run(same(request), eq(arguments))).thenReturn(Promise.done("expected"));
 
-        Promise<String> actual = responseT.comp(endpoint, fn).join(request, arguments);
+        Promise<String, ? extends Exception> actual = responseT.bind(endpoint, fn).join(request, arguments);
 
         assertEquals("expected", actual.join().unsafe());
     }

@@ -46,7 +46,7 @@ class MapMultipartFormHTTPRequestWriterTest {
 
         HTTPRequestBody httpRequestBody = writer.write(form, UTF_8);
 
-        assertEquals("multipart/form-data; boundary=abc1234", httpRequestBody.contentType().toString());
+        assertEquals("multipart/form-data; boundary=abc1234", httpRequestBody.contentType().map(Object::toString).orElse(""));
 
         httpRequestBody.serialize().subscribe(new Subscriber<>() {
 

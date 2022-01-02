@@ -23,26 +23,36 @@
 package com.github.ljtfreitas.julian;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public interface Response<T> {
+public interface Response<T, E extends Exception> {
 
-	T body();
+	Except<T> body();
 
-	<R> Response<R> map(Function<? super T, R> fn);
+	<R> Response<R, E> map(Function<? super T, R> fn);
 
-	<E extends Exception> Response<T> recover(Function<? super E, T> fn);
+	Response<T, E> onFailure(Consumer<? super E> fn);
 
-	<E extends Exception> Response<T> recover(Class<? super E> expected, Function<? super E, T> fn);
+	Response<T, E> recover(Function<? super E, T> fn);
 
-	<E extends Exception> Response<T> recover(Predicate<? super E> p, Function<? super E, T> fn);
+	Response<T, E> recover(Predicate<? super E> p, Function<? super E, T> fn);
 
-	default <R extends Response<T>> Optional<R> as(Class<R> candidate) {
+	<Err extends E> Response<T, E> recover(Class<? extends Err> expected, Function<? super Err, T> fn);
+
+	<R> R fold(Function<T, R> success, Function<? super E, R> failure);
+
+	default Response<T, E> onSuccess(Consumer<? super T> fn) {
+		body().onSuccess(fn::accept);
+		return this;
+	}
+
+	default <R extends Response<T, E>> Optional<R> as(Class<R> candidate) {
 		return candidate.isAssignableFrom(this.getClass()) ? Optional.of(candidate.cast(this)) : Optional.empty();
 	}
 
-	static <T> Response<T> done(T value) {
+	static <T> Response<T, Exception> done(T value) {
 		return new DoneResponse<>(value);
 	}
 }

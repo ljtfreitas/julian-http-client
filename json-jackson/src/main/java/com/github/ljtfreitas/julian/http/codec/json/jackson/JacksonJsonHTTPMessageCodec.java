@@ -25,6 +25,8 @@ package com.github.ljtfreitas.julian.http.codec.json.jackson;
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.DeserializationConfig;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.github.ljtfreitas.julian.JavaType;
@@ -58,7 +60,13 @@ public class JacksonJsonHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
     private final JsonFactory jsonFactory;
 
     public JacksonJsonHTTPMessageCodec() {
-        this(new ObjectMapper());
+        this(configure(new ObjectMapper()));
+    }
+
+    private static ObjectMapper configure(ObjectMapper objectMapper) {
+        objectMapper.configure(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES, false);
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        return objectMapper.findAndRegisterModules();
     }
 
     public JacksonJsonHTTPMessageCodec(ObjectMapper jsonMapper) {

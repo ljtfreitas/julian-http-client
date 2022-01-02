@@ -24,11 +24,11 @@ import com.github.ljtfreitas.julian.contract.CookiesParameterSerializer;
 
 class CookiesParameterSerializerTest {
 
-	private CookiesParameterSerializer serializer = new CookiesParameterSerializer();
+	private final CookiesParameterSerializer serializer = new CookiesParameterSerializer();
 
 	@ParameterizedTest
 	@MethodSource("cookies")
-	void shouldSerializeAsCookies(String name, JavaType javaType, Object value, Collection<Header> expectedHeaders) {
+	void shouldSerializeAsCookies(String name, JavaType javaType, Object value, Collection<Cookie> expectedHeaders) {
 		Optional<Cookies> cookies = serializer.serialize(name, javaType, value);
 
 		assertAll(() -> assertTrue(cookies.isPresent()),
@@ -42,8 +42,12 @@ class CookiesParameterSerializerTest {
 	}
 
 	static Stream<Arguments> cookies() {
-		return Stream.of(arguments("sessionid", JavaType.valueOf(String.class), "value1", 
+		return Stream.of(arguments("sessionid", JavaType.valueOf(String.class),
+									"value1",
 									List.of(new Cookie("sessionid", "value1"))),
+						 arguments("sessionid", JavaType.parameterized(Collection.class, String.class),
+									List.of("value1", "value2"),
+									List.of(new Cookie("sessionid", "value1"), new Cookie("sessionid", "value2"))),
 						 arguments("cookies", JavaType.parameterized(Collection.class, Cookie.class), 
 								 	List.of(new Cookie("sessionid", "value1"), new Cookie("token", "value2")), 
 								 	List.of(new Cookie("sessionid", "value1"), new Cookie("token", "value2"))),
@@ -53,6 +57,9 @@ class CookiesParameterSerializerTest {
 						 arguments("cookies", JavaType.genericArrayOf(Cookie.class),
 								 	new Cookie[] { new Cookie("sessionid", "value1"), new Cookie("token", "value2") }, 
 								 	List.of(new Cookie("sessionid", "value1"), new Cookie("token", "value2"))),
+						 arguments("sessionid", JavaType.valueOf(String[].class),
+									new String[] { "value1", "value2" },
+									List.of(new Cookie("sessionid", "value1"), new Cookie("sessionid", "value2"))),
 						 arguments("cookies", JavaType.parameterized(Map.class, String.class, String.class),
 								    Map.of("sessionid", "value1", "token", "value2"),
 								 	List.of(new Cookie("sessionid", "value1"), new Cookie("token", "value2"))));
@@ -61,10 +68,7 @@ class CookiesParameterSerializerTest {
 	static Stream<Arguments> restrictions() {
 		return Stream.of(arguments("cookies", JavaType.valueOf(Map.class),
 									Map.of("sessionid", "value1", "token", "value2"),
-								 	IllegalStateException.class),
-						 arguments("sessionid", JavaType.parameterized(Collection.class, String.class),
-									List.of("value1"),
-									IllegalArgumentException.class));
+								 	IllegalStateException.class));
 	}
 
 }

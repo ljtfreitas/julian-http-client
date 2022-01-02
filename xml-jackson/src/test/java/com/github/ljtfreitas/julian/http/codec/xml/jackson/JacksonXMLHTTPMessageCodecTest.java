@@ -74,7 +74,7 @@ class JacksonXMLHTTPMessageCodecTest {
             void write() {
                 HTTPRequestBody output = codec.write(new Person("Tiago", 35), StandardCharsets.UTF_8);
 
-                assertEquals(APPLICATION_XML, output.contentType());
+                assertEquals(APPLICATION_XML, output.contentType().orElseThrow());
 
                 output.serialize().subscribe(new Subscriber<>() {
                     @Override

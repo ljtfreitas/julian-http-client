@@ -22,9 +22,11 @@
 
 package com.github.ljtfreitas.julian.http;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import com.github.ljtfreitas.julian.Except;
 import com.github.ljtfreitas.julian.Response;
 
 class EmptyHTTPResponse<T> implements HTTPResponse<T> {
@@ -48,32 +50,34 @@ class EmptyHTTPResponse<T> implements HTTPResponse<T> {
 	}
 
 	@Override
-	public T body() {
-		return null;
+	public Except<T> body() {
+		return Except.success(null);
 	}
 
 	@Override
-	public <R> Response<R> map(Function<? super T, R> fn) {
-		return new DefaultHTTPResponse<>(status, headers, fn.apply(null));
+	public <R> HTTPResponse<R> map(Function<? super T, R> fn) {
+		return new SuccessHTTPResponse<>(status, headers, fn.apply(null));
 	}
-	
+
 	@Override
-	public <E extends Exception> Response<T> recover(Class<? super E> p, Function<? super E, T> fn) {
+	public <R> HTTPResponse<R> map(HTTPResponseFn<? super T, R> fn) {
+		return new SuccessHTTPResponse<>(status, headers, fn.apply(status, headers, null));
+	}
+
+	@Override
+	public HTTPResponse<T> onSuccess(Consumer<? super T> fn) {
+		fn.accept(null);
 		return this;
 	}
-	
+
 	@Override
-	public <E extends Exception> Response<T> recover(Function<? super E, T> fn) {
+	public HTTPResponse<T> onSuccess(HTTPResponseConsumer<? super T> fn) {
+		fn.accept(status, headers, null);
 		return this;
 	}
-	
+
 	@Override
-	public Response<T> recover(HTTPStatusCode code, Function<HTTPResponse<T>, T> fn) {
-		return this;
-	}
-	
-	@Override
-	public <E extends Exception> Response<T> recover(Predicate<? super E> p, Function<? super E, T> fn) {
-		return this;
+	public <R> R fold(Function<T, R> success, Function<? super HTTPResponseException, R> failure) {
+		return success.apply(null);
 	}
 }

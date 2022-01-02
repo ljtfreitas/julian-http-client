@@ -17,7 +17,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ResponsesTest {
 
-	@SuppressWarnings("unchecked")
 	@Test
     void test(@Mock Endpoint endpoint, @Mock RequestIO<String> request) {
 		JavaType completableFutureType = JavaType.parameterized(CompletableFuture.class, JavaType.Parameterized.valueOf(Optional.class, String.class));
@@ -25,14 +24,13 @@ class ResponsesTest {
 		when(endpoint.returnType()).thenReturn(completableFutureType);
 		when(endpoint.returns(any())).thenCallRealMethod();
 
-		Response<String> response = Response.done("oi");
+		Response<String, Exception> response = Response.done("oi");
 
 		when(request.execute()).then(a -> Promise.done(response));
-		when(request.run(any(), eq(Arguments.empty()))).thenCallRealMethod();
 
 		Responses requests = new Responses(List.of(new CompletionStageResponseT<>(), new OptionalResponseT<>()));
 
-		ResponseFn<CompletableFuture<Optional<String>>, String> requestFn = requests.select(endpoint);
+		ResponseFn<String, CompletableFuture<Optional<String>>> requestFn = requests.select(endpoint);
 
 		assertEquals(JavaType.valueOf(String.class), requestFn.returnType());
 

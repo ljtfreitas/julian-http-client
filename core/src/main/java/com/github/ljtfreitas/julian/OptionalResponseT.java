@@ -24,17 +24,17 @@ package com.github.ljtfreitas.julian;
 
 import java.util.Optional;
 
-class OptionalResponseT<T> implements ResponseT<Optional<T>, T> {
+class OptionalResponseT<T> implements ResponseT<T, Optional<T>> {
 
 	private static final OptionalResponseT<Object> SINGLE_INSTANCE = new OptionalResponseT<>();
 
 	@Override
-	public <A> ResponseFn<Optional<T>, A> comp(Endpoint endpoint, ResponseFn<T, A> fn) {
+	public <A> ResponseFn<A, Optional<T>> bind(Endpoint endpoint, ResponseFn<A, T> fn) {
 		return new ResponseFn<>() {
 
 			@Override
-			public Promise<Optional<T>> run(RequestIO<A> request, Arguments arguments) {
-				return request.run(fn, arguments).then(Optional::ofNullable);
+			public Promise<Optional<T>, ? extends Exception> run(RequestIO<A> request, Arguments arguments) {
+				return fn.run(request, arguments).then(Optional::ofNullable);
 			}
 
 			@Override

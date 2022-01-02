@@ -22,16 +22,16 @@
 
 package com.github.ljtfreitas.julian;
 
-class DefaultResponseT<T> implements ResponseT<Response<T>, T> {
+class DefaultResponseT<T> implements ResponseT<T, Response<T, ?>> {
 
     private static final DefaultResponseT<Object> SINGLE_INSTANCE = new DefaultResponseT<>();
 
     @Override
-    public <A> ResponseFn<Response<T>, A> comp(Endpoint endpoint, ResponseFn<T, A> fn) {
+    public <A> ResponseFn<A, Response<T, ?>> bind(Endpoint endpoint, ResponseFn<A, T> fn) {
         return new ResponseFn<>() {
 
             @Override
-            public Promise<Response<T>> run(RequestIO<A> request, Arguments arguments) {
+            public Promise<Response<T, ?>, ? extends Exception> run(RequestIO<A> request, Arguments arguments) {
                 return request.execute().then(r -> r.map(value -> fn.join(() -> Promise.done(r), arguments)));
             }
 

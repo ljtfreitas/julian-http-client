@@ -131,7 +131,7 @@ class JsonPHTTPMessageCodecTest {
 
             HTTPRequestBody output = codec.write(jsonObject, StandardCharsets.UTF_8);
 
-            assertEquals(APPLICATION_JSON, output.contentType());
+            assertEquals(APPLICATION_JSON, output.contentType().orElseThrow());
 
             output.serialize().subscribe(new Subscriber<>() {
                 @Override
@@ -164,7 +164,7 @@ class JsonPHTTPMessageCodecTest {
 
             HTTPRequestBody output = codec.write(jsonArray, StandardCharsets.UTF_8);
 
-            assertEquals(APPLICATION_JSON, output.contentType());
+            assertEquals(APPLICATION_JSON, output.contentType().orElseThrow());
 
             output.serialize().subscribe(new Subscriber<>() {
                 @Override
@@ -193,7 +193,7 @@ class JsonPHTTPMessageCodecTest {
     static class SupportedJsonStructureTypesProvider implements ArgumentsProvider {
 
         @Override
-        public Stream<? extends Arguments> provideArguments(ExtensionContext context) throws Exception {
+        public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
             return Stream.of(Arguments.of(JsonStructure.class), Arguments.of(JsonArray.class), Arguments.of(JsonObject.class));
         }
     }

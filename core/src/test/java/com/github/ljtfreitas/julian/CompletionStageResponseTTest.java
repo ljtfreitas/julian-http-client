@@ -27,7 +27,7 @@ class CompletionStageResponseTTest {
 	@Mock
 	private Endpoint endpoint;
 	
-	private CompletionStageResponseT<String> responseT = new CompletionStageResponseT<>();
+	private final CompletionStageResponseT<String> responseT = new CompletionStageResponseT<>();
 
 	@Nested
 	class Predicates {
@@ -37,7 +37,7 @@ class CompletionStageResponseTTest {
 
 			@ParameterizedTest
 			@ArgumentsSource(AcceptableTypesProvider.class)
-			void accepted(JavaType javaType) throws Exception {
+			void accepted(JavaType javaType) {
 				when(endpoint.returnType()).thenReturn(javaType);
 
 				assertTrue(responseT.test(endpoint));
@@ -57,7 +57,7 @@ class CompletionStageResponseTTest {
 	
 		@ParameterizedTest
 		@ArgumentsSource(AcceptableTypesProvider.class)
-		void parameterized(JavaType javaType) throws Exception {
+		void parameterized(JavaType javaType) {
 			when(endpoint.returnType()).thenReturn(javaType);
 
 			JavaType expectedType = JavaType.valueOf(javaType.parameterized()
@@ -69,12 +69,12 @@ class CompletionStageResponseTTest {
 	}
 		
 	@Test
-	void compose(@Mock ResponseFn<String, String> fn, @Mock RequestIO<String> request) throws Exception {
+	void compose(@Mock ResponseFn<String, String> fn, @Mock RequestIO<String> request) {
 		Arguments arguments = Arguments.empty();
 
-		when(request.run(fn, arguments)).thenReturn(Promise.done("expected"));
+		when(fn.run(request, arguments)).thenReturn(Promise.done("expected"));
 
-		CompletionStage<String> completionStage = responseT.comp(endpoint, fn).join(request, arguments);
+		CompletionStage<String> completionStage = responseT.bind(endpoint, fn).join(request, arguments);
 
 		assertEquals("expected", completionStage.toCompletableFuture().join());
 	}
@@ -82,7 +82,7 @@ class CompletionStageResponseTTest {
 	static class AcceptableTypesProvider implements ArgumentsProvider {
 
 		@Override
-		public Stream<? extends org.junit.jupiter.params.provider.Arguments> provideArguments(ExtensionContext context) throws Exception {
+		public Stream<? extends org.junit.jupiter.params.provider.Arguments> provideArguments(ExtensionContext context) {
 			return Stream.of(org.junit.jupiter.params.provider.Arguments.of(JavaType.parameterized(CompletionStage.class, String.class)),
 							 org.junit.jupiter.params.provider.Arguments.of(JavaType.parameterized(CompletableFuture.class, Throwable.class)));
 		}

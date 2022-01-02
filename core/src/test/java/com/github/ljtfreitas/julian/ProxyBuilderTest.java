@@ -2,18 +2,20 @@ package com.github.ljtfreitas.julian;
 
 import com.github.ljtfreitas.julian.Except.ThrowableConsumer;
 import com.github.ljtfreitas.julian.contract.Callback;
-import com.github.ljtfreitas.julian.contract.Get;
-import com.github.ljtfreitas.julian.contract.Head;
+import com.github.ljtfreitas.julian.contract.GET;
+import com.github.ljtfreitas.julian.contract.HEAD;
 import com.github.ljtfreitas.julian.http.HTTPHeader;
 import com.github.ljtfreitas.julian.http.HTTPHeaders;
 import com.github.ljtfreitas.julian.http.HTTPRequestInterceptor;
 import com.github.ljtfreitas.julian.http.HTTPResponse;
 import com.github.ljtfreitas.julian.http.HTTPStatus;
 import com.github.ljtfreitas.julian.http.HTTPStatusCode;
+import com.github.ljtfreitas.julian.http.MediaType;
 import com.github.ljtfreitas.julian.http.client.HTTPClient;
 import com.github.ljtfreitas.julian.http.client.HTTPClientException;
 import com.github.ljtfreitas.julian.http.client.HTTPClientRequest;
 import com.github.ljtfreitas.julian.http.client.HTTPClientResponse;
+import com.github.ljtfreitas.julian.http.codec.HTTPResponseReader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -40,12 +42,14 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.http.HttpTimeoutException;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.time.Duration;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -107,7 +111,8 @@ class ProxyBuilderTest {
 
             @BeforeEach
             void before() {
-                mockServer.when(request("/simple").withMethod("GET")).respond(response("hello"));
+                mockServer.when(request("/simple").withMethod("GET"))
+                        .respond(response("hello").withHeader("Content-Type", MediaType.TEXT_PLAIN_VALUE));
             }
 
             @Test
@@ -130,6 +135,11 @@ class ProxyBuilderTest {
             }
 
             @Test
+            void asByteBuffer() {
+                assertEquals("hello", new String(simpleApi.asByteBuffer().array()));
+            }
+
+            @Test
             void scalar() {
                 mockServer.when(request("/scalar").withMethod("GET")).respond(response("1"));
 
@@ -148,7 +158,7 @@ class ProxyBuilderTest {
             @ArgumentsSource(DefaultResponseTypesProvider.class)
             @DisplayName("Should run a request, and get the response as the desired object type.")
             void shouldRunTheRequestAndGetTheResponseAsTheDesiredObjectType(HttpRequest request, HttpResponse response, ThrowableConsumer<ResponsesApi> consumer) throws Throwable {
-                mockServer.when(request).respond(response);
+                mockServer.clear(request).when(request).respond(response);
 
                 consumer.accept(responsesApi);
 
@@ -334,7 +344,53 @@ class ProxyBuilderTest {
                 }
             }
         }
+    }
 
+    @Nested
+    @DisplayName("Should be able to customize ProxyBuilder.")
+    class Customizations {
+
+        @Nested
+        @MockServerSettings(ports = 8090)
+        @DisplayName("The user can add custom HTTPMessageCodecs.")
+        class Codecs {
+
+            @Test
+            void json() {
+                HTTPResponseReader<String> reader = new HTTPResponseReader<>() {
+
+                    @Override
+                    public boolean readable(MediaType candidate, JavaType javaType) {
+                        return candidate.compatible(MediaType.APPLICATION_JSON) && javaType.is(String.class);
+                    }
+
+                    @Override
+                    public String read(byte[] body, JavaType javaType) {
+                        return new String(body);
+                    }
+
+                    @Override
+                    public Collection<MediaType> contentTypes() {
+                        return List.of(MediaType.APPLICATION_JSON);
+                    }
+                };
+
+                SimpleApi simpleApi = new ProxyBuilder()
+                        .codecs()
+                            .add(reader)
+                        .and()
+                        .build(SimpleApi.class, "http://localhost:8090");
+
+                String responseAsJson = "{\"message\":\"hello\"}";
+
+                mockServer.when(request("/simple").withMethod("GET"))
+                        .respond(response(responseAsJson).withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE));
+
+                String actual = simpleApi.asString();
+
+                assertEquals(responseAsJson, actual);
+            }
+        }
     }
 
     static class DefaultResponseTypesProvider implements ArgumentsProvider {
@@ -355,15 +411,17 @@ class ProxyBuilderTest {
                                  assertEquals("hello", task.get());
                              })),
                              arguments(request("/optional").withMethod("GET"), response("hello"), run(api -> assertEquals("hello", api.optional().get()))),
-                             arguments(request("/response").withMethod("GET"), response("hello"), run(api -> assertEquals("hello", api.response().body()))),
+                             arguments(request("/response").withMethod("GET"), response("hello"), run(api -> assertEquals("hello", api.response().body().unsafe()))),
                              arguments(request("/promise").withMethod("GET"), response("hello"), run(api -> assertEquals("hello", api.promise().join().unsafe()))),
+                             arguments(request("/lazy").withMethod("GET"), response("hello"), run(api -> assertEquals("hello", api.lazy().run()))),
                              arguments(request("/headers").withMethod("HEAD"), response().withHeader("x-response-header", "whatever"),
                                     run(api -> assertThat(api.headers(), hasItems(new Header("x-response-header", List.of("whatever")))))),
-                             arguments(request("/http-response").withMethod("GET"), response("hello"), run(api -> assertEquals("hello", api.httpResponse().body()))),
+                             arguments(request("/http-response").withMethod("GET"), response("hello"), run(api -> assertEquals("hello", api.httpResponse().body().unsafe()))),
                              arguments(request("/http-headers").withMethod("HEAD"), response().withHeader("x-response-header", "whatever"),
                                      run(api -> assertThat(api.httpHeaders(), hasItems(new HTTPHeader("x-response-header", List.of("whatever")))))),
                              arguments(request("/http-status").withMethod("HEAD"), response().withStatusCode(200), run(api -> assertEquals(HTTPStatusCode.OK.value(), api.httpStatus().code()))),
-                             arguments(request("/http-status-code").withMethod("HEAD"), response().withStatusCode(200), run(api -> assertEquals(HTTPStatusCode.OK, api.httpStatusCode()))));
+                             arguments(request("/http-status-code").withMethod("HEAD"), response().withStatusCode(200), run(api -> assertEquals(HTTPStatusCode.OK, api.httpStatusCode()))),
+                             arguments(request("/except").withMethod("GET"), response("hello"), run(api -> assertEquals("hello", api.except().unsafe()))));
         }
 
         ThrowableConsumer<ResponsesApi> run(ThrowableConsumer<ResponsesApi> consumer) {
@@ -373,61 +431,70 @@ class ProxyBuilderTest {
 
     interface SimpleApi {
 
-        @Get("/simple")
+        @GET("/simple")
         String asString();
 
-        @Get("/simple")
+        @GET("/simple")
         byte[] asBytes();
 
-        @Get("/simple")
+        @GET("/simple")
         InputStream asInputStream();
 
-        @Get("/scalar")
+        @GET("/simple")
+        ByteBuffer asByteBuffer();
+
+        @GET("/scalar")
         int scalar();
     }
 
     interface ResponsesApi {
 
-        @Get("/callable")
+        @GET("/callable")
         Callable<String> callable();
 
-        @Get("/callback")
+        @GET("/callback")
         void callback(@Callback Consumer<String> callback);
 
-        @Get("/completable-future")
+        @GET("/completable-future")
         CompletableFuture<String> completableFuture();
 
-        @Get("/response")
-        Response<String> response();
+        @GET("/response")
+        Response<String, Exception> response();
 
-        @Get("/http-response")
+        @GET("/http-response")
         HTTPResponse<String> httpResponse();
 
-        @Get("/future")
+        @GET("/future")
         Future<String> future();
 
-        @Get("/future-task")
+        @GET("/future-task")
         FutureTask<String> futureTask();
 
-        @Head("/headers")
+        @HEAD("/headers")
         Headers headers();
 
-        @Head("/http-headers")
+        @HEAD("/http-headers")
         HTTPHeaders httpHeaders();
 
-        @Get("/optional")
+        @GET("/optional")
         Optional<String> optional();
 
-        @Get("/promise")
-        Promise<String> promise();
+        @GET("/promise")
+        Promise<String, Exception> promise();
 
-        @Get("/runnable")
+        @GET("/lazy")
+        Lazy<String> lazy();
+
+        @GET("/runnable")
         Runnable runnable();
 
-        @Head("/http-status")
+        @HEAD("/http-status")
         HTTPStatus httpStatus();
 
-        @Head("/http-status-code")
+        @HEAD("/http-status-code")
         HTTPStatusCode httpStatusCode();
+
+        @GET("/except")
+        Except<String> except();
     }
 }

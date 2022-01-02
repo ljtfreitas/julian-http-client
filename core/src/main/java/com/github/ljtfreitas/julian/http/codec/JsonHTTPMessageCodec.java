@@ -29,8 +29,10 @@ import java.util.List;
 
 public interface JsonHTTPMessageCodec<T> extends HTTPRequestWriter<T>, HTTPResponseReader<T> {
 
+    Collection<MediaType> JSON_MEDIA_TYPES = List.of(MediaType.APPLICATION_JSON);
+
     @Override
     default Collection<MediaType> contentTypes() {
-        return List.of(MediaType.APPLICATION_JSON);
+        return JSON_MEDIA_TYPES;
     }
 }

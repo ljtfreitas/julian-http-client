@@ -2,23 +2,18 @@ package com.github.ljtfreitas.julian;
 
 import com.github.ljtfreitas.julian.Endpoint.Parameter;
 import com.github.ljtfreitas.julian.Endpoint.Parameters;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestReporter;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Flow.Publisher;
 import java.util.concurrent.Flow.Subscriber;
 import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -57,14 +52,14 @@ class SubscriberCallbackResponseTTest {
     class Adapted {
 
         @Test
-        void parameterized() throws Exception {
+        void parameterized() {
             when(endpoint.parameters()).thenReturn(Parameters.create(Parameter.callback(0, "success", JavaType.parameterized(Subscriber.class, String.class))));
 
             assertEquals(JavaType.parameterized(Publisher.class, String.class), responseT.adapted(endpoint));
         }
 
         @Test
-        void unsupported() throws Exception {
+        void unsupported() {
             when(endpoint.parameters()).thenReturn(Parameters.empty());
 
             assertEquals(JavaType.parameterized(Publisher.class, Object.class), responseT.adapted(endpoint));
@@ -105,9 +100,9 @@ class SubscriberCallbackResponseTTest {
         ObjectResponseT<String> objectResponseT = new ObjectResponseT<>();
 
         PublisherResponseT<String> publisherResponseT = new PublisherResponseT<>();
-        ResponseFn<Publisher<String>, String> publisherFn = publisherResponseT.comp(endpoint, objectResponseT.comp(endpoint, null));
+        ResponseFn<String, Publisher<String>> publisherFn = publisherResponseT.bind(endpoint, objectResponseT.bind(endpoint, null));
 
-        responseT.comp(endpoint, publisherFn).join(request, arguments);
+        responseT.bind(endpoint, publisherFn).join(request, arguments);
 
         Thread.sleep(1500);
     }
@@ -115,7 +110,7 @@ class SubscriberCallbackResponseTTest {
     private class StringRequest implements RequestIO<String> {
 
         @Override
-        public Promise<? extends Response<String>> execute() {
+        public Promise<? extends Response<String, Exception>, Exception> execute() {
             return Promise.pending(CompletableFuture.supplyAsync(() -> new DoneResponse<>("it works!"),
                     CompletableFuture.delayedExecutor(1000, TimeUnit.MILLISECONDS)));
         }

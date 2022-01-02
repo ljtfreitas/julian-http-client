@@ -18,20 +18,20 @@ class RunnableResponseTTest {
 	@Mock
 	private Endpoint endpoint;
 
-	private RunnableResponseT responseT = new RunnableResponseT();
+	private final RunnableResponseT responseT = new RunnableResponseT();
 
 	@Nested
 	class Predicates {
 
 		@Test
-		void supported() throws Exception {
+		void supported() {
 			when(endpoint.returnType()).thenReturn(JavaType.parameterized(Runnable.class, String.class));
 
 			assertTrue(responseT.test(endpoint));
 		}
 		
 		@Test
-		void unsupported() throws Exception {
+		void unsupported() {
 			when(endpoint.returnType()).thenReturn(JavaType.valueOf(String.class));
 
 			assertFalse(responseT.test(endpoint));
@@ -39,15 +39,15 @@ class RunnableResponseTTest {
 	}
 	
 	@Test
-	void adapted() throws Exception {
+	void adapted() {
 		assertEquals(JavaType.none(), responseT.adapted(endpoint));
 	}
 
 	@Test
-	void compose(@Mock ResponseFn<Void, Void> fn, @Mock RequestIO<Void> request) throws Exception {
+	void compose(@Mock ResponseFn<Void, Void> fn, @Mock RequestIO<Void> request) {
 		Arguments arguments = Arguments.empty();
 
-		Runnable runnable = responseT.comp(endpoint, fn).join(request, arguments);
+		Runnable runnable = responseT.bind(endpoint, fn).join(request, arguments);
 		runnable.run();
 		
 		verify(fn).join(request, arguments);

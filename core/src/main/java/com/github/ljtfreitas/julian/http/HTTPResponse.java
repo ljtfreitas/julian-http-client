@@ -22,15 +22,59 @@
 
 package com.github.ljtfreitas.julian.http;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import com.github.ljtfreitas.julian.Response;
 
-public interface HTTPResponse<T> extends Response<T> {
-	
+public interface HTTPResponse<T> extends Response<T, HTTPResponseException> {
+
 	HTTPStatus status();
 
 	HTTPHeaders headers();
 
-	Response<T> recover(HTTPStatusCode code, Function<HTTPResponse<T>, T> fn);
+	@Override
+	<R> HTTPResponse<R> map(Function<? super T, R> fn);
+
+	<R> HTTPResponse<R> map(HTTPResponseFn<? super T, R> fn);
+
+	@Override
+	HTTPResponse<T> onSuccess(Consumer<? super T> fn);
+
+	HTTPResponse<T> onSuccess(HTTPResponseConsumer<? super T> fn);
+
+	@Override
+	default HTTPResponse<T> onFailure(Consumer<? super HTTPResponseException> fn) {
+		return this;
+	}
+
+	@Override
+	default HTTPResponse<T> recover(Function<? super HTTPResponseException, T> fn) {
+		return this;
+	}
+
+	@Override
+	default HTTPResponse<T> recover(Predicate<? super HTTPResponseException> p, Function<? super HTTPResponseException, T> fn) {
+		return this;
+	}
+
+	@Override
+	default <Err extends HTTPResponseException> HTTPResponse<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
+		return this;
+	}
+
+	default HTTPResponse<T> recover(HTTPStatusCode code, Function<HTTPResponse<T>, T> fn) {
+		return this;
+	}
+
+	interface HTTPResponseFn<T, R> {
+
+		R apply(HTTPStatus status, HTTPHeaders headers, T body);
+	}
+
+	interface HTTPResponseConsumer<T> {
+
+		void accept(HTTPStatus status, HTTPHeaders headers, T body);
+	}
 }

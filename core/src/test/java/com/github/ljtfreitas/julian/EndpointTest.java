@@ -65,7 +65,7 @@ class EndpointTest {
 			}
 
 			@Test
-			void defindOnEndpoint() throws URISyntaxException {
+			void definedOnEndpoint() throws URISyntaxException {
 				QueryParameters queryParameters = QueryParameters.create(Map.of("param1", "value1", "param2", "value2"));
 
 				Path path = new Path("http://my.api.com", queryParameters, Parameters.empty());
@@ -78,7 +78,7 @@ class EndpointTest {
 			@Nested
 			class WithDynamicParameters {
 
-				private QueryParameterSerializer queryParameterSerializer = new QueryParameterSerializer();
+				private final QueryParameterSerializer queryParameterSerializer = new QueryParameterSerializer();
 
 				@Test
 				void simple() {	
@@ -119,7 +119,7 @@ class EndpointTest {
 				}
 
 				@Test
-				void mapOfCollection() throws URISyntaxException {
+				void mapOfCollection() {
 					Map<String, Collection<String>> values = Map.of("params", List.of("value1", "value2"));
 
 					Parameters parameters = Parameters.create(Parameter.query(0, "params", JavaType.parameterized(Map.class, String.class, JavaType.Parameterized.valueOf(Collection.class, String.class)), queryParameterSerializer));
@@ -132,7 +132,7 @@ class EndpointTest {
 				}
 
 				@Test
-				void mapOfString() throws URISyntaxException {
+				void mapOfString() {
 					Map<String, String> values = Map.of("param1", "value1", "param2", "value2");
 
 					Parameters parameters = Parameters.create(Parameter.query(0, "params", JavaType.parameterized(Map.class, String.class, String.class), queryParameterSerializer));
@@ -145,7 +145,7 @@ class EndpointTest {
 				}
 
 				@Test
-				void array() throws URISyntaxException {
+				void array() {
 					String[] values = new String[] { "value1", "value2" };
 
 					Parameters parameters = Parameters.create(Parameter.query(0, "params", JavaType.valueOf(String[].class), queryParameterSerializer));
@@ -155,6 +155,18 @@ class EndpointTest {
 					URI uri = path.expand(Arguments.create(new Object[] { values })).unsafe();
 
 					assertEquals("http://my.api.com?params=value1&params=value2", uri.toString());
+				}
+
+				@Test
+				void mixing() {
+					Parameters parameters = Parameters.create(Parameter.query(0, "param2", JavaType.valueOf(String.class), queryParameterSerializer),
+															  Parameter.query(1, "param3", JavaType.valueOf(String.class), queryParameterSerializer));
+
+					Path path = new Path("http://my.api.com?param1=value1", parameters);
+
+					URI uri = path.expand(Arguments.create("value2", "value3")).unsafe();
+
+					assertEquals("http://my.api.com?param1=value1&param2=value2&param3=value3", uri.toString());
 				}
 			}
 		}

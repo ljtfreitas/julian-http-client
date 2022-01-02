@@ -24,17 +24,17 @@ package com.github.ljtfreitas.julian;
 
 import java.util.concurrent.CompletionStage;
 
-class CompletionStageResponseT<T> implements ResponseT<CompletionStage<T>, T> {
+class CompletionStageResponseT<T> implements ResponseT<T, CompletionStage<T>> {
 
 	private static final CompletionStageResponseT<Object> SINGLE_INSTANCE = new CompletionStageResponseT<>();
 
 	@Override
-	public <A> ResponseFn<CompletionStage<T>, A> comp(Endpoint endpoint, ResponseFn<T, A> fn) {
+	public <A> ResponseFn<A, CompletionStage<T>> bind(Endpoint endpoint, ResponseFn<A, T> fn) {
 		return new ResponseFn<>() {
 
 			@Override
 			public CompletionStage<T> join(RequestIO<A> request, Arguments arguments) {
-				return request.run(fn, arguments).future();
+				return fn.run(request, arguments).future();
 			}
 
 			@Override

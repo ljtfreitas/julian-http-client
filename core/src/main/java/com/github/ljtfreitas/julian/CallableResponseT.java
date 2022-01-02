@@ -24,12 +24,12 @@ package com.github.ljtfreitas.julian;
 
 import java.util.concurrent.Callable;
 
-class CallableResponseT<T> implements ResponseT<Callable<T>, T> {
+class CallableResponseT<T> implements ResponseT<T, Callable<T>> {
 
 	private static final CallableResponseT<Object> SINGLE_INSTANCE = new CallableResponseT<>();
 
 	@Override
-	public <A> ResponseFn<Callable<T>, A> comp(Endpoint endpoint, ResponseFn<T, A> fn) {
+	public <A> ResponseFn<A, Callable<T>> bind(Endpoint endpoint, ResponseFn<A, T> fn) {
 		return new ResponseFn<>() {
 
 			@Override

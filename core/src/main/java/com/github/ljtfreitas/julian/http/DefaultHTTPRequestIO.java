@@ -55,10 +55,10 @@ class DefaultHTTPRequestIO<T> implements HTTPRequestIO<T> {
 	}
 
 	@Override
-	public Promise<HTTPResponse<T>> execute() {
+	public Promise<HTTPResponse<T>, HTTPException> execute() {
 		return httpClient.request(source).execute()
-				.then(this::read)
-				.failure(e -> exceptionally(deep(e)));
+				.failure(e -> exceptionally(deep(e)))
+				.then(this::read);
 	}
 
 	private HTTPException exceptionally(Throwable e) {
@@ -93,7 +93,7 @@ class DefaultHTTPRequestIO<T> implements HTTPRequestIO<T> {
 	private HTTPResponse<T> success(HTTPClientResponse response) {
 		Optional<HTTPResponse<T>> r = response.body()
 				.deserialize(body -> deserialize(body, response.headers()))
-				.map(b -> new DefaultHTTPResponse<>(response.status(), response.headers(), b));
+				.map(b -> new SuccessHTTPResponse<>(response.status(), response.headers(), b));
 
 		return r.orElseGet(() -> empty(response));
 	}

@@ -29,8 +29,10 @@ import java.util.List;
 
 public interface FormURLEncodedHTTPMessageCodec<T> extends HTTPRequestWriter<T>, HTTPResponseReader<T> {
 
+    Collection<MediaType> FORM_URLENCODED_MEDIA_TYPES = List.of(MediaType.APPLICATION_FORM_URLENCODED);
+
     @Override
     default Collection<MediaType> contentTypes() {
-        return List.of(MediaType.APPLICATION_FORM_URLENCODED);
+        return FORM_URLENCODED_MEDIA_TYPES;
     }
 }

@@ -29,6 +29,6 @@ import com.github.ljtfreitas.julian.Promise;
 
 public interface HTTP {
 
-    <T> Promise<HTTPRequest<T>> request(Endpoint endpoint, Arguments arguments, JavaType returnType);
+    <T> Promise<HTTPRequest<T>, HTTPException> request(Endpoint endpoint, Arguments arguments, JavaType returnType);
 
 }

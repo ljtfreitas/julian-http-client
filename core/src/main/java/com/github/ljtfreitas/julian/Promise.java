@@ -23,36 +23,48 @@
 package com.github.ljtfreitas.julian;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
-public interface Promise<T> {
+public interface Promise<T, E extends Exception> {
 
-	<R> Promise<R> then(Function<? super T, R> fn);
+	Promise<T, E> onSuccess(Consumer<T> fn);
 
-	<R> Promise<R> bind(Function<? super T, Promise<R>> fn);
+	<R> Promise<R, E> then(Function<? super T, R> fn);
 
-	Promise<T> failure(Function<Throwable, ? extends Exception> fn);
+	<R, Err extends Exception> Promise<R, Err> bind(Function<? super T, Promise<R, Err>> fn);
 
 	Except<T> join();
 
+	Promise<T, E> onFailure(Consumer<? super E> fn);
+
+	<Err extends Exception> Promise<T, Err> failure(Function<? super E, Err> fn);
+
+	Promise<T, E> recover(Function<? super E, T> fn);
+
+	Promise<T, E> recover(Predicate<? super E> p, Function<? super E, T> fn);
+
+	<Err extends E> Promise<T, E> recover(Class<? extends Err> expected, Function<? super Err, T> fn);
+
 	CompletableFuture<T> future();
 
-    static <T> Promise<T> done(T value) {
-		return DefaultPromise.done(value);
+    static <T, E extends Exception> Promise<T, E> done(T value) {
+		return new DonePromise<>(value);
 	}
 
-	static <T> Promise<T> failed(Throwable t) {
-		return DefaultPromise.failed(t);
+	static <T, E extends Exception> Promise<T, E> failed(E e) {
+		return new FailedPromise<>(e);
 	}
 
-	static <T, F> Promise<T> pending(CompletableFuture<T> future) {
+	static <T, E extends Exception> Promise<T, E> pending(CompletableFuture<T> future) {
 		return new DefaultPromise<>(future);
 	}
 
-	static <T> Promise<T> pending(Supplier<T> fn) {
+	static <T, E extends Exception> Promise<T, E> pending(Supplier<T> fn) {
 		return new DefaultPromise<>(supplyAsync(fn));
 	}
 }

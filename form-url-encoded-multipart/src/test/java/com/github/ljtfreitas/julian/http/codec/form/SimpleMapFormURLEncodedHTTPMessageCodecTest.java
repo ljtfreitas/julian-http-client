@@ -51,7 +51,7 @@ class SimpleMapFormURLEncodedHTTPMessageCodecTest {
             void write() {
                 HTTPRequestBody output = codec.write(Map.of("name", "Tiago de Freitas Lima", "age", "35"), StandardCharsets.UTF_8);
 
-                assertEquals(APPLICATION_FORM_URLENCODED, output.contentType());
+                assertEquals(APPLICATION_FORM_URLENCODED, output.contentType().orElseThrow());
 
                 output.serialize().subscribe(new Subscriber<>() {
 

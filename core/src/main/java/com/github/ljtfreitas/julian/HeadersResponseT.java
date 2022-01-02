@@ -26,17 +26,17 @@ import java.util.Optional;
 
 import com.github.ljtfreitas.julian.http.HTTPResponse;
 
-public class HeadersResponseT implements ResponseT<Headers, Void> {
+public class HeadersResponseT implements ResponseT<Void, Headers> {
 
     private static final HeadersResponseT SINGLE_INSTANCE = new HeadersResponseT();
 
     @Override
-    public <A> ResponseFn<Headers, A> comp(Endpoint endpoint, ResponseFn<Void, A> fn) {
+    public <A> ResponseFn<A, Headers> bind(Endpoint endpoint, ResponseFn<A, Void> fn) {
         return new ResponseFn<>() {
 
             @SuppressWarnings({"unchecked", "rawtypes"})
             @Override
-            public Promise<Headers> run(RequestIO<A> request, Arguments arguments) {
+            public Promise<Headers, ? extends Exception> run(RequestIO<A> request, Arguments arguments) {
                 return request.execute().then(r -> {
                     Optional<HTTPResponse> httpResponse = r.as(HTTPResponse.class);
                     return httpResponse.map(HTTPResponse::headers)

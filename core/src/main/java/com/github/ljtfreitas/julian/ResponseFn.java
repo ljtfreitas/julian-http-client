@@ -22,9 +22,9 @@
 
 package com.github.ljtfreitas.julian;
 
-public interface ResponseFn<M, T> {
+public interface ResponseFn<T, M> {
 
-	default Promise<M> run(RequestIO<T> request, Arguments arguments) {
+	default Promise<M, ? extends Exception> run(RequestIO<T> request, Arguments arguments) {
 		return Promise.done(join(request, arguments));
 	}
 

@@ -33,12 +33,12 @@ class CollectionResponseT<T> implements ResponseT<Collection<T>, Collection<T>> 
 	private static final CollectionResponseT<Object> SINGLE_INSTANCE = new CollectionResponseT<>();
 
 	@Override
-	public <A> ResponseFn<Collection<T>, A> comp(Endpoint endpoint, ResponseFn<Collection<T>, A> fn) {
+	public <A> ResponseFn<A, Collection<T>> bind(Endpoint endpoint, ResponseFn<A, Collection<T>> fn) {
 		return new ResponseFn<>() {
 
 			@Override
-			public Promise<Collection<T>> run(RequestIO<A> request, Arguments arguments) {
-				return request.run(fn, arguments).then(c -> Optional.ofNullable(c).map(this::collectionByType).orElseGet(this::emptyCollectionByType));
+			public Promise<Collection<T>, ? extends Exception> run(RequestIO<A> request, Arguments arguments) {
+				return fn.run(request, arguments).then(c -> Optional.ofNullable(c).map(this::collectionByType).orElseGet(this::emptyCollectionByType));
 			}
 
 			private Collection<T> collectionByType(Collection<T> source) {

@@ -22,20 +22,19 @@
 
 package com.github.ljtfreitas.julian.http;
 
-import java.io.ByteArrayInputStream;
-import java.net.http.HttpRequest.BodyPublishers;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.util.concurrent.Flow;
+import java.util.Optional;
 import java.util.concurrent.Flow.Publisher;
 import java.util.function.Supplier;
-
-import com.github.ljtfreitas.julian.http.codec.HTTPRequestWriter;
 
 public class DefaultHTTPRequestBody implements HTTPRequestBody {
 
 	private final MediaType mediaType;
 	private final Supplier<Publisher<ByteBuffer>> publisher;
+
+	public DefaultHTTPRequestBody(Supplier<Publisher<ByteBuffer>> publisher) {
+		this(null, publisher);
+	}
 
 	public DefaultHTTPRequestBody(MediaType mediaType, Supplier<Publisher<ByteBuffer>> publisher) {
 		this.mediaType = mediaType;
@@ -43,8 +42,8 @@ public class DefaultHTTPRequestBody implements HTTPRequestBody {
 	}
 
 	@Override
-	public MediaType contentType() {
-		return mediaType;
+	public Optional<MediaType> contentType() {
+		return Optional.ofNullable(mediaType);
 	}
 
 	@Override

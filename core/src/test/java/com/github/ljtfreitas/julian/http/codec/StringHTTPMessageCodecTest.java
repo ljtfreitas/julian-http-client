@@ -31,8 +31,13 @@ class StringHTTPMessageCodecTest {
         }
 
         @Test
-        void supported() {
+        void textPlain() {
             assertTrue(codec.readable(MediaType.valueOf("text/plain"), JavaType.valueOf(String.class)));
+        }
+
+        @Test
+        void any() {
+            assertTrue(codec.readable(MediaType.valueOf("application/xml"), JavaType.valueOf(String.class)));
         }
 
         @Nested

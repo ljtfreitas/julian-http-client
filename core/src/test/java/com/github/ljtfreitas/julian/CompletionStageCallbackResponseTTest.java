@@ -70,7 +70,7 @@ class CompletionStageCallbackResponseTTest {
 	
 		@ParameterizedTest
 		@ArgumentsSource(AcceptableCallbackParametersProvider.class)
-		void parameterized(Parameter parameter) throws Exception {
+		void parameterized(Parameter parameter) {
 			when(endpoint.parameters()).thenReturn(new Parameters(List.of(parameter)));
 
 			JavaType expectedType = JavaType.valueOf(parameter.javaType().parameterized()
@@ -81,7 +81,7 @@ class CompletionStageCallbackResponseTTest {
 		}
 
 		@Test
-		void unsupported() throws Exception {
+		void unsupported() {
 			when(endpoint.parameters()).thenReturn(Parameters.empty());
 
 			assertEquals(JavaType.none(), responseT.adapted(endpoint));
@@ -92,7 +92,7 @@ class CompletionStageCallbackResponseTTest {
 	class Callbacks {
 
 		@Test
-		void consumesSuccess(@Mock ResponseFn<String, String> fn, @Mock RequestIO<String> request, @Mock Consumer<String> success) throws Exception {
+		void consumesSuccess(@Mock ResponseFn<String, String> fn, @Mock RequestIO<String> request, @Mock Consumer<String> success) {
 			when(endpoint.parameters()).thenReturn(Parameters.create(Parameter.callback(0, "success", JavaType.parameterized(Consumer.class, String.class))));
 			when(fn.returnType()).thenReturn(JavaType.valueOf(String.class));
 
@@ -102,15 +102,15 @@ class CompletionStageCallbackResponseTTest {
 
 			Arguments arguments = Arguments.create(check.andThen(success));
 
-			when(request.run(fn, arguments)).thenReturn(Promise.done(expected));
+			when(fn.run(request, arguments)).thenReturn(Promise.done(expected));
 
-			responseT.comp(endpoint, fn).join(request, arguments);
+			responseT.bind(endpoint, fn).join(request, arguments);
 
 			verify(success).accept(expected);
 		}
 
 		@Test
-		void consumesFailure(@Mock ResponseFn<String, String> fn, @Mock RequestIO<String> request, @Mock Consumer<Throwable> failure) throws Exception {
+		void consumesFailure(@Mock ResponseFn<String, String> fn, @Mock RequestIO<String> request, @Mock Consumer<Throwable> failure) {
 			when(endpoint.parameters()).thenReturn(Parameters.create(Parameter.callback(0, "failure", JavaType.parameterized(Consumer.class, Throwable.class))));
 			when(fn.returnType()).thenReturn(JavaType.none());
 
@@ -120,9 +120,9 @@ class CompletionStageCallbackResponseTTest {
 
 			Arguments arguments = Arguments.create(check.andThen(failure));
 
-			when(request.run(fn, arguments)).thenReturn(Promise.failed(e));
+			when(fn.run(request, arguments)).then(i ->  Promise.failed(e));
 
-			responseT.comp(endpoint, fn).join(request, arguments);
+			responseT.bind(endpoint, fn).join(request, arguments);
 
 			verify(failure).accept(e);
 		}
@@ -131,7 +131,7 @@ class CompletionStageCallbackResponseTTest {
 		class WithBiConsumer {
 
 			@Test
-			void consumesSuccess(@Mock ResponseFn<String, String> fn, @Mock RequestIO<String> request, @Mock BiConsumer<String, Throwable> subscriber) throws Exception {
+			void consumesSuccess(@Mock ResponseFn<String, String> fn, @Mock RequestIO<String> request, @Mock BiConsumer<String, Throwable> subscriber) {
 				when(endpoint.parameters()).thenReturn(Parameters.create(Parameter.callback(0, "success", JavaType.parameterized(BiConsumer.class, String.class, Throwable.class))));
 				when(fn.returnType()).thenReturn(JavaType.valueOf(String.class));
 
@@ -141,15 +141,15 @@ class CompletionStageCallbackResponseTTest {
 
 				Arguments arguments = Arguments.create(check.andThen(subscriber));
 
-				when(request.run(fn, arguments)).thenReturn(Promise.done(expected));
+				when(fn.run(request, arguments)).thenReturn(Promise.done(expected));
 
-				responseT.comp(endpoint, fn).join(request, arguments);
+				responseT.bind(endpoint, fn).join(request, arguments);
 
 				verify(subscriber).accept(expected, null);
 			}
 
 			@Test
-			void consumesFailure(@Mock ResponseFn<String, String> fn, @Mock RequestIO<String> request, @Mock BiConsumer<String, Throwable> subscriber) throws Exception {
+			void consumesFailure(@Mock ResponseFn<String, String> fn, @Mock RequestIO<String> request, @Mock BiConsumer<String, Throwable> subscriber) {
 				when(endpoint.parameters()).thenReturn(Parameters.create(Parameter.callback(0, "consumer", JavaType.parameterized(BiConsumer.class, String.class, Throwable.class))));
 				when(fn.returnType()).thenReturn(JavaType.valueOf(String.class));
 	
@@ -159,9 +159,9 @@ class CompletionStageCallbackResponseTTest {
 
 				Arguments arguments = Arguments.create(check.andThen(subscriber));
 
-				when(request.run(fn, arguments)).thenReturn(Promise.failed(e));
+				when(fn.run(request, arguments)).then(i -> Promise.failed(e));
 
-				responseT.comp(endpoint, fn).join(request, arguments);
+				responseT.bind(endpoint, fn).join(request, arguments);
 
 				verify(subscriber).accept(null, e);
 			}
@@ -172,7 +172,7 @@ class CompletionStageCallbackResponseTTest {
 	static class AcceptableCallbackParametersProvider implements ArgumentsProvider {
 
 		@Override
-		public Stream<? extends org.junit.jupiter.params.provider.Arguments> provideArguments(ExtensionContext context) throws Exception {
+		public Stream<? extends org.junit.jupiter.params.provider.Arguments> provideArguments(ExtensionContext context) {
 			return Stream.of(org.junit.jupiter.params.provider.Arguments.of(Parameter.callback(0, "success", JavaType.parameterized(Consumer.class, String.class))),
 							 org.junit.jupiter.params.provider.Arguments.of(Parameter.callback(0, "failure", JavaType.parameterized(Consumer.class, Throwable.class))),
 							 org.junit.jupiter.params.provider.Arguments.of(Parameter.callback(0, "consumer", JavaType.parameterized(BiConsumer.class, String.class, Throwable.class))));

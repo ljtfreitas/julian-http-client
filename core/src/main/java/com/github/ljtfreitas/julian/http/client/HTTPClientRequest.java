@@ -26,6 +26,6 @@ import com.github.ljtfreitas.julian.Promise;
 
 public interface HTTPClientRequest {
 
-	Promise<HTTPClientResponse> execute();
+	Promise<HTTPClientResponse, Exception> execute();
 
 }

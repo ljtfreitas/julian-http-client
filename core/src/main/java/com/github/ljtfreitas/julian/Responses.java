@@ -25,22 +25,26 @@ package com.github.ljtfreitas.julian;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 class Responses {
-	
+
+	private final ResponseT<Object, Object> defaultResponseT = ObjectResponseT.get();
+
+	private final ConcurrentHashMap<Endpoint, ResponseFn<?, ?>> cache;
 	private final Collection<ResponseT<?, ?>> responses;
 
-	private final ResponseT<Object, Object> defaultResponseT = new ObjectResponseT<>();
-
 	Responses(Collection<ResponseT<?, ?>> responses) {
+		this.cache = new ConcurrentHashMap<>();
 		this.responses = responses;
 	}
 
-	<M, T> ResponseFn<M, T> select(Endpoint endpoint) {
-		return select(endpoint, new Exclusions());
+	@SuppressWarnings("unchecked")
+	<M, T> ResponseFn<T, M> select(Endpoint endpoint) {
+		return (ResponseFn<T, M>) cache.computeIfAbsent(endpoint, e -> select(e, new Exclusions()));
 	}
 	
-	private <M, T> ResponseFn<M, T> select(Endpoint endpoint, Exclusions exclusions) {
+	private <M, T> ResponseFn<T, M> select(Endpoint endpoint, Exclusions exclusions) {
 		Optional<ResponseT<?, ?>> responseT = find(endpoint, exclusions);
 
 		return responseT.map(r -> this.<M, T> compose(endpoint, r, exclusions)).orElseGet(() -> unsafe(endpoint));
@@ -54,13 +58,13 @@ class Responses {
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private <M, T> ResponseFn<M, T> compose(Endpoint endpoint, ResponseT responseT, Exclusions exclusions) {
-		return responseT.comp(endpoint, select(endpoint.returns(responseT.adapted(endpoint)), exclusions.add(responseT)));
+	private <M, T> ResponseFn<T, M> compose(Endpoint endpoint, ResponseT responseT, Exclusions exclusions) {
+		return responseT.bind(endpoint, select(endpoint.returns(responseT.adapted(endpoint)), exclusions.add(responseT)));
 	}
 
 	@SuppressWarnings("unchecked")
-	private <M, T> ResponseFn<M, T> unsafe(Endpoint endpoint) {
-		return (ResponseFn<M, T>) defaultResponseT.comp(endpoint, null);
+	private <M, T> ResponseFn<T, M> unsafe(Endpoint endpoint) {
+		return (ResponseFn<T, M>) defaultResponseT.bind(endpoint, null);
 	}
 	
 	private class Exclusions {

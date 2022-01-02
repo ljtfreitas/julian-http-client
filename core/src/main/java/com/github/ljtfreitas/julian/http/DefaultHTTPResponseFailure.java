@@ -38,8 +38,8 @@ public class DefaultHTTPResponseFailure implements HTTPResponseFailure {
 
 		String responseBody = response.body().deserialize(String::new).orElse("");
 
-		Supplier<HTTPResponseException> ex = () -> HTTPStatusCode.select(status.code())
-				.<HTTPResponseException> map(httpStatusCode -> failure(httpStatusCode, headers, responseBody))
+		HTTPResponseException ex = HTTPStatusCode.select(status.code())
+				.<HTTPResponseException>map(httpStatusCode -> failure(httpStatusCode, headers, responseBody))
 				.orElseGet(() -> unknown(status, headers, responseBody));
 
 		return new FailureHTTPResponse<>(status, headers, ex);

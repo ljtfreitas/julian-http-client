@@ -24,9 +24,6 @@ package com.github.ljtfreitas.julian;
 
 public interface RequestIO<T> {
 
-	Promise<? extends Response<T>> execute();
+	Promise<? extends Response<T, ? extends Exception>, ? extends Exception> execute();
 
-	default <R> Promise<R> run(ResponseFn<R, T> fn, Arguments arguments) {
-		return fn.run(this::execute, arguments);
-	}
 }

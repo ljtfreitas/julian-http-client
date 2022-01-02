@@ -25,13 +25,11 @@ package com.github.ljtfreitas.julian;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
-import static com.github.ljtfreitas.julian.Except.run;
-import static java.util.concurrent.CompletableFuture.completedFuture;
-import static java.util.concurrent.CompletableFuture.failedFuture;
-
-class DefaultPromise<T> implements Promise<T> {
+class DefaultPromise<T, E extends Exception> implements Promise<T, E> {
 
 	private final CompletableFuture<T> future;
 
@@ -40,22 +38,77 @@ class DefaultPromise<T> implements Promise<T> {
 	}
 
 	@Override
-	public <R> Promise<R> then(Function<? super T, R> fn) {
+	public Promise<T, E> onSuccess(Consumer<T> fn) {
+		return new DefaultPromise<>(future.whenCompleteAsync((r, e) -> { if (e == null) fn.accept(r); }));
+	}
+
+	@Override
+	public <R> Promise<R, E> then(Function<? super T, R> fn) {
 		return new DefaultPromise<>(future.thenApplyAsync(fn));
 	}
 
 	@Override
-	public <R> Promise<R> bind(Function<? super T, Promise<R>> fn) {
+	public <R, Err extends Exception> Promise<R, Err> bind(Function<? super T, Promise<R, Err>> fn) {
 		return new DefaultPromise<>(future.thenComposeAsync(t -> fn.apply(t).future()));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Promise<T> failure(Function<Throwable, ? extends Exception> fn) {
-		return new DefaultPromise<>(future.handleAsync((r, e) -> { if (e == null) return r; else throw failure(fn.apply(e));}));
+	public Promise<T, E> recover(Function<? super E, T> fn) {
+		return new DefaultPromise<>(future.exceptionally(t -> fn.apply((E) t)));
 	}
-	
+
+	@Override
+	public <Err extends E> Promise<T, E> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
+		return new DefaultPromise<>(future.handleAsync((r, e) -> {
+			Exception cause = deep(e);
+			if (expected.isInstance(cause))
+				return fn.apply(expected.cast(cause));
+			else
+				return r;
+		}));
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Promise<T, E> recover(Predicate<? super E> p, Function<? super E, T> fn) {
+		return new DefaultPromise<>(future.handleAsync((r, e) -> {
+			Exception cause = deep(e);
+			if (cause != null && p.test((E) cause))
+				return fn.apply((E) cause);
+			else
+				return r;
+		}));
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <Err extends Exception> Promise<T, Err> failure(Function<? super E, Err> fn) {
+		return new DefaultPromise<>(future.handleAsync((r, e) -> {
+			Exception cause = deep(e);
+			if (cause != null)
+				throw failure(fn.apply((E) cause));
+			else
+				return r;
+		}));
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Promise<T, E> onFailure(Consumer<? super E> fn) {
+		return new DefaultPromise<>(future.whenCompleteAsync((r, e) -> {
+			Exception cause = deep(e);
+			if (cause != null)
+				fn.accept((E) cause);
+		}));
+	}
+
 	private RuntimeException failure(Exception e) {
 		return (e instanceof RuntimeException) ? (RuntimeException) e : new CompletionException(e);
+	}
+
+	private Exception deep(Throwable t) {
+		if (t instanceof CompletionException || t instanceof ExecutionException) return deep(t.getCause()); else return (Exception) t;
 	}
 
 	@Override
@@ -68,13 +121,5 @@ class DefaultPromise<T> implements Promise<T> {
 	@Override
 	public CompletableFuture<T> future() {
 		return future;
-	}
-
-	static <T> Promise<T> done(T value) {
-		return new DefaultPromise<>(completedFuture(value));
-	}
-
-	static <T> Promise<T> failed(Throwable t) {
-		return new DefaultPromise<>(failedFuture(t));
 	}
 }

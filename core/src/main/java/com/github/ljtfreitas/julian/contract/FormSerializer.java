@@ -22,20 +22,16 @@
 
 package com.github.ljtfreitas.julian.contract;
 
+import com.github.ljtfreitas.julian.Form;
+import com.github.ljtfreitas.julian.JavaType;
+
 import java.lang.reflect.GenericArrayType;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import com.github.ljtfreitas.julian.JavaType;
-import com.github.ljtfreitas.julian.Form;
-
-import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.flatMapping;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;

@@ -1,3 +1,9 @@
+import net.researchgate.release.GitAdapter
+import net.researchgate.release.GitAdapter.GitConfig
+import net.researchgate.release.ReleaseExtension
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
 /*
  * Copyright (C) 2021 Tiago de Freitas Lima
  *
@@ -22,6 +28,9 @@
 
 plugins {
     `java-library`
+    `maven-publish`
+    signing
+    id("net.researchgate.release")
 }
 
 java {
@@ -34,7 +43,6 @@ repositories {
 }
 
 dependencies {
-
     // Use JUnit Jupiter API for testing.
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.0")
     testImplementation("org.junit.jupiter:junit-jupiter:5.7.0")
@@ -51,9 +59,107 @@ dependencies {
 
 val test by tasks.getting(Test::class) {
     useJUnitPlatform()
+
+    testLogging.showStandardStreams = true
 }
 
 configure<JavaPluginConvention> {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
 }
+
+tasks.jar {
+    archiveBaseName.set("julian-http-client-${project.name}")
+
+    manifest {
+        val systemProperties = System.getProperties()
+
+        attributes(
+            "Build-By" to systemProperties["user.name"],
+            "Build-JDK" to "${systemProperties["java.version"]} (${systemProperties["java.version"]} ${systemProperties["java.vm.version"]})",
+            "Build-OS" to "${systemProperties["os.name"]} ${systemProperties["os.arch"]} ${systemProperties["os.version"]}",
+            "Build-Timestamp" to LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+            "Implementation-Title" to project.name,
+            "Implementation-Group" to project.group,
+            "Implementation-Version" to project.version,
+            "Created-By" to "Gradle ${gradle.gradleVersion}"
+        )
+    }
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+tasks.javadoc {
+    (options as StandardJavadocDocletOptions).addBooleanOption("html5", true)
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            artifactId = tasks.jar.get().archiveBaseName.get()
+            from(components["java"])
+
+            pom {
+                name.set(artifactId)
+                url.set("https://github.com/ljtfreitas/julian-http-client")
+                packaging = "jar"
+
+                licenses {
+                    license {
+                        name.set("MIT License")
+                        url.set("https://opensource.org/licenses/MIT")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("ljtfreitas")
+                        name.set("Tiago de Freitas Lima")
+                        email.set("ljtfreitas@gmail.com")
+                    }
+                }
+                issueManagement {
+                    system.set("GitHub issues")
+                    url.set("https://github.com/ljtfreitas/julian-http-client/issues")
+                }
+                scm {
+                    connection.set("scm:git:git@github.com:ljtfreitas/julian-http-client.git")
+                    developerConnection.set("scm:git:git@github.com:ljtfreitas/julian-http-client.git")
+                    url.set("https://github.com/ljtfreitas/julian-http-client")
+                    tag.set("HEAD")
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = "maven-central-nexus"
+
+            val releasesRepoUrl = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
+            val snapshotsRepoUrl = uri("https://oss.sonatype.org/content/repositories/snapshots")
+            url = if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
+
+            credentials {
+                val nexusUserName: String? by project
+                val nexusPassword: String? by project
+
+                username = nexusUserName
+                password = nexusPassword
+            }
+        }
+    }
+}
+
+signing {
+    sign(publishing.publications["maven"])
+}
+
+release {
+    git {
+        requireBranch = "main"
+    }
+}
+
+fun ReleaseExtension.git(configure: GitConfig.() -> Unit) = (getProperty("git") as GitConfig).configure()

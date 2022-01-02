@@ -45,7 +45,7 @@ class DefaultHTTPClientRequest implements HTTPClientRequest {
 	}
 
 	@Override
-	public Promise<HTTPClientResponse> execute() {
+	public Promise<HTTPClientResponse, Exception> execute() {
 		BodySubscriber<byte[]> upstream = BodySubscribers.ofByteArray();
 
 		BodyHandler<HTTPResponseBody> handler = r -> BodySubscribers.mapping(upstream, DefaultHTTPResponseBody::new);

@@ -25,7 +25,7 @@ package com.github.ljtfreitas.julian.contract;
 import java.lang.annotation.Target;
 import java.lang.annotation.*;
 
-@Target({ ElementType.TYPE, ElementType.METHOD, ElementType.PARAMETER })
+@Target({ElementType.TYPE, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @ParameterDefinition
@@ -34,6 +34,8 @@ public @interface Path {
 	String name() default "";
 
 	String value() default "";
+
+	String defaultValue() default "";
 
 	Class<? extends ParameterSerializer<? super Object, String>> serializer() default DefaultParameterSerializer.class;
 }

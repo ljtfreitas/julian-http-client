@@ -39,7 +39,7 @@ import java.util.List;
 
 import static java.util.stream.Collectors.joining;
 
-public class StringHTTPMessageCodec implements HTTPRequestWriter<String>, HTTPResponseReader<String> {
+public class StringHTTPMessageCodec implements WildcardHTTPMessageCodec<String> {
 
 	public static final MediaType TEXT_WILDCARD_MEDIA_TYPE = MediaType.valueOf("text/*");
 

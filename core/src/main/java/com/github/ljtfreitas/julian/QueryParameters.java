@@ -104,7 +104,7 @@ public class QueryParameters {
 	}
 
 	public static QueryParameters parse(String source) {
-		return new QueryParameters(Arrays.stream(nonNull(source).split("&"))
+		return new QueryParameters(Arrays.stream((source == null ? "" : source).split("&"))
 				.map(parameter -> parameter.split("="))
 				.filter(parameter -> parameter.length == 2)
 				.collect(groupingBy(parameter -> parameter[0], mapping(parameter -> parameter[1], toUnmodifiableList()))));

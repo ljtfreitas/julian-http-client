@@ -25,7 +25,10 @@ package com.github.ljtfreitas.julian.http;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.client.HTTPClientResponse;
 
+import java.util.function.Function;
 import java.util.function.Supplier;
+
+import static java.util.function.Function.identity;
 
 public class DefaultHTTPResponseFailure implements HTTPResponseFailure {
 
@@ -36,19 +39,19 @@ public class DefaultHTTPResponseFailure implements HTTPResponseFailure {
 		HTTPStatus status = response.status();
 		HTTPHeaders headers = response.headers();
 
-		String responseBody = response.body().deserialize(String::new).orElse("");
+		byte[] responseAsBytes = response.body().deserialize(identity()).orElseGet(() -> new byte[0]);
 
 		HTTPResponseException ex = HTTPStatusCode.select(status.code())
-				.<HTTPResponseException>map(httpStatusCode -> failure(httpStatusCode, headers, responseBody))
-				.orElseGet(() -> unknown(status, headers, responseBody));
+				.<HTTPResponseException>map(httpStatusCode -> failure(httpStatusCode, headers, responseAsBytes))
+				.orElseGet(() -> unknown(status, headers, responseAsBytes));
 
 		return new FailureHTTPResponse<>(status, headers, ex);
 	}
 
-	private HTTPUknownFailureResponseException unknown(HTTPStatus status, HTTPHeaders headers, String responseBody) {
+	private HTTPUknownFailureResponseException unknown(HTTPStatus status, HTTPHeaders headers, byte[] responseBody) {
 		return new HTTPUknownFailureResponseException(status, headers, responseBody);
 	}
-	private HTTPFailureResponseException failure(HTTPStatusCode status, HTTPHeaders headers, String responseBody) {
+	private HTTPFailureResponseException failure(HTTPStatusCode status, HTTPHeaders headers, byte[] responseBody) {
 		switch (status) {
 			case BAD_REQUEST:
 				return new HTTPClientFailureResponseException.BadRequest(headers, responseBody);

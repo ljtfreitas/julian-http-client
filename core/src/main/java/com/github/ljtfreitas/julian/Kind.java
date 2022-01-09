@@ -20,17 +20,22 @@
  * SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian.contract;
+package com.github.ljtfreitas.julian;
 
-import com.github.ljtfreitas.julian.JavaType;
+import java.lang.reflect.Type;
 
-import java.util.Optional;
+public abstract class Kind<T> {
 
-public interface ParameterSerializer<T, R> {
+	private final Type kind;
 
-	Optional<R> serialize(String name, JavaType javaType, T value);
+	public Kind() {
+		this.kind =  JavaType.valueOf(this.getClass().getGenericSuperclass())
+				.parameterized()
+				.map(JavaType.Parameterized::firstArg)
+				.orElseThrow();
+	}
 
-	static ParameterSerializer<? super Object, String> simple() {
-		return DefaultParameterSerializer.get();
+	public JavaType javaType() {
+		return JavaType.valueOf(kind);
 	}
 }

@@ -396,7 +396,7 @@ class DefaultHTTPTest {
 
 			@Test
 			void unknownHost() {
-				Endpoint endpoint = new Endpoint(new Path("http://localhost:8091/hello"), "GET",
+				Endpoint endpoint = new Endpoint(new Path("http://localhost:8099/hello"), "GET",
 						Headers.empty(), Cookies.empty(), Parameters.empty());
 
 				Except<HTTPResponse<Void>> response = http.<Void> request(endpoint, Arguments.empty(), JavaType.none())

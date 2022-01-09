@@ -23,7 +23,7 @@ class EndpointTest {
 	@Nested
 	class Paths {
 
-		private ParameterSerializer<Object, String> parameterSerializer = ParameterSerializer.create();
+		private ParameterSerializer<Object, String> parameterSerializer = ParameterSerializer.simple();
 
 		@Test
 		void simple() {

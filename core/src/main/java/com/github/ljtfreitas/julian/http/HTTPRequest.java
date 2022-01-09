@@ -22,10 +22,15 @@
 
 package com.github.ljtfreitas.julian.http;
 
-import java.net.URI;
-import java.util.Optional;
+import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.Kind;
+import com.github.ljtfreitas.julian.http.client.HTTPClient;
+import com.github.ljtfreitas.julian.http.codec.HTTPRequestWriter;
+import com.github.ljtfreitas.julian.http.codec.HTTPResponseReader;
 
-import com.github.ljtfreitas.julian.Request;
+import java.net.URI;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public interface HTTPRequest<T> extends HTTPRequestDefinition, HTTPRequestIO<T> {
 
@@ -37,4 +42,35 @@ public interface HTTPRequest<T> extends HTTPRequestDefinition, HTTPRequestIO<T> 
 
 	HTTPRequest<T> body(HTTPRequestBody body);
 
+	static HTTPRequestBuilder.HasHeaders<Void> GET(String path) {
+		return new HTTPRequestBuilder.HasHeaders<>(path, HTTPMethod.GET);
+	}
+
+	static HTTPRequestBuilder.HasBody<Void> POST(String path) {
+		return new HTTPRequestBuilder.HasBody<>(path, HTTPMethod.POST);
+	}
+
+	static HTTPRequestBuilder.HasBody<Void> PUT(String path) {
+		return new HTTPRequestBuilder.HasBody<>(path, HTTPMethod.PUT);
+	}
+
+	static HTTPRequestBuilder.HasBody<Void> PATCH(String path) {
+		return new HTTPRequestBuilder.HasBody<>(path, HTTPMethod.PATCH);
+	}
+
+	static HTTPRequestBuilder.HasBody<Void> DELETE(String path) {
+		return new HTTPRequestBuilder.HasBody<>(path, HTTPMethod.DELETE);
+	}
+
+	static HTTPRequestBuilder.JustHeaders<Void> HEAD(String path) {
+		return new HTTPRequestBuilder.JustHeaders<>(path, HTTPMethod.HEAD);
+	}
+
+	static HTTPRequestBuilder.JustHeaders<Void> OPTIONS(String path) {
+		return new HTTPRequestBuilder.JustHeaders<>(path, HTTPMethod.OPTIONS);
+	}
+
+	static HTTPRequestBuilder.JustHeaders<Void> TRACE(String path) {
+		return new HTTPRequestBuilder.JustHeaders<>(path, HTTPMethod.TRACE);
+	}
 }

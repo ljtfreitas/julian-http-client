@@ -75,6 +75,11 @@ public interface Bracket<T extends AutoCloseable> extends Except<T> {
 		}
 
 		@Override
+		public <E extends Exception> T prop() throws E {
+			return id().prop();
+		}
+
+		@Override
 		public <E extends Exception> T prop(Function<? super Throwable, E> fn) throws E {
 			return id().prop(fn);
 		}

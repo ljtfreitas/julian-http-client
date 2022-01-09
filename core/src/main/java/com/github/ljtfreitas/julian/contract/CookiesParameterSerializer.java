@@ -22,8 +22,9 @@
 
 package com.github.ljtfreitas.julian.contract;
 
-import static com.github.ljtfreitas.julian.Message.format;
-import static java.util.stream.Collectors.toUnmodifiableList;
+import com.github.ljtfreitas.julian.Cookie;
+import com.github.ljtfreitas.julian.Cookies;
+import com.github.ljtfreitas.julian.JavaType;
 
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Type;
@@ -33,11 +34,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.github.ljtfreitas.julian.Cookie;
-import com.github.ljtfreitas.julian.Cookies;
-import com.github.ljtfreitas.julian.Header;
-import com.github.ljtfreitas.julian.Headers;
-import com.github.ljtfreitas.julian.JavaType;
+import static java.util.stream.Collectors.toUnmodifiableList;
 
 public class CookiesParameterSerializer implements ParameterSerializer<Object, Cookies> {
 

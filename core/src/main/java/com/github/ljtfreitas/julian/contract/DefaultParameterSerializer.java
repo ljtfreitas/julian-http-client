@@ -28,8 +28,14 @@ import com.github.ljtfreitas.julian.JavaType;
 
 class DefaultParameterSerializer implements ParameterSerializer<Object, String> {
 
+	private static final DefaultParameterSerializer SINGLE_INSTANCE = new DefaultParameterSerializer();
+
 	@Override
 	public Optional<String> serialize(String name, JavaType javaType, Object value) {
 		return Optional.ofNullable(value).map(Object::toString);
+	}
+
+	static DefaultParameterSerializer get() {
+		return SINGLE_INSTANCE;
 	}
 }

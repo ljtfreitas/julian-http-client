@@ -26,7 +26,7 @@ public class HTTPUknownFailureResponseException extends HTTPResponseException {
 
 	private static final long serialVersionUID = 1L;
 
-	public HTTPUknownFailureResponseException(HTTPStatus status, HTTPHeaders headers, String body) {
+	public HTTPUknownFailureResponseException(HTTPStatus status, HTTPHeaders headers, byte[] body) {
 		super(status, headers, body);
 	}
 }

@@ -37,9 +37,9 @@ class DefaultHTTPRequest<T> implements HTTPRequest<T> {
 	private final HTTPMethod method;
 	private final HTTPRequestBody body;
 	private final HTTPHeaders headers;
-	private final DefaultHTTPRequestIO<T> io;
+	private final HTTPRequestIO<T> io;
 
-	public DefaultHTTPRequest(JavaType returnType, URI path, HTTPMethod method, HTTPRequestBody body, HTTPHeaders headers,
+	public DefaultHTTPRequest(URI path, HTTPMethod method, HTTPRequestBody body, HTTPHeaders headers, JavaType returnType,
 							  HTTPClient httpClient, HTTPMessageCodecs codecs, HTTPResponseFailure failure) {
 		this.returnType = returnType;
 		this.path = path;
@@ -49,7 +49,7 @@ class DefaultHTTPRequest<T> implements HTTPRequest<T> {
 		this.io = new DefaultHTTPRequestIO<>(this, httpClient, codecs, failure);
 	}
 
-	private DefaultHTTPRequest(JavaType returnType, URI path, HTTPMethod method, HTTPRequestBody body, HTTPHeaders headers, DefaultHTTPRequestIO<T> io) {
+	private DefaultHTTPRequest(URI path, HTTPMethod method, HTTPRequestBody body, HTTPHeaders headers, JavaType returnType, HTTPRequestIO<T> io) {
 		this.returnType = returnType;
 		this.path = path;
 		this.method = method;
@@ -90,21 +90,21 @@ class DefaultHTTPRequest<T> implements HTTPRequest<T> {
 
 	@Override
 	public HTTPRequest<T> path(URI path) {
-		return new DefaultHTTPRequest<>(returnType, path, method, body, headers, io);
+		return new DefaultHTTPRequest<>(path, method, body, headers, returnType, io);
 	}
 
 	@Override
 	public HTTPRequest<T> method(HTTPMethod method) {
-		return new DefaultHTTPRequest<>(returnType, path, method, body, headers, io);
+		return new DefaultHTTPRequest<>(path, method, body, headers, returnType, io);
 	}
 
 	@Override
 	public HTTPRequest<T> headers(HTTPHeaders headers) {
-		return new DefaultHTTPRequest<>(returnType, path, method, body, headers, io);
+		return new DefaultHTTPRequest<>(path, method, body, headers, returnType, io);
 	}
 
 	@Override
 	public HTTPRequest<T> body(HTTPRequestBody body) {
-		return new DefaultHTTPRequest<>(returnType, path, method, body, headers, io);
+		return new DefaultHTTPRequest<>(path, method, body, headers, returnType, io);
 	}
 }

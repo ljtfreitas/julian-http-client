@@ -22,8 +22,6 @@
 
 package com.github.ljtfreitas.julian.http;
 
-import java.util.stream.Collectors;
-
 import static java.util.stream.Collectors.joining;
 
 public class HTTPResponseException extends HTTPException {
@@ -32,13 +30,15 @@ public class HTTPResponseException extends HTTPException {
 
 	private final HTTPStatus status;
 	private final HTTPHeaders headers;
-	private final String body;
+	private final byte[] bodyAsBytes;
+	private final String bodyAsString;
 
-	HTTPResponseException(HTTPStatus status, HTTPHeaders headers, String body) {
+	HTTPResponseException(HTTPStatus status, HTTPHeaders headers, byte[] body) {
 		super(HTTPResponseException.message(status, headers, body));
 		this.status = status;
 		this.headers = headers;
-		this.body = body;
+		this.bodyAsBytes = body;
+		this.bodyAsString = new String(body);
 	}
 
 	public HTTPStatus status() {
@@ -49,11 +49,15 @@ public class HTTPResponseException extends HTTPException {
 		return headers;
 	}
 
-	public String body() {
-		return body;
+	public byte[] bodyAsBytes() {
+		return bodyAsBytes;
 	}
 
-	private static String message(HTTPStatus status, HTTPHeaders headers, String body) {
+	public String bodyAsString() {
+		return bodyAsString;
+	}
+
+	private static String message(HTTPStatus status, HTTPHeaders headers, byte[] body) {
 		return new StringBuilder()
 				.append(status)
 					.append("\n")
@@ -62,7 +66,7 @@ public class HTTPResponseException extends HTTPException {
 						.append(headers.all().stream().map(HTTPHeader::toString).collect(joining(", ")))
 					.append("]")
 				.append("\n")
-				.append(body)
+				.append(new String(body))
 				.toString();
 	}
 }

@@ -290,16 +290,16 @@ class JavaTypeTest {
 		void simple() {
 			JavaType javaType = JavaType.valueOf(String.class);
 
-			assertAll(() -> javaType.is(String.class),
-					  () -> javaType.classType().isPresent());
+			assertAll(() -> assertTrue(javaType.is(String.class)),
+					  () -> assertTrue(javaType.classType().isPresent()));
 		}
 
 		@Test
 		void parameterized() {
 			JavaType javaType = JavaType.valueOf(JavaType.Parameterized.valueOf(Collection.class, String.class));
 
-			assertAll(() -> javaType.is(Collection.class),
-					  () -> javaType.parameterized().isPresent());
+			assertAll(() -> assertTrue(javaType.is(Collection.class)),
+					  () -> assertTrue(javaType.parameterized().isPresent()));
 
 			ParameterizedType parameterized = javaType.parameterized().get();
 

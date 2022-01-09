@@ -262,7 +262,7 @@ class DefaultEndpointMetadataTest {
 
 			Arguments arguments = Arguments.create("whatever");
 
-			ParameterSerializer<Object, String> defaultSerializer = ParameterSerializer.create();
+			ParameterSerializer<Object, String> defaultSerializer = ParameterSerializer.simple();
 
 			return Stream.of(arguments("@PathParameter", "GET", URI.create("http://my.api.com/whatever"), Parameter.path(0, "name", JavaType.valueOf(String.class), defaultSerializer), 
 									WithParameters.class.getMethod("path", String.class), arguments),

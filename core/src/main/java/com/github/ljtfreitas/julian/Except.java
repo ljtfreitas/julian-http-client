@@ -51,6 +51,8 @@ public interface Except<T> {
 
 	T recover(Supplier<T> fn);
 
+	<E extends Exception> T prop() throws E;
+
 	<E extends Exception> T prop(Function<? super Throwable, E> fn) throws E;
 
 	<R> R fold(Function<T, R> success, Function<? super Throwable, R> failure);
@@ -153,6 +155,11 @@ public interface Except<T> {
 		}
 
 		@Override
+		public <E extends Exception> T prop() throws E {
+			return value;
+		}
+
+		@Override
 		public <E extends Exception> T prop(Function<? super Throwable, E> fn) throws E {
 			return value;
 		}
@@ -230,6 +237,11 @@ public interface Except<T> {
 		@Override
 		public Except<T> failure(Predicate<? super Throwable> candidate, Function<? super Throwable, ? extends Throwable> fn) {
 			return candidate.test(value) ? new Failure<>(fn.apply(value)) : this;
+		}
+
+		@Override
+		public <E extends Exception> T prop() throws E {
+			throw new RuntimeException(value);
 		}
 
 		@Override

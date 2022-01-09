@@ -88,7 +88,7 @@ class DefaultHTTPResponseFailureTest {
 
 		assertAll(() -> assertEquals(status, httpResponseException.status()),
 				  () -> assertEquals(headers, httpResponseException.headers()),
-				  () -> assertEquals(responseBody, httpResponseException.body()));
+				  () -> assertEquals(responseBody, httpResponseException.bodyAsString()));
 	}
 
 	static Stream<Arguments> failureHTTPStatuses() {

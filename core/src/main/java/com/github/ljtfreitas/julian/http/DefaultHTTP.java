@@ -37,7 +37,6 @@ import com.github.ljtfreitas.julian.http.codec.HTTPRequestWriterException;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.github.ljtfreitas.julian.Message.format;
@@ -75,7 +74,7 @@ public class DefaultHTTP implements HTTP {
 		HTTPMethod method = HTTPMethod.select(endpoint.method())
 				.orElseThrow(() -> new IllegalArgumentException(format("Unsupported HTTP method: {0}", endpoint.method())));
 
-		return Promise.pending(() -> new DefaultHTTPRequest<>(returnType, uri, method, body, headers, httpClient, codecs, failure));
+		return Promise.pending(() -> new DefaultHTTPRequest<>(uri, method, body, headers, returnType, httpClient, codecs, failure));
 	}
 
 	private HTTPRequestBody body(Endpoint endpoint, Arguments arguments, HTTPHeaders headers) {

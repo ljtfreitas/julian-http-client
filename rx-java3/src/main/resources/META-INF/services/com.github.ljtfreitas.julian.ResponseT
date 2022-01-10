@@ -1,0 +1,5 @@
+com.github.ljtfreitas.julian.rxjava3.CompletableResponseT
+com.github.ljtfreitas.julian.rxjava3.FlowableResponseT
+com.github.ljtfreitas.julian.rxjava3.MaybeResponseT
+com.github.ljtfreitas.julian.rxjava3.ObservableResponseT
+com.github.ljtfreitas.julian.rxjava3.SingleResponseT

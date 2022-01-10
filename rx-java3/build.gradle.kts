@@ -20,14 +20,15 @@
  * SOFTWARE.
  */
 
-rootProject.name = "julian-http-client-parent"
-include("core")
-include("form-url-encoded-multipart")
-include("json-jackson")
-include("json-gson")
-include("json-jsonb")
-include("json-jsonp")
-include("xml-jackson")
-include("http-client-reactor-netty")
-include("xml-jaxb")
-include("rx-java3")
+plugins {
+    modules
+}
+
+tasks.jar.configure {
+    archiveBaseName.set("julian-http-client-rx-java3")
+}
+
+dependencies {
+    implementation(project(":core"))
+    implementation("io.reactivex.rxjava3:rxjava:3.1.3")
+}

@@ -20,14 +20,16 @@
  * SOFTWARE.
  */
 
-rootProject.name = "julian-http-client-parent"
-include("core")
-include("form-url-encoded-multipart")
-include("json-jackson")
-include("json-gson")
-include("json-jsonb")
-include("json-jsonp")
-include("xml-jackson")
-include("http-client-reactor-netty")
-include("xml-jaxb")
-include("rx-java3")
+module com.github.ljtfreitas.julian.rxjava3 {
+    exports com.github.ljtfreitas.julian.rxjava3;
+
+    provides com.github.ljtfreitas.julian.ResponseT
+        with com.github.ljtfreitas.julian.rxjava3.CompletableResponseT,
+             com.github.ljtfreitas.julian.rxjava3.FlowableResponseT,
+             com.github.ljtfreitas.julian.rxjava3.MaybeResponseT,
+             com.github.ljtfreitas.julian.rxjava3.ObservableResponseT,
+             com.github.ljtfreitas.julian.rxjava3.SingleResponseT;
+
+    requires com.github.ljtfreitas.julian;
+    requires io.reactivex.rxjava3;
+}

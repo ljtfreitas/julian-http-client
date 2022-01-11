@@ -1,4 +1,4 @@
-package com.github.ljtfreitas.julian.mutiny;
+package com.github.ljtfreitas.julian.reactor;
 
 import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.Endpoint;
@@ -6,13 +6,16 @@ import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.RequestIO;
 import com.github.ljtfreitas.julian.ResponseFn;
-import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.core.publisher.Flux;
+import reactor.test.StepVerifier;
+
+import java.util.Collection;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -20,16 +23,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class UniResponseTTest {
+class FluxResponseTTest {
 
-    private final UniResponseT<String> subject = new UniResponseT<>();
+    private final FluxResponseT<String> subject = new FluxResponseT<>();
 
     @Nested
     class Predicates {
 
         @Test
         void supported(@Mock Endpoint endpoint) {
-            when(endpoint.returnType()).thenReturn(JavaType.parameterized(Uni.class, String.class));
+            when(endpoint.returnType()).thenReturn(JavaType.parameterized(Flux.class, String.class));
 
             assertTrue(subject.test(endpoint));
         }
@@ -40,6 +43,7 @@ class UniResponseTTest {
 
             assertFalse(subject.test(endpoint));
         }
+
     }
 
     @Nested
@@ -47,48 +51,46 @@ class UniResponseTTest {
 
         @Test
         void parameterized(@Mock Endpoint endpoint) {
-            when(endpoint.returnType()).thenReturn(JavaType.parameterized(Uni.class, String.class));
+            when(endpoint.returnType()).thenReturn(JavaType.parameterized(Flux.class, String.class));
 
             JavaType adapted = subject.adapted(endpoint);
 
-            assertEquals(JavaType.valueOf(String.class), adapted);
+            assertEquals(JavaType.parameterized(Collection.class, String.class), adapted);
         }
 
         @Test
-        void adaptToObjectWhenTypeArgumentIsMissing(@Mock Endpoint endpoint) {
-            when(endpoint.returnType()).thenReturn(JavaType.valueOf(Uni.class));
+        void adaptToCollectionWhenTypeArgumentIsMissing(@Mock Endpoint endpoint) {
+            when(endpoint.returnType()).thenReturn(JavaType.valueOf(Flux.class));
 
             JavaType adapted = subject.adapted(endpoint);
 
-            assertEquals(JavaType.valueOf(Object.class), adapted);
+            assertEquals(JavaType.parameterized(Collection.class, Object.class), adapted);
         }
     }
 
     @Test
-    void bind(@Mock Endpoint endpoint, @Mock RequestIO<String> request, @Mock ResponseFn<String, String> fn) {
+    void bind(@Mock Endpoint endpoint, @Mock RequestIO<String> request, @Mock ResponseFn<String, Collection<String>> fn) {
         Arguments arguments = Arguments.empty();
 
-        when(fn.run(request, arguments)).thenReturn(Promise.done("hello"));
+        when(fn.run(request, arguments)).thenReturn(Promise.done(List.of("one", "two", "three")));
 
-        Uni<String> uni = subject.bind(endpoint, fn).join(request, arguments);
+        Flux<String> flux = subject.bind(endpoint, fn).join(request, arguments);
 
-        UniAssertSubscriber<String> subscriber = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
-
-        subscriber.assertCompleted()
-                .assertItem("hello");
+        StepVerifier.create(flux)
+                .expectNext("one", "two", "three")
+                .expectComplete();
     }
 
     @Test
-    void failure(@Mock Endpoint endpoint, @Mock RequestIO<String> request, @Mock ResponseFn<String, String> fn) {
+    void failure(@Mock Endpoint endpoint, @Mock RequestIO<String> request, @Mock ResponseFn<String, Collection<String>> fn) {
         Arguments arguments = Arguments.empty();
 
         RuntimeException exception = new RuntimeException("oops");
         when(fn.run(request, arguments)).then(i -> Promise.failed(exception));
 
-        Uni<String> uni = subject.bind(endpoint, fn).join(request, arguments);
+        Flux<String> flux = subject.bind(endpoint, fn).join(request, arguments);
 
-        UniAssertSubscriber<String> subscriber = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
-
-        subscriber.assertFailedWith(RuntimeException.class, exception.getMessage());
+        StepVerifier.create(flux)
+                .expectErrorMatches(t -> t.equals(exception));
     }
 }

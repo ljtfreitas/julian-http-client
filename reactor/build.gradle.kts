@@ -20,16 +20,23 @@
  * SOFTWARE.
  */
 
-rootProject.name = "julian-http-client-parent"
-include("core")
-include("form-url-encoded-multipart")
-include("json-jackson")
-include("json-gson")
-include("json-jsonb")
-include("json-jsonp")
-include("xml-jackson")
-include("http-client-reactor-netty")
-include("xml-jaxb")
-include("rx-java3")
-include("mutiny")
-include("reactor")
+plugins {
+    modules
+    id("io.spring.dependency-management") version "1.0.11.RELEASE"
+}
+
+tasks.jar.configure {
+    archiveBaseName.set("julian-http-client-reactor")
+}
+
+dependencyManagement {
+    imports {
+        mavenBom("io.projectreactor:reactor-bom:2020.0.14")
+    }
+}
+
+dependencies {
+    implementation(project(":core"))
+    implementation("io.projectreactor:reactor-core")
+    testImplementation("io.projectreactor:reactor-test")
+}

@@ -20,16 +20,13 @@
  * SOFTWARE.
  */
 
-rootProject.name = "julian-http-client-parent"
-include("core")
-include("form-url-encoded-multipart")
-include("json-jackson")
-include("json-gson")
-include("json-jsonb")
-include("json-jsonp")
-include("xml-jackson")
-include("http-client-reactor-netty")
-include("xml-jaxb")
-include("rx-java3")
-include("mutiny")
-include("reactor")
+module com.github.ljtfreitas.julian.reactor {
+    exports com.github.ljtfreitas.julian.reactor;
+
+    provides com.github.ljtfreitas.julian.ResponseT
+        with com.github.ljtfreitas.julian.reactor.FluxResponseT,
+             com.github.ljtfreitas.julian.reactor.MonoResponseT;
+
+    requires com.github.ljtfreitas.julian;
+    requires reactor.core;
+}

@@ -55,7 +55,7 @@ class SingleResponseTTest {
         }
 
         @Test
-        void adaptToCollectionWhenTypeArgumentIsMissing(@Mock Endpoint endpoint) {
+        void adaptToObjectWhenTypeArgumentIsMissing(@Mock Endpoint endpoint) {
             when(endpoint.returnType()).thenReturn(JavaType.valueOf(Single.class));
 
             JavaType adapted = subject.adapted(endpoint);

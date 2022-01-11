@@ -20,15 +20,15 @@
  * SOFTWARE.
  */
 
-rootProject.name = "julian-http-client-parent"
-include("core")
-include("form-url-encoded-multipart")
-include("json-jackson")
-include("json-gson")
-include("json-jsonb")
-include("json-jsonp")
-include("xml-jackson")
-include("http-client-reactor-netty")
-include("xml-jaxb")
-include("rx-java3")
-include("mutiny")
+plugins {
+    modules
+}
+
+tasks.jar.configure {
+    archiveBaseName.set("julian-http-client-mutiny")
+}
+
+dependencies {
+    implementation(project(":core"))
+    implementation("io.smallrye.reactive:mutiny:1.2.0")
+}

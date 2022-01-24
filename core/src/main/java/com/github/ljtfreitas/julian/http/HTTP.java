@@ -22,13 +22,11 @@
 
 package com.github.ljtfreitas.julian.http;
 
-import com.github.ljtfreitas.julian.Arguments;
-import com.github.ljtfreitas.julian.Endpoint;
-import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.Promise;
+import com.github.ljtfreitas.julian.RequestDefinition;
 
 public interface HTTP {
 
-    <T> Promise<HTTPRequest<T>, HTTPException> request(Endpoint endpoint, Arguments arguments, JavaType returnType);
+    <T> Promise<HTTPResponse<T>, HTTPException> run(RequestDefinition request);
 
 }

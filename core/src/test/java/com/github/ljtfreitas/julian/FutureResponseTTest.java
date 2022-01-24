@@ -59,12 +59,12 @@ class FutureResponseTTest {
 	}
 	
 	@Test
-	void compose(@Mock ResponseFn<String, String> fn, @Mock RequestIO<String> request) throws Exception {
+	void compose(@Mock ResponseFn<String, String> fn, @Mock Promise<Response<String, Exception>, Exception> response) throws Exception {
 		Arguments arguments = Arguments.empty();
 
-		when(fn.run(request, arguments)).thenReturn(Promise.done("expected"));
+		when(fn.run(response, arguments)).thenReturn(Promise.done("expected"));
 		
-		Future<String> future = responseT.bind(endpoint, fn).join(request, arguments);
+		Future<String> future = responseT.bind(endpoint, fn).join(response, arguments);
 
 		assertEquals("expected", future.get());
 	}

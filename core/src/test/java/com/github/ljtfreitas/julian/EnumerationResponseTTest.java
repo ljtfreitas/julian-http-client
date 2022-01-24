@@ -60,12 +60,12 @@ class EnumerationResponseTTest {
 	}
 
 	@Test
-	void compose(@Mock ResponseFn<Collection<String>, Collection<String>> fn, @Mock RequestIO<Collection<String>> request) {
+	void compose(@Mock ResponseFn<Collection<String>, Collection<String>> fn, @Mock Promise<Response<Collection<String>, Exception>, Exception> response) {
 		Arguments arguments = Arguments.empty();
 
-		when(fn.run(request, arguments)).thenReturn(Promise.done(List.of("expected")));
+		when(fn.run(response, arguments)).thenReturn(Promise.done(List.of("expected")));
 
-		Enumeration<String> enumeration = responseT.bind(endpoint, fn).join(request, arguments);
+		Enumeration<String> enumeration = responseT.bind(endpoint, fn).join(response, arguments);
 
 		assertEquals("expected", enumeration.nextElement());
 	}

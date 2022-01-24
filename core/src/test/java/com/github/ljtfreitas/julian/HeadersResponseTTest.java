@@ -14,6 +14,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -22,7 +23,7 @@ class HeadersResponseTTest {
     @Mock
     private Endpoint endpoint;
 
-    private HeadersResponseT responseT = new HeadersResponseT();
+    private final HeadersResponseT responseT = new HeadersResponseT();
 
     @Nested
     class Predicates {
@@ -42,18 +43,16 @@ class HeadersResponseTTest {
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Test
-    void compose(@Mock ResponseFn<Void, Void> fn, @Mock RequestIO<Void> request, @Mock HTTPResponse<Void> response) {
+    void compose(@Mock ResponseFn<Void, Void> fn, @Mock HTTPResponse<Void> response) {
         Arguments arguments = Arguments.empty();
 
         Headers headers = Headers.create(new Header("X-Header", "x-header-content"));
 
         when(response.headers()).thenReturn(headers.all().stream().reduce(HTTPHeaders.empty(), (a, b) -> a.join(new HTTPHeader(b.name(), b.values())), (a, b) -> b));
-        when(response.as(HTTPResponse.class)).thenCallRealMethod();
-        when(request.execute()).then(a -> Promise.done(response));
+        when(response.cast(notNull())).thenCallRealMethod();
 
-        Headers actual = responseT.bind(endpoint, fn).join(request, arguments);
+        Headers actual = responseT.bind(endpoint, fn).join(Promise.done(response), arguments);
 
         assertThat(actual, contains(headers.all().toArray()));
     }

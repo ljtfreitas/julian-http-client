@@ -26,15 +26,13 @@ class ResponsesTest {
 
 		Response<String, Exception> response = Response.done("oi");
 
-		when(request.execute()).then(a -> Promise.done(response));
+		Responses responses = new Responses(List.of(new CompletionStageResponseT<>(), new OptionalResponseT<>()));
 
-		Responses requests = new Responses(List.of(new CompletionStageResponseT<>(), new OptionalResponseT<>()));
+		ResponseFn<String, CompletableFuture<Optional<String>>> responseFn = responses.select(endpoint);
 
-		ResponseFn<String, CompletableFuture<Optional<String>>> requestFn = requests.select(endpoint);
+		assertEquals(JavaType.valueOf(String.class), responseFn.returnType());
 
-		assertEquals(JavaType.valueOf(String.class), requestFn.returnType());
-
-		CompletableFuture<Optional<String>> result = requestFn.join(request, Arguments.empty());
+		CompletableFuture<Optional<String>> result = responseFn.join(Promise.done(response), Arguments.empty());
 
 		assertEquals("oi", result.join().get());
     }

@@ -61,12 +61,12 @@ class ListIteratorResponseTTest {
 	}
 
 	@Test
-	void compose(@Mock ResponseFn<List<String>, List<String>> fn, @Mock RequestIO<List<String>> request) {
+	void compose(@Mock ResponseFn<List<String>, List<String>> fn, @Mock Promise<Response<List<String>, Exception>, Exception> response) {
 		Arguments arguments = Arguments.empty();
 
-		when(fn.run(request, arguments)).thenReturn(Promise.done(List.of("expected")));
+		when(fn.run(response, arguments)).thenReturn(Promise.done(List.of("expected")));
 
-		ListIterator<String> listIterator = responseT.bind(endpoint, fn).join(request, arguments);
+		ListIterator<String> listIterator = responseT.bind(endpoint, fn).join(response, arguments);
 
 		assertThat(() -> listIterator, hasItem("expected"));
 	}

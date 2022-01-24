@@ -22,13 +22,12 @@
 
 package com.github.ljtfreitas.julian.http;
 
-import java.util.Optional;
-
 import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.Endpoint;
 import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.Kind;
 import com.github.ljtfreitas.julian.Promise;
-import com.github.ljtfreitas.julian.RequestIO;
+import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
 import com.github.ljtfreitas.julian.ResponseT;
 
@@ -40,15 +39,12 @@ public class HTTPStatusCodeResponseT implements ResponseT<Void, HTTPStatusCode> 
     public <A> ResponseFn<A, HTTPStatusCode> bind(Endpoint endpoint, ResponseFn<A, Void> fn) {
         return new ResponseFn<>() {
 
-            @SuppressWarnings({"unchecked", "rawtypes"})
             @Override
-            public Promise<HTTPStatusCode, ? extends Exception> run(RequestIO<A> request, Arguments arguments) {
-                return request.execute().then(r -> {
-                    Optional<HTTPResponse> httpResponse = r.as(HTTPResponse.class);
-                    return httpResponse.map(HTTPResponse::status)
+            public Promise<HTTPStatusCode, ? extends Exception> run(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+                return response.then(r -> r.cast(new Kind<HTTPResponse<A>>() {})
+                            .map(HTTPResponse::status)
                             .flatMap(status -> HTTPStatusCode.select(status.code()))
-                            .orElseThrow();
-                });
+                            .orElseThrow());
             }
 
             @Override

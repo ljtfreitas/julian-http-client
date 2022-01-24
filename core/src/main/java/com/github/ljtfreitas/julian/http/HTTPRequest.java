@@ -22,15 +22,7 @@
 
 package com.github.ljtfreitas.julian.http;
 
-import com.github.ljtfreitas.julian.JavaType;
-import com.github.ljtfreitas.julian.Kind;
-import com.github.ljtfreitas.julian.http.client.HTTPClient;
-import com.github.ljtfreitas.julian.http.codec.HTTPRequestWriter;
-import com.github.ljtfreitas.julian.http.codec.HTTPResponseReader;
-
 import java.net.URI;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 
 public interface HTTPRequest<T> extends HTTPRequestDefinition, HTTPRequestIO<T> {
 

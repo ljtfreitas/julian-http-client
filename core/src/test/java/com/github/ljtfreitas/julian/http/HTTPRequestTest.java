@@ -130,7 +130,7 @@ class HTTPRequestTest {
 
         @BeforeEach
         void setup() {
-            HttpRequest requestDefinition = request("/hello");
+            HttpRequest requestDefinition = request("/hello").withMethod("POST");
 
             mockServer.clear(requestDefinition)
                     .when(requestDefinition)
@@ -144,7 +144,7 @@ class HTTPRequestTest {
             Promise<String, HTTPException> promise = POST("http://localhost:8093/hello")
                     .header(new HTTPHeader(HTTPHeader.CONTENT_TYPE, "text/plain"))
                     .body("i am a body", StringHTTPMessageCodec.get())
-                    .response(String.class, new StringHTTPMessageCodec())
+                    .response(String.class, StringHTTPMessageCodec.get())
                     .build(client)
                         .execute()
                         .then(r -> r.body().unsafe());
@@ -218,9 +218,6 @@ class HTTPRequestTest {
                 .respond(response().withStatusCode(200));
 
         Promise<HTTPStatus, HTTPException> promise = DELETE("http://localhost:8091/hello")
-                .header(new HTTPHeader(HTTPHeader.CONTENT_TYPE, "text/plain"))
-                .body("i am a body", StringHTTPMessageCodec.get())
-                .response(String.class, new StringHTTPMessageCodec())
                 .build(client)
                     .execute()
                     .then(HTTPResponse::status);

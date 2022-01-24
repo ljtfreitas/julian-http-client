@@ -58,12 +58,12 @@ class CallableResponseTTest {
 	}
 	
 	@Test
-	void compose(@Mock ResponseFn<String, String> fn, @Mock RequestIO<String> request) throws Exception {
+	void compose(@Mock ResponseFn<String, String> fn, @Mock Promise<Response<String, Exception>, Exception> response) throws Exception {
 		Arguments arguments = Arguments.empty();
 
-		when(fn.join(request, arguments)).thenReturn("expected");
+		when(fn.join(response, arguments)).thenReturn("expected");
 
-		Callable<String> callable = responseT.bind(endpoint, fn).join(request, arguments);
+		Callable<String> callable = responseT.bind(endpoint, fn).join(response, arguments);
 		
 		assertEquals("expected", callable.call());
 	}

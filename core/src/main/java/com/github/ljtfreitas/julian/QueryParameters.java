@@ -51,6 +51,10 @@ public class QueryParameters {
 		this.parameters = unmodifiableMap(parameters);
 	}
 
+	public Map<String, Collection<String>> all() {
+		return parameters;
+	}
+
 	public String serialize() {
 		return parameters.entrySet().stream()
 				.flatMap(e -> e.getValue().stream().map(value -> encode(e.getKey()) + "=" + encode(value)))

@@ -30,6 +30,7 @@ import com.github.ljtfreitas.julian.Header;
 import com.github.ljtfreitas.julian.Headers;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.Promise;
+import com.github.ljtfreitas.julian.RequestDefinition;
 import com.github.ljtfreitas.julian.http.client.HTTPClient;
 import com.github.ljtfreitas.julian.http.codec.HTTPMessageCodecs;
 import com.github.ljtfreitas.julian.http.codec.HTTPRequestWriterException;
@@ -45,84 +46,58 @@ import static com.github.ljtfreitas.julian.http.HTTPHeader.CONTENT_TYPE;
 public class DefaultHTTP implements HTTP {
 
 	private final HTTPClient httpClient;
+	private final HTTPRequestInterceptor interceptor;
 	private final HTTPMessageCodecs codecs;
 	private final HTTPResponseFailure failure;
 	private final Charset encoding;
 
-	public DefaultHTTP(HTTPClient httpClient, HTTPMessageCodecs codecs, HTTPResponseFailure failure) {
-		this(httpClient, codecs, failure, StandardCharsets.UTF_8);
+	public DefaultHTTP(HTTPClient httpClient, HTTPRequestInterceptor interceptor, HTTPMessageCodecs codecs, HTTPResponseFailure failure) {
+		this(httpClient, interceptor, codecs, failure, StandardCharsets.UTF_8);
 	}
 
-	public DefaultHTTP(HTTPClient httpClient, HTTPMessageCodecs codecs, HTTPResponseFailure failure, Charset encoding) {
+	public DefaultHTTP(HTTPClient httpClient, HTTPRequestInterceptor interceptor, HTTPMessageCodecs codecs, HTTPResponseFailure failure, Charset encoding) {
 		this.httpClient = httpClient;
+		this.interceptor = interceptor;
 		this.codecs = codecs;
 		this.failure = failure;
 		this.encoding = encoding;
 	}
 
 	@Override
-	public <T> Promise<HTTPRequest<T>, HTTPException> request(Endpoint endpoint, Arguments arguments, JavaType returnType) {
-		URI uri = endpoint.path().expand(arguments)
-				.prop(cause -> new IllegalArgumentException(endpoint.path().show(), cause));
+	public <T> Promise<HTTPResponse<T>, HTTPException> run(RequestDefinition definition) {
+		URI uri = definition.path();
 
-		HTTPHeaders headers = headers(endpoint, arguments).merge(cookies(endpoint, arguments)).all().stream()
+		HTTPHeaders headers = definition.headers().all().stream()
 				.map(h -> new HTTPHeader(h.name(), h.values()))
 				.reduce(HTTPHeaders.empty(), HTTPHeaders::join, (a, b) -> b);
 
-		HTTPRequestBody body = body(endpoint, arguments, headers);
+		HTTPRequestBody body = definition.body().map(b -> body(b.content(), b.javaType(), headers)).orElse(null);
 
-		HTTPMethod method = HTTPMethod.select(endpoint.method())
-				.orElseThrow(() -> new IllegalArgumentException(format("Unsupported HTTP method: {0}", endpoint.method())));
+		HTTPMethod method = HTTPMethod.select(definition.method())
+				.orElseThrow(() -> new IllegalArgumentException(format("Unsupported HTTP method: {0}", definition.method())));
 
-		return Promise.pending(() -> new DefaultHTTPRequest<>(uri, method, body, headers, returnType, httpClient, codecs, failure));
+		HTTPRequest<T> request = new DefaultHTTPRequest<>(uri, method, body, headers, definition.returnType(), httpClient, codecs, failure);
+
+		return intercepts(Promise.pending(() -> request)).bind(HTTPRequest::execute);
 	}
 
-	private HTTPRequestBody body(Endpoint endpoint, Arguments arguments, HTTPHeaders headers) {
-		return endpoint.parameters().body()
-				.flatMap(p -> arguments.of(p.position())
-					.map(b -> p.contentType()
-						.map(MediaType::valueOf)
-						.or(() -> headers.select(CONTENT_TYPE)
-								.map(HTTPHeader::value)
-								.map(MediaType::valueOf))
-						.map(contentType -> codecs.writers().select(contentType, p.javaType())
-								.map(writer -> writer.write(b, encoding(contentType)))
-								.orElseThrow(() -> new HTTPRequestWriterException(format("There isn't any HTTPRequestWriter able to convert {0} to {1}", b.getClass(), contentType))))
-						.orElseThrow(() -> new HTTPRequestWriterException("The HTTP request has a body, but doesn't have a Content-Type header."))))
-				.orElse(null);
+	private <T> Promise<HTTPRequest<T>, HTTPException> intercepts(Promise<HTTPRequest<T>, HTTPException> request) {
+		return interceptor.intercepts(request);
+	}
+
+	private HTTPRequestBody body(Object content, JavaType javaType, HTTPHeaders headers) {
+		return headers.select(CONTENT_TYPE)
+				.map(HTTPHeader::value)
+				.map(MediaType::valueOf)
+				.map(contentType -> codecs.writers().select(contentType, javaType)
+						.map(writer -> writer.write(content, encoding(contentType)))
+						.orElseThrow(() -> new HTTPRequestWriterException(format("There isn't any HTTPRequestWriter able to convert {0} to {1}", javaType, contentType))))
+				.orElseThrow(() -> new HTTPRequestWriterException("The HTTP request has a body, but doesn't have a Content-Type header."));
 	}
 
 	private Charset encoding(MediaType contentType) {
 		return contentType.parameter("charset")
 				.map(Charset::forName)
 				.orElse(encoding);
-	}
-
-	private Headers headers(Endpoint endpoint, Arguments arguments) {
-		Stream<Headers> bodyContentType = endpoint.parameters().body()
-				.flatMap(BodyParameter::contentType)
-				.map(c -> new Header(CONTENT_TYPE, c))
-				.map(Headers::create)
-				.stream();
-
-		Stream<Headers> parameters = endpoint.parameters().headers()
-				.flatMap(header -> arguments.of(header.position())
-						.flatMap(header::resolve)
-						.stream());
-
-		return endpoint.headers()
-				.merge(Stream.concat(bodyContentType, parameters)
-						.reduce(Headers::merge).orElseGet(Headers::empty));
-	}
-
-	private Stream<Header> cookies(Endpoint endpoint, Arguments arguments) {
-		return endpoint.cookies()
-				.merge(endpoint.parameters().cookies()
-						.flatMap(cookie -> arguments.of(cookie.position())
-								.flatMap(cookie::resolve)
-								.stream())
-						.reduce(Cookies::merge).orElseGet(Cookies::empty))
-				.header()
-				.stream();
 	}
 }

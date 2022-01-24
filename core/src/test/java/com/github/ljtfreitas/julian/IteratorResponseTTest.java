@@ -1,5 +1,15 @@
 package com.github.ljtfreitas.julian;
 
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -7,23 +17,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 @ExtendWith(MockitoExtension.class)
 class IteratorResponseTTest {
 
 	@Mock
 	private Endpoint endpoint;
 	
-	private IteratorResponseT<String> responseT = new IteratorResponseT<>();
+	private final IteratorResponseT<String> responseT = new IteratorResponseT<>();
 
 	@Nested
 	class Predicates {
@@ -62,12 +62,12 @@ class IteratorResponseTTest {
 	}
 
 	@Test
-	void compose(@Mock ResponseFn<Collection<String>, Collection<String>> fn, @Mock RequestIO<Collection<String>> request) {
+	void compose(@Mock ResponseFn<Collection<String>, Collection<String>> fn, @Mock Promise<Response<Collection<String>, Exception>, Exception> response) {
 		Arguments arguments = Arguments.empty();
 
-		when(fn.run(request, arguments)).thenReturn(Promise.done(List.of("expected")));
+		when(fn.run(response, arguments)).thenReturn(Promise.done(List.of("expected")));
 
-		Iterator<String> iterator = responseT.bind(endpoint, fn).join(request, arguments);
+		Iterator<String> iterator = responseT.bind(endpoint, fn).join(response, arguments);
 
 		assertThat(() -> iterator, hasItem("expected"));
 	}

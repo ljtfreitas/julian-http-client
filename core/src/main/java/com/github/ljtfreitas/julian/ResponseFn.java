@@ -24,12 +24,12 @@ package com.github.ljtfreitas.julian;
 
 public interface ResponseFn<T, M> {
 
-	default Promise<M, ? extends Exception> run(RequestIO<T> request, Arguments arguments) {
-		return Promise.done(join(request, arguments));
+	default Promise<M, ? extends Exception> run(Promise<? extends Response<T, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+		return Promise.done(join(response, arguments));
 	}
 
-	default M join(RequestIO<T> request, Arguments arguments) {
-		return run(request, arguments).join().unsafe();
+	default M join(Promise<? extends Response<T, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+		return run(response, arguments).join().unsafe();
 	}
 
 	JavaType returnType();

@@ -87,4 +87,11 @@ class DonePromise<T, E extends Exception> implements Promise<T, E> {
 	public CompletableFuture<T> future() {
 		return CompletableFuture.completedFuture(value);
 	}
+
+	@Override
+	public Promise<T, E> subscribe(Subscriber<? super T, ? super E> subscriber) {
+		subscriber.success(value);
+		subscriber.done();
+		return this;
+	}
 }

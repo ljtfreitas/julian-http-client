@@ -22,6 +22,7 @@
 
 package com.github.ljtfreitas.julian;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Optional;
@@ -43,6 +44,10 @@ public class Cookies implements Iterable<Cookie> {
 
 	private Cookies(Stream<Cookie> cookies) {
 		this.cookies = cookies.collect(toUnmodifiableList());
+	}
+
+	public Cookies join(Cookie... cookies) {
+		return new Cookies(Stream.concat(this.cookies.stream(), Arrays.stream(cookies)));
 	}
 
 	public Cookies merge(Cookies that) {

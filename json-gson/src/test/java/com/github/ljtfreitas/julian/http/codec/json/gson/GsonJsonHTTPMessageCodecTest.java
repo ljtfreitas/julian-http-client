@@ -3,11 +3,9 @@ package com.github.ljtfreitas.julian.http.codec.json.gson;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.HTTPRequestBody;
 import com.github.ljtfreitas.julian.http.MediaType;
-import com.github.ljtfreitas.julian.http.codec.JsonHTTPMessageCodec;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayInputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Flow;

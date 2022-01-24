@@ -31,5 +31,4 @@ public interface HTTPRequestBody {
     Optional<MediaType> contentType();
 
     Publisher<ByteBuffer> serialize();
-
 }

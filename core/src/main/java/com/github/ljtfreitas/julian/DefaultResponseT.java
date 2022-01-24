@@ -31,8 +31,8 @@ class DefaultResponseT<T> implements ResponseT<T, Response<T, ?>> {
         return new ResponseFn<>() {
 
             @Override
-            public Promise<Response<T, ?>, ? extends Exception> run(RequestIO<A> request, Arguments arguments) {
-                return request.execute().then(r -> r.map(value -> fn.join(() -> Promise.done(r), arguments)));
+            public Promise<Response<T, ?>, ? extends Exception> run(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+                return response.then(r -> r.map(value -> fn.join(Promise.done(r), arguments)));
             }
 
             @Override

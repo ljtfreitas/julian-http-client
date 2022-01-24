@@ -22,6 +22,7 @@
 
 package com.github.ljtfreitas.julian;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -52,6 +53,14 @@ public interface Promise<T, E extends Exception> {
 
 	CompletableFuture<T> future();
 
+	Promise<T, E> subscribe(Subscriber<? super T, ? super E> subscriber);
+
+	@SuppressWarnings("unchecked")
+	default <Err extends Exception, P extends Promise<T, Err>> Optional<P> cast(Kind<P> candidate) {
+		Class<?> javaType = candidate.javaType().rawClassType();
+		return javaType.isAssignableFrom(this.getClass()) ? Optional.of((P) javaType.cast(this)) : Optional.empty();
+	}
+
     static <T, E extends Exception> Promise<T, E> done(T value) {
 		return new DonePromise<>(value);
 	}
@@ -66,5 +75,14 @@ public interface Promise<T, E extends Exception> {
 
 	static <T, E extends Exception> Promise<T, E> pending(Supplier<T> fn) {
 		return new DefaultPromise<>(supplyAsync(fn));
+	}
+
+	interface Subscriber<T, E> {
+
+		void success(T value);
+
+		void failure(E failure);
+
+		void done();
 	}
 }

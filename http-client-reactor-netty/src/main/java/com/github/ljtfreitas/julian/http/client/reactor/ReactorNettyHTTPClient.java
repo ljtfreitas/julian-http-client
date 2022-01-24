@@ -37,9 +37,19 @@ import com.github.ljtfreitas.julian.http.client.HTTPClientRequest;
 
 public class ReactorNettyHTTPClient implements HTTPClient {
 
+    private final HttpClient client;
+
+    public ReactorNettyHTTPClient() {
+        this(HttpClient.create());
+    }
+
+    public ReactorNettyHTTPClient(HttpClient client) {
+        this.client = client;
+    }
+
     @Override
     public HTTPClientRequest request(HTTPRequestDefinition request) {
-        ResponseReceiver<?> receiver = HttpClient.create()
+        ResponseReceiver<?> receiver = client
                 .headers(headers -> request.headers().forEach(h -> headers.add(h.name(), h.values())))
                 .request(HttpMethod.valueOf(request.method().name()))
                 .uri(request.path())

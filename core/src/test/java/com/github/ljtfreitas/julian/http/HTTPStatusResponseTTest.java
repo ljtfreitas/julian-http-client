@@ -1,6 +1,7 @@
 package com.github.ljtfreitas.julian.http;
 
 import com.github.ljtfreitas.julian.Endpoint;
+import com.github.ljtfreitas.julian.Kind;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,12 +11,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.Promise;
-import com.github.ljtfreitas.julian.RequestIO;
 import com.github.ljtfreitas.julian.ResponseFn;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -24,7 +25,7 @@ class HTTPStatusResponseTTest {
     @Mock
     private Endpoint endpoint;
 
-    private HTTPStatusResponseT responseT = new HTTPStatusResponseT();
+    private final HTTPStatusResponseT responseT = new HTTPStatusResponseT();
 
     @Nested
     class Predicates {
@@ -44,18 +45,16 @@ class HTTPStatusResponseTTest {
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Test
-    void compose(@Mock ResponseFn<Void, Void> fn, @Mock RequestIO<Void> request, @Mock HTTPResponse<Void> response) {
+    void compose(@Mock ResponseFn<Void, Void> fn, @Mock HTTPResponse<Void> response) {
         Arguments arguments = Arguments.empty();
 
         HTTPStatus httpStatus = new HTTPStatus(HTTPStatusCode.OK);
 
         when(response.status()).thenReturn(httpStatus);
-        when(response.as(HTTPResponse.class)).thenCallRealMethod();
-        when(request.execute()).then(a -> Promise.done(response));
+        when(response.cast(notNull())).thenCallRealMethod();
 
-        HTTPStatus actual = responseT.bind(endpoint, fn).join(request, arguments);
+        HTTPStatus actual = responseT.bind(endpoint, fn).join(Promise.done(response), arguments);
 
         assertEquals(httpStatus, actual);
     }

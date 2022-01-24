@@ -22,12 +22,13 @@
 
 package com.github.ljtfreitas.julian.http;
 
+import com.github.ljtfreitas.julian.Request;
+
 import java.net.URI;
 import java.util.Optional;
 
-import com.github.ljtfreitas.julian.Request;
-
 public interface HTTPRequestDefinition extends Request {
+
     URI path();
 
     HTTPMethod method();

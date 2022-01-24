@@ -44,12 +44,12 @@ class RunnableResponseTTest {
 	}
 
 	@Test
-	void compose(@Mock ResponseFn<Void, Void> fn, @Mock RequestIO<Void> request) {
+	void compose(@Mock ResponseFn<Void, Void> fn, @Mock Promise<Response<Void, Exception>, Exception> response) {
 		Arguments arguments = Arguments.empty();
 
-		Runnable runnable = responseT.bind(endpoint, fn).join(request, arguments);
+		Runnable runnable = responseT.bind(endpoint, fn).join(response, arguments);
 		runnable.run();
 		
-		verify(fn).join(request, arguments);
+		verify(fn).join(response, arguments);
 	}
 }

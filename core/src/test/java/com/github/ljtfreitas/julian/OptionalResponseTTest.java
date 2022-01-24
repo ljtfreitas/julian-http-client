@@ -59,12 +59,12 @@ class OptionalResponseTTest {
 	}
 
 	@Test
-	void compose(@Mock ResponseFn<String, String> fn, @Mock RequestIO<String> request) {
+	void compose(@Mock ResponseFn<String, String> fn, @Mock Promise<Response<String, Exception>, Exception> response) {
 		Arguments arguments = Arguments.empty();
 
-		when(fn.run(request, arguments)).thenReturn(Promise.done("expected"));
+		when(fn.run(response, arguments)).thenReturn(Promise.done("expected"));
 
-		Optional<String> optional = responseT.bind(endpoint, fn).join(request, arguments);
+		Optional<String> optional = responseT.bind(endpoint, fn).join(response, arguments);
 
 		assertAll(() -> assertTrue(optional.isPresent()), () -> assertEquals("expected", optional.get()));
 	}

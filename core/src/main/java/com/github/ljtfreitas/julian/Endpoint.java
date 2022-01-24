@@ -25,11 +25,9 @@ package com.github.ljtfreitas.julian;
 import com.github.ljtfreitas.julian.Preconditions.Precondition;
 import com.github.ljtfreitas.julian.contract.ParameterSerializer;
 
-import java.lang.reflect.Parameter;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -60,15 +58,35 @@ public class Endpoint {
     private final Parameters parameters;
     private final JavaType returnType;
 
-    public Endpoint(Path path) {
+    Endpoint(Path path) {
         this(path, "GET");
     }
 
-    public Endpoint(Path path, String method) {
-        this(path, method, Headers.empty(), Cookies.empty(), Parameters.empty());
+    Endpoint(Path path, String method) {
+        this(path, method, Headers.empty());
     }
 
-    public Endpoint(Path path, String method, Headers headers, Cookies cookies, Parameters parameters) {
+    Endpoint(Path path, String method, JavaType returnType) {
+        this(path, method, Headers.empty(), Cookies.empty(), Parameters.empty(), returnType);
+    }
+
+    Endpoint(Path path, String method, Headers headers) {
+        this(path, method, headers, Cookies.empty());
+    }
+
+    Endpoint(Path path, String method, Headers headers, Cookies cookies) {
+        this(path, method, headers, cookies, Parameters.empty());
+    }
+
+    Endpoint(Path path, String method, Parameters parameters) {
+        this(path, method, Headers.empty(), Cookies.empty(), parameters);
+    }
+
+    Endpoint(Path path, String method, Headers headers, Parameters parameters) {
+        this(path, method, headers, Cookies.empty(), parameters, JavaType.none());
+    }
+
+    Endpoint(Path path, String method, Headers headers, Cookies cookies, Parameters parameters) {
         this(path, method, headers, cookies, parameters, JavaType.none());
     }
 
@@ -116,6 +134,51 @@ public class Endpoint {
 
     public Endpoint returns(JavaType adapted) {
         return new Endpoint(path, method, headers, cookies, parameters, adapted);
+    }
+
+    RequestDefinition request(Arguments arguments, JavaType returnType) {
+        URI uri = path.expand(arguments)
+                .prop(cause -> new IllegalArgumentException(path.show(), cause));
+
+        Headers headers = headers(arguments).merge(cookies(arguments)).all().stream()
+                .map(h -> new Header(h.name(), h.values()))
+                .reduce(Headers.empty(), Headers::join, (a, b) -> b);
+
+        RequestDefinition.Body body = body(arguments);
+
+        return new RequestDefinition(uri, method, headers, body, returnType);
+    }
+
+    private RequestDefinition.Body body(Arguments arguments) {
+        return parameters.body()
+                .flatMap(p -> arguments.of(p.position()).map(value -> new RequestDefinition.Body(value, p.javaType())))
+                .orElse(null);
+    }
+
+    private Headers headers(Arguments arguments) {
+        Stream<Headers> bodyContentType = parameters.body()
+                .flatMap(BodyParameter::contentType)
+                .map(c -> new Header("Content-Type", c))
+                .map(Headers::create)
+                .stream();
+
+        Stream<Headers> headerParameters = parameters.headers()
+                .flatMap(header -> arguments.of(header.position())
+                        .flatMap(header::resolve)
+                        .stream());
+
+        return headers.merge(Stream.concat(bodyContentType, headerParameters)
+                .reduce(Headers::merge).orElseGet(Headers::empty));
+    }
+
+    private Stream<Header> cookies(Arguments arguments) {
+        return cookies.merge(parameters.cookies()
+                .flatMap(cookie -> arguments.of(cookie.position())
+                        .flatMap(cookie::resolve)
+                        .stream())
+                .reduce(Cookies::merge).orElseGet(Cookies::empty))
+                .header()
+                .stream();
     }
 
     @Override
@@ -175,6 +238,10 @@ public class Endpoint {
 
         public Path(String path, Parameters parameters) {
             this(path, QueryParameters.empty(), parameters);
+        }
+
+        public Path(String path, QueryParameters queryParameters) {
+            this(path, queryParameters, Parameters.empty());
         }
 
         public Path(String path, QueryParameters queryParameters, Parameters parameters) {

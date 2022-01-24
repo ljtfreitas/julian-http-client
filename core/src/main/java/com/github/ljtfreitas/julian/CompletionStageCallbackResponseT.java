@@ -43,8 +43,8 @@ class CompletionStageCallbackResponseT<T> implements ResponseT<T, Void> {
 		return new ResponseFn<>() {
 
 			@Override
-			public Void join(RequestIO<A> request, Arguments arguments) {
-				CompletableFuture<T> future = fn.run(request, arguments).future();
+			public Void join(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+				CompletableFuture<T> future = fn.run(response, arguments).future();
 
 				success(endpoint.parameters(), arguments)
 						.ifPresent(future::thenAccept);

@@ -36,7 +36,6 @@ import com.github.ljtfreitas.julian.http.HTTPResponseFailure;
 import com.github.ljtfreitas.julian.http.HTTPStatusCode;
 import com.github.ljtfreitas.julian.http.HTTPStatusCodeResponseT;
 import com.github.ljtfreitas.julian.http.HTTPStatusResponseT;
-import com.github.ljtfreitas.julian.http.InterceptedHTTP;
 import com.github.ljtfreitas.julian.http.client.ComposedHTTPClient;
 import com.github.ljtfreitas.julian.http.client.DebugHTTPClient;
 import com.github.ljtfreitas.julian.http.client.DefaultHTTPClient;
@@ -45,7 +44,6 @@ import com.github.ljtfreitas.julian.http.codec.ByteArrayHTTPMessageCodec;
 import com.github.ljtfreitas.julian.http.codec.ByteBufferHTTPMessageCodec;
 import com.github.ljtfreitas.julian.http.codec.HTTPMessageCodec;
 import com.github.ljtfreitas.julian.http.codec.InputStreamHTTPMessageCodec;
-import com.github.ljtfreitas.julian.http.codec.OctetStreamHTTPMessageCodec;
 import com.github.ljtfreitas.julian.http.codec.ScalarHTTPMessageCodec;
 import com.github.ljtfreitas.julian.http.codec.StringHTTPMessageCodec;
 import com.github.ljtfreitas.julian.http.codec.UnprocessableHTTPMessageCodec;
@@ -593,7 +591,7 @@ public class ProxyBuilder {
     }
 
     private Client client() {
-        HTTP http = intercepted(new DefaultHTTP(httpClient(), codecs.build(), failure(), encoding()));
+        HTTP http = new DefaultHTTP(httpClient(), interceptor(), codecs.build(), failure(), encoding());
         return new Client(responseTs.build(), http);
     }
 
@@ -607,10 +605,6 @@ public class ProxyBuilder {
 
     private HTTPResponseFailure failure() {
         return httpSpec.failure.build();
-    }
-
-    private HTTP intercepted(HTTP http) {
-        return new InterceptedHTTP(http, interceptor());
     }
 
     private HTTPRequestInterceptor interceptor() {

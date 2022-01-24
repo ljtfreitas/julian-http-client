@@ -58,12 +58,12 @@ class ExceptResponseTTest {
     }
 
     @Test
-    void compose(@Mock ResponseFn<String, String> fn, @Mock RequestIO<String> request) {
+    void compose(@Mock ResponseFn<String, String> fn, @Mock Promise<Response<String, Exception>, Exception> response) {
         Arguments arguments = Arguments.empty();
 
-        when(fn.run(same(request), eq(arguments))).thenReturn(Promise.done("expected"));
+        when(fn.run(same(response), eq(arguments))).thenReturn(Promise.done("expected"));
 
-        Except<String> actual = subject.bind(endpoint, fn).join(request, arguments);
+        Except<String> actual = subject.bind(endpoint, fn).join(response, arguments);
 
         assertEquals("expected", actual.unsafe());
     }

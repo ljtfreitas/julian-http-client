@@ -1,6 +1,7 @@
 package com.github.ljtfreitas.julian.http;
 
 import com.github.ljtfreitas.julian.Endpoint;
+import com.github.ljtfreitas.julian.Kind;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,12 +11,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.Promise;
-import com.github.ljtfreitas.julian.RequestIO;
 import com.github.ljtfreitas.julian.ResponseFn;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -24,7 +25,7 @@ class HTTPStatusCodeResponseTTest {
     @Mock
     private Endpoint endpoint;
 
-    private HTTPStatusCodeResponseT responseT = new HTTPStatusCodeResponseT();
+    private final HTTPStatusCodeResponseT responseT = new HTTPStatusCodeResponseT();
 
     @Nested
     class Predicates {
@@ -44,18 +45,16 @@ class HTTPStatusCodeResponseTTest {
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Test
-    void compose(@Mock ResponseFn<Void, Void> fn, @Mock RequestIO<Void> request, @Mock HTTPResponse<Void> response) {
+    void compose(@Mock ResponseFn<Void, Void> fn, @Mock HTTPResponse<Void> response) {
         Arguments arguments = Arguments.empty();
 
         HTTPStatusCode httpStatusCode = HTTPStatusCode.OK;
 
         when(response.status()).thenReturn(new HTTPStatus(httpStatusCode));
-        when(response.as(HTTPResponse.class)).thenCallRealMethod();
-        when(request.execute()).then(a -> Promise.done(response));
+        when(response.cast(notNull())).thenCallRealMethod();
 
-        HTTPStatusCode actual = responseT.bind(endpoint, fn).join(request, arguments);
+        HTTPStatusCode actual = responseT.bind(endpoint, fn).join(Promise.done(response), arguments);
 
         assertEquals(httpStatusCode, actual);
     }

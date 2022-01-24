@@ -4,20 +4,15 @@ import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.Endpoint;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.Promise;
-import com.github.ljtfreitas.julian.RequestIO;
+import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
 import io.reactivex.rxjava3.core.Completable;
-import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.observers.TestObserver;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -56,12 +51,12 @@ class CompletableResponseTTest {
     }
 
     @Test
-    void bind(@Mock Endpoint endpoint, @Mock RequestIO<String> request, @Mock ResponseFn<String, Void> fn) {
+    void bind(@Mock Endpoint endpoint, @Mock Promise<Response<String, Exception>, Exception> response, @Mock ResponseFn<String, Void> fn) {
         Arguments arguments = Arguments.empty();
 
-        when(fn.run(request, arguments)).thenReturn(Promise.done(null));
+        when(fn.run(response, arguments)).thenReturn(Promise.done(null));
 
-        Completable completable = subject.bind(endpoint, fn).join(request, arguments);
+        Completable completable = subject.bind(endpoint, fn).join(response, arguments);
 
         TestObserver<String> observer = new TestObserver<>();
         completable.subscribe(observer);

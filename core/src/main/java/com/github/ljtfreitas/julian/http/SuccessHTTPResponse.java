@@ -30,13 +30,13 @@ import com.github.ljtfreitas.julian.Except;
 import com.github.ljtfreitas.julian.Message;
 import com.github.ljtfreitas.julian.Response;
 
-class SuccessHTTPResponse<T> implements HTTPResponse<T> {
+public class SuccessHTTPResponse<T> implements HTTPResponse<T> {
 
 	private final HTTPStatus status;
 	private final HTTPHeaders headers;
 	private final T body;
 
-	SuccessHTTPResponse(HTTPStatus status, HTTPHeaders headers, T body) {
+	public SuccessHTTPResponse(HTTPStatus status, HTTPHeaders headers, T body) {
 		this.status = status;
 		this.headers = headers;
 		this.body = body;

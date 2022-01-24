@@ -95,4 +95,28 @@ public enum HTTPStatusCode {
 	public static Optional<HTTPStatusCode> select(int code) {
 		return Arrays.stream(values()).filter(s ->s.value == code).findFirst();
 	}
+
+	public boolean informational() {
+		return (value / 100) == 1;
+	}
+
+	public boolean success() {
+		return (value / 100) == 2;
+	}
+
+	public boolean redirection() {
+		return (value / 100) == 3;
+	}
+
+	public boolean error() {
+		return a4xx() || a5xx();
+	}
+
+	private boolean a4xx() {
+		return (value / 100) == 4;
+	}
+
+	private boolean a5xx() {
+		return (value / 100) == 5;
+	}
 }

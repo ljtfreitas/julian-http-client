@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.concurrent.CompletableFuture;
@@ -14,6 +15,7 @@ import static org.hamcrest.Matchers.endsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,6 +53,32 @@ class DefaultPromiseTest {
         void join() {
             assertEquals("hello", promise.join().unsafe());
         }
+
+        @Test
+        void subscribe() {
+            Promise.Subscriber<String, Exception> subscriber = spy(new Promise.Subscriber<>() {
+
+                @Override
+                public void success(String value) {
+                    assertEquals("hello", value);
+                }
+
+                @Override
+                public void failure(Exception failure) {
+                    fail("a success was expected...", failure);
+                }
+
+                @Override
+                public void done() {
+                }
+
+            });
+
+            promise.subscribe(subscriber).join();
+
+            verify(subscriber).success("hello");
+            verify(subscriber).done();
+        }
     }
 
     @Nested
@@ -83,6 +111,30 @@ class DefaultPromiseTest {
                     .future();
 
             assertThat(future.join(), endsWith("oops...but i'm recovered"));
+        }
+
+        @Test
+        void subscribe() {
+            Promise.Subscriber<String, Exception> subscriber = spy(new Promise.Subscriber<>() {
+
+                @Override
+                public void success(String value) {
+                    fail("a failure was expected...instead, it was the value " + value);
+                }
+
+                @Override
+                public void failure(Exception e) {
+                    assertEquals(failure, e);
+                }
+
+                @Override
+                public void done() {
+                }
+            });
+
+            promise.subscribe(subscriber).join();
+
+            verify(subscriber).failure(failure);
         }
     }
 }

@@ -23,6 +23,7 @@
 package com.github.ljtfreitas.julian;
 
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.github.ljtfreitas.julian.Message.format;
 import static com.github.ljtfreitas.julian.Preconditions.nonNull;
@@ -40,7 +41,11 @@ public class Cookie {
 	public String pair() {
 		return format("{0}={1}", name, value); 
 	}
-	
+
+	public Header header() {
+		return new Header("Cookie", pair());
+	}
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(name, value);

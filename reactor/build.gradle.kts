@@ -37,6 +37,6 @@ dependencyManagement {
 
 dependencies {
     implementation(project(":core"))
-    implementation("io.projectreactor:reactor-core")
-    testImplementation("io.projectreactor:reactor-test")
+    implementation("io.projectreactor:reactor-core:3.4.14")
+    testImplementation("io.projectreactor:reactor-test:3.4.14")
 }

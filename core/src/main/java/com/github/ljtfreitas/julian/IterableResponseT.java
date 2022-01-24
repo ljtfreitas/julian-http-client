@@ -35,8 +35,8 @@ class IterableResponseT<T> implements ResponseT<Collection<T>, Iterable<T>> {
 		return new ResponseFn<>() {
 
 			@Override
-			public Promise<Iterable<T>, ? extends Exception> run(RequestIO<A> request, Arguments arguments) {
-				return fn.run(request, arguments).then(c -> Optional.ofNullable(c).orElseGet(Collections::emptyList));
+			public Promise<Iterable<T>, ? extends Exception> run(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+				return fn.run(response, arguments).then(c -> Optional.ofNullable(c).orElseGet(Collections::emptyList));
 			}
 
 			@Override

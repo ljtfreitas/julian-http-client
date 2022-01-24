@@ -241,7 +241,11 @@ public interface Except<T> {
 
 		@Override
 		public <E extends Exception> T prop() throws E {
-			throw new RuntimeException(value);
+			if (value instanceof RuntimeException) {
+				throw (RuntimeException) value;
+			} else {
+				throw new FailureException(value);
+			}
 		}
 
 		@Override

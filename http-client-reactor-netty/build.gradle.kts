@@ -30,9 +30,10 @@ tasks.jar.configure {
 
 dependencies {
     implementation(project(":core"))
+    implementation(project(":reactor"))
 
     implementation(platform("io.projectreactor:reactor-bom:2020.0.9"))
-    implementation("io.projectreactor.netty:reactor-netty-core")
-    implementation("io.projectreactor.netty:reactor-netty-http")
-    runtimeOnly("io.netty:netty-transport-native-epoll:4.1.65.Final:linux-x86_64")
+    implementation("io.projectreactor.netty:reactor-netty-core:1.0.15")
+    implementation("io.projectreactor.netty:reactor-netty-http:1.0.15")
+    testRuntimeOnly("io.netty:netty-transport-native-epoll:4.1.72.Final:linux-x86_64")
 }

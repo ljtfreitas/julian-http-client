@@ -68,7 +68,8 @@ class SubscriberCallbackResponseTTest {
 
     @Test
     void compose(@Mock Endpoint endpoint, TestReporter reporter) throws InterruptedException {
-        RequestIO<String> request = new StringRequest();
+        Promise<Response<String, Exception>, Exception> response = Promise.pending(CompletableFuture.supplyAsync(() -> new DoneResponse<>("it works!"),
+                CompletableFuture.delayedExecutor(1000, TimeUnit.MILLISECONDS)));
 
         Subscriber<String> subscriber = new Subscriber<>() {
             @Override
@@ -102,17 +103,8 @@ class SubscriberCallbackResponseTTest {
         PublisherResponseT<String> publisherResponseT = new PublisherResponseT<>();
         ResponseFn<String, Publisher<String>> publisherFn = publisherResponseT.bind(endpoint, objectResponseT.bind(endpoint, null));
 
-        responseT.bind(endpoint, publisherFn).join(request, arguments);
+        responseT.bind(endpoint, publisherFn).join(response, arguments);
 
         Thread.sleep(1500);
-    }
-
-    private class StringRequest implements RequestIO<String> {
-
-        @Override
-        public Promise<? extends Response<String, Exception>, Exception> execute() {
-            return Promise.pending(CompletableFuture.supplyAsync(() -> new DoneResponse<>("it works!"),
-                    CompletableFuture.delayedExecutor(1000, TimeUnit.MILLISECONDS)));
-        }
     }
 }

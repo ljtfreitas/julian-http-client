@@ -25,7 +25,8 @@ package com.github.ljtfreitas.julian.rxjava3;
 import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.Endpoint;
 import com.github.ljtfreitas.julian.JavaType;
-import com.github.ljtfreitas.julian.RequestIO;
+import com.github.ljtfreitas.julian.Promise;
+import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
 import com.github.ljtfreitas.julian.ResponseT;
 import io.reactivex.rxjava3.core.Flowable;
@@ -39,8 +40,8 @@ public class FlowableResponseT<T> implements ResponseT<Collection<T>, Flowable<T
         return new ResponseFn<>() {
 
             @Override
-            public Flowable<T> join(RequestIO<A> request, Arguments arguments) {
-                return Flowable.fromCompletionStage(fn.run(request, arguments).future())
+            public Flowable<T> join(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+                return Flowable.fromCompletionStage(fn.run(response, arguments).future())
                         .flatMapIterable(c -> c);
             }
 

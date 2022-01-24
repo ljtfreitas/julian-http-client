@@ -22,8 +22,6 @@
 
 package com.github.ljtfreitas.julian;
 
-import java.util.Optional;
-
 import com.github.ljtfreitas.julian.http.HTTPResponse;
 
 public class HeadersResponseT implements ResponseT<Void, Headers> {
@@ -34,16 +32,13 @@ public class HeadersResponseT implements ResponseT<Void, Headers> {
     public <A> ResponseFn<A, Headers> bind(Endpoint endpoint, ResponseFn<A, Void> fn) {
         return new ResponseFn<>() {
 
-            @SuppressWarnings({"unchecked", "rawtypes"})
             @Override
-            public Promise<Headers, ? extends Exception> run(RequestIO<A> request, Arguments arguments) {
-                return request.execute().then(r -> {
-                    Optional<HTTPResponse> httpResponse = r.as(HTTPResponse.class);
-                    return httpResponse.map(HTTPResponse::headers)
-                            .map(headers -> headers.all().stream()
-                                    .reduce(Headers.empty(), (h, header) -> h.add(header.name(), header.values()), (a, b) -> b))
-                            .orElseGet(Headers::empty);
-                });
+            public Promise<Headers, ? extends Exception> run(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+                return response.then(r -> r.cast(new Kind<HTTPResponse<A>>() {})
+                        .map(HTTPResponse::headers)
+                        .map(headers -> headers.all().stream()
+                                .reduce(Headers.empty(), (h, header) -> h.join(header.name(), header.values()), (a, b) -> b))
+                        .orElseGet(Headers::empty));
             }
 
             @Override

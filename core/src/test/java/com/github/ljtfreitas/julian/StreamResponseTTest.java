@@ -63,12 +63,12 @@ class StreamResponseTTest {
 	}
 
 	@Test
-	void compose(@Mock ResponseFn<Collection<String>, Collection<String>> fn, @Mock RequestIO<Collection<String>> request) {
+	void compose(@Mock ResponseFn<Collection<String>, Collection<String>> fn, @Mock Promise<Response<Collection<String>, Exception>, Exception> response) {
 		Arguments arguments = Arguments.empty();
 
-		when(fn.run(request, arguments)).thenReturn(Promise.done(List.of("expected")));
+		when(fn.run(response, arguments)).thenReturn(Promise.done(List.of("expected")));
 
-		Stream<String> stream = responseT.bind(endpoint, fn).join(request, arguments);
+		Stream<String> stream = responseT.bind(endpoint, fn).join(response, arguments);
 
 		assertThat(stream.collect(toList()), hasItem("expected"));
 	}

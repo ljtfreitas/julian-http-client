@@ -1,19 +1,13 @@
 package com.github.ljtfreitas.julian.http;
 
-import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.Cookie;
 import com.github.ljtfreitas.julian.Cookies;
-import com.github.ljtfreitas.julian.Endpoint;
-import com.github.ljtfreitas.julian.Endpoint.Parameter;
-import com.github.ljtfreitas.julian.Endpoint.Parameters;
-import com.github.ljtfreitas.julian.Endpoint.Path;
 import com.github.ljtfreitas.julian.Except;
 import com.github.ljtfreitas.julian.Header;
 import com.github.ljtfreitas.julian.Headers;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.Promise;
-import com.github.ljtfreitas.julian.contract.CookiesParameterSerializer;
-import com.github.ljtfreitas.julian.contract.HeadersParameterSerializer;
+import com.github.ljtfreitas.julian.RequestDefinition;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.BadRequest;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.Conflict;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.ExpectationFailed;
@@ -59,7 +53,7 @@ import org.mockserver.model.HttpResponse;
 import org.mockserver.model.NottableString;
 
 import java.io.IOException;
-import java.util.Collection;
+import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -95,6 +89,7 @@ class DefaultHTTPTest {
 	@BeforeEach
 	void setup() {
 		http = new DefaultHTTP(new DefaultHTTPClient(),
+							   new HTTPRequestInterceptorChain(),
 							   new HTTPMessageCodecs(List.of(new StringHTTPMessageCodec(MediaType.valueOf("text/*")))),
 							   new DefaultHTTPResponseFailure());
 	}
@@ -105,14 +100,13 @@ class DefaultHTTPTest {
 
 		@ParameterizedTest(name = "HTTP Request: {0} and HTTP Response: {1}")
 		@ArgumentsSource(HTTPMethodProvider.class)
-		void shouldRunRequestAndReadTheResponse(HttpRequest expectedRequest, HttpResponse expectedResponse, Endpoint endpoint, Arguments arguments, 
-				JavaType returnType) {
+		void shouldRunRequestAndReadTheResponse(HttpRequest expectedRequest, HttpResponse expectedResponse, RequestDefinition definition) {
 
 			mockServer.when(expectedRequest).respond(expectedResponse);
 
-			Promise<HTTPRequest<String>, HTTPException> request = http.request(endpoint, arguments, returnType);
+			Promise<HTTPResponse<String>, HTTPException> promise = http.run(definition);
 
-			HTTPResponse<String> response = request.bind(HTTPRequest::execute).join().unsafe();
+			HTTPResponse<String> response = promise.join().unsafe();
 
 			assertAll(() -> assertEquals(expectedResponse.getStatusCode(), response.status().code()),
 					  () -> assertEquals(expectedResponse.getBodyAsString(), response.body().unsafe()));
@@ -120,8 +114,7 @@ class DefaultHTTPTest {
 
 		@Test
 		void shouldThrowExceptionToUnsupportedHTTPMethod() {
-			Endpoint endpoint = new Endpoint(new Path("http://my.api.com"), "WHATEVER");
-			assertThrows(IllegalArgumentException.class, () -> http.request(endpoint, Arguments.empty(), JavaType.none()));
+			assertThrows(IllegalArgumentException.class, () -> http.run(new RequestDefinition(URI.create("http://my.api.com"), "whatever")));
 		}
 	}
 
@@ -131,12 +124,12 @@ class DefaultHTTPTest {
 
 		@ParameterizedTest(name = "HTTP Request: {0} and HTTP Response: {1}")
 		@ArgumentsSource(HTTPHeadersProvider.class)
-		void shouldRunRequestAndReadTheResponse(HttpRequest expectedRequest, HttpResponse expectedResponse, Endpoint endpoint, Arguments arguments) {
+		void shouldRunRequestAndReadTheResponse(HttpRequest expectedRequest, HttpResponse expectedResponse, RequestDefinition definition) {
 			mockServer.when(expectedRequest).respond(expectedResponse);
 
-			Promise<HTTPRequest<Void>, HTTPException> request = http.request(endpoint, arguments, JavaType.none());
+			Promise<HTTPResponse<Void>, HTTPException> promise = http.run(definition);
 
-			HTTPResponse<Void> response = request.bind(HTTPRequest::execute).join().unsafe();
+			HTTPResponse<Void> response = promise.join().unsafe();
 
 			HTTPHeader[] expectedHeaders = expectedResponse.getHeaderList().stream()
 						.map(h -> HTTPHeader.create(h.getName().getValue(), h.getValues().stream()
@@ -171,36 +164,13 @@ class DefaultHTTPTest {
 							.respond(response(expectedResponse)
 									.withContentType(TEXT_PLAIN));
 
-					Endpoint endpoint = new Endpoint(new Path("http://localhost:8090/hello"), "POST",
-							Headers.create(new Header("Content-Type", "text/plain")), Cookies.empty(),
-							Parameters.create(Endpoint.Parameter.body(0, "body", JavaType.valueOf(String.class))));
+					RequestDefinition request = new RequestDefinition(URI.create("http://localhost:8090/hello"), "POST",
+							Headers.create(new Header("Content-Type", "text/plain")), new RequestDefinition.Body(requestBodyAsString),
+							JavaType.valueOf(String.class));
 
-					Promise<HTTPRequest<String>, HTTPException> request = http.request(endpoint, Arguments.create(requestBodyAsString), JavaType.valueOf(String.class));
+					Promise<HTTPResponse<String>, HTTPException> promise = http.run(request);
 
-					String response = request.bind(HTTPRequest::execute).then(HTTPResponse::body).then(Except::unsafe).join().unsafe();
-
-					assertEquals(expectedResponse, response);
-				}
-
-				@Test
-				void shouldSerializeTheContentToHTTPRequestBodyUsingTheContentTypeDefinedOnBodyParameter() {
-					String requestBodyAsString = "{\"message\":\"hello\"}";
-					String expectedResponse = "it works!";
-
-					mockServer.when(request("/hello")
-									.withMethod("POST")
-									.withBody(requestBodyAsString)
-									.withContentType(TEXT_PLAIN))
-							.respond(response(expectedResponse)
-									.withContentType(TEXT_PLAIN));
-
-					Endpoint endpoint = new Endpoint(new Path("http://localhost:8090/hello"), "POST",
-							Headers.empty(), Cookies.empty(),
-							Parameters.create(Endpoint.Parameter.body(0, "body", JavaType.valueOf(String.class), "text/plain")));
-
-					Promise<HTTPRequest<String>, HTTPException> request = http.request(endpoint, Arguments.create(requestBodyAsString), JavaType.valueOf(String.class));
-
-					String response = request.bind(HTTPRequest::execute).then(HTTPResponse::body).then(Except::unsafe).join().unsafe();
+					String response = promise.then(HTTPResponse::body).then(Except::unsafe).join().unsafe();
 
 					assertEquals(expectedResponse, response);
 				}
@@ -214,31 +184,28 @@ class DefaultHTTPTest {
 				void missingContentType() {
 					class MyObjectBody {}
 
-					Endpoint endpoint = new Endpoint(new Path("http://localhost:8090/hello"), "POST",
-							Headers.empty(), Cookies.empty(),
-							Parameters.create(Endpoint.Parameter.body(0, "body", JavaType.valueOf(MyObjectBody.class))));
+					RequestDefinition request = new RequestDefinition(URI.create("http://localhost:8090/hello"), "POST",
+							Headers.empty(), new RequestDefinition.Body(new MyObjectBody()));
 
-					assertThrows(HTTPRequestWriterException.class, () -> http.request(endpoint, Arguments.create(new MyObjectBody()), JavaType.none()));
+					assertThrows(HTTPRequestWriterException.class, () -> http.run(request));
 				}
 
 				@Test
 				void unsupportedContentObject() {
 					class MyObjectBody {}
 
-					Endpoint endpoint = new Endpoint(new Path("http://localhost:8090/hello"), "POST",
-							Headers.create(new Header("Content-Type", "text/plain")), Cookies.empty(),
-							Parameters.create(Endpoint.Parameter.body(0, "body", JavaType.valueOf(MyObjectBody.class))));
+					RequestDefinition request = new RequestDefinition(URI.create("http://localhost:8090/hello"), "POST",
+							Headers.create(new Header("Content-Type", "text/plain")), new RequestDefinition.Body(new MyObjectBody()));
 
-					assertThrows(HTTPRequestWriterException.class, () -> http.request(endpoint, Arguments.create(new MyObjectBody()), JavaType.none()));
+					assertThrows(HTTPRequestWriterException.class, () -> http.run(request));
 				}
 
 				@Test
 				void unsupportedContentType() {
-					Endpoint endpoint = new Endpoint(new Path("http://localhost:8090/hello"), "POST",
-							Headers.create(new Header("Content-Type", "application/json")), Cookies.empty(),
-							Parameters.create(Endpoint.Parameter.body(0, "body", JavaType.valueOf(String.class))));
+					RequestDefinition request = new RequestDefinition(URI.create("http://localhost:8090/hello"), "POST",
+							Headers.create(new Header("Content-Type", "application/json")), new RequestDefinition.Body("hello"));
 
-					assertThrows(HTTPRequestWriterException.class, () -> http.request(endpoint, Arguments.create("body"), JavaType.none()));
+					assertThrows(HTTPRequestWriterException.class, () -> http.run(request));
 				}
 			}
 		}
@@ -252,7 +219,7 @@ class DefaultHTTPTest {
 
 				@Test
 				void shouldSerializeTheHTTPResponseBody() {
-					String expectedResponse = "response";
+					String expectedResponse = "promise";
 
 					HttpRequest requestSpec = request("/hello").withMethod("GET");
 
@@ -261,15 +228,12 @@ class DefaultHTTPTest {
 							.respond(response(expectedResponse)
 									.withContentType(TEXT_PLAIN));
 
-					JavaType responseType = JavaType.valueOf(String.class);
+					RequestDefinition request = new RequestDefinition(URI.create("http://localhost:8090/hello"), "GET",
+							Headers.empty(), JavaType.valueOf(String.class));
 
-					Endpoint endpoint = new Endpoint(new Path("http://localhost:8090/hello"), "GET",
-							Headers.empty(), Cookies.empty(),
-							Parameters.empty(), responseType);
+					Promise<HTTPResponse<String>, HTTPException> promise = http.run(request);
 
-					Promise<HTTPRequest<String>, HTTPException> request = http.request(endpoint, Arguments.empty(), responseType);
-
-					String response = request.bind(HTTPRequest::execute).then(HTTPResponse::body).then(Except::unsafe).join().unsafe();
+					String response = promise.then(HTTPResponse::body).then(Except::unsafe).join().unsafe();
 
 					assertEquals(expectedResponse, response);
 				}
@@ -288,15 +252,10 @@ class DefaultHTTPTest {
 							.respond(response("{\"message\":\"it works!\"}")
 									.withContentType(APPLICATION_JSON));
 
-					JavaType responseType = JavaType.valueOf(MyObjectBody.class);
+					RequestDefinition request = new RequestDefinition(URI.create("http://localhost:8090/hello"), "GET",
+							Headers.empty(), JavaType.valueOf(MyObjectBody.class));
 
-					Endpoint endpoint = new Endpoint(new Path("http://localhost:8090/hello"), "GET",
-													Headers.empty(), Cookies.empty(),
-													Parameters.empty(), responseType);
-
-					Except<HTTPResponse<Object>> response = http.request(endpoint, Arguments.empty(), responseType)
-							.bind(HTTPRequest::execute)
-							.join();
+					Except<HTTPResponse<Object>> response = http.run(request).join();
 
 					response.onSuccess(r -> fail("a HTTPResponseReaderException was expected."))
 							.onFailure(e -> assertThat(e, instanceOf(HTTPResponseReaderException.class)));
@@ -309,14 +268,10 @@ class DefaultHTTPTest {
 							.respond(response("{\"message\":\"it works!\"}")
 								.withContentType(APPLICATION_JSON));
 
-					JavaType responseType = JavaType.valueOf(String.class);
+					RequestDefinition request = new RequestDefinition(URI.create("http://localhost:8090/hello"), "GET",
+							Headers.empty(), JavaType.valueOf(String.class));
 
-					Endpoint endpoint = new Endpoint(new Path("http://localhost:8090/hello"), "GET",
-													Headers.empty(), Cookies.empty(),
-													Parameters.empty(), responseType);
-
-					Except<Object> response = http.request(endpoint, Arguments.empty(), responseType)
-							.bind(HTTPRequest::execute)
+					Except<Object> response = http.run(request)
 							.then(HTTPResponse::body)
 							.then(Except::unsafe)
 							.join();
@@ -344,11 +299,10 @@ class DefaultHTTPTest {
 							.withReasonPhrase(reason)
 							.withHeader("X-Whatever", "whatever"));
 
-				Endpoint endpoint = new Endpoint(new Path("http://localhost:8090/hello/" + statusCode), "GET",
-												Headers.empty(), Cookies.empty(), Parameters.empty());
+				RequestDefinition request = new RequestDefinition(URI.create("http://localhost:8090/hello/" + statusCode), "GET",
+						Headers.empty());
 
-				HTTPResponse<Void> response = http.<Void> request(endpoint, Arguments.empty(), JavaType.none())
-						.bind(HTTPRequest::execute)
+				HTTPResponse<Void> response = http.<Void> run(request)
 						.join()
 						.unsafe();
 
@@ -373,16 +327,15 @@ class DefaultHTTPTest {
 							.withMethod("GET"))
 						.respond(response().withStatusCode(statusCode.value()));
 
-				Endpoint endpoint = new Endpoint(new Path("http://localhost:8090/hello/" + statusCode), "GET",
-												Headers.empty(), Cookies.empty(), Parameters.empty());
+				RequestDefinition request = new RequestDefinition(URI.create("http://localhost:8090/hello/" + statusCode), "GET",
+						Headers.empty());
 
-				HTTPResponse<String> response = http.<String> request(endpoint, Arguments.empty(), JavaType.none())
-						.bind(HTTPRequest::execute)
+				HTTPResponse<String> response = http.<String> run(request)
 						.join()
 						.unsafe();
 
 				String recovered = "recovered";
-				
+
 				assertAll(() -> assertThat(response, instanceOf(FailureHTTPResponse.class)),
 						  () -> assertEquals(recovered, response.recover(empty -> recovered).body().unsafe()),
 						  () -> assertEquals(recovered, response.recover(exceptionType, e -> recovered).body().unsafe()),
@@ -396,12 +349,10 @@ class DefaultHTTPTest {
 
 			@Test
 			void unknownHost() {
-				Endpoint endpoint = new Endpoint(new Path("http://localhost:8099/hello"), "GET",
-						Headers.empty(), Cookies.empty(), Parameters.empty());
+				RequestDefinition request = new RequestDefinition(URI.create("http://localhost:8099/hello"), "GET",
+						Headers.empty());
 
-				Except<HTTPResponse<Void>> response = http.<Void> request(endpoint, Arguments.empty(), JavaType.none())
-						.bind(HTTPRequest::execute)
-						.join();
+				Except<HTTPResponse<Void>> response = http.<Void> run(request).join();
 
 				response.onSuccess(r -> fail("a connection error was expected..."))
 						.onFailure(e -> assertThat(e, instanceOf(HTTPClientException.class)))
@@ -414,64 +365,40 @@ class DefaultHTTPTest {
 
 		@Override
 		public Stream<? extends org.junit.jupiter.params.provider.Arguments> provideArguments(ExtensionContext context) {
-
 			HttpResponse expectedResponse = response("it works!").withContentType(TEXT_PLAIN);
 
 			String requestBodyAsString = "{\"message\":\"hello\"}";
 
 			return Stream.of(arguments(request("/hello").withMethod("GET"), 
 									   expectedResponse,
-									   new Endpoint(new Path("http://localhost:8090/hello")),
-									   Arguments.empty(),
-									   JavaType.valueOf(String.class)),
+									   new RequestDefinition(URI.create("http://localhost:8090/hello"), "GET", JavaType.valueOf(String.class))),
 							 arguments(request("/hello").withMethod("POST").withBody(requestBodyAsString), 
 							  		   expectedResponse,
-							  		   new Endpoint(new Path("http://localhost:8090/hello"), "POST",
+							  		   new RequestDefinition(URI.create("http://localhost:8090/hello"), "POST",
 							  				   		Headers.create(new Header("Content-Type", "text/plain")),
-							  				   		Cookies.empty(),
-							  				   		Parameters.create(Endpoint.Parameter.body(0, "body", JavaType.valueOf(String.class)))),
-									   Arguments.create(requestBodyAsString),
-									   JavaType.valueOf(String.class)),
+							  				   		new RequestDefinition.Body(requestBodyAsString),
+											   		JavaType.valueOf(String.class))),
 							 arguments(request("/hello").withMethod("PUT").withBody(requestBodyAsString), 
 							  		   expectedResponse,
-							  		   new Endpoint(new Path("http://localhost:8090/hello"), "POST",
+							  		   new RequestDefinition(URI.create("http://localhost:8090/hello"), "POST",
 							  				   		Headers.create(new Header("Content-Type", "text/plain")),
-							  				   		Cookies.empty(),
-							  				   		Parameters.create(Endpoint.Parameter.body(0, "body", JavaType.valueOf(String.class)))),
-									   Arguments.create(requestBodyAsString),
-									   JavaType.valueOf(String.class)),
+							  				   		new RequestDefinition.Body(requestBodyAsString),
+											   		JavaType.valueOf(String.class))),
 							 arguments(request("/hello").withMethod("PATCH").withBody(requestBodyAsString), 
 							  		   expectedResponse,
-							  		   new Endpoint(new Path("http://localhost:8090/hello"), "PATCH",
+							  		   new RequestDefinition(URI.create("http://localhost:8090/hello"), "PATCH",
 							  				   		Headers.create(new Header("Content-Type", "text/plain")),
-							  				   		Cookies.empty(),
-							  				   		Parameters.create(Endpoint.Parameter.body(0, "body", JavaType.valueOf(String.class)))),
-									   Arguments.create(requestBodyAsString),
-									   JavaType.valueOf(String.class)),
+											   		new RequestDefinition.Body(requestBodyAsString),
+											   		JavaType.valueOf(String.class))),
 							 arguments(request("/hello").withMethod("DELETE"), 
 							  		   expectedResponse,
-							  		   new Endpoint(new Path("http://localhost:8090/hello"), "DELETE",
-							  				   		Headers.empty(),
-							  				   		Cookies.empty(),
-							  				   		Parameters.empty()),
-									   Arguments.empty(),
-									   JavaType.valueOf(String.class)),
+							  		   new RequestDefinition(URI.create("http://localhost:8090/hello"), "DELETE", JavaType.valueOf(String.class))),
 							 arguments(request("/hello").withMethod("TRACE"), 
 							  		   response().withStatusCode(200),
-							  		   new Endpoint(new Path("http://localhost:8090/hello"), "TRACE",
-							  				   		Headers.empty(),
-							  				   		Cookies.empty(),
-							  				   		Parameters.empty()),
-									   Arguments.empty(),
-									   JavaType.none()),
+							  		   new RequestDefinition(URI.create("http://localhost:8090/hello"), "TRACE")),
 							 arguments(request("/hello").withMethod("HEAD"), 
 							  		   response().withStatusCode(200),
-							  		   new Endpoint(new Path("http://localhost:8090/hello"), "HEAD",
-							  				   		Headers.empty(),
-							  				   		Cookies.empty(),
-							  				   		Parameters.empty()),
-									   Arguments.empty(),
-									   JavaType.none()));
+							  		   new RequestDefinition(URI.create("http://localhost:8090/hello"), "HEAD")));
 		}
 	}
 	
@@ -485,52 +412,24 @@ class DefaultHTTPTest {
 													  .withHeader("X-Response-Header-2", "response-header-value-2")
 													  .withHeader("X-Response-Header-3", "value1", "value2");
 
-			HeadersParameterSerializer headersParameterSerializer = new HeadersParameterSerializer();
-			CookiesParameterSerializer cookiesParameterSerializer = new CookiesParameterSerializer();
-
 			return Stream.of(arguments(request("/hello").withMethod("GET")
 														.withHeader("X-Whatever-1", "whatever-header-value-1")
 														.withHeader("X-Whatever-2", "whatever-header-value-2")
 														.withHeader("X-Whatever-3", "value1", "value2"),
 									   expectedResponse,
-									   new Endpoint(new Path("http://localhost:8090/hello"), "GET",
+									   new RequestDefinition(URI.create("http://localhost:8090/hello"), "GET",
 						  				   			Headers.create(new Header("X-Whatever-1", "whatever-header-value-1"),
 						  				   						   new Header("X-Whatever-2", "whatever-header-value-2"),
-						  				   						   new Header("X-Whatever-3", "value1", "value2")),
-						  				   			Cookies.empty(),
-						  				   			Parameters.empty()),
-									   Arguments.empty()),
-							 arguments(request("/hello").withMethod("GET")
-													    .withHeader("X-Whatever-1", "whatever-header-value-1")
-													    .withHeader("X-Whatever-2", "whatever-header-value-2")
-													    .withHeader("X-Whatever-3", "value1", "value2"),
-								       expectedResponse,
-						       		   new Endpoint(new Path("http://localhost:8090/hello"), "GET",
-						       				   		Headers.empty(),
-						       				   		Cookies.empty(),
-						       				   		Parameters.create(Parameter.header(0, "X-Whatever-1",  JavaType.valueOf(String.class), headersParameterSerializer),
-						       				   						  Parameter.header(1, "X-Whatever-2",  JavaType.valueOf(String.class), headersParameterSerializer),
-					       				   							  Parameter.header(2, "X-Whatever-3",  JavaType.parameterized(Collection.class, String.class), headersParameterSerializer))),
-						       		   Arguments.create("whatever-header-value-1", "whatever-header-value-2", List.of("value1", "value2"))),
-							 arguments(request("/hello").withMethod("GET")
-													    .withCookie("session-id", "abc1234"),
-								       expectedResponse,
-						       		   new Endpoint(new Path("http://localhost:8090/hello"), "GET",
-						       				   		Headers.empty(),
-						       				   		Cookies.create(new Cookie("session-id", "abc1234")),
-						       				   		Parameters.empty()),
-						       		   Arguments.empty()),
+						  				   						   new Header("X-Whatever-3", "value1", "value2")))),
 							 arguments(request("/hello").withMethod("GET")
 									 					.withCookie("session-id", "abc1234")
 									 					.withCookie("csrftoken", "xyz9876")
 									 					.withCookie("_gat", "1"),
 								       expectedResponse,
-						       		   new Endpoint(new Path("http://localhost:8090/hello"), "GET",
-						       				   		Headers.empty(),
-						       				   		Cookies.empty(),
-						       				   		Parameters.create(Parameter.cookie(0, "session-id",  JavaType.valueOf(String.class), cookiesParameterSerializer),
-						       				   						  Parameter.cookie(1, "cookies",  JavaType.valueOf(Cookies.class), cookiesParameterSerializer))),
-						       		   Arguments.create("abc1234", Cookies.create(new Cookie("csrftoken", "xyz9876"), new Cookie("_gat", "1")))));
+						       		   new RequestDefinition(URI.create("http://localhost:8090/hello"), "GET",
+											   		Headers.create(Cookies.create(new Cookie("session-id", "abc1234"),
+																				  new Cookie("csrftoken", "xyz9876"),
+																				  new Cookie("_gat", "1")).header().get()))));
 		}
 	}
 

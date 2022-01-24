@@ -4,21 +4,15 @@ import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.Endpoint;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.Promise;
-import com.github.ljtfreitas.julian.RequestIO;
+import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
-import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Observable;
-import io.reactivex.rxjava3.core.Observer;
 import io.reactivex.rxjava3.observers.TestObserver;
-import io.reactivex.rxjava3.subscribers.TestSubscriber;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
 
 import java.util.Collection;
 import java.util.List;
@@ -73,12 +67,12 @@ class ObservableResponseTTest {
     }
 
     @Test
-    void bind(@Mock Endpoint endpoint, @Mock RequestIO<String> request, @Mock ResponseFn<String, Collection<String>> fn) {
+    void bind(@Mock Endpoint endpoint, @Mock Promise<Response<String, Exception>, Exception> response, @Mock ResponseFn<String, Collection<String>> fn) {
         Arguments arguments = Arguments.empty();
 
-        when(fn.run(request, arguments)).thenReturn(Promise.done(List.of("one", "two", "three")));
+        when(fn.run(response, arguments)).thenReturn(Promise.done(List.of("one", "two", "three")));
 
-        Observable<String> observable = subject.bind(endpoint, fn).join(request, arguments);
+        Observable<String> observable = subject.bind(endpoint, fn).join(response, arguments);
 
         TestObserver<String> observer = new TestObserver<>();
         observable.subscribe(observer);

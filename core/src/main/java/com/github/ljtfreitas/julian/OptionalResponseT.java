@@ -33,8 +33,8 @@ class OptionalResponseT<T> implements ResponseT<T, Optional<T>> {
 		return new ResponseFn<>() {
 
 			@Override
-			public Promise<Optional<T>, ? extends Exception> run(RequestIO<A> request, Arguments arguments) {
-				return fn.run(request, arguments).then(Optional::ofNullable);
+			public Promise<Optional<T>, ? extends Exception> run(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+				return fn.run(response, arguments).then(Optional::ofNullable);
 			}
 
 			@Override

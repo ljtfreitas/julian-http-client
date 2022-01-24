@@ -25,10 +25,10 @@ package com.github.ljtfreitas.julian.rxjava3;
 import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.Endpoint;
 import com.github.ljtfreitas.julian.JavaType;
-import com.github.ljtfreitas.julian.RequestIO;
+import com.github.ljtfreitas.julian.Promise;
+import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
 import com.github.ljtfreitas.julian.ResponseT;
-import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Single;
 
 public class SingleResponseT<T> implements ResponseT<T, Single<T>> {
@@ -38,8 +38,8 @@ public class SingleResponseT<T> implements ResponseT<T, Single<T>> {
         return new ResponseFn<>() {
 
             @Override
-            public Single<T> join(RequestIO<A> request, Arguments arguments) {
-                return Single.fromCompletionStage(fn.run(request, arguments).future());
+            public Single<T> join(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+                return Single.fromCompletionStage(fn.run(response, arguments).future());
             }
 
             @Override

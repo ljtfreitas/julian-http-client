@@ -48,8 +48,10 @@ public interface Response<T, E extends Exception> {
 		return this;
 	}
 
-	default <R extends Response<T, E>> Optional<R> as(Class<R> candidate) {
-		return candidate.isAssignableFrom(this.getClass()) ? Optional.of(candidate.cast(this)) : Optional.empty();
+	@SuppressWarnings("unchecked")
+	default <Err extends Exception, R extends Response<T, Err>> Optional<R> cast(Kind<R> candidate) {
+		Class<?> javaType = candidate.javaType().rawClassType();
+		return javaType.isAssignableFrom(this.getClass()) ? Optional.of((R) javaType.cast(this)) : Optional.empty();
 	}
 
 	static <T> Response<T, Exception> done(T value) {

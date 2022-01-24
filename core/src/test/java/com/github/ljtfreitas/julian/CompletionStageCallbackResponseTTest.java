@@ -1,19 +1,8 @@
 package com.github.ljtfreitas.julian;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
-
+import com.github.ljtfreitas.julian.Endpoint.Parameter;
+import com.github.ljtfreitas.julian.Endpoint.Parameters;
+import com.github.ljtfreitas.julian.JavaType.Parameterized;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -25,9 +14,19 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.github.ljtfreitas.julian.Endpoint.Parameter;
-import com.github.ljtfreitas.julian.Endpoint.Parameters;
-import com.github.ljtfreitas.julian.JavaType.Parameterized;
+import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CompletionStageCallbackResponseTTest {
@@ -35,7 +34,7 @@ class CompletionStageCallbackResponseTTest {
 	@Mock
 	private Endpoint endpoint;
 	
-	private CompletionStageCallbackResponseT<String> responseT = new CompletionStageCallbackResponseT<>();
+	private final CompletionStageCallbackResponseT<String> responseT = new CompletionStageCallbackResponseT<>();
 
 	@Nested
 	class Predicates {
@@ -92,7 +91,7 @@ class CompletionStageCallbackResponseTTest {
 	class Callbacks {
 
 		@Test
-		void consumesSuccess(@Mock ResponseFn<String, String> fn, @Mock RequestIO<String> request, @Mock Consumer<String> success) {
+		void consumesSuccess(@Mock ResponseFn<String, String> fn, @Mock Promise<Response<String, Exception>, Exception> response, @Mock Consumer<String> success) {
 			when(endpoint.parameters()).thenReturn(Parameters.create(Parameter.callback(0, "success", JavaType.parameterized(Consumer.class, String.class))));
 			when(fn.returnType()).thenReturn(JavaType.valueOf(String.class));
 
@@ -102,15 +101,15 @@ class CompletionStageCallbackResponseTTest {
 
 			Arguments arguments = Arguments.create(check.andThen(success));
 
-			when(fn.run(request, arguments)).thenReturn(Promise.done(expected));
+			when(fn.run(response, arguments)).thenReturn(Promise.done(expected));
 
-			responseT.bind(endpoint, fn).join(request, arguments);
+			responseT.bind(endpoint, fn).join(response, arguments);
 
 			verify(success).accept(expected);
 		}
 
 		@Test
-		void consumesFailure(@Mock ResponseFn<String, String> fn, @Mock RequestIO<String> request, @Mock Consumer<Throwable> failure) {
+		void consumesFailure(@Mock ResponseFn<String, String> fn, @Mock Promise<Response<String, Exception>, Exception> response, @Mock Consumer<Throwable> failure) {
 			when(endpoint.parameters()).thenReturn(Parameters.create(Parameter.callback(0, "failure", JavaType.parameterized(Consumer.class, Throwable.class))));
 			when(fn.returnType()).thenReturn(JavaType.none());
 
@@ -120,9 +119,9 @@ class CompletionStageCallbackResponseTTest {
 
 			Arguments arguments = Arguments.create(check.andThen(failure));
 
-			when(fn.run(request, arguments)).then(i ->  Promise.failed(e));
+			when(fn.run(response, arguments)).then(i ->  Promise.failed(e));
 
-			responseT.bind(endpoint, fn).join(request, arguments);
+			responseT.bind(endpoint, fn).join(response, arguments);
 
 			verify(failure).accept(e);
 		}
@@ -131,7 +130,7 @@ class CompletionStageCallbackResponseTTest {
 		class WithBiConsumer {
 
 			@Test
-			void consumesSuccess(@Mock ResponseFn<String, String> fn, @Mock RequestIO<String> request, @Mock BiConsumer<String, Throwable> subscriber) {
+			void consumesSuccess(@Mock ResponseFn<String, String> fn, @Mock Promise<Response<String, Exception>, Exception> response, @Mock BiConsumer<String, Throwable> subscriber) {
 				when(endpoint.parameters()).thenReturn(Parameters.create(Parameter.callback(0, "success", JavaType.parameterized(BiConsumer.class, String.class, Throwable.class))));
 				when(fn.returnType()).thenReturn(JavaType.valueOf(String.class));
 
@@ -141,15 +140,15 @@ class CompletionStageCallbackResponseTTest {
 
 				Arguments arguments = Arguments.create(check.andThen(subscriber));
 
-				when(fn.run(request, arguments)).thenReturn(Promise.done(expected));
+				when(fn.run(response, arguments)).thenReturn(Promise.done(expected));
 
-				responseT.bind(endpoint, fn).join(request, arguments);
+				responseT.bind(endpoint, fn).join(response, arguments);
 
 				verify(subscriber).accept(expected, null);
 			}
 
 			@Test
-			void consumesFailure(@Mock ResponseFn<String, String> fn, @Mock RequestIO<String> request, @Mock BiConsumer<String, Throwable> subscriber) {
+			void consumesFailure(@Mock ResponseFn<String, String> fn, @Mock Promise<Response<String, Exception>, Exception> response, @Mock BiConsumer<String, Throwable> subscriber) {
 				when(endpoint.parameters()).thenReturn(Parameters.create(Parameter.callback(0, "consumer", JavaType.parameterized(BiConsumer.class, String.class, Throwable.class))));
 				when(fn.returnType()).thenReturn(JavaType.valueOf(String.class));
 	
@@ -159,9 +158,9 @@ class CompletionStageCallbackResponseTTest {
 
 				Arguments arguments = Arguments.create(check.andThen(subscriber));
 
-				when(fn.run(request, arguments)).then(i -> Promise.failed(e));
+				when(fn.run(response, arguments)).then(i -> Promise.failed(e));
 
-				responseT.bind(endpoint, fn).join(request, arguments);
+				responseT.bind(endpoint, fn).join(response, arguments);
 
 				verify(subscriber).accept(null, e);
 			}

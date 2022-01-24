@@ -110,4 +110,11 @@ class FailedPromise<T, E extends Exception> implements Promise<T, E> {
 	public CompletableFuture<T> future() {
 		return CompletableFuture.failedFuture(failure);
 	}
+
+	@Override
+	public Promise<T, E> subscribe(Subscriber<? super T, ? super E> subscriber) {
+		subscriber.failure(failure);
+		subscriber.done();
+		return this;
+	}
 }

@@ -25,7 +25,9 @@ package com.github.ljtfreitas.julian.mutiny;
 import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.Endpoint;
 import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.RequestIO;
+import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
 import com.github.ljtfreitas.julian.ResponseT;
 import io.smallrye.mutiny.Multi;
@@ -41,10 +43,10 @@ public class MultiResponseT<T> implements ResponseT<Collection<T>, Multi<T>> {
         return new ResponseFn<>() {
 
             @Override
-            public Multi<T> join(RequestIO<A> request, Arguments arguments) {
+            public Multi<T> join(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
                 return Multi.createFrom()
-                        .completionStage(fn.run(request, arguments).future())
-                            .onItem().transformToIterable(identity());
+                        .completionStage(fn.run(response, arguments).future())
+                        .onItem().transformToIterable(identity());
             }
 
             @Override

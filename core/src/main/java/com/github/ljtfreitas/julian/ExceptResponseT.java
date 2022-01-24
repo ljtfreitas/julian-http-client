@@ -31,8 +31,8 @@ class ExceptResponseT<T> implements ResponseT<T, Except<T>> {
         return new ResponseFn<>() {
 
             @Override
-            public Except<T> join(RequestIO<A> request, Arguments arguments) {
-                return fn.run(request, arguments).join();
+            public Except<T> join(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+                return fn.run(response, arguments).join();
             }
 
             @Override

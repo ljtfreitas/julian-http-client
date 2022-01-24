@@ -22,12 +22,11 @@
 
 package com.github.ljtfreitas.julian.http.client.reactor;
 
-import com.github.ljtfreitas.julian.http.client.HTTPClientException;
-import reactor.netty.http.client.HttpClient.ResponseReceiver;
-
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.http.client.HTTPClientRequest;
 import com.github.ljtfreitas.julian.http.client.HTTPClientResponse;
+import com.github.ljtfreitas.julian.reactor.MonoPromise;
+import reactor.netty.http.client.HttpClient.ResponseReceiver;
 
 class ReactorNettyHTTPClientRequest implements HTTPClientRequest {
 

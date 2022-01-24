@@ -25,7 +25,10 @@ package com.github.ljtfreitas.julian.reactor;
 import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.Endpoint;
 import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.Kind;
+import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.RequestIO;
+import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
 import com.github.ljtfreitas.julian.ResponseT;
 import reactor.core.publisher.Flux;
@@ -42,8 +45,12 @@ public class FluxResponseT<T> implements ResponseT<Collection<T>, Flux<T>> {
         return new ResponseFn<>() {
 
             @Override
-            public Flux<T> join(RequestIO<A> request, Arguments arguments) {
-                return Mono.fromFuture(fn.run(request, arguments).future())
+            public Flux<T> join(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+                Promise<Collection<T>, ? extends Exception> promise = fn.run(response, arguments);
+
+                return promise.cast(new Kind<MonoPromise<Collection<T>, Exception>>() {})
+                        .map(MonoPromise::mono)
+                        .orElseGet(() -> Mono.fromFuture(promise.future()))
                         .flatMapIterable(identity());
             }
 

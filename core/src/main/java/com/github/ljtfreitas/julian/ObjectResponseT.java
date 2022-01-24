@@ -32,8 +32,8 @@ class ObjectResponseT<T> implements ResponseT<T, T> {
 		return new ResponseFn<>() {
 
 			@Override
-			public Promise<T, ? extends Exception> run(RequestIO<A> request, Arguments arguments) {
-				return request.execute().bind(response -> response.map(r -> (T) r).fold(Promise::done, Promise::failed));
+			public Promise<T, ? extends Exception> run(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+				return response.bind(r -> r.map(value -> (T) value).fold(Promise::done, Promise::failed));
 			}
 
 			@Override

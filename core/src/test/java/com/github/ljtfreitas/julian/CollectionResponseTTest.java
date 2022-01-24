@@ -84,18 +84,18 @@ class CollectionResponseTTest {
 		private ResponseFn<Collection<String>, Collection<String>> fn;
 
 		@Mock 
-		private RequestIO<Collection<String>> request;
+		private Promise<Response<Collection<String>, Exception>, Exception> response;
 		
 		@ParameterizedTest
 		@ArgumentsSource(AcceptableCollectionsProvider.class)
 		void compose(JavaType javaType) {
 			when(endpoint.returnType()).thenReturn(javaType);
 
-			when(fn.run(request, Arguments.empty())).thenReturn(Promise.done(List.of("expected")));
+			when(fn.run(response, Arguments.empty())).thenReturn(Promise.done(List.of("expected")));
 
-			Collection<String> response = responseT.bind(endpoint, fn).join(request, Arguments.empty());
+			Collection<String> collection = responseT.bind(endpoint, fn).join(response, Arguments.empty());
 
-			assertThat(response, contains("expected"));
+			assertThat(collection, contains("expected"));
 		}
 
 		@ParameterizedTest
@@ -103,12 +103,12 @@ class CollectionResponseTTest {
 		void empty(JavaType javaType, Class<?> expectedCollectionType) {
 			when(endpoint.returnType()).thenReturn(javaType);
 
-			when(fn.run(request, Arguments.empty())).thenReturn(Promise.done(Collections.emptyList()));
+			when(fn.run(response, Arguments.empty())).thenReturn(Promise.done(Collections.emptyList()));
 
-			Collection<String> response = responseT.bind(endpoint, fn).join(request, Arguments.empty());
+			Collection<String> collection = responseT.bind(endpoint, fn).join(response, Arguments.empty());
 
-			assertAll(() -> assertTrue(response.isEmpty()),
-					  () -> assertTrue(expectedCollectionType.isInstance(response))); 
+			assertAll(() -> assertTrue(collection.isEmpty()),
+					  () -> assertTrue(expectedCollectionType.isInstance(collection)));
 		}
 	}
 

@@ -4,7 +4,7 @@ import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.Endpoint;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.Promise;
-import com.github.ljtfreitas.julian.RequestIO;
+import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.observers.TestObserver;
@@ -66,12 +66,12 @@ class MaybeResponseTTest {
     }
 
     @Test
-    void bind(@Mock Endpoint endpoint, @Mock RequestIO<String> request, @Mock ResponseFn<String, String> fn) {
+    void bind(@Mock Endpoint endpoint, @Mock Promise<Response<String, Exception>, Exception> response, @Mock ResponseFn<String, String> fn) {
         Arguments arguments = Arguments.empty();
 
-        when(fn.run(request, arguments)).thenReturn(Promise.done("hello"));
+        when(fn.run(response, arguments)).thenReturn(Promise.done("hello"));
 
-        Maybe<String> maybe = subject.bind(endpoint, fn).join(request, arguments);
+        Maybe<String> maybe = subject.bind(endpoint, fn).join(response, arguments);
 
         TestObserver<String> observer = new TestObserver<>();
         maybe.subscribe(observer);

@@ -4,12 +4,9 @@ import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.Endpoint;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.Promise;
-import com.github.ljtfreitas.julian.RequestIO;
+import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
 import io.reactivex.rxjava3.core.Flowable;
-import io.reactivex.rxjava3.core.FlowableSubscriber;
-import io.reactivex.rxjava3.core.Observable;
-import io.reactivex.rxjava3.observers.TestObserver;
 import io.reactivex.rxjava3.subscribers.TestSubscriber;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -72,12 +69,12 @@ class FlowableResponseTTest {
     }
 
     @Test
-    void bind(@Mock Endpoint endpoint, @Mock RequestIO<String> request, @Mock ResponseFn<String, Collection<String>> fn) {
+    void bind(@Mock Endpoint endpoint, @Mock Promise<Response<String, Exception>, Exception> response, @Mock ResponseFn<String, Collection<String>> fn) {
         Arguments arguments = Arguments.empty();
 
-        when(fn.run(request, arguments)).thenReturn(Promise.done(List.of("one", "two", "three")));
+        when(fn.run(response, arguments)).thenReturn(Promise.done(List.of("one", "two", "three")));
 
-        Flowable<String> flowable = subject.bind(endpoint, fn).join(request, arguments);
+        Flowable<String> flowable = subject.bind(endpoint, fn).join(response, arguments);
 
         TestSubscriber<String> subscriber = new TestSubscriber<>();
         flowable.subscribe(subscriber);

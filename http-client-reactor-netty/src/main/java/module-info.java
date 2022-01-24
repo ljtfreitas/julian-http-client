@@ -24,6 +24,8 @@ module com.github.ljtfreitas.julian.http.client.reactor {
     exports com.github.ljtfreitas.julian.http.client.reactor;
 
     requires com.github.ljtfreitas.julian;
+    requires com.github.ljtfreitas.julian.reactor;
+
     requires io.netty.buffer;
     requires io.netty.codec.http;
     requires reactor.core;

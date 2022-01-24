@@ -4,7 +4,7 @@ import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.Endpoint;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.Promise;
-import com.github.ljtfreitas.julian.RequestIO;
+import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
@@ -65,12 +65,12 @@ class UniResponseTTest {
     }
 
     @Test
-    void bind(@Mock Endpoint endpoint, @Mock RequestIO<String> request, @Mock ResponseFn<String, String> fn) {
+    void bind(@Mock Endpoint endpoint, @Mock Promise<Response<String, Exception>, Exception> response, @Mock ResponseFn<String, String> fn) {
         Arguments arguments = Arguments.empty();
 
-        when(fn.run(request, arguments)).thenReturn(Promise.done("hello"));
+        when(fn.run(response, arguments)).thenReturn(Promise.done("hello"));
 
-        Uni<String> uni = subject.bind(endpoint, fn).join(request, arguments);
+        Uni<String> uni = subject.bind(endpoint, fn).join(response, arguments);
 
         UniAssertSubscriber<String> subscriber = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
 
@@ -79,13 +79,13 @@ class UniResponseTTest {
     }
 
     @Test
-    void failure(@Mock Endpoint endpoint, @Mock RequestIO<String> request, @Mock ResponseFn<String, String> fn) {
+    void failure(@Mock Endpoint endpoint, @Mock Promise<Response<String, Exception>, Exception> response, @Mock ResponseFn<String, String> fn) {
         Arguments arguments = Arguments.empty();
 
         RuntimeException exception = new RuntimeException("oops");
-        when(fn.run(request, arguments)).then(i -> Promise.failed(exception));
+        when(fn.run(response, arguments)).then(i -> Promise.failed(exception));
 
-        Uni<String> uni = subject.bind(endpoint, fn).join(request, arguments);
+        Uni<String> uni = subject.bind(endpoint, fn).join(response, arguments);
 
         UniAssertSubscriber<String> subscriber = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
 

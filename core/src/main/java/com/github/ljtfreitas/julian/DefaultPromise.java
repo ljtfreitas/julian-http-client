@@ -25,6 +25,7 @@ package com.github.ljtfreitas.julian;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -121,5 +122,13 @@ class DefaultPromise<T, E extends Exception> implements Promise<T, E> {
 	@Override
 	public CompletableFuture<T> future() {
 		return future;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Promise<T, E> subscribe(Subscriber<? super T, ? super E> subscriber) {
+		BiConsumer<T, Throwable> handle = (r, e) -> { if (e == null) subscriber.success(r); else subscriber.failure((E) e); };
+		BiConsumer<T, Throwable> done = (r, e) -> subscriber.done();
+		return new DefaultPromise<>(future.whenCompleteAsync(handle).whenCompleteAsync(done));
 	}
 }

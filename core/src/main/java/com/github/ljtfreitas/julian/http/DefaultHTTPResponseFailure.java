@@ -25,9 +25,6 @@ package com.github.ljtfreitas.julian.http;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.client.HTTPClientResponse;
 
-import java.util.function.Function;
-import java.util.function.Supplier;
-
 import static java.util.function.Function.identity;
 
 public class DefaultHTTPResponseFailure implements HTTPResponseFailure {
@@ -42,7 +39,7 @@ public class DefaultHTTPResponseFailure implements HTTPResponseFailure {
 		byte[] responseAsBytes = response.body().deserialize(identity()).orElseGet(() -> new byte[0]);
 
 		HTTPResponseException ex = HTTPStatusCode.select(status.code())
-				.<HTTPResponseException>map(httpStatusCode -> failure(httpStatusCode, headers, responseAsBytes))
+				.<HTTPResponseException>map(httpStatusCode -> HTTPFailureResponseException.create(httpStatusCode, headers, responseAsBytes))
 				.orElseGet(() -> unknown(status, headers, responseAsBytes));
 
 		return new FailureHTTPResponse<>(status, headers, ex);
@@ -50,81 +47,6 @@ public class DefaultHTTPResponseFailure implements HTTPResponseFailure {
 
 	private HTTPUknownFailureResponseException unknown(HTTPStatus status, HTTPHeaders headers, byte[] responseBody) {
 		return new HTTPUknownFailureResponseException(status, headers, responseBody);
-	}
-	private HTTPFailureResponseException failure(HTTPStatusCode status, HTTPHeaders headers, byte[] responseBody) {
-		switch (status) {
-			case BAD_REQUEST:
-				return new HTTPClientFailureResponseException.BadRequest(headers, responseBody);
-	
-			case UNAUTHORIZED:
-				return new HTTPClientFailureResponseException.Unauthorized(headers, responseBody);
-		
-			case FORBIDDEN:
-				return new HTTPClientFailureResponseException.Forbidden(headers, responseBody);
-		
-			case NOT_FOUND:
-				return new HTTPClientFailureResponseException.NotFound(headers, responseBody);
-			
-			case METHOD_NOT_ALLOWED:
-				return new HTTPClientFailureResponseException.MethodNotAllowed(headers, responseBody);
-			
-			case NOT_ACCEPTABLE:
-				return new HTTPClientFailureResponseException.NotAcceptable(headers, responseBody);
-			
-			case PROXY_AUTHENTATION_REQUIRED:
-				return new HTTPClientFailureResponseException.ProxyAuthenticationRequired(headers, responseBody);
-			
-			case REQUEST_TIMEOUT:
-				return new HTTPClientFailureResponseException.RequestTimeout(headers, responseBody);
-			
-			case CONFLICT:
-				return new HTTPClientFailureResponseException.Conflict(headers, responseBody);
-			
-			case GONE:
-				return new HTTPClientFailureResponseException.Gone(headers, responseBody);
-			
-			case LENGTH_REQUIRED:
-				return new HTTPClientFailureResponseException.LengthRequired(headers, responseBody);
-			
-			case PRECONDITION_FAILED:
-				return new HTTPClientFailureResponseException.PreconditionFailed(headers, responseBody);
-			
-			case REQUEST_ENTITY_TOO_LARGE:
-				return new HTTPClientFailureResponseException.RequestEntityTooLarge(headers, responseBody);
-			
-			case REQUEST_URI_TOO_LONG:
-				return new HTTPClientFailureResponseException.RequestURITooLong(headers, responseBody);
-			
-			case UNSUPPORTED_MEDIA_TYPE:
-				return new HTTPClientFailureResponseException.UnsupportedMediaType(headers, responseBody);
-			
-			case REQUESTED_RANGE_NOT_SATISFIABLE:
-				return new HTTPClientFailureResponseException.RequestedRangeNotSatisfiable(headers, responseBody);
-			
-			case EXPECTATION_FAILED:
-				return new HTTPClientFailureResponseException.ExpectationFailed(headers, responseBody);
-			
-			case INTERNAL_SERVER_ERROR:
-				return new HTTPServerFailureResponseException.InternalServerError(headers, responseBody);
-			
-			case NOT_IMPLEMENTED:
-				return new HTTPServerFailureResponseException.NotImplemented(headers, responseBody);
-			
-			case BAD_GATEWAY:
-				return new HTTPServerFailureResponseException.BadGateway(headers, responseBody);
-			
-			case SERVICE_UNAVAILABLE:
-				return new HTTPServerFailureResponseException.ServiceUnavailable(headers, responseBody);
-			
-			case GATEWAY_TIMEOUT:
-				return new HTTPServerFailureResponseException.GatewayTimeout(headers, responseBody);
-			
-			case HTTP_VERSION_NOT_SUPPORTED:
-				return new HTTPServerFailureResponseException.HTTPVersionNotSupported(headers, responseBody);
-			
-			default:
-				return new HTTPFailureResponseException(status, headers, responseBody);
-		}
 	}
 
 	public static DefaultHTTPResponseFailure get() {

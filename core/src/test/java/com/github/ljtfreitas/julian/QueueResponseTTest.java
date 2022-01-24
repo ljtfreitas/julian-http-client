@@ -70,24 +70,24 @@ class QueueResponseTTest {
 		private ResponseFn<Collection<String>, Collection<String>> fn;
 
 		@Mock 
-		private RequestIO<Collection<String>> request;
+		private Promise<Response<Collection<String>, Exception>, Exception> response;
 		
 		@Test
 		void compose() {
-			when(fn.run(request, Arguments.empty())).thenReturn(Promise.done(List.of("expected")));
+			when(fn.run(response, Arguments.empty())).thenReturn(Promise.done(List.of("expected")));
 
-			Queue<String> response = responseT.bind(endpoint, fn).join(request, Arguments.empty());
+			Queue<String> queue = responseT.bind(endpoint, fn).join(response, Arguments.empty());
 
-			assertAll(() -> assertThat(response, contains("expected")), () -> assertEquals("expected", response.poll()));
+			assertAll(() -> assertThat(queue, contains("expected")), () -> assertEquals("expected", queue.poll()));
 		}
 
 		@Test
 		void empty() {
-			when(fn.run(request, Arguments.empty())).thenReturn(Promise.done(Collections.emptyList()));
+			when(fn.run(response, Arguments.empty())).thenReturn(Promise.done(Collections.emptyList()));
 
-			Queue<String> response = responseT.bind(endpoint, fn).join(request, Arguments.empty());
+			Queue<String> queue = responseT.bind(endpoint, fn).join(response, Arguments.empty());
 
-			assertTrue(response.isEmpty());
+			assertTrue(queue.isEmpty());
 		}
 	}
 }

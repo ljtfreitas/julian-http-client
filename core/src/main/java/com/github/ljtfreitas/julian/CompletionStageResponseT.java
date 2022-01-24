@@ -33,8 +33,8 @@ class CompletionStageResponseT<T> implements ResponseT<T, CompletionStage<T>> {
 		return new ResponseFn<>() {
 
 			@Override
-			public CompletionStage<T> join(RequestIO<A> request, Arguments arguments) {
-				return fn.run(request, arguments).future();
+			public CompletionStage<T> join(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+				return fn.run(response, arguments).future();
 			}
 
 			@Override

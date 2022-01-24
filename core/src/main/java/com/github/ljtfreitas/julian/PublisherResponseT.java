@@ -46,11 +46,11 @@ public class PublisherResponseT<T> implements ResponseT<T, Publisher<T>> {
         return new ResponseFn<>() {
 
             @Override
-            public Publisher<T> join(RequestIO<A> request, Arguments arguments) {
+            public Publisher<T> join(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
                 SubmissionPublisher<T> publisher = executor == null ?
                         new SubmissionPublisher<>() : new SubmissionPublisher<>(executor, Flow.defaultBufferSize());
 
-                fn.run(request, arguments).future()
+                fn.run(response, arguments).future()
                         .thenAcceptAsync(publisher::submit)
                         .thenRunAsync(publisher::close)
                         .whenCompleteAsync((r, t) -> { if (t != null) publisher.closeExceptionally(t);});

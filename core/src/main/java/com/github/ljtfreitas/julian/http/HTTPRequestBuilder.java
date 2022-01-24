@@ -35,12 +35,7 @@ import com.github.ljtfreitas.julian.http.codec.UnprocessableHTTPMessageCodec;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Stream;
-
-import static java.util.function.Predicate.not;
 
 public class HTTPRequestBuilder<T> {
 
@@ -69,7 +64,7 @@ public class HTTPRequestBuilder<T> {
     }
 
     private HTTPRequestBuilder(String path, HTTPMethod httpMethod, QueryParameters parameters, HTTPHeaders headers, HTTPRequestBody body, JavaType responseType,
-                       HTTPResponseReader<?> reader) {
+                               HTTPResponseReader<?> reader) {
         this.path = path;
         this.httpMethod = httpMethod;
         this.headers = headers;
@@ -193,6 +188,10 @@ public class HTTPRequestBuilder<T> {
 
         public HasBody<T> header(HTTPHeader header) {
             return new HasBody<>(hasHeaders.header(header));
+        }
+
+        public HTTPRequest<T> build(HTTPClient client) {
+            return hasHeaders.build(client);
         }
     }
 }

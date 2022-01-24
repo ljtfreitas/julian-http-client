@@ -21,14 +21,12 @@ class ObjectResponseTTest {
     private final ObjectResponseT<String> responseT = new ObjectResponseT<>();
 
     @Test
-    void compose(@Mock ResponseFn<String, String> fn, @Mock RequestIO<String> request) {
+    void compose(@Mock ResponseFn<String, String> fn) {
         Arguments arguments = Arguments.empty();
 
         Response<String, Exception> response = Response.done("expected");
 
-        when(request.execute()).then(a -> Promise.done(response));
-
-        String actual = responseT.bind(endpoint, fn).join(request, arguments);
+        String actual = responseT.bind(endpoint, fn).join(Promise.done(response), arguments);
 
         assertEquals("expected", actual);
     }

@@ -25,7 +25,8 @@ package com.github.ljtfreitas.julian.rxjava3;
 import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.Endpoint;
 import com.github.ljtfreitas.julian.JavaType;
-import com.github.ljtfreitas.julian.RequestIO;
+import com.github.ljtfreitas.julian.Promise;
+import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
 import com.github.ljtfreitas.julian.ResponseT;
 import io.reactivex.rxjava3.core.Completable;
@@ -37,8 +38,8 @@ public class CompletableResponseT implements ResponseT<Void, Completable> {
         return new ResponseFn<>() {
 
             @Override
-            public Completable join(RequestIO<A> request, Arguments arguments) {
-                return Completable.fromCompletionStage(fn.run(request, arguments).future());
+            public Completable join(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+                return Completable.fromCompletionStage(fn.run(response, arguments).future());
             }
 
             @Override

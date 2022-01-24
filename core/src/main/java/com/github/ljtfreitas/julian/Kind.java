@@ -23,12 +23,13 @@
 package com.github.ljtfreitas.julian;
 
 import java.lang.reflect.Type;
+import java.util.Objects;
 
 public abstract class Kind<T> {
 
 	private final Type kind;
 
-	public Kind() {
+	protected Kind() {
 		this.kind =  JavaType.valueOf(this.getClass().getGenericSuperclass())
 				.parameterized()
 				.map(JavaType.Parameterized::firstArg)
@@ -38,4 +39,18 @@ public abstract class Kind<T> {
 	public JavaType javaType() {
 		return JavaType.valueOf(kind);
 	}
+
+	@SuppressWarnings("rawtypes")
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof Kind) {
+			return ((Kind) o).kind.equals(kind);
+		} else return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(kind);
+	}
+
 }

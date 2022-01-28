@@ -1,11 +1,6 @@
 package com.github.ljtfreitas.julian.reactor;
 
-import com.github.ljtfreitas.julian.Arguments;
-import com.github.ljtfreitas.julian.Endpoint;
-import com.github.ljtfreitas.julian.JavaType;
-import com.github.ljtfreitas.julian.Promise;
-import com.github.ljtfreitas.julian.Response;
-import com.github.ljtfreitas.julian.ResponseFn;
+import com.github.ljtfreitas.julian.*;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,9 +13,7 @@ import reactor.test.StepVerifier;
 import java.util.Collection;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -83,12 +76,12 @@ class FluxResponseTTest {
     }
 
     @Test
-    void bindAsMono(@Mock Endpoint endpoint, @Mock ResponseFn<String, Collection<String>> fn) {
+    void bindAsMono(@Mock Endpoint endpoint, @Mock ResponseFn<Collection<String>, Collection<String>> fn) {
         Arguments arguments = Arguments.empty();
 
-        Promise<Response<String, Exception>, Exception> response = new MonoPromise<>(Mono.just(Response.done("one,two,three")));
+        Promise<Response<Collection<String>, Exception>, Exception> response = new MonoPromise<>(Mono.just(Response.done(List.of("one", "two", "three"))));
 
-        when(fn.run(response, arguments)).then(i -> response.then(r -> r.map(s -> List.of(s.split(",")))));
+        when(fn.run(response, arguments)).then(i -> response.then(r -> r.body().unsafe()));
 
         Flux<String> flux = subject.bind(endpoint, fn).join(response, arguments);
 

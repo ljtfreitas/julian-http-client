@@ -20,18 +20,9 @@
  * SOFTWARE.
  */
 
-rootProject.name = "julian-http-client-parent"
-include("core")
-include("form-url-encoded-multipart")
-include("json-jackson")
-include("json-gson")
-include("json-jsonb")
-include("json-jsonp")
-include("xml-jackson")
-include("http-client-reactor-netty")
-include("http-spring-web-flux")
-include("xml-jaxb")
-include("rx-java3")
-include("mutiny")
-include("reactor")
-include("vavr")
+module com.github.ljtfreitas.julian.vavr {
+    exports com.github.ljtfreitas.julian.vavr;
+
+    requires com.github.ljtfreitas.julian;
+    requires io.vavr;
+}

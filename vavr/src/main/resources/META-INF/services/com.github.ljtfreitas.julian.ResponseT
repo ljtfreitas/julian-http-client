@@ -1,0 +1,15 @@
+com.github.ljtfreitas.julian.vavr.ArrayResponseT
+com.github.ljtfreitas.julian.vavr.EitherHTTPResponseT
+com.github.ljtfreitas.julian.vavr.EitherResponseT
+com.github.ljtfreitas.julian.vavr.FutureResponseT
+com.github.ljtfreitas.julian.vavr.IndexedSeqResponseT
+com.github.ljtfreitas.julian.vavr.LazyResponseT
+com.github.ljtfreitas.julian.vavr.LinearSeqResponseT
+com.github.ljtfreitas.julian.vavr.ListResponseT
+com.github.ljtfreitas.julian.vavr.OptionResponseT
+com.github.ljtfreitas.julian.vavr.QueueResponseT
+com.github.ljtfreitas.julian.vavr.SeqResponseT
+com.github.ljtfreitas.julian.vavr.SetResponseT
+com.github.ljtfreitas.julian.vavr.TraversableResponseT
+com.github.ljtfreitas.julian.vavr.TryResponseT
+com.github.ljtfreitas.julian.vavr.VectorResponseT

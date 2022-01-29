@@ -11,6 +11,7 @@ import com.github.ljtfreitas.julian.http.HTTPResponse;
 import com.github.ljtfreitas.julian.http.HTTPStatus;
 import com.github.ljtfreitas.julian.http.HTTPStatusCode;
 import com.github.ljtfreitas.julian.http.MediaType;
+import com.github.ljtfreitas.julian.http.SuccessHTTPResponse;
 import com.github.ljtfreitas.julian.http.client.HTTPClient;
 import com.github.ljtfreitas.julian.http.client.HTTPClientException;
 import com.github.ljtfreitas.julian.http.client.HTTPClientRequest;
@@ -71,6 +72,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockserver.model.HttpRequest.request;
@@ -169,7 +171,26 @@ class ProxyBuilderTest {
 
     @Nested
     @DisplayName("Should be able to configure the HTTP request/response process.")
+    @ExtendWith(MockitoExtension.class)
     class HTTP {
+
+        @Test
+        @DisplayName("Should run a HTTP request using a customized HTTP instance.")
+        void shouldRunAHTTPRequestUsingACustomizedHTTPObject(@Mock com.github.ljtfreitas.julian.http.HTTP http) {
+            SimpleApi simpleApi = new ProxyBuilder()
+                    .http()
+                        .using(http)
+                        .and()
+                    .build(SimpleApi.class, "http://localhost:8090");
+
+            when(http.run(notNull())).thenReturn(Promise.done(new SuccessHTTPResponse<>(new HTTPStatus(HTTPStatusCode.OK), HTTPHeaders.empty(), "success")));
+
+            String response = simpleApi.asString();
+
+            assertEquals("success", response);
+
+            verify(http).run(notNull());
+        }
 
         @Nested
         @DisplayName("The HTTP client configuration.")

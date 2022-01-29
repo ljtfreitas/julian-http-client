@@ -54,7 +54,7 @@ public class SeqResponseT<T> implements ResponseT<Collection<T>, Seq<T>> {
 
             @Override
             public JavaType returnType() {
-                return endpoint.returnType();
+                return fn.returnType();
             }
         };
     }

@@ -49,7 +49,7 @@ public class EitherResponseT<R, L extends Exception> implements ResponseT<R, Eit
 
             @Override
             public JavaType returnType() {
-                return endpoint.returnType();
+                return fn.returnType();
             }
         };
     }

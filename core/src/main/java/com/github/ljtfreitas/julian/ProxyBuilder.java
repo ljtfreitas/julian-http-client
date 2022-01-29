@@ -63,11 +63,11 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableCollection;
 import static java.util.Objects.requireNonNull;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
@@ -196,10 +196,11 @@ public class ProxyBuilder {
                     HeadersResponseT.get(),
                     IterableResponseT.get(),
                     IteratorResponseT.get(),
+                    LazyResponseT.get(),
                     ListIteratorResponseT.get(),
                     OptionalResponseT.get(),
                     PromiseResponseT.get(),
-                    LazyResponseT.get(),
+                    PromiseSubscriberCallbackResponseT.get(),
                     QueueResponseT.get(),
                     RunnableResponseT.get(),
                     StreamResponseT.get(),
@@ -232,10 +233,17 @@ public class ProxyBuilder {
 
     public class HTTPSpec {
 
+        private HTTP http = null;
+
         private final HTTPClientSpec client = new HTTPClientSpec();
         private final HTTPRequestInterceptors interceptors = new HTTPRequestInterceptors();
         private final HTTPResponseFailureSpec failure = new HTTPResponseFailureSpec();
         private final Encoding encoding = new Encoding();
+
+        public HTTPSpec using(HTTP http) {
+            this.http = http;
+            return this;
+        }
 
         public HTTPClientSpec client() {
             return client;
@@ -253,6 +261,12 @@ public class ProxyBuilder {
 
         public ProxyBuilder and() {
             return ProxyBuilder.this;
+        }
+
+        public HTTP build() {
+            return http == null ?
+                    new DefaultHTTP(client.build(), interceptors.build(), codecs.build(), failure.build(), encoding.charset) :
+                    http;
         }
 
         public class HTTPClientSpec {
@@ -458,8 +472,8 @@ public class ProxyBuilder {
                 return HTTPSpec.this;
             }
 
-            private Collection<HTTPRequestInterceptor> all() {
-                return interceptors;
+            private HTTPRequestInterceptor build() {
+                return new HTTPRequestInterceptorChain(unmodifiableCollection(interceptors));
             }
         }
 
@@ -513,7 +527,7 @@ public class ProxyBuilder {
             }
 
             public Encoding using(String charset) {
-                this.charset = Charset.forName(Objects.requireNonNull(charset));
+                this.charset = Charset.forName(requireNonNull(charset));
                 return this;
             }
 
@@ -591,23 +605,7 @@ public class ProxyBuilder {
     }
 
     private Client client() {
-        HTTP http = new DefaultHTTP(httpClient(), interceptor(), codecs.build(), failure(), encoding());
+        HTTP http = httpSpec.build();
         return new Client(responseTs.build(), http);
-    }
-
-    private Charset encoding() {
-        return httpSpec.encoding.charset;
-    }
-
-    private HTTPClient httpClient() {
-        return httpSpec.client.build();
-    }
-
-    private HTTPResponseFailure failure() {
-        return httpSpec.failure.build();
-    }
-
-    private HTTPRequestInterceptor interceptor() {
-        return new HTTPRequestInterceptorChain(httpSpec.interceptors.all());
     }
 }

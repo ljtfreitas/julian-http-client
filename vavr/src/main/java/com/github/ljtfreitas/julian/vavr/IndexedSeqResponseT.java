@@ -54,7 +54,7 @@ public class IndexedSeqResponseT<T> implements ResponseT<Collection<T>, IndexedS
 
             @Override
             public JavaType returnType() {
-                return endpoint.returnType();
+                return fn.returnType();
             }
         };
     }

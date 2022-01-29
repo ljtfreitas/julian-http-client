@@ -44,7 +44,7 @@ public class LazyResponseT<T> implements ResponseT<T, Lazy<T>> {
 
             @Override
             public JavaType returnType() {
-                return endpoint.returnType();
+                return fn.returnType();
             }
         };
     }

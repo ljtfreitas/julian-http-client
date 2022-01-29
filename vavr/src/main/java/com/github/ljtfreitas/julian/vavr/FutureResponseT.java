@@ -44,7 +44,7 @@ public class FutureResponseT<T> implements ResponseT<T, Future<T>> {
 
             @Override
             public JavaType returnType() {
-                return endpoint.returnType();
+                return fn.returnType();
             }
         };
     }

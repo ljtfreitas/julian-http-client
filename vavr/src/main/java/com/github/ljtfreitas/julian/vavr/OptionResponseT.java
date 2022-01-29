@@ -44,7 +44,7 @@ public class OptionResponseT<T> implements ResponseT<T, Option<T>> {
 
             @Override
             public JavaType returnType() {
-                return endpoint.returnType();
+                return fn.returnType();
             }
         };
     }

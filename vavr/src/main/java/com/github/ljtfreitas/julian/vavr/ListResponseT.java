@@ -53,7 +53,7 @@ public class ListResponseT<T> implements ResponseT<Collection<T>, List<T>> {
 
             @Override
             public JavaType returnType() {
-                return endpoint.returnType();
+                return fn.returnType();
             }
         };
     }

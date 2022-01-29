@@ -53,7 +53,7 @@ public class QueueResponseT<T> implements ResponseT<Collection<T>, Queue<T>> {
 
             @Override
             public JavaType returnType() {
-                return endpoint.returnType();
+                return fn.returnType();
             }
         };
     }

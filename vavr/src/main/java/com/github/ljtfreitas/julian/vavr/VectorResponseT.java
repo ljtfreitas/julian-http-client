@@ -52,7 +52,7 @@ public class VectorResponseT<T> implements ResponseT<Collection<T>, Vector<T>> {
 
             @Override
             public JavaType returnType() {
-                return endpoint.returnType();
+                return fn.returnType();
             }
         };
     }

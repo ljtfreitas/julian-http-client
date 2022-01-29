@@ -54,7 +54,7 @@ public class TraversableResponseT<T> implements ResponseT<Collection<T>, Travers
 
             @Override
             public JavaType returnType() {
-                return endpoint.returnType();
+                return fn.returnType();
             }
         };
     }

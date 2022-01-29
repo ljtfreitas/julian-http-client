@@ -54,7 +54,7 @@ public class SetResponseT<T> implements ResponseT<Collection<T>, Set<T>> {
 
             @Override
             public JavaType returnType() {
-                return endpoint.returnType();
+                return fn.returnType();
             }
         };
     }

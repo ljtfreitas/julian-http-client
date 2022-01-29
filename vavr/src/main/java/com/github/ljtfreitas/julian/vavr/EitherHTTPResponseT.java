@@ -50,7 +50,7 @@ public class EitherHTTPResponseT<T> implements ResponseT<T, Either<HTTPResponseE
 
             @Override
             public JavaType returnType() {
-                return endpoint.returnType();
+                return fn.returnType();
             }
         };
     }

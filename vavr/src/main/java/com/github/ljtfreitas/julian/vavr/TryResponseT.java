@@ -45,7 +45,7 @@ public class TryResponseT<T> implements ResponseT<T, Try<T>> {
 
             @Override
             public JavaType returnType() {
-                return endpoint.returnType();
+                return fn.returnType();
             }
         };
     }

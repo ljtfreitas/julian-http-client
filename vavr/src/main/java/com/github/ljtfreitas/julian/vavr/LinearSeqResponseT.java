@@ -54,7 +54,7 @@ public class LinearSeqResponseT<T> implements ResponseT<Collection<T>, LinearSeq
 
             @Override
             public JavaType returnType() {
-                return endpoint.returnType();
+                return fn.returnType();
             }
         };
     }

@@ -53,7 +53,7 @@ public class ArrayResponseT<T> implements ResponseT<Collection<T>, Array<T>> {
 
             @Override
             public JavaType returnType() {
-                return endpoint.returnType();
+                return fn.returnType();
             }
         };
     }

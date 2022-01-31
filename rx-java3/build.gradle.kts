@@ -30,5 +30,5 @@ tasks.jar.configure {
 
 dependencies {
     implementation(project(":core"))
-    implementation("io.reactivex.rxjava3:rxjava:3.1.3")
+    api("io.reactivex.rxjava3:rxjava:3.1.3")
 }

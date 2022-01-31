@@ -41,6 +41,8 @@ import static java.util.stream.Collectors.toUnmodifiableMap;
 
 public class SimpleMapFormURLEncodedHTTPMessageCodec implements FormURLEncodedHTTPMessageCodec<Map<String, String>> {
 
+    private static final SimpleMapFormURLEncodedHTTPMessageCodec SINGLE_INSTANCE = new SimpleMapFormURLEncodedHTTPMessageCodec();
+
     private final FormObjectURLEncodedHTTPMessageCodec codec = new FormObjectURLEncodedHTTPMessageCodec();
     private final FormSerializer serializer = new FormSerializer();
 
@@ -80,5 +82,9 @@ public class SimpleMapFormURLEncodedHTTPMessageCodec implements FormURLEncodedHT
                         .findFirst()
                         .map(value -> Map.entry(e.getKey(), value)).stream())
                 .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    public static SimpleMapFormURLEncodedHTTPMessageCodec provider() {
+        return SINGLE_INSTANCE;
     }
 }

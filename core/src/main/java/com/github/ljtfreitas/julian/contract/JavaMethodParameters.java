@@ -36,6 +36,7 @@ import com.github.ljtfreitas.julian.Endpoint.Parameters;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.JavaType.Parameterized;
 import com.github.ljtfreitas.julian.Preconditions.Precondition;
+import com.github.ljtfreitas.julian.Promise;
 
 import static com.github.ljtfreitas.julian.Message.format;
 import static com.github.ljtfreitas.julian.Preconditions.check;
@@ -67,24 +68,11 @@ class JavaMethodParameters {
 	}
 
 	private Collection<Parameter> before(Map<Class<? extends Parameter>, List<Parameter>> parameters) {
-		return check(parameters, justOneBodyParameter(), allowedCallbackParameters())
+		return check(parameters, justOneBodyParameter())
 				.values()
 				.stream()
 				.flatMap(List::stream)
 				.collect(toUnmodifiableList());
-	}
-
-	private <T> Precondition<Map<Class<? extends Parameter>, List<Parameter>>, Map<Class<? extends Parameter>, List<Parameter>>> allowedCallbackParameters() {
-		Predicate<JavaType> isException = jt -> jt.is(Exception.class);
-		Predicate<JavaType> isThrowable = jt -> jt.is(Throwable.class);
-
-		return p -> state(p, m -> {
-			Collection<Parameter> parameters = m.getOrDefault(Endpoint.CallbackParameter.class, emptyList());
-			return parameters.isEmpty() 
-				|| parameters.stream().anyMatch(c -> c.javaType().when(Consumer.class, () -> c.javaType().parameterized().map(Parameterized::firstArg).map(JavaType::valueOf).filter(not(isException)).isPresent())
-				 						   .or(() -> c.javaType().when(BiConsumer.class, () -> c.javaType().parameterized().map(t -> t.getActualTypeArguments()[1]).map(JavaType::valueOf).filter(isThrowable).isPresent()))
-				 						   .orElse(false));
-		}, () -> format("Method {0} is invalid; check @Callback parameters (just Consumer<SomeType>, Consumer<Throwable>, or BiConsumer<SomeType, Throwable> are allowed).", javaMethod));
 	}
 
 	private <T> Precondition<Map<Class<? extends Parameter>, List<Parameter>>, Map<Class<? extends Parameter>, List<Parameter>>> justOneBodyParameter() {

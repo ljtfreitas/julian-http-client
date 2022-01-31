@@ -39,6 +39,8 @@ import java.util.concurrent.Flow.Publisher;
 
 public class MapMultipartFormHTTPRequestWriter implements MultipartFormDataHTTPRequestWriter<Map<String, ?>> {
 
+    private static final MapMultipartFormHTTPRequestWriter SINGLE_INSTANCE = new MapMultipartFormHTTPRequestWriter();
+
     private final BoundaryGen boundaryGen;
     private final MultipartFormFieldSerializers serializers = new MultipartFormFieldSerializers();
 
@@ -83,5 +85,9 @@ public class MapMultipartFormHTTPRequestWriter implements MultipartFormDataHTTPR
         } catch (IOException e) {
             throw new HTTPRequestWriterException("Multipart/form serialization failed.", e);
         }
+    }
+
+    public static MapMultipartFormHTTPRequestWriter provider() {
+        return SINGLE_INSTANCE;
     }
 }

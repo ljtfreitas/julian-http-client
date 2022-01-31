@@ -51,6 +51,8 @@ import static com.github.ljtfreitas.julian.http.MediaType.APPLICATION_XML;
 
 public class JacksonXMLHTTPMessageCodec<T> implements XMLHTTPMessageCodec<T> {
 
+    private static final JacksonXMLHTTPMessageCodec<Object> SINGLE_INSTANCE = new JacksonXMLHTTPMessageCodec<>();
+
     private final XmlMapper xmlMapper;
     private final TypeFactory typeFactory;
     private final XmlFactory xmlFactory;
@@ -112,5 +114,9 @@ public class JacksonXMLHTTPMessageCodec<T> implements XMLHTTPMessageCodec<T> {
         } catch (IOException e) {
             throw new HTTPResponseReaderException("XML deserialization failed. The target type was: " + javaType, e);
         }
+    }
+
+    public static JacksonXMLHTTPMessageCodec<Object> provider() {
+        return SINGLE_INSTANCE;
     }
 }

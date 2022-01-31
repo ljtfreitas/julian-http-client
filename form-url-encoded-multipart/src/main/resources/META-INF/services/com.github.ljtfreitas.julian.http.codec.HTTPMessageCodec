@@ -1,3 +1,5 @@
 com.github.ljtfreitas.julian.http.codec.form.FormObjectURLEncodedHTTPMessageCodec
 com.github.ljtfreitas.julian.http.codec.form.SimpleMapFormURLEncodedHTTPMessageCodec
 com.github.ljtfreitas.julian.http.codec.form.MultiMapFormURLEncodedHTTPMessageCodec
+com.github.ljtfreitas.julian.http.codec.form.multipart.MultipartFormObjectHTTPRequestWriter
+com.github.ljtfreitas.julian.http.codec.form.multipart.MapMultipartFormHTTPRequestWriter

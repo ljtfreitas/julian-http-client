@@ -47,6 +47,8 @@ import static com.github.ljtfreitas.julian.http.MediaType.APPLICATION_JSON;
 
 public class JsonBHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
 
+    private static final JsonBHTTPMessageCodec<String> SINGLE_INSTANCE = new JsonBHTTPMessageCodec<>();
+
     private final Jsonb jsonb;
 
     public JsonBHTTPMessageCodec() {
@@ -97,5 +99,9 @@ public class JsonBHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
         } catch (JsonbException | IOException e) {
             throw new HTTPResponseReaderException("JSON deserialization failed. The target type was: " + javaType, e);
         }
+    }
+
+    public static JsonBHTTPMessageCodec<String> provider() {
+        return SINGLE_INSTANCE;
     }
 }

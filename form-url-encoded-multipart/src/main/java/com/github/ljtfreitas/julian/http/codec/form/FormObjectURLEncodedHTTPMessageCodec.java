@@ -43,6 +43,8 @@ import static com.github.ljtfreitas.julian.http.MediaType.APPLICATION_FORM_URLEN
 
 public class FormObjectURLEncodedHTTPMessageCodec implements FormURLEncodedHTTPMessageCodec<Form> {
 
+    private static final FormObjectURLEncodedHTTPMessageCodec SINGLE_INSTANCE = new FormObjectURLEncodedHTTPMessageCodec();
+
     @Override
     public boolean writable(MediaType candidate, JavaType javaType) {
         return supports(candidate) && javaType.is(Form.class);
@@ -71,5 +73,9 @@ public class FormObjectURLEncodedHTTPMessageCodec implements FormURLEncodedHTTPM
         } catch (IOException e) {
             throw new HTTPResponseReaderException("Form deserialization failed. The target type was: " + javaType, e);
         }
+    }
+
+    public static FormObjectURLEncodedHTTPMessageCodec provider() {
+        return SINGLE_INSTANCE;
     }
 }

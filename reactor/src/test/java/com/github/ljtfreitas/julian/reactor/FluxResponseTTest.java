@@ -19,20 +19,23 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class FluxResponseTTest {
 
+    @Mock
+    private Endpoint endpoint;
+    
     private final FluxResponseT<String> subject = new FluxResponseT<>();
 
     @Nested
     class Predicates {
 
         @Test
-        void supported(@Mock Endpoint endpoint) {
+        void supported() {
             when(endpoint.returnType()).thenReturn(JavaType.parameterized(Flux.class, String.class));
 
             assertTrue(subject.test(endpoint));
         }
 
         @Test
-        void unsupported(@Mock Endpoint endpoint) {
+        void unsupported() {
             when(endpoint.returnType()).thenReturn(JavaType.valueOf(String.class));
 
             assertFalse(subject.test(endpoint));
@@ -44,7 +47,7 @@ class FluxResponseTTest {
     class Adapted {
 
         @Test
-        void parameterized(@Mock Endpoint endpoint) {
+        void parameterized() {
             when(endpoint.returnType()).thenReturn(JavaType.parameterized(Flux.class, String.class));
 
             JavaType adapted = subject.adapted(endpoint);
@@ -53,7 +56,7 @@ class FluxResponseTTest {
         }
 
         @Test
-        void adaptToCollectionWhenTypeArgumentIsMissing(@Mock Endpoint endpoint) {
+        void adaptToCollectionWhenTypeArgumentIsMissing() {
             when(endpoint.returnType()).thenReturn(JavaType.valueOf(Flux.class));
 
             JavaType adapted = subject.adapted(endpoint);
@@ -63,27 +66,15 @@ class FluxResponseTTest {
     }
 
     @Test
-    void bind(@Mock Endpoint endpoint, @Mock Promise<Response<String, Exception>, Exception> response, @Mock ResponseFn<String, Collection<String>> fn) {
-        Arguments arguments = Arguments.empty();
+    void bind() {
+        when(endpoint.returnType()).thenReturn(JavaType.parameterized(Flux.class, String.class));
 
-        when(fn.run(response, arguments)).thenReturn(Promise.done(List.of("one", "two", "three")));
+        Promise<Response<Collection<String>, Exception>, Exception> response = Promise.done(Response.done(List.of("one", "two", "three")));
 
-        Flux<String> flux = subject.bind(endpoint, fn).join(response, arguments);
+        ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
+                new ObjectResponseT<Collection<String>>().bind(endpoint, null));
 
-        StepVerifier.create(flux)
-                .expectNext("one", "two", "three")
-                .expectComplete();
-    }
-
-    @Test
-    void bindAsMono(@Mock Endpoint endpoint, @Mock ResponseFn<Collection<String>, Collection<String>> fn) {
-        Arguments arguments = Arguments.empty();
-
-        Promise<Response<Collection<String>, Exception>, Exception> response = new MonoPromise<>(Mono.just(Response.done(List.of("one", "two", "three"))));
-
-        when(fn.run(response, arguments)).then(i -> response.then(r -> r.body().unsafe()));
-
-        Flux<String> flux = subject.bind(endpoint, fn).join(response, arguments);
+        Flux<String> flux = subject.bind(endpoint, fn).join(response, Arguments.empty());
 
         StepVerifier.create(flux)
                 .expectNext("one", "two", "three")
@@ -91,31 +82,52 @@ class FluxResponseTTest {
     }
 
     @Test
-    void failure(@Mock Endpoint endpoint, @Mock Promise<Response<String, Exception>, Exception> response, @Mock ResponseFn<String, Collection<String>> fn) {
-        Arguments arguments = Arguments.empty();
+    void bindAsMono() {
+        when(endpoint.returnType()).thenReturn(JavaType.parameterized(Flux.class, String.class));
 
-        RuntimeException exception = new RuntimeException("oops");
-        when(fn.run(response, arguments)).then(i -> Promise.failed(exception));
+        Promise<Response<Collection<String>, Exception>, Exception> response = new MonoPromise<>(
+                Mono.just(Response.done(List.of("one", "two", "three"))));
 
-        Flux<String> flux = subject.bind(endpoint, fn).join(response, arguments);
+        ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
+                new ObjectResponseT<Collection<String>>().bind(endpoint, null));
+
+        Flux<String> flux = subject.bind(endpoint, fn).join(response, Arguments.empty());
 
         StepVerifier.create(flux)
-                .expectErrorMatches(t -> t.equals(exception));
+                .expectNext("one", "two", "three")
+                .expectComplete()
+                .verify();
     }
 
     @Test
-    void failureAsMono(@Mock Endpoint endpoint, @Mock ResponseFn<String, Collection<String>> fn) {
-        Arguments arguments = Arguments.empty();
-
+    void failure() {
         RuntimeException exception = new RuntimeException("oops");
 
-        Promise<Response<String, Exception>, Exception> response = new MonoPromise<>(Mono.error(exception));
+        Promise<Response<Collection<String>, Exception>, Exception> response = Promise.failed(exception);
 
-        when(fn.run(response, arguments)).then(i -> response);
+        ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
+                new ObjectResponseT<Collection<String>>().bind(endpoint, null));
 
-        Flux<String> flux = subject.bind(endpoint, fn).join(response, arguments);
+        Flux<String> flux = subject.bind(endpoint, fn).join(response, Arguments.empty());
 
         StepVerifier.create(flux)
-                .expectErrorMatches(t -> t.equals(exception));
+                .expectErrorMatches(t -> t.equals(exception))
+                .verify();
+    }
+
+    @Test
+    void failureAsMono() {
+        RuntimeException exception = new RuntimeException("oops");
+
+        Promise<Response<Collection<String>, Exception>, Exception> response = new MonoPromise<>(Mono.error(exception));
+
+        ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
+                new ObjectResponseT<Collection<String>>().bind(endpoint, null));
+
+        Flux<String> flux = subject.bind(endpoint, fn).join(response, Arguments.empty());
+
+        StepVerifier.create(flux)
+                .expectErrorMatches(t -> t.equals(exception))
+                .verify();
     }
 }

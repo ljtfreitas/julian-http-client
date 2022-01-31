@@ -53,6 +53,8 @@ import static java.util.Collections.emptyMap;
 
 public class JsonPHTTPMessageCodec implements JsonHTTPMessageCodec<JsonStructure> {
 
+    private static final JsonPHTTPMessageCodec SINGLE_INSTANCE = new JsonPHTTPMessageCodec();
+
     private final JsonReaderFactory jsonReaderFactory;
     private final JsonWriterFactory jsonWriterFactory;
 
@@ -120,5 +122,9 @@ public class JsonPHTTPMessageCodec implements JsonHTTPMessageCodec<JsonStructure
         } catch (JsonException | IOException e) {
             throw new HTTPResponseReaderException("JSON deserialization failed. The target type was: " + javaType, e);
         }
+    }
+
+    public static JsonPHTTPMessageCodec provider() {
+        return SINGLE_INSTANCE;
     }
 }

@@ -41,6 +41,8 @@ import static com.github.ljtfreitas.julian.http.MediaType.APPLICATION_FORM_URLEN
 
 public class MultiMapFormURLEncodedHTTPMessageCodec implements FormURLEncodedHTTPMessageCodec<Map<String, ? extends Iterable<?>>> {
 
+    private static final MultiMapFormURLEncodedHTTPMessageCodec SINGLE_INSTANCE = new MultiMapFormURLEncodedHTTPMessageCodec();
+
     private final FormObjectURLEncodedHTTPMessageCodec codec = new FormObjectURLEncodedHTTPMessageCodec();
     private final FormSerializer serializer = new FormSerializer();
 
@@ -78,5 +80,9 @@ public class MultiMapFormURLEncodedHTTPMessageCodec implements FormURLEncodedHTT
         return codec.read(body, javaType)
                 .all().entrySet().stream()
                 .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    public static MultiMapFormURLEncodedHTTPMessageCodec provider() {
+        return SINGLE_INSTANCE;
     }
 }

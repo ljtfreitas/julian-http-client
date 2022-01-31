@@ -24,7 +24,6 @@ package com.github.ljtfreitas.julian.http.spring.webflux;
 
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.Promise;
-import com.github.ljtfreitas.julian.http.EmptyHTTPResponse;
 import com.github.ljtfreitas.julian.http.FailureHTTPResponse;
 import com.github.ljtfreitas.julian.http.HTTPException;
 import com.github.ljtfreitas.julian.http.HTTPFailureResponseException;
@@ -36,7 +35,6 @@ import com.github.ljtfreitas.julian.http.HTTPResponseException;
 import com.github.ljtfreitas.julian.http.HTTPStatus;
 import com.github.ljtfreitas.julian.http.HTTPStatusCode;
 import com.github.ljtfreitas.julian.http.HTTPUknownFailureResponseException;
-import com.github.ljtfreitas.julian.http.SuccessHTTPResponse;
 import com.github.ljtfreitas.julian.http.client.HTTPClientException;
 import com.github.ljtfreitas.julian.http.codec.HTTPMessageException;
 import com.github.ljtfreitas.julian.reactor.MonoPromise;
@@ -138,7 +136,7 @@ class WebClientHTTPRequest<T> implements HTTPRequestIO<T> {
         };
 
         return response.bodyToMono(expectedType)
-                .<HTTPResponse<T>> map(value -> new SuccessHTTPResponse<>(status, headers, value))
-                .switchIfEmpty(Mono.just(new EmptyHTTPResponse<>(status, headers)));
+                .map(value -> HTTPResponse.success(status, headers, value))
+                .switchIfEmpty(Mono.just(HTTPResponse.empty(status, headers)));
     }
 }

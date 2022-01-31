@@ -22,7 +22,7 @@
 
 package com.github.ljtfreitas.julian;
 
-class DefaultResponseT<T> implements ResponseT<T, Response<T, ?>> {
+public class DefaultResponseT<T> implements ResponseT<T, Response<T, ?>> {
 
     private static final DefaultResponseT<Object> SINGLE_INSTANCE = new DefaultResponseT<>();
 

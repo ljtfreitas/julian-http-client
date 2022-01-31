@@ -57,6 +57,6 @@ public class TryResponseT<T> implements ResponseT<T, Try<T>> {
 
     @Override
     public boolean test(Endpoint endpoint) {
-        return endpoint.returnType().is(Future.class);
+        return endpoint.returnType().is(Try.class);
     }
 }

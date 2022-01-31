@@ -29,12 +29,12 @@ import java.util.function.Predicate;
 import com.github.ljtfreitas.julian.Except;
 import com.github.ljtfreitas.julian.Response;
 
-public class EmptyHTTPResponse<T> implements HTTPResponse<T> {
+class EmptyHTTPResponse<T> implements HTTPResponse<T> {
 
 	private final HTTPStatus status;
 	private final HTTPHeaders headers;
 
-	public EmptyHTTPResponse(HTTPStatus status, HTTPHeaders headers) {
+	EmptyHTTPResponse(HTTPStatus status, HTTPHeaders headers) {
 		this.status = status;
 		this.headers = headers;
 	}

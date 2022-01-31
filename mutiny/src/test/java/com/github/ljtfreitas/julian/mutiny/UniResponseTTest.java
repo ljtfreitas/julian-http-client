@@ -3,6 +3,7 @@ package com.github.ljtfreitas.julian.mutiny;
 import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.Endpoint;
 import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.ObjectResponseT;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
@@ -22,20 +23,23 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class UniResponseTTest {
 
+    @Mock
+    private Endpoint endpoint;
+    
     private final UniResponseT<String> subject = new UniResponseT<>();
 
     @Nested
     class Predicates {
 
         @Test
-        void supported(@Mock Endpoint endpoint) {
+        void supported() {
             when(endpoint.returnType()).thenReturn(JavaType.parameterized(Uni.class, String.class));
 
             assertTrue(subject.test(endpoint));
         }
 
         @Test
-        void unsupported(@Mock Endpoint endpoint) {
+        void unsupported() {
             when(endpoint.returnType()).thenReturn(JavaType.valueOf(String.class));
 
             assertFalse(subject.test(endpoint));
@@ -46,7 +50,7 @@ class UniResponseTTest {
     class Adapted {
 
         @Test
-        void parameterized(@Mock Endpoint endpoint) {
+        void parameterized() {
             when(endpoint.returnType()).thenReturn(JavaType.parameterized(Uni.class, String.class));
 
             JavaType adapted = subject.adapted(endpoint);
@@ -55,7 +59,7 @@ class UniResponseTTest {
         }
 
         @Test
-        void adaptToObjectWhenTypeArgumentIsMissing(@Mock Endpoint endpoint) {
+        void adaptToObjectWhenTypeArgumentIsMissing() {
             when(endpoint.returnType()).thenReturn(JavaType.valueOf(Uni.class));
 
             JavaType adapted = subject.adapted(endpoint);
@@ -65,12 +69,12 @@ class UniResponseTTest {
     }
 
     @Test
-    void bind(@Mock Endpoint endpoint, @Mock Promise<Response<String, Exception>, Exception> response, @Mock ResponseFn<String, String> fn) {
-        Arguments arguments = Arguments.empty();
+    void bind() {
+        Promise<Response<String, Exception>, Exception> response = Promise.done(Response.done("hello"));
 
-        when(fn.run(response, arguments)).thenReturn(Promise.done("hello"));
+        ResponseFn<String, String> fn = new ObjectResponseT<String>().bind(endpoint, null);
 
-        Uni<String> uni = subject.bind(endpoint, fn).join(response, arguments);
+        Uni<String> uni = subject.bind(endpoint, fn).join(response, Arguments.empty());
 
         UniAssertSubscriber<String> subscriber = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
 
@@ -79,13 +83,14 @@ class UniResponseTTest {
     }
 
     @Test
-    void failure(@Mock Endpoint endpoint, @Mock Promise<Response<String, Exception>, Exception> response, @Mock ResponseFn<String, String> fn) {
-        Arguments arguments = Arguments.empty();
-
+    void failure() {
         RuntimeException exception = new RuntimeException("oops");
-        when(fn.run(response, arguments)).then(i -> Promise.failed(exception));
 
-        Uni<String> uni = subject.bind(endpoint, fn).join(response, arguments);
+        Promise<Response<String, Exception>, Exception> response = Promise.failed(exception);
+
+        ResponseFn<String, String> fn = new ObjectResponseT<String>().bind(endpoint, null);
+
+        Uni<String> uni = subject.bind(endpoint, fn).join(response, Arguments.empty());
 
         UniAssertSubscriber<String> subscriber = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
 

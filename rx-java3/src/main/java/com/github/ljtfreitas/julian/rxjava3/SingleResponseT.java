@@ -44,7 +44,7 @@ public class SingleResponseT<T> implements ResponseT<T, Single<T>> {
 
             @Override
             public JavaType returnType() {
-                return endpoint.returnType();
+                return fn.returnType();
             }
         };
     }

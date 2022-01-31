@@ -34,6 +34,8 @@ import reactor.core.publisher.Mono;
 
 public class MonoResponseT<T> implements ResponseT<T, Mono<T>> {
 
+    private static final MonoResponseT<Object> SINGLE_INSTANCE = new MonoResponseT<>();
+
     @Override
     public <A> ResponseFn<A, Mono<T>> bind(Endpoint endpoint, ResponseFn<A, T> fn) {
         return new ResponseFn<>() {
@@ -49,7 +51,7 @@ public class MonoResponseT<T> implements ResponseT<T, Mono<T>> {
 
             @Override
             public JavaType returnType() {
-                return endpoint.returnType();
+                return fn.returnType();
             }
         };
     }
@@ -62,5 +64,9 @@ public class MonoResponseT<T> implements ResponseT<T, Mono<T>> {
     @Override
     public boolean test(Endpoint endpoint) {
         return endpoint.returnType().is(Mono.class);
+    }
+
+    public static MonoResponseT<Object> provider() {
+        return SINGLE_INSTANCE;
     }
 }

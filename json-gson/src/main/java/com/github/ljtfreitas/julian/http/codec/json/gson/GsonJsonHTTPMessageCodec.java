@@ -48,6 +48,8 @@ import static com.github.ljtfreitas.julian.http.MediaType.APPLICATION_JSON;
 
 public class GsonJsonHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
 
+    private static final GsonJsonHTTPMessageCodec<Object> SINGLE_INSTANCE = new GsonJsonHTTPMessageCodec<>();
+
     private final Gson gson;
 
     public GsonJsonHTTPMessageCodec() {
@@ -98,5 +100,9 @@ public class GsonJsonHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
         } catch (JsonIOException | JsonSyntaxException | IOException e) {
             throw new HTTPResponseReaderException("JSON deserialization failed. The target type was: " + javaType, e);
         }
+    }
+
+    public static GsonJsonHTTPMessageCodec<Object> provider() {
+        return SINGLE_INSTANCE;
     }
 }

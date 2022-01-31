@@ -37,7 +37,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import static com.github.ljtfreitas.julian.Preconditions.isTrue;
 import static com.github.ljtfreitas.julian.Preconditions.nonNull;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 
 public class JavaType {
@@ -122,7 +124,7 @@ public class JavaType {
 	}
 
 	public static JavaType valueOf(Type javaType) {
-		return new JavaType(javaType);
+		return new JavaType(nonNull(javaType));
 	}
 
 	public static JavaType none() {
@@ -134,15 +136,17 @@ public class JavaType {
 	}
 
 	public static JavaType valueOf(Class<?> context, Type javaType) {
-		return new JavaType(Kind.resolve(context, javaType));
+		return new JavaType(Kind.resolve(requireNonNull(context), requireNonNull(javaType)));
 	}
 
 	public static JavaType parameterized(Type rawType, Type... arguments) {
-		return new JavaType(Parameterized.valueOf(rawType, arguments));
+		return new JavaType(Parameterized.valueOf(nonNull(rawType), isTrue(arguments, a -> a.length > 0,
+				() -> "You must supply at least one type argument.")));
 	}
 
 	public static JavaType parameterized(Type rawType, JavaType... arguments) {
-		return new JavaType(Parameterized.valueOf(rawType, Arrays.stream(arguments).map(a -> a.javaType).toArray(Type[]::new)));
+		return new JavaType(Parameterized.valueOf(rawType, isTrue(Arrays.stream(arguments).map(a -> a.javaType).toArray(Type[]::new),
+				a -> a.length > 0, () -> "You must supply at least one type argument.")));
 	}
 
 	public static JavaType genericArrayOf(Type arrayType) {

@@ -47,7 +47,7 @@ public class ObservableResponseT<T> implements ResponseT<Collection<T>, Observab
 
             @Override
             public JavaType returnType() {
-                return endpoint.returnType();
+                return fn.returnType();
             }
         };
     }

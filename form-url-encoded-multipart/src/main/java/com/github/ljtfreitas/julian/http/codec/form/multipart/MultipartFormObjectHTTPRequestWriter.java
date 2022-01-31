@@ -41,6 +41,8 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 
 public class MultipartFormObjectHTTPRequestWriter implements MultipartFormDataHTTPRequestWriter<MultipartForm> {
 
+    private static final MultipartFormObjectHTTPRequestWriter SINGLE_INSTANCE = new MultipartFormObjectHTTPRequestWriter();
+
     private final MapMultipartFormHTTPRequestWriter mapMultipartFormHTTPRequestWriter;
 
     public MultipartFormObjectHTTPRequestWriter() {
@@ -62,5 +64,9 @@ public class MultipartFormObjectHTTPRequestWriter implements MultipartFormDataHT
                 .collect(groupingBy(Part::name, LinkedHashMap::new, mapping(identity(), toUnmodifiableList())));
 
         return mapMultipartFormHTTPRequestWriter.write(parameters, encoding);
+    }
+
+    public static MultipartFormObjectHTTPRequestWriter provider() {
+        return SINGLE_INSTANCE;
     }
 }

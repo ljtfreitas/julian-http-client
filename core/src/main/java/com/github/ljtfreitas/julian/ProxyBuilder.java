@@ -240,9 +240,9 @@ public class ProxyBuilder {
         private final HTTPResponseFailureSpec failure = new HTTPResponseFailureSpec();
         private final Encoding encoding = new Encoding();
 
-        public HTTPSpec using(HTTP http) {
+        public ProxyBuilder using(HTTP http) {
             this.http = http;
-            return this;
+            return ProxyBuilder.this;
         }
 
         public HTTPClientSpec client() {
@@ -276,9 +276,9 @@ public class ProxyBuilder {
             private final Decorators decorators = new Decorators();
             private final Configuration configuration = new Configuration();
 
-            public HTTPClientSpec using(HTTPClient httpClient) {
+            public HTTPSpec using(HTTPClient httpClient) {
                 this.httpClient = httpClient;
-                return this;
+                return HTTPSpec.this;
             }
 
             public HTTPClientSpec.Decorators decorators() {
@@ -482,9 +482,9 @@ public class ProxyBuilder {
             private HTTPResponseFailure failure = null;
             private final HTTPResponseFailures failures = new HTTPResponseFailures();
 
-            public HTTPResponseFailureSpec using(HTTPResponseFailure failure) {
+            public HTTPSpec using(HTTPResponseFailure failure) {
                 this.failure = failure;
-                return this;
+                return HTTPSpec.this;
             }
 
             public HTTPResponseFailureSpec when(HTTPStatusCode status, HTTPResponseFailure failure) {

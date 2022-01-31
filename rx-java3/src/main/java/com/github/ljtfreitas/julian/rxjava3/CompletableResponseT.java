@@ -44,7 +44,7 @@ public class CompletableResponseT implements ResponseT<Void, Completable> {
 
             @Override
             public JavaType returnType() {
-                return endpoint.returnType();
+                return fn.returnType();
             }
         };
     }

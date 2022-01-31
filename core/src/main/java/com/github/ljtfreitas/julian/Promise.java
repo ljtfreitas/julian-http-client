@@ -77,7 +77,7 @@ public interface Promise<T, E extends Exception> {
 		return new DefaultPromise<>(supplyAsync(fn));
 	}
 
-	interface Subscriber<T, E> {
+	interface Subscriber<T, E extends Exception> {
 
 		void success(T value);
 

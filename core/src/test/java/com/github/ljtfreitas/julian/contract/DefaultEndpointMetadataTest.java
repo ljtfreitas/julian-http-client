@@ -234,16 +234,6 @@ class DefaultEndpointMetadataTest {
 		}
 
 		@Test
-		void rejectCallbackWithInvalidConsumer() {
-			assertThrows(IllegalStateException.class, () -> new DefaultEndpointMetadata(Wrong.class, Wrong.class.getMethod("invalidConsumerCallback", Consumer.class)));
-		}
-
-		@Test
-		void rejectCallbackWithInvalidBiConsumer() {
-			assertThrows(IllegalStateException.class, () -> new DefaultEndpointMetadata(Wrong.class, Wrong.class.getMethod("invalidBiConsumerCallback", BiConsumer.class)));
-		}
-
-		@Test
 		void rejectMethodWithoutHTTPMethod() {
 			assertThrows(IllegalStateException.class, () -> new DefaultEndpointMetadata(Wrong.class, Wrong.class.getMethod("withoutHTTPMethod")));
 		}

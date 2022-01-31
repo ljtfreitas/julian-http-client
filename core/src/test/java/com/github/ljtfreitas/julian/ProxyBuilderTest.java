@@ -11,7 +11,6 @@ import com.github.ljtfreitas.julian.http.HTTPResponse;
 import com.github.ljtfreitas.julian.http.HTTPStatus;
 import com.github.ljtfreitas.julian.http.HTTPStatusCode;
 import com.github.ljtfreitas.julian.http.MediaType;
-import com.github.ljtfreitas.julian.http.SuccessHTTPResponse;
 import com.github.ljtfreitas.julian.http.client.HTTPClient;
 import com.github.ljtfreitas.julian.http.client.HTTPClientException;
 import com.github.ljtfreitas.julian.http.client.HTTPClientRequest;
@@ -180,10 +179,9 @@ class ProxyBuilderTest {
             SimpleApi simpleApi = new ProxyBuilder()
                     .http()
                         .using(http)
-                        .and()
                     .build(SimpleApi.class, "http://localhost:8090");
 
-            when(http.run(notNull())).thenReturn(Promise.done(new SuccessHTTPResponse<>(new HTTPStatus(HTTPStatusCode.OK), HTTPHeaders.empty(), "success")));
+            when(http.run(notNull())).thenReturn(Promise.done(HTTPResponse.success(new HTTPStatus(HTTPStatusCode.OK), HTTPHeaders.empty(), "success")));
 
             String response = simpleApi.asString();
 
@@ -204,7 +202,6 @@ class ProxyBuilderTest {
                         .http()
                             .client()
                                 .using(httpClient)
-                                .and()
                             .and()
                         .build(SimpleApi.class, "http://localhost:8090");
 

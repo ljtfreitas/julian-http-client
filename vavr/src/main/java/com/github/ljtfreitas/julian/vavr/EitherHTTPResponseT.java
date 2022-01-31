@@ -34,18 +34,15 @@ import com.github.ljtfreitas.julian.http.HTTPResponse;
 import com.github.ljtfreitas.julian.http.HTTPResponseException;
 import io.vavr.control.Either;
 
-public class EitherHTTPResponseT<T> implements ResponseT<T, Either<HTTPResponseException, T>> {
+public class EitherHTTPResponseT<T> implements ResponseT<HTTPResponse<T>, Either<HTTPResponseException, T>> {
 
     @Override
-    public <A> ResponseFn<A, Either<HTTPResponseException, T>> bind(Endpoint endpoint, ResponseFn<A, T> fn) {
+    public <A> ResponseFn<A, Either<HTTPResponseException, T>> bind(Endpoint endpoint, ResponseFn<A, HTTPResponse<T>> fn) {
         return new ResponseFn<>() {
 
             @Override
             public Promise<Either<HTTPResponseException, T>, ? extends Exception> run(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
-                Promise<Response<T, ? extends Exception>, ? extends Exception> promise = response.then(r -> r.map(value -> fn.join(Promise.done(r), arguments)));
-
-                return promise.then(r -> r.cast(new Kind<HTTPResponse<T>>() {}).orElseThrow())
-                              .then(h -> h.fold(Either::right, Either::left));
+                return fn.run(response, arguments).then(r -> r.fold(Either::right, Either::left));
             }
 
             @Override
@@ -57,7 +54,7 @@ public class EitherHTTPResponseT<T> implements ResponseT<T, Either<HTTPResponseE
 
     @Override
     public JavaType adapted(Endpoint endpoint) {
-        return JavaType.valueOf(endpoint.returnType().parameterized().map(p -> p.getActualTypeArguments()[1]).orElse(Object.class));
+        return JavaType.parameterized(HTTPResponse.class, endpoint.returnType().parameterized().map(p -> p.getActualTypeArguments()[1]).orElse(Object.class));
     }
 
     @Override

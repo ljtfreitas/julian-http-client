@@ -20,40 +20,32 @@
  * SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian.reactor;
+package com.github.ljtfreitas.julian.http;
 
 import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.Endpoint;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.Kind;
 import com.github.ljtfreitas.julian.Promise;
-import com.github.ljtfreitas.julian.RequestIO;
 import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
 import com.github.ljtfreitas.julian.ResponseT;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
-import java.util.Collection;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 
-import static java.util.function.Function.identity;
+public class HTTPResponseT<T> implements ResponseT<Response<T, ?>, HTTPResponse<T>> {
 
-public class FluxResponseT<T> implements ResponseT<Collection<T>, Flux<T>> {
-
-    private static final FluxResponseT<Object> SINGLE_INSTANCE = new FluxResponseT<>();
+    private static final HTTPResponseT<Object> SINGLE_INSTANCE = new HTTPResponseT<>();
 
     @Override
-    public <A> ResponseFn<A, Flux<T>> bind(Endpoint endpoint, ResponseFn<A, Collection<T>> fn) {
+    public <A> ResponseFn<A, HTTPResponse<T>> bind(Endpoint endpoint, ResponseFn<A, Response<T, ?>> fn) {
         return new ResponseFn<>() {
 
             @Override
-            public Flux<T> join(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
-                Promise<Collection<T>, ? extends Exception> promise = fn.run(response, arguments);
-
-                return promise.cast(new Kind<MonoPromise<Collection<T>, Exception>>() {})
-                        .map(MonoPromise::mono)
-                        .orElseGet(() -> Mono.fromFuture(promise.future()))
-                        .flatMapIterable(identity());
+            public Promise<HTTPResponse<T>, ? extends Exception> run(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+                return fn.run(response, arguments).then(r -> r.cast(new Kind<HTTPResponse<T>>() {})
+                        .orElseThrow(() -> new IllegalArgumentException("It was expected a HTTPResponse instance, but it was " + r)));
             }
 
             @Override
@@ -65,16 +57,18 @@ public class FluxResponseT<T> implements ResponseT<Collection<T>, Flux<T>> {
 
     @Override
     public JavaType adapted(Endpoint endpoint) {
-        return JavaType.parameterized(Collection.class, endpoint.returnType().parameterized().map(JavaType.Parameterized::firstArg).orElse(Object.class));
+        Type[] args = endpoint.returnType().parameterized()
+                .map(p -> new Type[] { p.getActualTypeArguments()[0], Exception.class })
+                .orElseGet(() -> new Type[]{ Object.class, Exception.class });
+        return JavaType.parameterized(Response.class, args);
     }
 
     @Override
     public boolean test(Endpoint endpoint) {
-        return endpoint.returnType().is(Flux.class);
+        return endpoint.returnType().is(HTTPResponse.class);
     }
 
-    public static FluxResponseT<Object> provider() {
+    public static HTTPResponseT<Object> get() {
         return SINGLE_INSTANCE;
     }
-
 }

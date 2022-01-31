@@ -60,6 +60,8 @@ import static jakarta.xml.bind.Marshaller.JAXB_ENCODING;
 
 public class JaxBHTTPMessageCodec<T> implements XMLHTTPMessageCodec<T> {
 
+    private static final JaxBHTTPMessageCodec<Object> SINGLE_INSTANCE = new JaxBHTTPMessageCodec<>();
+
     private static final XMLInputFactory XML_INPUT_FACTORY = XMLInputFactory.newInstance();
 
     private final Map<Class<?>, JAXBContext> xmlContexts = new HashMap<>();
@@ -139,5 +141,9 @@ public class JaxBHTTPMessageCodec<T> implements XMLHTTPMessageCodec<T> {
 
     private JAXBContext newContext(Class<?> classType) {
         return Except.run(() -> JAXBContext.newInstance(classType)).unsafe();
+    }
+
+    public static JaxBHTTPMessageCodec<Object> provider() {
+        return SINGLE_INSTANCE;
     }
 }

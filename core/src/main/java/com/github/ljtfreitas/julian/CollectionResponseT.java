@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-class CollectionResponseT<T> implements ResponseT<Collection<T>, Collection<T>> {
+public class CollectionResponseT<T> implements ResponseT<Collection<T>, Collection<T>> {
 
 	private static final CollectionResponseT<Object> SINGLE_INSTANCE = new CollectionResponseT<>();
 
@@ -59,7 +59,7 @@ class CollectionResponseT<T> implements ResponseT<Collection<T>, Collection<T>> 
 
 			@Override
 			public JavaType returnType() {
-				return endpoint.returnType();
+				return fn.returnType();
 			}
 		};
 	}

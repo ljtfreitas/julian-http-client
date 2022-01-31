@@ -44,7 +44,7 @@ public class MaybeResponseT<T> implements ResponseT<T, Maybe<T>> {
 
             @Override
             public JavaType returnType() {
-                return endpoint.returnType();
+                return fn.returnType();
             }
         };
     }

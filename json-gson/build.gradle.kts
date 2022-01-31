@@ -30,5 +30,5 @@ tasks.jar.configure {
 
 dependencies {
     implementation(project(":core"))
-    api("com.google.code.gson:gson:2.8.7")
+    api("com.google.code.gson:gson:2.8.9")
 }

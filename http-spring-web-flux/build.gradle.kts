@@ -32,5 +32,5 @@ dependencies {
     implementation(project(":core"))
     implementation(project(":reactor"))
     implementation(project(":http-client-reactor-netty"))
-    implementation("org.springframework:spring-webflux:5.3.14")
+    implementation("org.springframework:spring-webflux:5.3.15")
 }

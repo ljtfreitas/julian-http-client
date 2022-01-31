@@ -30,5 +30,5 @@ tasks.jar.configure {
 
 dependencies {
     implementation(project(":core"))
-    implementation("io.vavr:vavr:0.10.4")
+    api("io.vavr:vavr:0.10.4")
 }

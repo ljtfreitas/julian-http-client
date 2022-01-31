@@ -26,13 +26,14 @@ import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.Endpoint;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.Promise;
-import com.github.ljtfreitas.julian.RequestIO;
 import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
 import com.github.ljtfreitas.julian.ResponseT;
 import io.smallrye.mutiny.Uni;
 
 public class UniResponseT<T> implements ResponseT<T, Uni<T>> {
+
+    private static final UniResponseT<Object> SINGLE_INSTANCE = new UniResponseT<>();
 
     @Override
     public <A> ResponseFn<A, Uni<T>> bind(Endpoint endpoint, ResponseFn<A, T> fn) {
@@ -45,7 +46,7 @@ public class UniResponseT<T> implements ResponseT<T, Uni<T>> {
 
             @Override
             public JavaType returnType() {
-                return endpoint.returnType();
+                return fn.returnType();
             }
         };
     }
@@ -58,5 +59,9 @@ public class UniResponseT<T> implements ResponseT<T, Uni<T>> {
     @Override
     public boolean test(Endpoint endpoint) {
         return endpoint.returnType().is(Uni.class);
+    }
+
+    public static UniResponseT<Object> provider() {
+        return SINGLE_INSTANCE;
     }
 }

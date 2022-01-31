@@ -30,7 +30,6 @@ tasks.jar.configure {
 
 dependencies {
     implementation(project(":core"))
-    implementation("jakarta.json:jakarta.json-api:2.0.0")
-    implementation("org.eclipse.parsson:parsson:1.0.0")
-
+    api("jakarta.json:jakarta.json-api:2.0.1")
+    api("org.eclipse.parsson:parsson:1.0.0")
 }

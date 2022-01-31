@@ -1,8 +1,10 @@
 package com.github.ljtfreitas.julian.vavr;
 
 import com.github.ljtfreitas.julian.Arguments;
+import com.github.ljtfreitas.julian.CollectionResponseT;
 import com.github.ljtfreitas.julian.Endpoint;
 import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.ObjectResponseT;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
@@ -71,25 +73,31 @@ class TraversableResponseTTest {
     }
 
     @Test
-    void bind(@Mock Promise<Response<Collection<String>, Exception>, Exception> promise, @Mock ResponseFn<Collection<String>, Collection<String>> fn) {
-        Arguments arguments = Arguments.empty();
+    void bind() {
+        when(endpoint.returnType()).thenReturn(JavaType.parameterized(Collection.class, String.class));
 
-        Collection<String> values = List.of("one", "two", "three");
+        Collection<String> values = java.util.List.of("one", "two", "three");
 
-        when(fn.run(promise, arguments)).thenReturn(Promise.done(values));
+        Promise<Response<Collection<String>, Exception>, Exception> promise = Promise.done(Response.done(values));
 
-        Traversable<String> traversable = responseT.bind(endpoint, fn).join(promise, arguments);
+        ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
+                new ObjectResponseT<Collection<String>>().bind(endpoint, null));
+
+        Traversable<String> traversable = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
 
         assertTrue(traversable.containsAll(values));
     }
 
     @Test
-    void bindNullCollection(@Mock Promise<Response<Collection<String>, Exception>, Exception> promise, @Mock ResponseFn<Collection<String>, Collection<String>> fn) {
-        Arguments arguments = Arguments.empty();
+    void bindNullCollection() {
+        when(endpoint.returnType()).thenReturn(JavaType.parameterized(Collection.class, String.class));
 
-        when(fn.run(promise, arguments)).thenReturn(Promise.done(null));
+        Promise<Response<Collection<String>, Exception>, Exception> promise = Promise.done(Response.done(null));
 
-        Traversable<String> traversable = responseT.bind(endpoint, fn).join(promise, arguments);
+        ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
+                new ObjectResponseT<Collection<String>>().bind(endpoint, null));
+
+        Traversable<String> traversable = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
 
         assertTrue(traversable.isEmpty());
     }

@@ -30,6 +30,6 @@ tasks.jar.configure {
 
 dependencies {
     implementation(project(":core"))
-    implementation("jakarta.xml.bind:jakarta.xml.bind-api:3.0.1")
-    implementation("com.sun.xml.bind:jaxb-impl:3.0.2")
+    api("jakarta.xml.bind:jakarta.xml.bind-api:3.0.1")
+    api("com.sun.xml.bind:jaxb-impl:3.0.2")
 }

@@ -93,13 +93,13 @@ class DefaultHTTPRequestIO<T> implements HTTPRequestIO<T> {
 	private HTTPResponse<T> success(HTTPClientResponse response) {
 		Optional<HTTPResponse<T>> r = response.body()
 				.deserialize(body -> deserialize(body, response.headers()))
-				.map(b -> new SuccessHTTPResponse<>(response.status(), response.headers(), b));
+				.map(b -> HTTPResponse.success(response.status(), response.headers(), b));
 
 		return r.orElseGet(() -> empty(response));
 	}
 
 	private HTTPResponse<T> empty(HTTPClientResponse response) {
-		return new EmptyHTTPResponse<>(response.status(), response.headers());
+		return HTTPResponse.empty(response.status(), response.headers());
 	}
 
 	@SuppressWarnings("unchecked")

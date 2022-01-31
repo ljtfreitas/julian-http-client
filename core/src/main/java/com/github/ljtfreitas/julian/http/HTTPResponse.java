@@ -77,4 +77,16 @@ public interface HTTPResponse<T> extends Response<T, HTTPResponseException> {
 
 		void accept(HTTPStatus status, HTTPHeaders headers, T body);
 	}
+
+	static <T> HTTPResponse<T> success(HTTPStatus status, HTTPHeaders headers, T body) {
+		return new SuccessHTTPResponse<>(status, headers, body);
+	}
+
+	static <T> HTTPResponse<T> empty(HTTPStatus status, HTTPHeaders headers) {
+		return new EmptyHTTPResponse<>(status, headers);
+	}
+
+	static <T> HTTPResponse<T> failed(HTTPStatus status, HTTPHeaders headers, HTTPResponseException failure) {
+		return new FailureHTTPResponse<>(status, headers, failure);
+	}
 }

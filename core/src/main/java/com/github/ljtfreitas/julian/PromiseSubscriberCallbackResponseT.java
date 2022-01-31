@@ -58,7 +58,7 @@ public class PromiseSubscriberCallbackResponseT<T> implements ResponseT<Promise<
 
             @Override
             public JavaType returnType() {
-                return null;
+                return fn.returnType();
             }
         };
     }

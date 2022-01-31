@@ -3,6 +3,7 @@ package com.github.ljtfreitas.julian.rxjava3;
 import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.Endpoint;
 import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.ObjectResponseT;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
@@ -22,20 +23,23 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class MaybeResponseTTest {
 
+    @Mock
+    private Endpoint endpoint;
+
     private final MaybeResponseT<String> subject = new MaybeResponseT<>();
 
     @Nested
     class Predicates {
 
         @Test
-        void supported(@Mock Endpoint endpoint) {
+        void supported() {
             when(endpoint.returnType()).thenReturn(JavaType.parameterized(Maybe.class, String.class));
 
             assertTrue(subject.test(endpoint));
         }
 
         @Test
-        void unsupported(@Mock Endpoint endpoint) {
+        void unsupported() {
             when(endpoint.returnType()).thenReturn(JavaType.valueOf(String.class));
 
             assertFalse(subject.test(endpoint));
@@ -47,7 +51,7 @@ class MaybeResponseTTest {
     class Adapted {
 
         @Test
-        void parameterized(@Mock Endpoint endpoint) {
+        void parameterized() {
             when(endpoint.returnType()).thenReturn(JavaType.parameterized(Maybe.class, String.class));
 
             JavaType adapted = subject.adapted(endpoint);
@@ -56,7 +60,7 @@ class MaybeResponseTTest {
         }
 
         @Test
-        void adaptToObjectWhenTypeArgumentIsMissing(@Mock Endpoint endpoint) {
+        void adaptToObjectWhenTypeArgumentIsMissing() {
             when(endpoint.returnType()).thenReturn(JavaType.valueOf(Maybe.class));
 
             JavaType adapted = subject.adapted(endpoint);
@@ -66,12 +70,12 @@ class MaybeResponseTTest {
     }
 
     @Test
-    void bind(@Mock Endpoint endpoint, @Mock Promise<Response<String, Exception>, Exception> response, @Mock ResponseFn<String, String> fn) {
-        Arguments arguments = Arguments.empty();
+    void bind() {
+        Promise<Response<String, Exception>, Exception> response = Promise.done(Response.done("hello"));
 
-        when(fn.run(response, arguments)).thenReturn(Promise.done("hello"));
+        ResponseFn<String, String> fn = new ObjectResponseT<String>().bind(endpoint, null);
 
-        Maybe<String> maybe = subject.bind(endpoint, fn).join(response, arguments);
+        Maybe<String> maybe = subject.bind(endpoint, fn).join(response, Arguments.empty());
 
         TestObserver<String> observer = new TestObserver<>();
         maybe.subscribe(observer);

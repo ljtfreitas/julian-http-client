@@ -3,6 +3,7 @@ package com.github.ljtfreitas.julian.rxjava3;
 import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.Endpoint;
 import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.ObjectResponseT;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
@@ -22,20 +23,23 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class SingleResponseTTest {
 
+    @Mock
+    private Endpoint endpoint;
+    
     private final SingleResponseT<String> subject = new SingleResponseT<>();
 
     @Nested
     class Predicates {
 
         @Test
-        void supported(@Mock Endpoint endpoint) {
+        void supported() {
             when(endpoint.returnType()).thenReturn(JavaType.parameterized(Single.class, String.class));
 
             assertTrue(subject.test(endpoint));
         }
 
         @Test
-        void unsupported(@Mock Endpoint endpoint) {
+        void unsupported() {
             when(endpoint.returnType()).thenReturn(JavaType.valueOf(String.class));
 
             assertFalse(subject.test(endpoint));
@@ -46,7 +50,7 @@ class SingleResponseTTest {
     class Adapted {
 
         @Test
-        void parameterized(@Mock Endpoint endpoint) {
+        void parameterized() {
             when(endpoint.returnType()).thenReturn(JavaType.parameterized(Single.class, String.class));
 
             JavaType adapted = subject.adapted(endpoint);
@@ -55,7 +59,7 @@ class SingleResponseTTest {
         }
 
         @Test
-        void adaptToObjectWhenTypeArgumentIsMissing(@Mock Endpoint endpoint) {
+        void adaptToObjectWhenTypeArgumentIsMissing() {
             when(endpoint.returnType()).thenReturn(JavaType.valueOf(Single.class));
 
             JavaType adapted = subject.adapted(endpoint);
@@ -65,12 +69,11 @@ class SingleResponseTTest {
     }
 
     @Test
-    void bind(@Mock Endpoint endpoint, @Mock Promise<Response<String, Exception>, Exception> response, @Mock ResponseFn<String, String> fn) {
-        Arguments arguments = Arguments.empty();
+    void bind() {
+        Promise<Response<String, Exception>, Exception> response = Promise.done(Response.done("hello"));
+        ResponseFn<String, String> fn = new ObjectResponseT<String>().bind(endpoint, null);
 
-        when(fn.run(response, arguments)).thenReturn(Promise.done("hello"));
-
-        Single<String> single = subject.bind(endpoint, fn).join(response, arguments);
+        Single<String> single = subject.bind(endpoint, fn).join(response, Arguments.empty());
 
         TestObserver<String> observer = new TestObserver<>();
         single.subscribe(observer);

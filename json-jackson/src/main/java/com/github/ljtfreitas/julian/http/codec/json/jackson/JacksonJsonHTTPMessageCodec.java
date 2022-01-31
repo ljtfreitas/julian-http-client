@@ -52,6 +52,8 @@ import static com.github.ljtfreitas.julian.http.MediaType.APPLICATION_JSON;
 
 public class JacksonJsonHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
 
+    private static final JacksonJsonHTTPMessageCodec<Object> SINGLE_INSTANCE = new JacksonJsonHTTPMessageCodec<>();
+
     private final ObjectMapper jsonMapper;
     private final TypeFactory typeFactory;
     private final JsonFactory jsonFactory;
@@ -119,5 +121,9 @@ public class JacksonJsonHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
         } catch (IOException e) {
             throw new HTTPResponseReaderException("JSON deserialization failed. The target type was: " + javaType, e);
         }
+    }
+
+    public static JacksonJsonHTTPMessageCodec<Object> provider() {
+        return SINGLE_INSTANCE;
     }
 }

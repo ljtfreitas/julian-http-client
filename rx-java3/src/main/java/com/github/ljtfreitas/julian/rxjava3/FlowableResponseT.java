@@ -47,7 +47,7 @@ public class FlowableResponseT<T> implements ResponseT<Collection<T>, Flowable<T
 
             @Override
             public JavaType returnType() {
-                return endpoint.returnType();
+                return fn.returnType();
             }
         };
     }

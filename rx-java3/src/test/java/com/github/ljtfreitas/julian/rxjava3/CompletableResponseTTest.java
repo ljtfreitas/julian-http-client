@@ -3,6 +3,7 @@ package com.github.ljtfreitas.julian.rxjava3;
 import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.Endpoint;
 import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.ObjectResponseT;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
@@ -22,20 +23,23 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class CompletableResponseTTest {
 
+    @Mock
+    private Endpoint endpoint;
+    
     private final CompletableResponseT subject = new CompletableResponseT();
 
     @Nested
     class Predicates {
 
         @Test
-        void supported(@Mock Endpoint endpoint) {
+        void supported() {
             when(endpoint.returnType()).thenReturn(JavaType.valueOf(Completable.class));
 
             assertTrue(subject.test(endpoint));
         }
 
         @Test
-        void unsupported(@Mock Endpoint endpoint) {
+        void unsupported() {
             when(endpoint.returnType()).thenReturn(JavaType.valueOf(String.class));
 
             assertFalse(subject.test(endpoint));
@@ -51,14 +55,14 @@ class CompletableResponseTTest {
     }
 
     @Test
-    void bind(@Mock Endpoint endpoint, @Mock Promise<Response<String, Exception>, Exception> response, @Mock ResponseFn<String, Void> fn) {
-        Arguments arguments = Arguments.empty();
+    void bind() {
+        Promise<Response<Void, Exception>, Exception> response = Promise.done(Response.done(null));
 
-        when(fn.run(response, arguments)).thenReturn(Promise.done(null));
+        ResponseFn<Void, Void> fn = new ObjectResponseT<Void>().bind(endpoint, null);
 
-        Completable completable = subject.bind(endpoint, fn).join(response, arguments);
+        Completable completable = subject.bind(endpoint, fn).join(response, Arguments.empty());
 
-        TestObserver<String> observer = new TestObserver<>();
+        TestObserver<Void> observer = new TestObserver<>();
         completable.subscribe(observer);
 
         observer.assertComplete()

@@ -68,7 +68,7 @@ class SubscriberCallbackResponseTTest {
 
     @Test
     void compose(@Mock Endpoint endpoint, TestReporter reporter) throws InterruptedException {
-        Promise<Response<String, Exception>, Exception> response = Promise.pending(CompletableFuture.supplyAsync(() -> new DoneResponse<>("it works!"),
+        Promise<Response<String>> response = Promise.pending(CompletableFuture.supplyAsync(() -> new DoneResponse<>("it works!"),
                 CompletableFuture.delayedExecutor(1000, TimeUnit.MILLISECONDS)));
 
         Subscriber<String> subscriber = new Subscriber<>() {

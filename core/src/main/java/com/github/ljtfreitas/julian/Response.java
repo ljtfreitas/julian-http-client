@@ -27,34 +27,36 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public interface Response<T, E extends Exception> {
+public interface Response<T> {
 
 	Except<T> body();
 
-	<R> Response<R, E> map(Function<? super T, R> fn);
+	<R> Response<R> map(Function<? super T, R> fn);
 
-	Response<T, E> onFailure(Consumer<? super E> fn);
+	Response<T> onFailure(Consumer<? super Exception> fn);
 
-	Response<T, E> recover(Function<? super E, T> fn);
+	Response<T> recover(Function<? super Exception, T> fn);
 
-	Response<T, E> recover(Predicate<? super E> p, Function<? super E, T> fn);
+	Response<T> recover(Predicate<? super Exception> p, Function<? super Exception, T> fn);
 
-	<Err extends E> Response<T, E> recover(Class<? extends Err> expected, Function<? super Err, T> fn);
+	<Err extends Exception> Response<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn);
 
-	<R> R fold(Function<T, R> success, Function<? super E, R> failure);
+	<R> R fold(Function<? super T, R> success, Function<? super Exception, R> failure);
 
-	default Response<T, E> onSuccess(Consumer<? super T> fn) {
+	Response<T> subscribe(Subscriber<? super T> subscriber);
+
+	default Response<T> onSuccess(Consumer<? super T> fn) {
 		body().onSuccess(fn::accept);
 		return this;
 	}
 
 	@SuppressWarnings("unchecked")
-	default <Err extends Exception, R extends Response<T, Err>> Optional<R> cast(Kind<R> candidate) {
+	default <R extends Response<T>> Optional<R> cast(Kind<R> candidate) {
 		Class<?> javaType = candidate.javaType().rawClassType();
 		return javaType.isAssignableFrom(this.getClass()) ? Optional.of((R) javaType.cast(this)) : Optional.empty();
 	}
 
-	static <T> Response<T, Exception> done(T value) {
+	static <T> Response<T> done(T value) {
 		return new DoneResponse<>(value);
 	}
 }

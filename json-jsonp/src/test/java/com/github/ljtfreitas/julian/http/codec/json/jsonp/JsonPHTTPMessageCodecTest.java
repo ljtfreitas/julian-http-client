@@ -24,6 +24,7 @@ package com.github.ljtfreitas.julian.http.codec.json.jsonp;
 
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.MediaType;
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
@@ -40,6 +41,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Flow;
 import java.util.concurrent.Flow.Subscriber;
 import java.util.stream.Stream;
@@ -78,7 +80,9 @@ class JsonPHTTPMessageCodecTest {
         void shouldBeAbleToReadJsonObjectValue() {
             String value = "{\"name\":\"Tiago\",\"age\":35}";
 
-            JsonStructure jsonStructure = codec.read(value.getBytes(), JavaType.valueOf(JsonObject.class));
+            JsonStructure jsonStructure = codec.read(HTTPResponseBody.some(value.getBytes()), JavaType.valueOf(JsonObject.class))
+                    .map(CompletableFuture::join)
+                    .orElse(null);
 
             assertTrue(jsonStructure instanceof JsonObject);
 
@@ -93,7 +97,9 @@ class JsonPHTTPMessageCodecTest {
         void shouldBeAbleToReadJsonArrayValue() {
             String value = "[{\"name\":\"Tiago\",\"age\":35}]";
 
-            JsonStructure jsonStructure = codec.read(value.getBytes(), JavaType.valueOf(JsonArray.class));
+            JsonStructure jsonStructure = codec.read(HTTPResponseBody.some(value.getBytes()), JavaType.valueOf(JsonArray.class))
+                    .map(CompletableFuture::join)
+                    .orElse(null);
 
             assertTrue(jsonStructure instanceof JsonArray);
 

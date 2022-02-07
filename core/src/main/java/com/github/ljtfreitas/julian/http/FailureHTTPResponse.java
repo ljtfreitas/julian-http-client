@@ -23,36 +23,39 @@
 package com.github.ljtfreitas.julian.http;
 
 import com.github.ljtfreitas.julian.Except;
+import com.github.ljtfreitas.julian.Subscriber;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import static com.github.ljtfreitas.julian.Preconditions.nonNull;
+
 public class FailureHTTPResponse<T> implements HTTPResponse<T> {
 
+	private final HTTPResponseException failure;
 	private final HTTPStatus status;
 	private final HTTPHeaders headers;
-	private final HTTPResponseException exception;
 
-	public FailureHTTPResponse(HTTPStatus status, HTTPHeaders headers, HTTPResponseException exception) {
-		this.status = status;
-		this.headers = headers;
-		this.exception = exception;
+	public FailureHTTPResponse(HTTPResponseException failure) {
+		this.failure = nonNull(failure);
+		this.status = failure.status();
+		this.headers = failure.headers();
 	}
 
 	@Override
 	public Except<T> body() {
-		return Except.failed(exception);
+		return Except.failed(failure);
 	}
 
 	@Override
 	public <R> HTTPResponse<R> map(Function<? super T, R> fn) {
-		return new FailureHTTPResponse<>(status, headers, exception);
+		return new FailureHTTPResponse<>(failure);
 	}
 
 	@Override
 	public <R> HTTPResponse<R> map(HTTPResponseFn<? super T, R> fn) {
-		return new FailureHTTPResponse<>(status, headers, exception);
+		return new FailureHTTPResponse<>(failure);
 	}
 
 	@Override
@@ -76,33 +79,47 @@ public class FailureHTTPResponse<T> implements HTTPResponse<T> {
 	}
 
 	@Override
-	public HTTPResponse<T> onFailure(Consumer<? super HTTPResponseException> fn) {
-		fn.accept(exception);
+	public HTTPResponse<T> onFailure(Consumer<? super Exception> fn) {
+		fn.accept(failure);
 		return this;
 	}
 
 	@Override
-	public HTTPResponse<T> recover(Function<? super HTTPResponseException, T> fn) {
-		return new SuccessHTTPResponse<>(status, headers, fn.apply(exception));
+	public HTTPResponse<T> recover(Function<? super Exception, T> fn) {
+		return new SuccessHTTPResponse<>(status, headers, fn.apply(failure));
 	}
 
 	@Override
-	public <Err extends HTTPResponseException> HTTPResponse<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
-		return expected.isInstance(exception) ? new SuccessHTTPResponse<>(status, headers, fn.apply(expected.cast(exception))) : this;
+	public <Err extends Exception> HTTPResponse<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
+		return expected.isInstance(failure) ? new SuccessHTTPResponse<>(status, headers, fn.apply(expected.cast(failure))) : this;
 	}
 
 	@Override
-	public HTTPResponse<T> recover(Predicate<? super HTTPResponseException> p, Function<? super HTTPResponseException, T> fn) {
-		return p.test(exception) ? new SuccessHTTPResponse<>(status, headers, fn.apply(exception)) : this;
+	public HTTPResponse<T> recover(Predicate<? super Exception> p, Function<? super Exception, T> fn) {
+		return p.test(failure) ? new SuccessHTTPResponse<>(status, headers, fn.apply(failure)) : this;
 	}
 
 	@Override
-	public HTTPResponse<T> recover(HTTPStatusCode code, Function<HTTPResponse<T>, T> fn) {
-		return status.is(code) ? new SuccessHTTPResponse<>(status, headers, fn.apply(this)) : this;
+	public HTTPResponse<T> recover(HTTPStatusCode code, HTTPResponseFn<byte[], T> fn) {
+		return status.is(code) ? new SuccessHTTPResponse<>(status, headers, fn.apply(status, headers, failure.bodyAsBytes())) : this;
 	}
 
 	@Override
-	public <R> R fold(Function<T, R> success, Function<? super HTTPResponseException, R> failure) {
-		return failure.apply(exception);
+	public <R> R fold(Function<? super T, R> success, Function<? super Exception, R> failure) {
+		return failure.apply(this.failure);
+	}
+
+	@Override
+	public HTTPResponse<T> subscribe(Subscriber<? super T> subscriber) {
+		subscriber.failure(failure);
+		subscriber.done();
+		return this;
+	}
+
+	@Override
+	public HTTPResponse<T> subscribe(HTTPResponseSubscriber<? super T> subscriber) {
+		subscriber.failure(failure);
+		subscriber.done();
+		return this;
 	}
 }

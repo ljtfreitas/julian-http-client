@@ -61,7 +61,7 @@ class ListIteratorResponseTTest {
 	}
 
 	@Test
-	void compose(@Mock ResponseFn<List<String>, List<String>> fn, @Mock Promise<Response<List<String>, Exception>, Exception> response) {
+	void compose(@Mock ResponseFn<List<String>, List<String>> fn, @Mock Promise<Response<List<String>>> response) {
 		Arguments arguments = Arguments.empty();
 
 		when(fn.run(response, arguments)).thenReturn(Promise.done(List.of("expected")));

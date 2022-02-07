@@ -25,12 +25,22 @@ package com.github.ljtfreitas.julian.http.codec;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.DefaultHTTPRequestBody;
 import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.MediaType;
 
 import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodySubscriber;
+import java.net.http.HttpResponse.BodySubscribers;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Flow;
+import java.util.concurrent.Flow.Publisher;
 
 public class UnprocessableHTTPMessageCodec implements WildcardHTTPMessageCodec<Void> {
 
@@ -49,8 +59,14 @@ public class UnprocessableHTTPMessageCodec implements WildcardHTTPMessageCodec<V
 	}
 
 	@Override
-	public Void read(byte[] body, JavaType javaType) {
-		return null;
+	public Optional<CompletableFuture<Void>> read(HTTPResponseBody body, JavaType javaType) {
+		return body.content().map(this::deserialize);
+	}
+
+	private CompletableFuture<Void> deserialize(Publisher<List<ByteBuffer>> publisher) {
+		BodySubscriber<Void> subscriber = BodySubscribers.discarding();
+		publisher.subscribe(subscriber);
+		return subscriber.getBody().toCompletableFuture();
 	}
 
 	@Override

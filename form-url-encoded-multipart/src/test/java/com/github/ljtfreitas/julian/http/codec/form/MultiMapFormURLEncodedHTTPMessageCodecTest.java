@@ -3,21 +3,31 @@ package com.github.ljtfreitas.julian.http.codec.form;
 import com.github.ljtfreitas.julian.Form;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.MediaType;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Flow;
 import java.util.concurrent.Flow.Subscriber;
 
 import static com.github.ljtfreitas.julian.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static java.util.Collections.emptyList;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasKey;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -106,10 +116,13 @@ class MultiMapFormURLEncodedHTTPMessageCodecTest {
             void read() {
                 String value = "name=Tiago&age=35";
 
-                Map<String, Collection<String>> form = codec.read(value.getBytes(), JavaType.valueOf(Form.class));
+                Map<String, ? extends Iterable<?>> form = codec.read(HTTPResponseBody.some(value.getBytes()), JavaType.valueOf(Form.class))
+                        .map(CompletableFuture::join)
+                        .orElse(Collections.emptyMap());
 
-                assertAll(() -> assertEquals("Tiago", form.getOrDefault("name", emptyList()).stream().findFirst().orElse("")),
-                          () -> assertEquals("35", form.getOrDefault("age", emptyList()).stream().findFirst().orElse("")));
+                assertThat(form, allOf(hasKey("name"), hasKey("name")));
+                assertThat(form.get("name"), contains("Tiago"));
+                assertThat(form.get("age"), contains("35"));
             }
         }
     }

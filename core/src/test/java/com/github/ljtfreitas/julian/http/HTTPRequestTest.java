@@ -65,7 +65,7 @@ class HTTPRequestTest {
         @DisplayName("Should run a GET request, using a Class<String> as response.")
         @Test
         void shouldRunGETUsingClass() {
-            Promise<String, HTTPException> promise = GET("http://localhost:8092/hello")
+            Promise<String> promise = GET("http://localhost:8092/hello")
                     .response(String.class, StringHTTPMessageCodec.get())
                     .build(client)
                         .execute()
@@ -77,7 +77,7 @@ class HTTPRequestTest {
         @DisplayName("Should run a GET request, using a Kind<String> as response.")
         @Test
         void shouldRunGETUsingKind() {
-            Promise<String, HTTPException> promise = GET("http://localhost:8092/hello")
+            Promise<String> promise = GET("http://localhost:8092/hello")
                     .response(new Kind<>() {}, StringHTTPMessageCodec.get())
                     .build(client)
                         .execute()
@@ -89,7 +89,7 @@ class HTTPRequestTest {
         @DisplayName("Should build a GET request, using a JavaType<String> as response.")
         @Test
         void shouldRunGETUsingJavaType() {
-            Promise<String, HTTPException> promise = GET("http://localhost:8092/hello")
+            Promise<String> promise = GET("http://localhost:8092/hello")
                     .response(JavaType.valueOf(String.class), StringHTTPMessageCodec.get())
                     .build(client)
                         .execute()
@@ -110,7 +110,7 @@ class HTTPRequestTest {
                     .respond(response("it works")
                             .withContentType(TEXT_PLAIN));
 
-            Promise<String, HTTPException> promise = GET("http://localhost:8092/hello")
+            Promise<String> promise = GET("http://localhost:8092/hello")
                     .param("param", "value")
                     .response(String.class, StringHTTPMessageCodec.get())
                     .build(client)
@@ -141,7 +141,7 @@ class HTTPRequestTest {
         @DisplayName("Should run a POST request, using a String as body.")
         @Test
         void shouldRunPOSTUsingString() {
-            Promise<String, HTTPException> promise = POST("http://localhost:8093/hello")
+            Promise<String> promise = POST("http://localhost:8093/hello")
                     .header(new HTTPHeader(HTTPHeader.CONTENT_TYPE, "text/plain"))
                     .body("i am a body", StringHTTPMessageCodec.get())
                     .response(String.class, StringHTTPMessageCodec.get())
@@ -157,7 +157,7 @@ class HTTPRequestTest {
         void shouldRunPOSTUsingHTTPRequestBody() {
             HTTPRequestBody body = StringHTTPMessageCodec.get().write("i am a body", StandardCharsets.UTF_8);
 
-            Promise<String, HTTPException> promise = POST("http://localhost:8093/hello")
+            Promise<String> promise = POST("http://localhost:8093/hello")
                     .body(body)
                     .response(String.class, new StringHTTPMessageCodec())
                     .build(client)
@@ -178,7 +178,7 @@ class HTTPRequestTest {
                 .respond(response("it works")
                         .withContentType(TEXT_PLAIN));
 
-        Promise<String, HTTPException> promise = PUT("http://localhost:8091/hello")
+        Promise<String> promise = PUT("http://localhost:8091/hello")
                 .header(new HTTPHeader(HTTPHeader.CONTENT_TYPE, "text/plain"))
                 .body("i am a body", StringHTTPMessageCodec.get())
                 .response(String.class, new StringHTTPMessageCodec())
@@ -199,7 +199,7 @@ class HTTPRequestTest {
                 .respond(response("it works")
                         .withContentType(TEXT_PLAIN));
 
-        Promise<String, HTTPException> promise = PATCH("http://localhost:8091/hello")
+        Promise<String> promise = PATCH("http://localhost:8091/hello")
                 .header(new HTTPHeader(HTTPHeader.CONTENT_TYPE, "text/plain"))
                 .body("i am a body", StringHTTPMessageCodec.get())
                 .response(String.class, new StringHTTPMessageCodec())
@@ -217,7 +217,7 @@ class HTTPRequestTest {
                         .withMethod("DELETE"))
                 .respond(response().withStatusCode(200));
 
-        Promise<HTTPStatus, HTTPException> promise = DELETE("http://localhost:8091/hello")
+        Promise<HTTPStatus> promise = DELETE("http://localhost:8091/hello")
                 .build(client)
                     .execute()
                     .then(HTTPResponse::status);
@@ -236,7 +236,7 @@ class HTTPRequestTest {
                 .when(requestDefinition)
                 .respond(response().withHeader("x-my-header", "whatever"));
 
-        Promise<HTTPHeaders, HTTPException> promise = HEAD("http://localhost:8091/hello")
+        Promise<HTTPHeaders> promise = HEAD("http://localhost:8091/hello")
                 .build(client)
                     .execute()
                     .then(HTTPResponse::headers);
@@ -257,7 +257,7 @@ class HTTPRequestTest {
                 .when(requestDefinition)
                 .respond(response().withHeader("Allow", "GET, POST, PUT, DELETE"));
 
-        Promise<HTTPHeaders, HTTPException> promise = OPTIONS("http://localhost:8091/hello")
+        Promise<HTTPHeaders> promise = OPTIONS("http://localhost:8091/hello")
                 .build(client)
                     .execute()
                     .then(HTTPResponse::headers);
@@ -278,7 +278,7 @@ class HTTPRequestTest {
                 .when(requestDefinition)
                 .respond(response().withStatusCode(200));
 
-        Promise<HTTPStatus, HTTPException> promise = TRACE("http://localhost:8091/hello")
+        Promise<HTTPStatus> promise = TRACE("http://localhost:8091/hello")
                 .build(client)
                     .execute()
                     .then(HTTPResponse::status);

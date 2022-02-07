@@ -31,58 +31,56 @@ import java.util.function.Supplier;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
-public interface Promise<T, E extends Exception> {
+public interface Promise<T> {
 
-	Promise<T, E> onSuccess(Consumer<T> fn);
+	Promise<T> onSuccess(Consumer<? super T> fn);
 
-	<R> Promise<R, E> then(Function<? super T, R> fn);
+	<R> Promise<R> then(Function<? super T, R> fn);
 
-	<R, Err extends Exception> Promise<R, Err> bind(Function<? super T, Promise<R, Err>> fn);
+	<R> Promise<R> bind(Function<? super T, Promise<R>> fn);
 
 	Except<T> join();
 
-	Promise<T, E> onFailure(Consumer<? super E> fn);
+	Promise<T> onFailure(Consumer<? super Exception> fn);
 
-	<Err extends Exception> Promise<T, Err> failure(Function<? super E, Err> fn);
+	<Err extends Exception> Promise<T> failure(Function<? super Exception, Err> fn);
 
-	Promise<T, E> recover(Function<? super E, T> fn);
+	Promise<T> recover(Function<? super Exception, T> fn);
 
-	Promise<T, E> recover(Predicate<? super E> p, Function<? super E, T> fn);
+	Promise<T> recover(Predicate<? super Exception> p, Function<? super Exception, T> fn);
 
-	<Err extends E> Promise<T, E> recover(Class<? extends Err> expected, Function<? super Err, T> fn);
+	<Err extends Exception> Promise<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn);
+
+	<R> Promise<R> fold(Function<? super T, R> success, Function<? super Exception, R> failure);
 
 	CompletableFuture<T> future();
 
-	Promise<T, E> subscribe(Subscriber<? super T, ? super E> subscriber);
+	Promise<T> subscribe(Subscriber<? super T> subscriber);
 
 	@SuppressWarnings("unchecked")
-	default <Err extends Exception, P extends Promise<T, Err>> Optional<P> cast(Kind<P> candidate) {
+	default <Err extends Exception, P extends Promise<T>> Optional<P> cast(Kind<P> candidate) {
 		Class<?> javaType = candidate.javaType().rawClassType();
 		return javaType.isAssignableFrom(this.getClass()) ? Optional.of((P) javaType.cast(this)) : Optional.empty();
 	}
 
-    static <T, E extends Exception> Promise<T, E> done(T value) {
+    static <T> Promise<T> done(T value) {
 		return new DonePromise<>(value);
 	}
 
-	static <T, E extends Exception> Promise<T, E> failed(E e) {
+	static <T, E extends Exception> Promise<T> failed(E e) {
 		return new FailedPromise<>(e);
 	}
 
-	static <T, E extends Exception> Promise<T, E> pending(CompletableFuture<T> future) {
+	static <T> Promise<T> empty() {
+		return new DonePromise<>(null);
+	}
+
+	static <T> Promise<T> pending(CompletableFuture<T> future) {
 		return new DefaultPromise<>(future);
 	}
 
-	static <T, E extends Exception> Promise<T, E> pending(Supplier<T> fn) {
+	static <T> Promise<T> pending(Supplier<T> fn) {
 		return new DefaultPromise<>(supplyAsync(fn));
 	}
 
-	interface Subscriber<T, E extends Exception> {
-
-		void success(T value);
-
-		void failure(E failure);
-
-		void done();
-	}
 }

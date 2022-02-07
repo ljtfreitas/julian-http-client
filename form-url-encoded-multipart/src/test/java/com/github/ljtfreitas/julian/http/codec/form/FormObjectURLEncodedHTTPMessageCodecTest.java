@@ -3,6 +3,7 @@ package com.github.ljtfreitas.julian.http.codec.form;
 import com.github.ljtfreitas.julian.Form;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.MediaType;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Flow;
 import java.util.concurrent.Flow.Subscriber;
 
@@ -94,7 +96,8 @@ class FormObjectURLEncodedHTTPMessageCodecTest {
             void read() {
                 String value = "name=Tiago&age=35";
 
-                Form form = codec.read(value.getBytes(), JavaType.valueOf(Form.class));
+                Form form = codec.read(HTTPResponseBody.some(value.getBytes()), JavaType.valueOf(Form.class))
+                        .map(CompletableFuture::join).orElse(new Form());
 
                 assertAll(() -> assertEquals("Tiago", form.select("name").orElse("")),
                           () -> assertEquals("35", form.select("age").orElse("")));

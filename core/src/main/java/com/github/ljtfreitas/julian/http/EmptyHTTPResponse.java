@@ -28,6 +28,7 @@ import java.util.function.Predicate;
 
 import com.github.ljtfreitas.julian.Except;
 import com.github.ljtfreitas.julian.Response;
+import com.github.ljtfreitas.julian.Subscriber;
 
 class EmptyHTTPResponse<T> implements HTTPResponse<T> {
 
@@ -77,7 +78,46 @@ class EmptyHTTPResponse<T> implements HTTPResponse<T> {
 	}
 
 	@Override
-	public <R> R fold(Function<T, R> success, Function<? super HTTPResponseException, R> failure) {
+	public <R> R fold(Function<? super T, R> success, Function<? super Exception, R> failure) {
 		return success.apply(null);
+	}
+
+	@Override
+	public HTTPResponse<T> subscribe(Subscriber<? super T> subscriber) {
+		subscriber.success(null);
+		subscriber.done();
+		return this;
+	}
+
+	@Override
+	public HTTPResponse<T> subscribe(HTTPResponseSubscriber<? super T> subscriber) {
+		subscriber.success(status, headers, null);
+		subscriber.done();
+		return this;
+	}
+
+	@Override
+	public HTTPResponse<T> onFailure(Consumer<? super Exception> fn) {
+		return this;
+	}
+
+	@Override
+	public HTTPResponse<T> recover(Function<? super Exception, T> fn) {
+		return this;
+	}
+
+	@Override
+	public HTTPResponse<T> recover(Predicate<? super Exception> p, Function<? super Exception, T> fn) {
+		return this;
+	}
+
+	@Override
+	public <Err extends Exception> HTTPResponse<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
+		return this;
+	}
+
+	@Override
+	public HTTPResponse<T> recover(HTTPStatusCode code, HTTPResponseFn<byte[], T> fn) {
+		return this;
 	}
 }

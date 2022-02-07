@@ -25,6 +25,7 @@ package com.github.ljtfreitas.julian.http.codec.json.jsonp;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.DefaultHTTPRequestBody;
 import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.MediaType;
 import com.github.ljtfreitas.julian.http.codec.HTTPRequestWriterException;
 import com.github.ljtfreitas.julian.http.codec.HTTPResponseReaderException;
@@ -41,12 +42,15 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.nio.charset.Charset;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import static com.github.ljtfreitas.julian.http.MediaType.APPLICATION_JSON;
 import static java.util.Collections.emptyMap;
@@ -112,15 +116,18 @@ public class JsonPHTTPMessageCodec implements JsonHTTPMessageCodec<JsonStructure
     }
 
     @Override
-    public JsonStructure read(byte[] body, JavaType javaType) {
-        try (ByteArrayInputStream stream = new ByteArrayInputStream(body);
-            InputStreamReader reader = new InputStreamReader(stream);
-            BufferedReader buffered = new BufferedReader(reader);
-            JsonReader jsonReader = jsonReaderFactory.createReader(buffered)) {
+    public Optional<CompletableFuture<JsonStructure>> read(HTTPResponseBody body, JavaType javaType) {
+        return body.readAsInputStream(this::deserialize);
+    }
+
+    private JsonStructure deserialize(InputStream bodyAsStream) {
+        try (InputStreamReader reader = new InputStreamReader(bodyAsStream);
+             BufferedReader buffered = new BufferedReader(reader);
+             JsonReader jsonReader = jsonReaderFactory.createReader(buffered)) {
 
             return jsonReader.read();
         } catch (JsonException | IOException e) {
-            throw new HTTPResponseReaderException("JSON deserialization failed. The target type was: " + javaType, e);
+            throw new HTTPResponseReaderException("JSON deserialization failed.", e);
         }
     }
 

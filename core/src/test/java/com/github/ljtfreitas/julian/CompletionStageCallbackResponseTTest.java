@@ -91,7 +91,7 @@ class CompletionStageCallbackResponseTTest {
 	class Callbacks {
 
 		@Test
-		void consumesSuccess(@Mock ResponseFn<String, String> fn, @Mock Promise<Response<String, Exception>, Exception> response, @Mock Consumer<String> success) {
+		void consumesSuccess(@Mock ResponseFn<String, String> fn, @Mock Promise<Response<String>> response, @Mock Consumer<String> success) {
 			when(endpoint.parameters()).thenReturn(Parameters.create(Parameter.callback(0, "success", JavaType.parameterized(Consumer.class, String.class))));
 			when(fn.returnType()).thenReturn(JavaType.valueOf(String.class));
 
@@ -109,7 +109,7 @@ class CompletionStageCallbackResponseTTest {
 		}
 
 		@Test
-		void consumesFailure(@Mock ResponseFn<String, String> fn, @Mock Promise<Response<String, Exception>, Exception> response, @Mock Consumer<Throwable> failure) {
+		void consumesFailure(@Mock ResponseFn<String, String> fn, @Mock Promise<Response<String>> response, @Mock Consumer<Throwable> failure) {
 			when(endpoint.parameters()).thenReturn(Parameters.create(Parameter.callback(0, "failure", JavaType.parameterized(Consumer.class, Throwable.class))));
 			when(fn.returnType()).thenReturn(JavaType.none());
 
@@ -130,7 +130,7 @@ class CompletionStageCallbackResponseTTest {
 		class WithBiConsumer {
 
 			@Test
-			void consumesSuccess(@Mock ResponseFn<String, String> fn, @Mock Promise<Response<String, Exception>, Exception> response, @Mock BiConsumer<String, Throwable> subscriber) {
+			void consumesSuccess(@Mock ResponseFn<String, String> fn, @Mock Promise<Response<String>> response, @Mock BiConsumer<String, Throwable> subscriber) {
 				when(endpoint.parameters()).thenReturn(Parameters.create(Parameter.callback(0, "success", JavaType.parameterized(BiConsumer.class, String.class, Throwable.class))));
 				when(fn.returnType()).thenReturn(JavaType.valueOf(String.class));
 
@@ -148,7 +148,7 @@ class CompletionStageCallbackResponseTTest {
 			}
 
 			@Test
-			void consumesFailure(@Mock ResponseFn<String, String> fn, @Mock Promise<Response<String, Exception>, Exception> response, @Mock BiConsumer<String, Throwable> subscriber) {
+			void consumesFailure(@Mock ResponseFn<String, String> fn, @Mock Promise<Response<String>> response, @Mock BiConsumer<String, Throwable> subscriber) {
 				when(endpoint.parameters()).thenReturn(Parameters.create(Parameter.callback(0, "consumer", JavaType.parameterized(BiConsumer.class, String.class, Throwable.class))));
 				when(fn.returnType()).thenReturn(JavaType.valueOf(String.class));
 	

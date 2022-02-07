@@ -38,7 +38,7 @@ public class FutureResponseT<T> implements ResponseT<T, Future<T>> {
         return new ResponseFn<>() {
 
             @Override
-            public Future<T> join(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+            public Future<T> join(Promise<? extends Response<A>> response, Arguments arguments) {
                 return Future.fromCompletableFuture(fn.run(response, arguments).future());
             }
 

@@ -22,6 +22,9 @@
 
 package com.github.ljtfreitas.julian.http;
 
+import com.github.ljtfreitas.julian.Promise;
+
+import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.joining;
 
 public class HTTPResponseException extends HTTPException {
@@ -30,15 +33,13 @@ public class HTTPResponseException extends HTTPException {
 
 	private final HTTPStatus status;
 	private final HTTPHeaders headers;
-	private final byte[] bodyAsBytes;
-	private final String bodyAsString;
+	private final Promise<byte[]> bodyAsBytes;
 
-	HTTPResponseException(HTTPStatus status, HTTPHeaders headers, byte[] body) {
+	HTTPResponseException(HTTPStatus status, HTTPHeaders headers, Promise<byte[]> body) {
 		super(HTTPResponseException.message(status, headers, body));
 		this.status = status;
 		this.headers = headers;
 		this.bodyAsBytes = body;
-		this.bodyAsString = new String(body);
 	}
 
 	public HTTPStatus status() {
@@ -50,14 +51,14 @@ public class HTTPResponseException extends HTTPException {
 	}
 
 	public byte[] bodyAsBytes() {
-		return bodyAsBytes;
+		return bodyAsBytes.fold(identity(), e -> new byte[0]).join().unsafe();
 	}
 
 	public String bodyAsString() {
-		return bodyAsString;
+		return bodyAsString(bodyAsBytes);
 	}
 
-	private static String message(HTTPStatus status, HTTPHeaders headers, byte[] body) {
+	private static String message(HTTPStatus status, HTTPHeaders headers, Promise<byte[]> body) {
 		return new StringBuilder()
 				.append(status)
 					.append("\n")
@@ -66,7 +67,11 @@ public class HTTPResponseException extends HTTPException {
 						.append(headers.all().stream().map(HTTPHeader::toString).collect(joining(", ")))
 					.append("]")
 				.append("\n")
-				.append(new String(body))
+				.append(bodyAsString(body))
 				.toString();
+	}
+
+	private static String bodyAsString(Promise<byte[]> body) {
+		return body.fold(String::new, e -> "[impossible to read]").join().unsafe();
 	}
 }

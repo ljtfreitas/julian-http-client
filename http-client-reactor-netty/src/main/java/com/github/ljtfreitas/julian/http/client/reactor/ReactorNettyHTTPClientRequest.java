@@ -37,7 +37,7 @@ class ReactorNettyHTTPClientRequest implements HTTPClientRequest {
     }
 
     @Override
-    public Promise<HTTPClientResponse, Exception> execute() {
+    public Promise<HTTPClientResponse> execute() {
         return new MonoPromise<>(receiver.responseSingle(ReactorNettyHTTPClientResponse::valueOf)
                 .cast(HTTPClientResponse.class));
     }

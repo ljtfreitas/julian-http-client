@@ -23,46 +23,43 @@
 package com.github.ljtfreitas.julian.http;
 
 import java.io.InputStream;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodySubscriber;
+import java.net.http.HttpResponse.BodySubscribers;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Flow.Publisher;
-import java.util.concurrent.Flow.Subscription;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
-public interface HTTPResponseBody {
+import static com.github.ljtfreitas.julian.Preconditions.nonNull;
+import static java.net.http.HttpResponse.BodySubscribers.mapping;
 
-    <T> Optional<CompletableFuture<T>> readAsInputStream(Function<InputStream, T> fn);
+class PublisherHTTPResponseBody implements HTTPResponseBody {
 
-    <T> Optional<CompletableFuture<T>> readAsBytes(Function<byte[], T> fn);
+	private final Publisher<List<ByteBuffer>> publisher;
 
-    <T> Optional<Publisher<List<ByteBuffer>>> content();
+	PublisherHTTPResponseBody(Publisher<List<ByteBuffer>> publisher) {
+		this.publisher = nonNull(publisher);
+	}
 
-    static HTTPResponseBody empty() {
-        return new EmptyHTTPResponseBody();
-    }
+	@Override
+	public <T> Optional<CompletableFuture<T>> readAsBytes(Function<byte[], T> fn) {
+		BodySubscriber<T> subscriber = mapping(BodySubscribers.ofByteArray(), fn);
+		publisher.subscribe(subscriber);
+		return Optional.of(subscriber.getBody().toCompletableFuture());
+	}
 
-    static HTTPResponseBody optional(HTTPStatus status, HTTPHeaders headers, Supplier<HTTPResponseBody> body) {
-        return new OptionalHTTPResponseBody(status, headers, body);
-    }
+	@Override
+	public <T> Optional<CompletableFuture<T>> readAsInputStream(Function<InputStream, T> fn) {
+		BodySubscriber<T> subscriber = mapping(BodySubscribers.ofInputStream(), fn);
+		publisher.subscribe(subscriber);
+		return Optional.of(subscriber.getBody().toCompletableFuture());
+	}
 
-    static HTTPResponseBody lazy(Publisher<List<ByteBuffer>> publisher) {
-        return new PublisherHTTPResponseBody(publisher);
-    }
-
-    static HTTPResponseBody some(byte[] bodyAsBytes) {
-        return new PublisherHTTPResponseBody(subscriber -> subscriber.onSubscribe(new Subscription() {
-
-            @Override
-            public void request(long n) {
-                subscriber.onNext(List.of(ByteBuffer.wrap(bodyAsBytes)));
-                subscriber.onComplete();
-            }
-
-            @Override
-            public void cancel() {}
-        }));
-    }
+	@Override
+	public Optional<Publisher<List<ByteBuffer>>> content() {
+		return Optional.of(publisher);
+	}
 }

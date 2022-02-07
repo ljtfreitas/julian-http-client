@@ -23,19 +23,20 @@
 package com.github.ljtfreitas.julian.http;
 
 import com.github.ljtfreitas.julian.Except;
+import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.Subscriber;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-class SuccessHTTPResponse<T> implements HTTPResponse<T> {
+class LazyHTTPResponse<T> implements HTTPResponse<T> {
 
 	private final HTTPStatus status;
 	private final HTTPHeaders headers;
-	private final T body;
+	private final Promise<T> body;
 
-	SuccessHTTPResponse(HTTPStatus status, HTTPHeaders headers, T body) {
+	LazyHTTPResponse(HTTPStatus status, HTTPHeaders headers, Promise<T> body) {
 		this.status = status;
 		this.headers = headers;
 		this.body = body;
@@ -45,7 +46,7 @@ class SuccessHTTPResponse<T> implements HTTPResponse<T> {
 	public HTTPStatus status() {
 		return status;
 	}
-	
+
 	@Override
 	public HTTPHeaders headers() {
 		return headers;
@@ -53,72 +54,86 @@ class SuccessHTTPResponse<T> implements HTTPResponse<T> {
 
 	@Override
 	public Except<T> body() {
-		return Except.success(body);
+		return body.join();
 	}
 
 	@Override
 	public <R> HTTPResponse<R> map(Function<? super T, R> fn) {
-		return new SuccessHTTPResponse<>(status, headers, fn.apply(body));
+		return new LazyHTTPResponse<>(status, headers, body.then(fn));
 	}
 
 	@Override
 	public <R> HTTPResponse<R> map(HTTPResponseFn<? super T, R> fn) {
-		return new SuccessHTTPResponse<>(status, headers, fn.apply(status, headers, body));
+		return new LazyHTTPResponse<>(status, headers, body.then(content -> fn.apply(status, headers, content)));
 	}
 
 	@Override
 	public <R> R fold(Function<? super T, R> success, Function<? super Exception, R> failure) {
-		return success.apply(body);
-	}
-
-	@Override
-	public HTTPResponse<T> subscribe(HTTPResponseSubscriber<? super T> subscriber) {
-		subscriber.success(status, headers, body);
-		subscriber.done();
-		return this;
+		return body.fold(success, failure).join().unsafe();
 	}
 
 	@Override
 	public HTTPResponse<T> subscribe(Subscriber<? super T> subscriber) {
-		subscriber.success(body);
-		subscriber.done();
-		return this;
+		return new LazyHTTPResponse<>(status, headers, body.subscribe(subscriber));
+	}
+
+	@Override
+	public HTTPResponse<T> subscribe(HTTPResponseSubscriber<? super T> subscriber) {
+		return new LazyHTTPResponse<>(status, headers, body.subscribe(new Subscriber<>() {
+
+			@Override
+			public void success(T value) {
+				subscriber.success(status, headers, value);
+			}
+
+			@Override
+			public void failure(Exception failure) {
+				subscriber.failure(failure);
+			}
+
+			@Override
+			public void done() {
+				subscriber.done();
+			}
+		}));
 	}
 
 	@Override
 	public HTTPResponse<T> onSuccess(Consumer<? super T> fn) {
-		fn.accept(body);
+		body.onSuccess(fn);
 		return this;
 	}
 
 	@Override
 	public HTTPResponse<T> onSuccess(HTTPResponseConsumer<? super T> fn) {
-		fn.accept(status, headers, body);
+		body.onSuccess(content ->fn.accept(status, headers, content));
 		return this;
 	}
 
 	@Override
 	public HTTPResponse<T> onFailure(Consumer<? super Exception> fn) {
-		return this;
+		return new LazyHTTPResponse<>(status, headers, body.onFailure(fn));
 	}
 
 	@Override
 	public HTTPResponse<T> recover(Function<? super Exception, T> fn) {
-		return this;
+		return new LazyHTTPResponse<>(status, headers, body.recover(fn));
 	}
 
 	@Override
 	public HTTPResponse<T> recover(Predicate<? super Exception> p, Function<? super Exception, T> fn) {
-		return this;
+		return new LazyHTTPResponse<>(status, headers, body.recover(p, fn));
 	}
 
 	@Override
 	public <Err extends Exception> HTTPResponse<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
-		return this;
+		return new LazyHTTPResponse<>(status, headers, body.recover(expected, fn));
 	}
 
 	@Override
 	public HTTPResponse<T> recover(HTTPStatusCode code, HTTPResponseFn<byte[], T> fn) {
-		return this;
+		return (status.is(code)) ?
+				new LazyHTTPResponse<>(status, headers, body.recover(HTTPResponseException.class, e -> fn.apply(status, headers, e.bodyAsBytes()))) :
+				this;
 	}
 }

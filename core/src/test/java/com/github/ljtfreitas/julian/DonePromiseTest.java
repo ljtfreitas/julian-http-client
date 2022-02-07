@@ -9,7 +9,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.endsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -18,7 +17,7 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class DonePromiseTest {
 
-    private final Promise<String, Exception> promise = new DonePromise<>("hello");
+    private final Promise<String> promise = new DonePromise<>("hello");
 
     @Test
     void onSuccess(@Mock Consumer<String> consumer) {

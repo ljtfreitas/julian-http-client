@@ -44,7 +44,7 @@ class RunnableResponseTTest {
 	}
 
 	@Test
-	void compose(@Mock ResponseFn<Void, Void> fn, @Mock Promise<Response<Void, Exception>, Exception> response) {
+	void compose(@Mock ResponseFn<Void, Void> fn, @Mock Promise<Response<Void>> response) {
 		Arguments arguments = Arguments.empty();
 
 		Runnable runnable = responseT.bind(endpoint, fn).join(response, arguments);

@@ -26,14 +26,18 @@ import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.contract.FormSerializer;
 import com.github.ljtfreitas.julian.http.DefaultHTTPRequestBody;
 import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.MediaType;
 import com.github.ljtfreitas.julian.http.codec.FormURLEncodedHTTPMessageCodec;
 
 import java.net.http.HttpRequest.BodyPublishers;
+import java.net.http.HttpResponse;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Flow.Publisher;
 import java.util.stream.Collectors;
 
@@ -76,10 +80,11 @@ public class MultiMapFormURLEncodedHTTPMessageCodec implements FormURLEncodedHTT
     }
 
     @Override
-    public Map<String, Collection<String>> read(byte[] body, JavaType javaType) {
+    public Optional<CompletableFuture<Map<String, ? extends Iterable<?>>>> read(HTTPResponseBody body, JavaType javaType) {
         return codec.read(body, javaType)
-                .all().entrySet().stream()
-                .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
+                .map(future -> future
+                        .thenApplyAsync(form -> form.all().entrySet().stream()
+                                .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue))));
     }
 
     public static MultiMapFormURLEncodedHTTPMessageCodec provider() {

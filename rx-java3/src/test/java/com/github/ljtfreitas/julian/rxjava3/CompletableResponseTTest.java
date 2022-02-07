@@ -56,7 +56,7 @@ class CompletableResponseTTest {
 
     @Test
     void bind() {
-        Promise<Response<Void, Exception>, Exception> response = Promise.done(Response.done(null));
+        Promise<Response<Void>> response = Promise.done(Response.done(null));
 
         ResponseFn<Void, Void> fn = new ObjectResponseT<Void>().bind(endpoint, null);
 

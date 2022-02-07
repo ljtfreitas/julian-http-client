@@ -36,7 +36,7 @@ class ListIteratorResponseT<T> implements ResponseT<List<T>, ListIterator<T>> {
 		return new ResponseFn<>() {
 
 			@Override
-			public Promise<ListIterator<T>, ? extends Exception> run(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+			public Promise<ListIterator<T>> run(Promise<? extends Response<A>> response, Arguments arguments) {
 				return fn.run(response, arguments).then(l -> Optional.ofNullable(l).map(List::listIterator).orElseGet(Collections::emptyListIterator));
 			}
 

@@ -23,6 +23,7 @@
 package com.github.ljtfreitas.julian.http;
 
 import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.http.client.HTTPClientResponse;
 
 import static java.util.function.Function.identity;
@@ -36,17 +37,17 @@ public class DefaultHTTPResponseFailure implements HTTPResponseFailure {
 		HTTPStatus status = response.status();
 		HTTPHeaders headers = response.headers();
 
-		byte[] responseAsBytes = response.body().deserialize(identity()).orElseGet(() -> new byte[0]);
+		Promise<byte[]> bodyAsBytes = response.body().readAsBytes(identity()).map(Promise::pending).orElseGet(() -> Promise.done(new byte[0]));
 
 		HTTPResponseException ex = HTTPStatusCode.select(status.code())
-				.<HTTPResponseException>map(httpStatusCode -> HTTPFailureResponseException.create(httpStatusCode, headers, responseAsBytes))
-				.orElseGet(() -> unknown(status, headers, responseAsBytes));
+				.<HTTPResponseException>map(httpStatusCode -> HTTPFailureResponseException.create(httpStatusCode, headers, bodyAsBytes))
+				.orElseGet(() -> unknown(status, headers, bodyAsBytes));
 
-		return new FailureHTTPResponse<>(status, headers, ex);
+		return new FailureHTTPResponse<>(ex);
 	}
 
-	private HTTPUknownFailureResponseException unknown(HTTPStatus status, HTTPHeaders headers, byte[] responseBody) {
-		return new HTTPUknownFailureResponseException(status, headers, responseBody);
+	private HTTPUnknownFailureResponseException unknown(HTTPStatus status, HTTPHeaders headers, Promise<byte[]> responseBody) {
+		return new HTTPUnknownFailureResponseException(status, headers, responseBody);
 	}
 
 	public static DefaultHTTPResponseFailure get() {

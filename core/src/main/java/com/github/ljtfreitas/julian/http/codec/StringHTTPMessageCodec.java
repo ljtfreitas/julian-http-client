@@ -26,6 +26,7 @@ import com.github.ljtfreitas.julian.Bracket;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.DefaultHTTPRequestBody;
 import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.MediaType;
 
 import java.io.BufferedReader;
@@ -35,6 +36,9 @@ import java.net.http.HttpRequest;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 import static java.util.stream.Collectors.joining;
 
@@ -70,10 +74,10 @@ public class StringHTTPMessageCodec implements WildcardHTTPMessageCodec<String> 
 	}
 
 	@Override
-	public String read(byte[] body, JavaType javaType) {
-		return Bracket.acquire(() -> new BufferedReader(new InputStreamReader(new ByteArrayInputStream(body))))
+	public Optional<CompletableFuture<String>> read(HTTPResponseBody body, JavaType javaType) {
+		return body.readAsBytes(bodyAsBytes -> Bracket.acquire(() -> new BufferedReader(new InputStreamReader(new ByteArrayInputStream(bodyAsBytes))))
 				.map(reader -> reader.lines().collect(joining("\n")))
-				.prop(HTTPResponseReaderException::new);
+				.prop(HTTPResponseReaderException::new));
 	}
 
 	@Override

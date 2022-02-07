@@ -55,7 +55,7 @@ public interface Except<T> {
 
 	<E extends Exception> T prop(Function<? super Throwable, E> fn) throws E;
 
-	<R> R fold(Function<T, R> success, Function<? super Throwable, R> failure);
+	<R> R fold(Function<? super T, R> success, Function<? super Throwable, R> failure);
 
 	static <T> Except<T> run(ThrowableSupplier<T> fn) {
 		try {
@@ -165,7 +165,7 @@ public interface Except<T> {
 		}
 
 		@Override
-		public <R> R fold(Function<T, R> success, Function<? super Throwable, R> failure) {
+		public <R> R fold(Function<? super T, R> success, Function<? super Throwable, R> failure) {
 			return success.apply(value);
 		}
 	}
@@ -254,7 +254,7 @@ public interface Except<T> {
 		}
 
 		@Override
-		public <R> R fold(Function<T, R> success, Function<? super Throwable, R> failure) {
+		public <R> R fold(Function<? super T, R> success, Function<? super Throwable, R> failure) {
 			return failure.apply(value);
 		}
 	}

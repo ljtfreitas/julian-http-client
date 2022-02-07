@@ -78,7 +78,7 @@ class IndexedSeqResponseTTest {
 
         Collection<String> values = List.of("one", "two", "three");
 
-        Promise<Response<Collection<String>, Exception>, Exception> promise = Promise.done(Response.done(values));
+        Promise<Response<Collection<String>>> promise = Promise.done(Response.done(values));
 
         ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
                 new ObjectResponseT<Collection<String>>().bind(endpoint, null));
@@ -92,7 +92,7 @@ class IndexedSeqResponseTTest {
     void bindNullCollection() {
         when(endpoint.returnType()).thenReturn(JavaType.parameterized(Collection.class, String.class));
 
-        Promise<Response<Collection<String>, Exception>, Exception> promise = Promise.done(Response.done(null));
+        Promise<Response<Collection<String>>> promise = Promise.done(Response.done(null));
 
         ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
                 new ObjectResponseT<Collection<String>>().bind(endpoint, null));

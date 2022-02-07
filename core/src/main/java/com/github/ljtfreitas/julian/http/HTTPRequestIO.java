@@ -28,6 +28,6 @@ import com.github.ljtfreitas.julian.RequestIO;
 public interface HTTPRequestIO<T> extends RequestIO<T> {
 
     @Override
-    Promise<HTTPResponse<T>, HTTPException> execute();
+    Promise<HTTPResponse<T>> execute();
 
 }

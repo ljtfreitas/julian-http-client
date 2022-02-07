@@ -69,7 +69,7 @@ class FluxResponseTTest {
     void bind() {
         when(endpoint.returnType()).thenReturn(JavaType.parameterized(Flux.class, String.class));
 
-        Promise<Response<Collection<String>, Exception>, Exception> response = Promise.done(Response.done(List.of("one", "two", "three")));
+        Promise<Response<Collection<String>>> response = Promise.done(Response.done(List.of("one", "two", "three")));
 
         ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
                 new ObjectResponseT<Collection<String>>().bind(endpoint, null));
@@ -85,7 +85,7 @@ class FluxResponseTTest {
     void bindAsMono() {
         when(endpoint.returnType()).thenReturn(JavaType.parameterized(Flux.class, String.class));
 
-        Promise<Response<Collection<String>, Exception>, Exception> response = new MonoPromise<>(
+        Promise<Response<Collection<String>>> response = new MonoPromise<>(
                 Mono.just(Response.done(List.of("one", "two", "three"))));
 
         ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
@@ -103,7 +103,7 @@ class FluxResponseTTest {
     void failure() {
         RuntimeException exception = new RuntimeException("oops");
 
-        Promise<Response<Collection<String>, Exception>, Exception> response = Promise.failed(exception);
+        Promise<Response<Collection<String>>> response = Promise.failed(exception);
 
         ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
                 new ObjectResponseT<Collection<String>>().bind(endpoint, null));
@@ -119,7 +119,7 @@ class FluxResponseTTest {
     void failureAsMono() {
         RuntimeException exception = new RuntimeException("oops");
 
-        Promise<Response<Collection<String>, Exception>, Exception> response = new MonoPromise<>(Mono.error(exception));
+        Promise<Response<Collection<String>>> response = new MonoPromise<>(Mono.error(exception));
 
         ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
                 new ObjectResponseT<Collection<String>>().bind(endpoint, null));

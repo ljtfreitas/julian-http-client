@@ -31,10 +31,6 @@ import static com.github.ljtfreitas.julian.Except.ThrowableFunction.identity;
 
 public interface Bracket<T extends AutoCloseable> extends Except<T> {
 
-	static <T extends AutoCloseable> Bracket<T> resource(T resource) {
-		return new Acquired<>(() -> resource);
-	}
-
 	static <T extends AutoCloseable> Bracket<T> acquire(AutoCloseableSupplier<T> fn) {
 		return new Acquired<>(fn);
 	}
@@ -130,7 +126,7 @@ public interface Bracket<T extends AutoCloseable> extends Except<T> {
 		}
 
 		@Override
-		public <R> R fold(Function<T, R> success, Function<? super Throwable, R> failure) {
+		public <R> R fold(Function<? super T, R> success, Function<? super Throwable, R> failure) {
 			return id().fold(success, failure);
 		}
 	}

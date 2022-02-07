@@ -20,21 +20,13 @@
  * SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian.http;
+package com.github.ljtfreitas.julian;
 
-import java.util.Optional;
-import java.util.function.Function;
+public interface Subscriber<T> {
 
-public class DefaultHTTPResponseBody implements HTTPResponseBody {
+    void success(T value);
 
-	private final byte[] body;
+    void failure(Exception failure);
 
-	public DefaultHTTPResponseBody(byte[] body) {
-		this.body = body;
-	}
-
-	@Override
-	public <T> Optional<T> deserialize(Function<byte[], T> fn) {
-		return Optional.ofNullable(fn.apply(body));
-	}
+    void done();
 }

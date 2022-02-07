@@ -22,13 +22,29 @@
 
 package com.github.ljtfreitas.julian.http;
 
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Flow;
 import java.util.function.Function;
 
 class EmptyHTTPResponseBody implements HTTPResponseBody {
 
     @Override
-    public <T> Optional<T> deserialize(Function<byte[], T> fn) {
+    public <T> Optional<CompletableFuture<T>> readAsBytes(Function<byte[], T> fn) {
+        return Optional.empty();
+    }
+
+    @Override
+    public <T> Optional<CompletableFuture<T>> readAsInputStream(Function<InputStream, T> fn) {
+        return Optional.empty();
+    }
+
+    @Override
+    public <T> Optional<Flow.Publisher<List<ByteBuffer>>> content() {
         return Optional.empty();
     }
 }

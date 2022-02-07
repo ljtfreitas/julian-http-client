@@ -23,14 +23,18 @@
 package com.github.ljtfreitas.julian.http.codec;
 
 import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.MediaType;
 
 import java.io.InputStream;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 public interface HTTPResponseReader<T> extends HTTPMessageCodec {
 
 	boolean readable(MediaType candidate, JavaType javaType);
 
-	T read(byte[] body, JavaType javaType);
+	Optional<CompletableFuture<T>> read(HTTPResponseBody body, JavaType javaType);
 
 }

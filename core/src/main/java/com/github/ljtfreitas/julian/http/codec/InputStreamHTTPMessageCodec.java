@@ -25,26 +25,41 @@ package com.github.ljtfreitas.julian.http.codec;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.DefaultHTTPRequestBody;
 import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.MediaType;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.http.HttpRequest.BodyPublishers;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodySubscriber;
+import java.net.http.HttpResponse.BodySubscribers;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Flow;
+import java.util.concurrent.Flow.Publisher;
 
 public class InputStreamHTTPMessageCodec implements WildcardHTTPMessageCodec<InputStream> {
+
+	private static final int DEFAULT_BUFFER_SIZE = 1024 * 100;
 
 	private static final InputStreamHTTPMessageCodec SINGLE_INSTANCE = new InputStreamHTTPMessageCodec();
 
 	private final ByteArrayHTTPMessageCodec reader;
+	private final int bufferSize;
 
 	public InputStreamHTTPMessageCodec() {
 		this.reader = ByteArrayHTTPMessageCodec.get();
+		this.bufferSize = DEFAULT_BUFFER_SIZE;
 	}
 
 	public InputStreamHTTPMessageCodec(int bufferSize) {
 		this.reader = new ByteArrayHTTPMessageCodec(bufferSize);
+		this.bufferSize = bufferSize;
 	}
 
 	@Override
@@ -53,8 +68,14 @@ public class InputStreamHTTPMessageCodec implements WildcardHTTPMessageCodec<Inp
 	}
 
 	@Override
-	public InputStream read(byte[] body, JavaType javaType) {
-		return new BufferedInputStream(new ByteArrayInputStream(reader.read(body, javaType)));
+	public Optional<CompletableFuture<InputStream>> read(HTTPResponseBody body, JavaType javaType) {
+		return body.content().map(this::subscribe);
+	}
+
+	private CompletableFuture<InputStream> subscribe(Publisher<List<ByteBuffer>> publisher) {
+		BodySubscriber<InputStream> subscriber = BodySubscribers.buffering(BodySubscribers.ofInputStream(), bufferSize);
+		publisher.subscribe(subscriber);
+		return subscriber.getBody().toCompletableFuture();
 	}
 
 	@Override

@@ -34,7 +34,7 @@ import com.github.ljtfreitas.julian.http.HTTPResponse;
 import com.github.ljtfreitas.julian.http.HTTPResponseException;
 import com.github.ljtfreitas.julian.http.HTTPStatus;
 import com.github.ljtfreitas.julian.http.HTTPStatusCode;
-import com.github.ljtfreitas.julian.http.HTTPUknownFailureResponseException;
+import com.github.ljtfreitas.julian.http.HTTPUnknownFailureResponseException;
 import com.github.ljtfreitas.julian.http.client.HTTPClientException;
 import com.github.ljtfreitas.julian.http.codec.HTTPMessageException;
 import com.github.ljtfreitas.julian.reactor.MonoPromise;
@@ -74,7 +74,7 @@ class WebClientHTTPRequest<T> implements HTTPRequestIO<T> {
     }
 
     @Override
-    public Promise<HTTPResponse<T>, HTTPException> execute() {
+    public Promise<HTTPResponse<T>> execute() {
         Mono<HTTPResponse<T>> mono = webClient.method(method)
                 .uri(path)
                 .headers(h -> headers.forEach(h::addAll))
@@ -101,9 +101,9 @@ class WebClientHTTPRequest<T> implements HTTPRequestIO<T> {
     private HTTPResponse<T> failure(HTTPStatus status, HTTPHeaders headers, WebClientResponseException e) {
         HTTPResponseException exception = HTTPStatusCode.select(status.code())
                 .<HTTPResponseException>map(httpStatusCode -> HTTPFailureResponseException.create(httpStatusCode, headers, e.getResponseBodyAsByteArray()))
-                .orElseGet(() -> new HTTPUknownFailureResponseException(status, headers, e.getResponseBodyAsByteArray()));
+                .orElseGet(() -> new HTTPUnknownFailureResponseException(status, headers, e.getResponseBodyAsByteArray()));
 
-        return new FailureHTTPResponse<>(status, headers, exception);
+        return new FailureHTTPResponse<>(exception);
     }
 
     private HTTPException exceptionally(Throwable e) {

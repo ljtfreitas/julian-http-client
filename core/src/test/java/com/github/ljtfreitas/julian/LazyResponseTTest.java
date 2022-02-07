@@ -56,7 +56,7 @@ class LazyResponseTTest {
 	}
 
 	@Test
-	void compose(@Mock ResponseFn<String, String> fn, @Mock Promise<Response<String, Exception>, Exception> response) {
+	void compose(@Mock ResponseFn<String, String> fn, @Mock Promise<Response<String>> response) {
 		Arguments arguments = Arguments.empty();
 
 		when(fn.run(response, arguments)).thenReturn(Promise.done("expected"));

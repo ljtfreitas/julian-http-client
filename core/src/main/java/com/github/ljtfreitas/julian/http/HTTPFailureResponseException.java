@@ -22,15 +22,21 @@
 
 package com.github.ljtfreitas.julian.http;
 
+import com.github.ljtfreitas.julian.Promise;
+
 public class HTTPFailureResponseException extends HTTPResponseException {
 
 	private static final long serialVersionUID = 1L;
 
-	public HTTPFailureResponseException(HTTPStatusCode status, HTTPHeaders headers, byte[] body) {
+	public HTTPFailureResponseException(HTTPStatusCode status, HTTPHeaders headers, Promise<byte[]> body) {
 		super(new HTTPStatus(status.value(), status.message()), headers, body);
 	}
 
 	public static HTTPFailureResponseException create(HTTPStatusCode status, HTTPHeaders headers, byte[] responseBody) {
+		return create(status, headers, Promise.done(responseBody));
+	}
+
+	public static HTTPFailureResponseException create(HTTPStatusCode status, HTTPHeaders headers, Promise<byte[]> responseBody) {
 		switch (status) {
 			case BAD_REQUEST:
 				return new HTTPClientFailureResponseException.BadRequest(headers, responseBody);

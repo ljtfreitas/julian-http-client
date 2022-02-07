@@ -27,7 +27,6 @@ import com.github.ljtfreitas.julian.Endpoint;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.Kind;
 import com.github.ljtfreitas.julian.Promise;
-import com.github.ljtfreitas.julian.RequestIO;
 import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
 import com.github.ljtfreitas.julian.ResponseT;
@@ -47,10 +46,10 @@ public class FluxResponseT<T> implements ResponseT<Collection<T>, Flux<T>> {
         return new ResponseFn<>() {
 
             @Override
-            public Flux<T> join(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
-                Promise<Collection<T>, ? extends Exception> promise = fn.run(response, arguments);
+            public Flux<T> join(Promise<? extends Response<A>> response, Arguments arguments) {
+                Promise<Collection<T>> promise = fn.run(response, arguments);
 
-                return promise.cast(new Kind<MonoPromise<Collection<T>, Exception>>() {})
+                return promise.cast(new Kind<MonoPromise<Collection<T>>>() {})
                         .map(MonoPromise::mono)
                         .orElseGet(() -> Mono.fromFuture(promise.future()))
                         .flatMapIterable(identity());

@@ -64,7 +64,7 @@ class PublisherResponseTTest {
     }
 
     @Test
-    void compose(@Mock ResponseFn<String, String> fn, @Mock Promise<Response<String, Exception>, Exception> response, TestReporter reporter) throws InterruptedException {
+    void compose(@Mock ResponseFn<String, String> fn, @Mock Promise<Response<String>> response, TestReporter reporter) throws InterruptedException {
         Arguments arguments = Arguments.empty();
 
         when(fn.run(response, arguments)).thenReturn(Promise.pending(CompletableFuture.supplyAsync(() -> "expected",

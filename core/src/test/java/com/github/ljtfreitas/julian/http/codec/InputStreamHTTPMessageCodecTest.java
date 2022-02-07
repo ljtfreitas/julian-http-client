@@ -3,6 +3,7 @@ package com.github.ljtfreitas.julian.http.codec;
 import com.github.ljtfreitas.julian.Bracket;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.MediaType;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Flow;
 import java.util.concurrent.Flow.Subscriber;
 
@@ -45,7 +47,9 @@ class InputStreamHTTPMessageCodecTest {
 	void read() {
 		String expected = "response body";
 
-		InputStream in = codec.read(expected.getBytes(), JavaType.valueOf(InputStream.class));
+		InputStream in = codec.read(HTTPResponseBody.some(expected.getBytes()), JavaType.valueOf(InputStream.class))
+				.map(CompletableFuture::join)
+				.orElse(new ByteArrayInputStream(new byte[0]));
 
 		String actual = Bracket.acquire(( ) -> new BufferedReader(new InputStreamReader(in)))
 			.map(r -> r.lines().collect(joining()))

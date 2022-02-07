@@ -38,7 +38,7 @@ public class SingleResponseT<T> implements ResponseT<T, Single<T>> {
         return new ResponseFn<>() {
 
             @Override
-            public Single<T> join(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+            public Single<T> join(Promise<? extends Response<A>> response, Arguments arguments) {
                 return Single.fromCompletionStage(fn.run(response, arguments).future());
             }
 

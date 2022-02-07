@@ -26,20 +26,28 @@ import com.github.ljtfreitas.julian.Bracket;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.DefaultHTTPRequestBody;
 import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.MediaType;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.http.HttpRequest.BodyPublishers;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodySubscriber;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Flow.Publisher;
+
+import static java.net.http.HttpResponse.BodySubscribers.mapping;
 
 public class OctetStreamHTTPMessageCodec<T extends Serializable> implements HTTPRequestWriter<T>, HTTPResponseReader<T> {
 
@@ -81,10 +89,14 @@ public class OctetStreamHTTPMessageCodec<T extends Serializable> implements HTTP
 		return supports(candidate) && javaType.compatible(Serializable.class);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public T read(byte[] body, JavaType javaType) {
-		return Bracket.acquire(() -> new ObjectInputStream(new ByteArrayInputStream(body)))
+	public Optional<CompletableFuture<T>> read(HTTPResponseBody body, JavaType javaType) {
+		return body.readAsInputStream(s -> deserialize(s, javaType));
+	}
+
+	@SuppressWarnings("unchecked")
+	private T deserialize(InputStream bodyAsInputStream, JavaType javaType) {
+		return Bracket.acquire(() -> new ObjectInputStream(bodyAsInputStream))
 				.map(s -> (T) s.readObject())
 				.prop(e -> new HTTPResponseReaderException("Object deserialization failed. The target type was: " + javaType, e));
 	}

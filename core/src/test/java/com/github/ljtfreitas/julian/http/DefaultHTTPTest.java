@@ -8,6 +8,7 @@ import com.github.ljtfreitas.julian.Headers;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.RequestDefinition;
+import com.github.ljtfreitas.julian.Subscriber;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.BadRequest;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.Conflict;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.ExpectationFailed;
@@ -25,6 +26,7 @@ import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.Requ
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.RequestedRangeNotSatisfiable;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.Unauthorized;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.UnsupportedMediaType;
+import com.github.ljtfreitas.julian.http.HTTPResponse.HTTPResponseSubscriber;
 import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.BadGateway;
 import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.GatewayTimeout;
 import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.HTTPVersionNotSupported;
@@ -37,6 +39,7 @@ import com.github.ljtfreitas.julian.http.codec.HTTPMessageCodecs;
 import com.github.ljtfreitas.julian.http.codec.HTTPRequestWriterException;
 import com.github.ljtfreitas.julian.http.codec.HTTPResponseReaderException;
 import com.github.ljtfreitas.julian.http.codec.StringHTTPMessageCodec;
+import com.github.ljtfreitas.julian.http.codec.UnprocessableHTTPMessageCodec;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -45,6 +48,10 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
+import org.mockito.hamcrest.MockitoHamcrest;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.jupiter.MockServerExtension;
 import org.mockserver.junit.jupiter.MockServerSettings;
@@ -68,8 +75,13 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.MediaType.APPLICATION_JSON;
@@ -90,7 +102,7 @@ class DefaultHTTPTest {
 	void setup() {
 		http = new DefaultHTTP(new DefaultHTTPClient(),
 							   new HTTPRequestInterceptorChain(),
-							   new HTTPMessageCodecs(List.of(new StringHTTPMessageCodec(MediaType.valueOf("text/*")))),
+							   new HTTPMessageCodecs(List.of(new StringHTTPMessageCodec(MediaType.valueOf("text/*")), new UnprocessableHTTPMessageCodec())),
 							   new DefaultHTTPResponseFailure());
 	}
 
@@ -104,7 +116,7 @@ class DefaultHTTPTest {
 
 			mockServer.when(expectedRequest).respond(expectedResponse);
 
-			Promise<HTTPResponse<String>, HTTPException> promise = http.run(definition);
+			Promise<HTTPResponse<String>> promise = http.run(definition);
 
 			HTTPResponse<String> response = promise.join().unsafe();
 
@@ -124,10 +136,10 @@ class DefaultHTTPTest {
 
 		@ParameterizedTest(name = "HTTP Request: {0} and HTTP Response: {1}")
 		@ArgumentsSource(HTTPHeadersProvider.class)
-		void shouldRunRequestAndReadTheResponse(HttpRequest expectedRequest, HttpResponse expectedResponse, RequestDefinition definition) {
+		void shouldRunRequestAndReadTheHeaders(HttpRequest expectedRequest, HttpResponse expectedResponse, RequestDefinition definition) {
 			mockServer.when(expectedRequest).respond(expectedResponse);
 
-			Promise<HTTPResponse<Void>, HTTPException> promise = http.run(definition);
+			Promise<HTTPResponse<Void>> promise = http.run(definition);
 
 			HTTPResponse<Void> response = promise.join().unsafe();
 
@@ -168,7 +180,7 @@ class DefaultHTTPTest {
 							Headers.create(new Header("Content-Type", "text/plain")), new RequestDefinition.Body(requestBodyAsString),
 							JavaType.valueOf(String.class));
 
-					Promise<HTTPResponse<String>, HTTPException> promise = http.run(request);
+					Promise<HTTPResponse<String>> promise = http.run(request);
 
 					String response = promise.then(HTTPResponse::body).then(Except::unsafe).join().unsafe();
 
@@ -231,7 +243,7 @@ class DefaultHTTPTest {
 					RequestDefinition request = new RequestDefinition(URI.create("http://localhost:8090/hello"), "GET",
 							Headers.empty(), JavaType.valueOf(String.class));
 
-					Promise<HTTPResponse<String>, HTTPException> promise = http.run(request);
+					Promise<HTTPResponse<String>> promise = http.run(request);
 
 					String response = promise.then(HTTPResponse::body).then(Except::unsafe).join().unsafe();
 
@@ -319,7 +331,7 @@ class DefaultHTTPTest {
 				assertAll(() -> assertEquals(failure.status(), exception.status()),
 						  () -> assertEquals(failure.headers(), exception.headers()));
 			}
-			
+
 			@ParameterizedTest(name = "{0} {1}")
 			@ArgumentsSource(HTTPFailureExceptionsProvider.class)
 			void recover(HTTPStatusCode statusCode, Class<? extends HTTPFailureResponseException> exceptionType) {
@@ -339,7 +351,7 @@ class DefaultHTTPTest {
 				assertAll(() -> assertThat(response, instanceOf(FailureHTTPResponse.class)),
 						  () -> assertEquals(recovered, response.recover(empty -> recovered).body().unsafe()),
 						  () -> assertEquals(recovered, response.recover(exceptionType, e -> recovered).body().unsafe()),
-						  () -> assertEquals(recovered, response.recover(statusCode, e -> recovered).body().unsafe()),
+						  () -> assertEquals(recovered, response.recover(statusCode, (status, headers, bodyAsBytes) -> recovered).body().unsafe()),
 						  () -> assertEquals(recovered, response.recover(exceptionType::isInstance, e -> recovered).body().unsafe()));
 			}
 		}
@@ -393,7 +405,7 @@ class DefaultHTTPTest {
 							 arguments(request("/hello").withMethod("DELETE"), 
 							  		   expectedResponse,
 							  		   new RequestDefinition(URI.create("http://localhost:8090/hello"), "DELETE", JavaType.valueOf(String.class))),
-							 arguments(request("/hello").withMethod("TRACE"), 
+							 arguments(request("/hello").withMethod("TRACE"),
 							  		   response().withStatusCode(200),
 							  		   new RequestDefinition(URI.create("http://localhost:8090/hello"), "TRACE")),
 							 arguments(request("/hello").withMethod("HEAD"), 

@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.concurrent.CompletableFuture;
@@ -14,7 +13,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.endsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -24,7 +22,7 @@ class DefaultPromiseTest {
     @Nested
     class WhenSuccess {
 
-        private final Promise<String, Exception> promise = new DefaultPromise<>(CompletableFuture.supplyAsync(() -> "hello"));
+        private final Promise<String> promise = new DefaultPromise<>(CompletableFuture.supplyAsync(() -> "hello"));
 
         @Test
         void onSuccess(@Mock Consumer<String> consumer) {
@@ -56,7 +54,7 @@ class DefaultPromiseTest {
 
         @Test
         void subscribe() {
-            Promise.Subscriber<String, Exception> subscriber = spy(new Promise.Subscriber<>() {
+            Subscriber<String> subscriber = spy(new Subscriber<>() {
 
                 @Override
                 public void success(String value) {
@@ -85,7 +83,7 @@ class DefaultPromiseTest {
     class WhenFailed {
 
         private final Exception failure = new RuntimeException("oops");
-        private final Promise<String, Exception> promise = new DefaultPromise<>(CompletableFuture.failedFuture(failure));
+        private final Promise<String> promise = new DefaultPromise<>(CompletableFuture.failedFuture(failure));
 
         @Test
         void onFailure(@Mock Consumer<Exception> consumer) {
@@ -106,7 +104,7 @@ class DefaultPromiseTest {
 
         @Test
         void recover() {
-            CompletableFuture<String> future = new DefaultPromise<String, Exception>(CompletableFuture.failedFuture(new RuntimeException("oops")))
+            CompletableFuture<String> future = new DefaultPromise<String>(CompletableFuture.failedFuture(new RuntimeException("oops")))
                     .recover(e -> e.getMessage() + "...but i'm recovered")
                     .future();
 
@@ -115,7 +113,7 @@ class DefaultPromiseTest {
 
         @Test
         void subscribe() {
-            Promise.Subscriber<String, Exception> subscriber = spy(new Promise.Subscriber<>() {
+            Subscriber<String> subscriber = spy(new Subscriber<>() {
 
                 @Override
                 public void success(String value) {

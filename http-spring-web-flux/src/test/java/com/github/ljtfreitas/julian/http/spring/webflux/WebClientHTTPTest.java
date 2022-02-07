@@ -27,7 +27,6 @@ import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.Requ
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.RequestedRangeNotSatisfiable;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.Unauthorized;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.UnsupportedMediaType;
-import com.github.ljtfreitas.julian.http.HTTPException;
 import com.github.ljtfreitas.julian.http.HTTPFailureResponseException;
 import com.github.ljtfreitas.julian.http.HTTPHeader;
 import com.github.ljtfreitas.julian.http.HTTPResponse;
@@ -117,7 +116,7 @@ class WebClientHTTPTest {
 
 			mockServer.when(expectedRequest).respond(expectedResponse);
 
-			Promise<HTTPResponse<String>, HTTPException> promise = http.run(definition);
+			Promise<HTTPResponse<String>> promise = http.run(definition);
 
 			HTTPResponse<String> response = promise.join().unsafe();
 
@@ -140,7 +139,7 @@ class WebClientHTTPTest {
 		void shouldRunRequestAndReadTheResponse(HttpRequest expectedRequest, HttpResponse expectedResponse, RequestDefinition definition) {
 			mockServer.when(expectedRequest).respond(expectedResponse);
 
-			Promise<HTTPResponse<Void>, HTTPException> promise = http.run(definition);
+			Promise<HTTPResponse<Void>> promise = http.run(definition);
 
 			HTTPResponse<Void> response = promise.join().unsafe();
 
@@ -181,7 +180,7 @@ class WebClientHTTPTest {
 							Headers.create(new Header("Content-Type", "text/plain")), new RequestDefinition.Body(requestBodyAsString),
 							JavaType.valueOf(String.class));
 
-					Promise<HTTPResponse<String>, HTTPException> promise = http.run(request);
+					Promise<HTTPResponse<String>> promise = http.run(request);
 
 					String response = promise.then(HTTPResponse::body).then(Except::unsafe).join().unsafe();
 
@@ -244,7 +243,7 @@ class WebClientHTTPTest {
 					RequestDefinition request = new RequestDefinition(URI.create("http://localhost:8090/hello"), "GET",
 							Headers.empty(), JavaType.valueOf(String.class));
 
-					Promise<HTTPResponse<String>, HTTPException> promise = http.run(request);
+					Promise<HTTPResponse<String>> promise = http.run(request);
 
 					String response = promise.then(HTTPResponse::body).then(Except::unsafe).join().unsafe();
 
@@ -350,7 +349,7 @@ class WebClientHTTPTest {
 				assertAll(() -> assertThat(response, instanceOf(FailureHTTPResponse.class)),
 						() -> assertEquals(recovered, response.recover(empty -> recovered).body().unsafe()),
 						() -> assertEquals(recovered, response.recover(exceptionType, e -> recovered).body().unsafe()),
-						() -> assertEquals(recovered, response.recover(statusCode, e -> recovered).body().unsafe()),
+						() -> assertEquals(recovered, response.recover(statusCode, (status, header, bodyAsBytes) -> recovered).body().unsafe()),
 						() -> assertEquals(recovered, response.recover(exceptionType::isInstance, e -> recovered).body().unsafe()));
 			}
 		}

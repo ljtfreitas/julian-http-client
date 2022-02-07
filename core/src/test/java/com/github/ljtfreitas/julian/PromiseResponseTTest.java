@@ -59,12 +59,12 @@ class PromiseResponseTTest {
     }
 
     @Test
-    void compose(@Mock ResponseFn<String, String> fn, @Mock Promise<Response<String, Exception>, Exception> response) {
+    void compose(@Mock ResponseFn<String, String> fn, @Mock Promise<Response<String>> response) {
         Arguments arguments = Arguments.empty();
 
         when(fn.run(same(response), eq(arguments))).thenReturn(Promise.done("expected"));
 
-        Promise<String, ? extends Exception> actual = responseT.bind(endpoint, fn).join(response, arguments);
+        Promise<String> actual = responseT.bind(endpoint, fn).join(response, arguments);
 
         assertEquals("expected", actual.join().unsafe());
     }

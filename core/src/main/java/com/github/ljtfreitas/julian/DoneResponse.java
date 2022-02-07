@@ -4,7 +4,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-class DoneResponse<T, E extends Exception> implements Response<T, E> {
+class DoneResponse<T> implements Response<T> {
 
     private final T value;
 
@@ -18,38 +18,45 @@ class DoneResponse<T, E extends Exception> implements Response<T, E> {
     }
 
     @Override
-    public <R> Response<R, E> map(Function<? super T, R> fn) {
+    public <R> Response<R> map(Function<? super T, R> fn) {
         return new DoneResponse<>(fn.apply(value));
     }
 
     @Override
-    public Response<T, E> onSuccess(Consumer<? super T> fn) {
+    public Response<T> onSuccess(Consumer<? super T> fn) {
         fn.accept(value);
         return this;
     }
 
     @Override
-    public Response<T, E> onFailure(Consumer<? super E> fn) {
+    public Response<T> onFailure(Consumer<? super Exception> fn) {
         return this;
     }
 
     @Override
-    public Response<T, E> recover(Predicate<? super E> p, Function<? super E, T> fn) {
+    public Response<T> recover(Predicate<? super Exception> p, Function<? super Exception, T> fn) {
         return this;
     }
 
     @Override
-    public Response<T, E> recover(Function<? super E, T> fn) {
+    public Response<T> recover(Function<? super Exception, T> fn) {
         return this;
     }
 
     @Override
-    public <Err extends E> Response<T, E> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
+    public <Err extends Exception> Response<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
         return this;
     }
 
     @Override
-    public <R> R fold(Function<T, R> success, Function<? super E, R> failure) {
+    public <R> R fold(Function<? super T, R> success, Function<? super Exception, R> failure) {
         return success.apply(value);
+    }
+
+    @Override
+    public Response<T> subscribe(Subscriber<? super T> subscriber) {
+        subscriber.success(value);
+        subscriber.done();
+        return this;
     }
 }

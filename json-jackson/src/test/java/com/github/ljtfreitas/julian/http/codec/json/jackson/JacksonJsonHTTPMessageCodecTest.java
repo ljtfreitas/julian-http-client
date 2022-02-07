@@ -4,12 +4,14 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.MediaType;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Flow;
 import java.util.concurrent.Flow.Subscriber;
 
@@ -44,7 +46,9 @@ class JacksonJsonHTTPMessageCodecTest {
             void read() {
                 String value = "{\"name\":\"Tiago\",\"age\":35}";
 
-                Person person = codec.read(value.getBytes(), JavaType.valueOf(Person.class));
+                Person person = codec.read(HTTPResponseBody.some(value.getBytes()), JavaType.valueOf(Person.class))
+                        .map(CompletableFuture::join)
+                        .orElse(null);
 
                 assertAll(() -> assertEquals("Tiago", person.name),
                           () -> assertEquals(35, person.age));

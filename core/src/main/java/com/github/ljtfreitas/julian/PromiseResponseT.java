@@ -1,15 +1,15 @@
 package com.github.ljtfreitas.julian;
 
-class PromiseResponseT<T> implements ResponseT<T, Promise<T, ?>> {
+class PromiseResponseT<T> implements ResponseT<T, Promise<T>> {
 
     private static final PromiseResponseT<Object> SINGLE_INSTANCE = new PromiseResponseT<>();
 
     @Override
-    public <A> ResponseFn<A, Promise<T, ?>> bind(Endpoint endpoint, ResponseFn<A, T> fn) {
+    public <A> ResponseFn<A, Promise<T>> bind(Endpoint endpoint, ResponseFn<A, T> fn) {
         return new ResponseFn<>() {
 
             @Override
-            public Promise<T, ?> join(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+            public Promise<T> join(Promise<? extends Response<A>> response, Arguments arguments) {
                 return fn.run(response, arguments);
             }
 

@@ -22,25 +22,44 @@
 
 package com.github.ljtfreitas.julian.http;
 
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Flow.Publisher;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class OptionalHTTPResponseBody implements HTTPResponseBody {
+class OptionalHTTPResponseBody implements HTTPResponseBody {
 
     private final HTTPStatus status;
     private final HTTPHeaders headers;
-    private final Supplier<HTTPResponseBody> content;
+    private final Supplier<HTTPResponseBody> body;
 
-    public OptionalHTTPResponseBody(HTTPStatus status, HTTPHeaders headers, Supplier<HTTPResponseBody> content) {
+    OptionalHTTPResponseBody(HTTPStatus status, HTTPHeaders headers, Supplier<HTTPResponseBody> body) {
         this.status = status;
         this.headers = headers;
-        this.content = content;
+        this.body = body;
     }
 
     @Override
-    public <T> Optional<T> deserialize(Function<byte[], T> fn) {
-        return (status.readable() && hasContentLength()) ? content.get().deserialize(fn) : Optional.empty();
+    public <T> Optional<CompletableFuture<T>> readAsBytes(Function<byte[], T> fn) {
+        return readable() ? body.get().readAsBytes(fn) : Optional.empty();
+    }
+
+    @Override
+    public <T> Optional<CompletableFuture<T>> readAsInputStream(Function<InputStream, T> fn) {
+        return readable() ? body.get().readAsInputStream(fn) : Optional.empty();
+    }
+
+    @Override
+    public <T> Optional<Publisher<List<ByteBuffer>>> content() {
+        return readable() ? body.get().content() : Optional.empty();
+    }
+
+    private boolean readable() {
+        return status.readable() && hasContentLength();
     }
 
     private boolean hasContentLength() {

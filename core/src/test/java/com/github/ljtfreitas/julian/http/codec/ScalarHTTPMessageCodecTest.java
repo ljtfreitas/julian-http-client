@@ -2,6 +2,7 @@ package com.github.ljtfreitas.julian.http.codec;
 
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.MediaType;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Flow;
 import java.util.stream.Stream;
 
@@ -50,7 +52,9 @@ class ScalarHTTPMessageCodecTest {
 			@ArgumentsSource(ScalarTypesProvider.class)
 			void read(Class<?> scalarClassType, Object value) {
 				
-				Object output = codec.read(value.toString().getBytes(), JavaType.valueOf(scalarClassType));
+				Object output = codec.read(HTTPResponseBody.some(value.toString().getBytes()), JavaType.valueOf(scalarClassType))
+						.map(CompletableFuture::join)
+						.orElse(null);
 				
 				assertAll(() -> assertEquals(value, output),
 						  () -> assertThat(output, instanceOf(scalarClassType)));

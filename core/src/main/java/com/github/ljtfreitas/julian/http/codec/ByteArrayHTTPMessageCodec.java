@@ -26,11 +26,15 @@ import com.github.ljtfreitas.julian.Bracket;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.DefaultHTTPRequestBody;
 import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.MediaType;
 
 import java.io.ByteArrayInputStream;
 import java.net.http.HttpRequest;
 import java.nio.charset.Charset;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 public class ByteArrayHTTPMessageCodec implements WildcardHTTPMessageCodec<byte[]> {
 
@@ -54,10 +58,10 @@ public class ByteArrayHTTPMessageCodec implements WildcardHTTPMessageCodec<byte[
 	}
 
 	@Override
-	public byte[] read(byte[] body, JavaType javaType) {
-		return Bracket.acquire(() -> new ByteArrayInputStream(body))
+	public Optional<CompletableFuture<byte[]>> read(HTTPResponseBody body, JavaType javaType) {
+		return body.readAsBytes(bodyAsBytes -> Bracket.acquire(() -> new ByteArrayInputStream(bodyAsBytes))
 				.map(stream -> stream.readNBytes(bufferSize))
-				.prop(HTTPResponseReaderException::new);
+				.prop(HTTPResponseReaderException::new));
 	}
 
 	@Override

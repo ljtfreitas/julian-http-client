@@ -29,7 +29,6 @@ import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
 import com.github.ljtfreitas.julian.ResponseT;
-import io.vavr.concurrent.Future;
 import io.vavr.control.Try;
 
 public class TryResponseT<T> implements ResponseT<T, Try<T>> {
@@ -39,7 +38,7 @@ public class TryResponseT<T> implements ResponseT<T, Try<T>> {
         return new ResponseFn<>() {
 
             @Override
-            public Promise<Try<T>, ? extends Exception> run(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+            public Promise<Try<T>> run(Promise<? extends Response<A>> response, Arguments arguments) {
                 return fn.run(response, arguments).then(Try::success).recover(Try::failure);
             }
 

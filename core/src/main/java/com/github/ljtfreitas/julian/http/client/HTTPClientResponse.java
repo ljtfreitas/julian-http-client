@@ -28,7 +28,6 @@ import java.util.function.Function;
 import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.http.HTTPHeaders;
 import com.github.ljtfreitas.julian.http.HTTPResponseBody;
-import com.github.ljtfreitas.julian.http.HTTPResponseException;
 import com.github.ljtfreitas.julian.http.HTTPStatus;
 
 public interface HTTPClientResponse {
@@ -39,9 +38,9 @@ public interface HTTPClientResponse {
 
 	HTTPResponseBody body();
 
-	<T, R extends Response<T, HTTPResponseException>> Optional<R> success(Function<? super HTTPClientResponse, R> fn);
+	<T, R extends Response<T>> Optional<R> success(Function<? super HTTPClientResponse, R> fn);
 
-	<T, R extends Response<T, HTTPResponseException>> Optional<R> failure(Function<? super HTTPClientResponse, R> fn);
+	<T, R extends Response<T>> Optional<R> failure(Function<? super HTTPClientResponse, R> fn);
 
 	static HTTPClientResponse create(HTTPStatus status, HTTPHeaders headers, HTTPResponseBody body) {
 		return new DefaultHTTPClientResponse(status, headers, body);

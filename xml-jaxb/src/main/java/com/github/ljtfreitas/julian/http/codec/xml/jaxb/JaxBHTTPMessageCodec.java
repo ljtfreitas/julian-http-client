@@ -26,6 +26,7 @@ import com.github.ljtfreitas.julian.Except;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.DefaultHTTPRequestBody;
 import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.MediaType;
 import com.github.ljtfreitas.julian.http.codec.HTTPRequestWriterException;
 import com.github.ljtfreitas.julian.http.codec.HTTPResponseReaderException;
@@ -46,6 +47,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.http.HttpRequest;
@@ -53,6 +55,8 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Flow.Publisher;
 
 import static com.github.ljtfreitas.julian.http.MediaType.APPLICATION_XML;
@@ -106,15 +110,18 @@ public class JaxBHTTPMessageCodec<T> implements XMLHTTPMessageCodec<T> {
                 .orElse(false);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public T read(byte[] body, JavaType javaType) {
+    public Optional<CompletableFuture<T>> read(HTTPResponseBody body, JavaType javaType) {
+        return body.readAsInputStream(stream -> deserialize(stream, javaType));
+    }
+
+    @SuppressWarnings("unchecked")
+    private T deserialize(InputStream bodyAsStream, JavaType javaType) {
         Class<?> expectedClassType = javaType.rawClassType();
 
         JAXBContext context = context(expectedClassType);
 
-        try (ByteArrayInputStream stream = new ByteArrayInputStream(body);
-             InputStreamReader reader = new InputStreamReader(stream);
+        try (InputStreamReader reader = new InputStreamReader(bodyAsStream);
              BufferedReader buffered = new BufferedReader(reader)) {
 
             Unmarshaller unmarshaller = context.createUnmarshaller();

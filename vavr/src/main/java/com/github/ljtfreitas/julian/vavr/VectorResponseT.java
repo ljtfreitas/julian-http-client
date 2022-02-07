@@ -42,7 +42,7 @@ public class VectorResponseT<T> implements ResponseT<Collection<T>, Vector<T>> {
         return new ResponseFn<>() {
 
             @Override
-            public Promise<Vector<T>, ? extends Exception> run(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+            public Promise<Vector<T>> run(Promise<? extends Response<A>> response, Arguments arguments) {
                 return fn.run(response, arguments)
                         .then(c -> Optional.ofNullable(c)
                                 .filter(Predicate.not(Collection::isEmpty))

@@ -24,7 +24,7 @@ class ResponsesTest {
 		when(endpoint.returnType()).thenReturn(completableFutureType);
 		when(endpoint.returns(any())).thenCallRealMethod();
 
-		Response<String, Exception> response = Response.done("oi");
+		Response<String> response = Response.done("oi");
 
 		Responses responses = new Responses(List.of(new CompletionStageResponseT<>(), new OptionalResponseT<>()));
 

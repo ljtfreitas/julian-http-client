@@ -44,7 +44,7 @@ public class TraversableResponseT<T> implements ResponseT<Collection<T>, Travers
         return new ResponseFn<>() {
 
             @Override
-            public Promise<Traversable<T>, ? extends Exception> run(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+            public Promise<Traversable<T>> run(Promise<? extends Response<A>> response, Arguments arguments) {
                 return fn.run(response, arguments)
                         .then(c -> Optional.ofNullable(c)
                                 .filter(not(Collection::isEmpty))

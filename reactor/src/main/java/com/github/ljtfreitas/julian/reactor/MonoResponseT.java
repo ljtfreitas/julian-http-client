@@ -41,10 +41,10 @@ public class MonoResponseT<T> implements ResponseT<T, Mono<T>> {
         return new ResponseFn<>() {
 
             @Override
-            public Mono<T> join(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
-                Promise<T, ? extends Exception> promise = fn.run(response, arguments);
+            public Mono<T> join(Promise<? extends Response<A>> response, Arguments arguments) {
+                Promise<T> promise = fn.run(response, arguments);
 
-                return promise.cast(new Kind<MonoPromise<T, Exception>>() {})
+                return promise.cast(new Kind<MonoPromise<T>>() {})
                         .map(MonoPromise::mono)
                         .orElseGet(() -> Mono.fromFuture(promise.future()));
             }

@@ -22,7 +22,6 @@
 
 package com.github.ljtfreitas.julian.http;
 
-import com.github.ljtfreitas.julian.Except;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.http.client.HTTPClient;
 import com.github.ljtfreitas.julian.http.client.HTTPClientException;
@@ -34,6 +33,7 @@ import com.github.ljtfreitas.julian.http.codec.HTTPResponseReaderException;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 
@@ -55,7 +55,7 @@ class DefaultHTTPRequestIO<T> implements HTTPRequestIO<T> {
 	}
 
 	@Override
-	public Promise<HTTPResponse<T>, HTTPException> execute() {
+	public Promise<HTTPResponse<T>> execute() {
 		return httpClient.request(source).execute()
 				.failure(e -> exceptionally(deep(e)))
 				.then(this::read);
@@ -91,27 +91,34 @@ class DefaultHTTPRequestIO<T> implements HTTPRequestIO<T> {
 	}
 
 	private HTTPResponse<T> success(HTTPClientResponse response) {
-		Optional<HTTPResponse<T>> r = response.body()
-				.deserialize(body -> deserialize(body, response.headers()))
-				.map(b -> HTTPResponse.success(response.status(), response.headers(), b));
+		Optional<HTTPResponse<T>> success = deserialize(response)
+				.map(bodyAsFuture -> HTTPResponse.lazy(response.status(), response.headers(), Promise.pending(bodyAsFuture)));
 
-		return r.orElseGet(() -> empty(response));
+		return success.orElseGet(() -> empty(response));
 	}
 
 	private HTTPResponse<T> empty(HTTPClientResponse response) {
 		return HTTPResponse.empty(response.status(), response.headers());
 	}
 
-	@SuppressWarnings("unchecked")
-	private T deserialize(byte[] bodyAsBytes, HTTPHeaders headers) {
-		MediaType mediaType = headers.select(CONTENT_TYPE)
+	private Optional<CompletableFuture<T>> deserialize(HTTPClientResponse response) {
+		MediaType mediaType = response.headers().select(CONTENT_TYPE)
 				.map(h -> MediaType.valueOf(h.value()))
 				.orElseGet(MediaType::wildcard);
 
 		HTTPResponseReader<?> reader = codecs.readers().select(mediaType, source.returnType())
-				.orElseThrow(() -> new HTTPResponseReaderException(format("There is not a HTTPResponseReader able to convert {0} to {1}", mediaType, source.returnType())));
+				.orElseThrow(() -> new HTTPResponseReaderException(format("There is no a HTTPResponseReader able to convert {0} to {1}", mediaType, source.returnType())));
 
-		return (T) Except.run(() -> reader.read(bodyAsBytes, source.returnType()))
-				.prop(HTTPResponseReaderException::new);
+		return reader.read(response.body(), source.returnType())
+				.map(c -> c.handleAsync(this::handle).toCompletableFuture());
 	}
+
+	@SuppressWarnings("unchecked")
+	private T handle(Object value, Throwable e) {
+		if (e != null)
+			if (e instanceof HTTPResponseReaderException) throw (HTTPResponseReaderException) e;
+			else throw new HTTPResponseReaderException(e);
+		else return (T) value;
+	}
+
 }

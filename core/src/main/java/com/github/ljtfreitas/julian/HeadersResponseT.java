@@ -33,7 +33,7 @@ public class HeadersResponseT implements ResponseT<Void, Headers> {
         return new ResponseFn<>() {
 
             @Override
-            public Promise<Headers, ? extends Exception> run(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+            public Promise<Headers> run(Promise<? extends Response<A>> response, Arguments arguments) {
                 return response.then(r -> r.cast(new Kind<HTTPResponse<A>>() {})
                         .map(HTTPResponse::headers)
                         .map(headers -> headers.all().stream()
@@ -43,7 +43,7 @@ public class HeadersResponseT implements ResponseT<Void, Headers> {
 
             @Override
             public JavaType returnType() {
-                return null;
+                return fn.returnType();
             }
         };
     }

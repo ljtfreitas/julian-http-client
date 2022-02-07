@@ -71,7 +71,7 @@ class MaybeResponseTTest {
 
     @Test
     void bind() {
-        Promise<Response<String, Exception>, Exception> response = Promise.done(Response.done("hello"));
+        Promise<Response<String>> response = Promise.done(Response.done("hello"));
 
         ResponseFn<String, String> fn = new ObjectResponseT<String>().bind(endpoint, null);
 

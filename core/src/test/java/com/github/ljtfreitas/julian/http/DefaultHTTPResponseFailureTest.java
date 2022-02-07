@@ -30,7 +30,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Flow;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -63,17 +66,17 @@ class DefaultHTTPResponseFailureTest {
 			}
 
 			@Override
-			public DefaultHTTPResponseBody body() {
-				return new DefaultHTTPResponseBody(responseBody.getBytes());
+			public HTTPResponseBody body() {
+				return new PublisherHTTPResponseBody(new SimplePublisher(responseBody));
 			}
 
 			@Override
-			public <T, R extends Response<T, HTTPResponseException>> Optional<R> failure(Function<? super HTTPClientResponse, R> fn) {
+			public <T, R extends Response<T>> Optional<R> failure(Function<? super HTTPClientResponse, R> fn) {
 				return Optional.empty();
 			}
 
 			@Override
-			public <T, R extends Response<T, HTTPResponseException>> Optional<R> success(Function<? super HTTPClientResponse, R> fn) {
+			public <T, R extends Response<T>> Optional<R> success(Function<? super HTTPClientResponse, R> fn) {
 				return Optional.empty();
 			}
 		};
@@ -116,5 +119,30 @@ class DefaultHTTPResponseFailureTest {
 					     arguments(HTTPStatus.valueOf(HTTPStatusCode.GATEWAY_TIMEOUT), GatewayTimeout.class),
 					     arguments(HTTPStatus.valueOf(HTTPStatusCode.HTTP_VERSION_NOT_SUPPORTED), HTTPVersionNotSupported.class),
 					     arguments(HTTPStatus.valueOf(499), HTTPResponseException.class));
+	}
+
+	private class SimplePublisher implements Flow.Publisher<List<ByteBuffer>> {
+
+		private final String source;
+
+		SimplePublisher(String source) {
+			this.source = source;
+		}
+
+		@Override
+		public void subscribe(Flow.Subscriber<? super List<ByteBuffer>> subscriber) {
+			subscriber.onSubscribe(new Flow.Subscription() {
+
+
+				@Override
+				public void request(long n) {
+					subscriber.onNext(List.of(ByteBuffer.wrap(source.getBytes())));
+					subscriber.onComplete();
+				}
+
+				@Override
+				public void cancel() {}
+			});
+		}
 	}
 }

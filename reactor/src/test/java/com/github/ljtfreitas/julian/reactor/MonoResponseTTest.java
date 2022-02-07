@@ -15,8 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -73,7 +71,7 @@ class MonoResponseTTest {
 
     @Test
     void bind() {
-        Promise<Response<String, Exception>, Exception> response = Promise.done(Response.done("hello"));
+        Promise<Response<String>> response = Promise.done(Response.done("hello"));
 
         ResponseFn<String, String> fn = new ObjectResponseT<String>().bind(endpoint, null);
 
@@ -87,7 +85,7 @@ class MonoResponseTTest {
 
     @Test
     void bindAsMono() {
-        Promise<Response<String, Exception>, Exception> response = new MonoPromise<>(Mono.just(Response.done("hello")));
+        Promise<Response<String>> response = new MonoPromise<>(Mono.just(Response.done("hello")));
 
         ResponseFn<String, String> fn = new ObjectResponseT<String>().bind(endpoint, null);
 
@@ -103,7 +101,7 @@ class MonoResponseTTest {
     void failure() {
         RuntimeException exception = new RuntimeException("oops");
 
-        Promise<Response<String, Exception>, Exception> response = Promise.failed(exception);
+        Promise<Response<String>> response = Promise.failed(exception);
 
         ResponseFn<String, String> fn = new ObjectResponseT<String>().bind(endpoint, null);
 
@@ -118,7 +116,7 @@ class MonoResponseTTest {
     void failureAsMono() {
         RuntimeException exception = new RuntimeException("oops");
 
-        Promise<Response<String, Exception>, Exception> response = new MonoPromise<>(Mono.error(exception));
+        Promise<Response<String>> response = new MonoPromise<>(Mono.error(exception));
 
         ResponseFn<String, String> fn = new ObjectResponseT<String>().bind(endpoint, null);
 

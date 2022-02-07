@@ -29,7 +29,7 @@ import java.lang.reflect.ParameterizedType;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-public class PromiseSubscriberCallbackResponseT<T> implements ResponseT<Promise<T, ?>, Void> {
+public class PromiseSubscriberCallbackResponseT<T> implements ResponseT<Promise<T>, Void> {
 
     private static final PromiseSubscriberCallbackResponseT<Object> SINGLE_INSTANCE = new PromiseSubscriberCallbackResponseT<>();
 
@@ -38,22 +38,22 @@ public class PromiseSubscriberCallbackResponseT<T> implements ResponseT<Promise<
     }
 
     @Override
-    public <A> ResponseFn<A, Void> bind(Endpoint endpoint, ResponseFn<A, Promise<T, ?>> fn) {
+    public <A> ResponseFn<A, Void> bind(Endpoint endpoint, ResponseFn<A, Promise<T>> fn) {
         return new ResponseFn<>() {
 
             @Override
-            public Void join(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+            public Void join(Promise<? extends Response<A>> response, Arguments arguments) {
                 subscriber(endpoint.parameters(), arguments).ifPresent(subscriber -> fn.join(response, arguments).subscribe(subscriber));
                 return null;
             }
 
             @SuppressWarnings("unchecked")
-            private Optional<Promise.Subscriber<T, Exception>> subscriber(Parameters parameters, Arguments arguments) {
+            private Optional<Subscriber<T>> subscriber(Parameters parameters, Arguments arguments) {
                 return parameters.callbacks()
-                        .filter(c -> c.javaType().compatible(Promise.Subscriber.class))
+                        .filter(c -> c.javaType().compatible(Subscriber.class))
                         .findFirst()
                         .flatMap(c -> arguments.of(c.position()))
-                        .map(arg -> (Promise.Subscriber<T, Exception>) arg);
+                        .map(arg -> (Subscriber<T>) arg);
             }
 
             @Override
@@ -66,8 +66,8 @@ public class PromiseSubscriberCallbackResponseT<T> implements ResponseT<Promise<
     @Override
     public JavaType adapted(Endpoint endpoint) {
         return argument(endpoint, this::subscriber)
-                .map(parameterized -> JavaType.parameterized(Promise.class, parameterized.getActualTypeArguments()[0], parameterized.getActualTypeArguments()[1]))
-                .orElseGet(() -> JavaType.parameterized(Promise.class, Object.class, Exception.class));
+                .map(parameterized -> JavaType.parameterized(Promise.class, parameterized.getActualTypeArguments()[0]))
+                .orElseGet(() -> JavaType.parameterized(Promise.class, Object.class));
     }
 
     private Optional<ParameterizedType> argument(Endpoint endpoint, Predicate<CallbackParameter> p) {
@@ -85,9 +85,7 @@ public class PromiseSubscriberCallbackResponseT<T> implements ResponseT<Promise<
 
     private boolean subscriber(CallbackParameter callback) {
         JavaType javaType = callback.javaType();
-        return javaType.compatible(Promise.Subscriber.class)
-            && javaType.parameterized().filter(p -> p.getActualTypeArguments().length == 2)
-                    .filter(p -> p.getActualTypeArguments()[1].equals(Exception.class))
-                    .isPresent();
+        return javaType.compatible(Subscriber.class)
+            && javaType.parameterized().isPresent();
     }
 }

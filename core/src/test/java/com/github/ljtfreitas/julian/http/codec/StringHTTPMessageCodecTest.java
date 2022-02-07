@@ -2,9 +2,11 @@ package com.github.ljtfreitas.julian.http.codec;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Flow;
 
 import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.MediaType;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -46,7 +48,9 @@ class StringHTTPMessageCodecTest {
             void read() {
                 String value = "response body";
 
-                Object output = codec.read(value.getBytes(), JavaType.valueOf(String.class));
+                Object output = codec.read(HTTPResponseBody.some(value.getBytes()), JavaType.valueOf(String.class))
+                        .map(CompletableFuture::join)
+                        .orElse("");
 
                 assertEquals(value, output);
             }

@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.junit.jupiter.api.Nested;
@@ -59,7 +58,7 @@ class FutureResponseTTest {
 	}
 	
 	@Test
-	void compose(@Mock ResponseFn<String, String> fn, @Mock Promise<Response<String, Exception>, Exception> response) throws Exception {
+	void compose(@Mock ResponseFn<String, String> fn, @Mock Promise<Response<String>> response) throws Exception {
 		Arguments arguments = Arguments.empty();
 
 		when(fn.run(response, arguments)).thenReturn(Promise.done("expected"));

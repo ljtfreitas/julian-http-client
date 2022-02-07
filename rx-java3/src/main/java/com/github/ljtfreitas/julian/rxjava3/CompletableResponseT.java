@@ -38,7 +38,7 @@ public class CompletableResponseT implements ResponseT<Void, Completable> {
         return new ResponseFn<>() {
 
             @Override
-            public Completable join(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+            public Completable join(Promise<? extends Response<A>> response, Arguments arguments) {
                 return Completable.fromCompletionStage(fn.run(response, arguments).future());
             }
 

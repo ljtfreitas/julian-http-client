@@ -1,5 +1,4 @@
 com.github.ljtfreitas.julian.vavr.ArrayResponseT
-com.github.ljtfreitas.julian.vavr.EitherHTTPResponseT
 com.github.ljtfreitas.julian.vavr.EitherResponseT
 com.github.ljtfreitas.julian.vavr.FutureResponseT
 com.github.ljtfreitas.julian.vavr.IndexedSeqResponseT

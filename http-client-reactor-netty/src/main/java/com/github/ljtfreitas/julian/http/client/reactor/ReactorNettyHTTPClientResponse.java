@@ -22,23 +22,30 @@
 
 package com.github.ljtfreitas.julian.http.client.reactor;
 
-import com.github.ljtfreitas.julian.http.HTTPResponseException;
-import com.github.ljtfreitas.julian.http.OptionalHTTPResponseBody;
-import reactor.core.publisher.Mono;
-import reactor.netty.ByteBufMono;
-import reactor.netty.http.client.HttpClientResponse;
-
-import java.util.Optional;
-import java.util.function.Function;
-
 import com.github.ljtfreitas.julian.Response;
-import com.github.ljtfreitas.julian.http.DefaultHTTPResponseBody;
 import com.github.ljtfreitas.julian.http.HTTPHeader;
 import com.github.ljtfreitas.julian.http.HTTPHeaders;
 import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.HTTPStatus;
 import com.github.ljtfreitas.julian.http.HTTPStatusCode;
 import com.github.ljtfreitas.julian.http.client.HTTPClientResponse;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
+import reactor.adapter.JdkFlowAdapter;
+import reactor.core.publisher.Mono;
+import reactor.netty.ByteBufMono;
+import reactor.netty.http.client.HttpClientResponse;
+
+import java.net.http.HttpResponse;
+import java.nio.ByteBuffer;
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.Flow;
+import java.util.concurrent.Flow.Publisher;
+import java.util.function.Function;
 
 class ReactorNettyHTTPClientResponse implements HTTPClientResponse {
 
@@ -64,12 +71,12 @@ class ReactorNettyHTTPClientResponse implements HTTPClientResponse {
     }
 
     @Override
-    public <T, R extends Response<T, HTTPResponseException>> Optional<R> failure(Function<? super HTTPClientResponse, R> fn) {
+    public <T, R extends Response<T>> Optional<R> failure(Function<? super HTTPClientResponse, R> fn) {
         return response.failure(fn);
     }
 
     @Override
-    public <T, R extends Response<T, HTTPResponseException>> Optional<R> success(Function<? super HTTPClientResponse, R> fn) {
+    public <T, R extends Response<T>> Optional<R> success(Function<? super HTTPClientResponse, R> fn) {
         return response.success(fn);
     }
 
@@ -82,7 +89,7 @@ class ReactorNettyHTTPClientResponse implements HTTPClientResponse {
                 .reduce(HTTPHeaders.empty(), HTTPHeaders::join, (a, b) -> b);
 
         return bodyAsBuffer.asByteArray()
-                .map(bodyAsByteArray -> new OptionalHTTPResponseBody(status, headers, () -> new DefaultHTTPResponseBody(bodyAsByteArray)))
+                .map(bodyAsBytes -> HTTPResponseBody.optional(status, headers, () -> HTTPResponseBody.some(bodyAsBytes)))
                 .map(body -> new ReactorNettyHTTPClientResponse(HTTPClientResponse.create(status, headers, body)))
                 .switchIfEmpty(Mono.fromCallable(() -> new ReactorNettyHTTPClientResponse(HTTPClientResponse.empty(status, headers))));
     }

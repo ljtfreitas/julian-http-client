@@ -45,7 +45,7 @@ public class SubscriberCallbackResponseT<T> implements ResponseT<Publisher<T>, V
         return new ResponseFn<>() {
 
             @Override
-            public Void join(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+            public Void join(Promise<? extends Response<A>> response, Arguments arguments) {
                 fn.run(response, arguments)
                         .onSuccess(publisher -> subscriber(endpoint.parameters(), arguments).ifPresent(publisher::subscribe));
                 return null;
@@ -62,7 +62,7 @@ public class SubscriberCallbackResponseT<T> implements ResponseT<Publisher<T>, V
 
             @Override
             public JavaType returnType() {
-                return null;
+                return fn.returnType();
             }
         };
     }

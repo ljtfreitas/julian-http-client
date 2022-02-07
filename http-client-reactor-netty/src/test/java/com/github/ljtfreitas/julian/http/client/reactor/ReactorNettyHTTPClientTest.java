@@ -4,7 +4,6 @@ import com.github.ljtfreitas.julian.Except;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.http.DefaultHTTPRequestBody;
-import com.github.ljtfreitas.julian.http.HTTPException;
 import com.github.ljtfreitas.julian.http.HTTPHeader;
 import com.github.ljtfreitas.julian.http.HTTPHeaders;
 import com.github.ljtfreitas.julian.http.HTTPMethod;
@@ -36,6 +35,7 @@ import java.net.URI;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -86,7 +86,9 @@ class ReactorNettyHTTPClientTest {
             HTTPClientResponse response = client.request(request).execute().join().unsafe();
 
             assertAll(() -> assertEquals(expectedResponse.getStatusCode(), response.status().code()),
-                      () -> assertEquals(expectedResponse.getBodyAsString(), response.body().deserialize(String::new).orElse(null)));
+                      () -> assertEquals(expectedResponse.getBodyAsString(), response.body().readAsBytes(String::new)
+                              .map(CompletableFuture::join)
+                              .orElse(null)));
         }
     }
 
@@ -140,7 +142,7 @@ class ReactorNettyHTTPClientTest {
 
                     HTTPClientResponse response = client.request(request).execute().join().unsafe();
 
-                    assertEquals(expectedResponse, response.body().deserialize(String::new).orElse(""));
+                    assertEquals(expectedResponse, response.body().readAsBytes(String::new).map(CompletableFuture::join).orElse(""));
                 }
             }
         }
@@ -167,7 +169,7 @@ class ReactorNettyHTTPClientTest {
 
                     HTTPClientResponse response = client.request(request).execute().join().unsafe();
 
-                    assertEquals(expectedResponse, response.body().deserialize(String::new).orElse(""));
+                    assertEquals(expectedResponse, response.body().readAsBytes(String::new).map(CompletableFuture::join).orElse(""));
                 }
             }
         }
@@ -278,7 +280,7 @@ class ReactorNettyHTTPClientTest {
                     .respond(response("GET is working")
                             .withContentType(TEXT_PLAIN));
 
-            Promise<String, HTTPException> promise = GET("http://localhost:8092/hello")
+            Promise<String> promise = GET("http://localhost:8092/hello")
                     .response(String.class, StringHTTPMessageCodec.get())
                     .build(client)
                         .execute()
@@ -296,7 +298,7 @@ class ReactorNettyHTTPClientTest {
                     .respond(response("POST is working")
                             .withContentType(TEXT_PLAIN));
 
-            Promise<String, HTTPException> promise = POST("http://localhost:8092/hello")
+            Promise<String> promise = POST("http://localhost:8092/hello")
                     .header(new HTTPHeader(HTTPHeader.CONTENT_TYPE, "text/plain"))
                     .body("i am a body", StringHTTPMessageCodec.get())
                     .response(String.class, StringHTTPMessageCodec.get())
@@ -316,7 +318,7 @@ class ReactorNettyHTTPClientTest {
                     .respond(response("PUT is working")
                             .withContentType(TEXT_PLAIN));
 
-            Promise<String, HTTPException> promise = PUT("http://localhost:8092/hello")
+            Promise<String> promise = PUT("http://localhost:8092/hello")
                     .header(new HTTPHeader(HTTPHeader.CONTENT_TYPE, "text/plain"))
                     .body("i am a body", StringHTTPMessageCodec.get())
                     .response(String.class, new StringHTTPMessageCodec())
@@ -336,7 +338,7 @@ class ReactorNettyHTTPClientTest {
                     .respond(response("PATCH is working")
                             .withContentType(TEXT_PLAIN));
 
-            Promise<String, HTTPException> promise = PATCH("http://localhost:8092/hello")
+            Promise<String> promise = PATCH("http://localhost:8092/hello")
                     .header(new HTTPHeader(HTTPHeader.CONTENT_TYPE, "text/plain"))
                     .body("i am a body", StringHTTPMessageCodec.get())
                     .response(String.class, new StringHTTPMessageCodec())
@@ -353,7 +355,7 @@ class ReactorNettyHTTPClientTest {
                             .withMethod("DELETE"))
                     .respond(response().withStatusCode(200));
 
-            Promise<HTTPStatus, HTTPException> promise = DELETE("http://localhost:8092/hello")
+            Promise<HTTPStatus> promise = DELETE("http://localhost:8092/hello")
                     .build(client)
                         .execute()
                         .then(HTTPResponse::status);
@@ -372,7 +374,7 @@ class ReactorNettyHTTPClientTest {
                     .when(requestDefinition)
                     .respond(response().withHeader("x-my-header", "whatever"));
 
-            Promise<HTTPHeaders, HTTPException> promise = HEAD("http://localhost:8092/hello")
+            Promise<HTTPHeaders> promise = HEAD("http://localhost:8092/hello")
                     .build(client)
                         .execute()
                         .then(HTTPResponse::headers);
@@ -393,7 +395,7 @@ class ReactorNettyHTTPClientTest {
                     .when(requestDefinition)
                     .respond(response().withHeader("Allow", "GET, POST, PUT, DELETE"));
 
-            Promise<HTTPHeaders, HTTPException> promise = OPTIONS("http://localhost:8092/hello")
+            Promise<HTTPHeaders> promise = OPTIONS("http://localhost:8092/hello")
                     .build(client)
                     .execute()
                     .then(HTTPResponse::headers);
@@ -414,7 +416,7 @@ class ReactorNettyHTTPClientTest {
                     .when(requestDefinition)
                     .respond(response().withStatusCode(200));
 
-            Promise<HTTPStatus, HTTPException> promise = TRACE("http://localhost:8092/hello")
+            Promise<HTTPStatus> promise = TRACE("http://localhost:8092/hello")
                     .build(client)
                     .execute()
                     .then(HTTPResponse::status);

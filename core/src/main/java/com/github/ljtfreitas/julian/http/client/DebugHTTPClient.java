@@ -23,16 +23,30 @@
 package com.github.ljtfreitas.julian.http.client;
 
 import com.github.ljtfreitas.julian.Promise;
+import com.github.ljtfreitas.julian.Response;
+import com.github.ljtfreitas.julian.http.HTTPHeaders;
 import com.github.ljtfreitas.julian.http.HTTPRequestBody;
 import com.github.ljtfreitas.julian.http.HTTPRequestDefinition;
+import com.github.ljtfreitas.julian.http.HTTPResponseBody;
+import com.github.ljtfreitas.julian.http.HTTPStatus;
 
+import java.io.ByteArrayOutputStream;
 import java.lang.System.Logger.Level;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Flow.Processor;
+import java.util.concurrent.Flow.Publisher;
 import java.util.concurrent.Flow.Subscriber;
 import java.util.concurrent.Flow.Subscription;
+import java.util.concurrent.SubmissionPublisher;
+import java.util.function.Function;
+
+import static java.util.function.Function.identity;
 
 public class DebugHTTPClient implements HTTPClient {
 
@@ -47,20 +61,6 @@ public class DebugHTTPClient implements HTTPClient {
     @Override
     public HTTPClientRequest request(HTTPRequestDefinition request) {
         return new DebugHTTPClientRequest(source.request(info(request)));
-    }
-
-    private class DebugHTTPClientRequest implements HTTPClientRequest  {
-
-        private final HTTPClientRequest source;
-
-        public DebugHTTPClientRequest(HTTPClientRequest source) {
-            this.source = source;
-        }
-
-        @Override
-        public Promise<HTTPClientResponse, Exception> execute() {
-            return source.execute().then(DebugHTTPClient.this::info);
-        }
     }
 
     private HTTPRequestDefinition info(HTTPRequestDefinition request) {
@@ -89,6 +89,7 @@ public class DebugHTTPClient implements HTTPClient {
 
             @Override
             public void onError(Throwable throwable) {
+                log.log(Level.ERROR, throwable.getMessage(), throwable);
             }
 
             @Override
@@ -110,9 +111,9 @@ public class DebugHTTPClient implements HTTPClient {
 
         String message = new StringBuilder()
                 .append("HTTP request ->>>>>")
-                    .append("\n")
+                .append("\n")
                 .append(request.method()).append(" ").append(request.path())
-                    .append("\n")
+                .append("\n")
                 .append(headers.isEmpty() ? headers : headers.concat("\n"))
                 .append(body.isEmpty() ? body : body.concat("\n"))
                 .append("->>>>>")
@@ -121,22 +122,184 @@ public class DebugHTTPClient implements HTTPClient {
         log.log(Level.INFO, message);
     }
 
-    private HTTPClientResponse info(HTTPClientResponse response) {
-        String headers = response.headers().toString();
-        String body = response.body().deserialize(String::new).map(s -> s.concat("\n")).orElse("");
+    private class DebugHTTPClientRequest implements HTTPClientRequest  {
 
-        String message = new StringBuilder()
-                .append("HTTP response <<<<<-")
+        private final HTTPClientRequest source;
+
+        public DebugHTTPClientRequest(HTTPClientRequest source) {
+            this.source = source;
+        }
+
+        @Override
+        public Promise<HTTPClientResponse> execute() {
+            return source.execute().then(this::info);
+        }
+
+        private HTTPClientResponse info(HTTPClientResponse response) {
+            byte[] bodyAsBytes = response.body().readAsBytes(identity()).map(CompletableFuture::join).orElse(new byte[0]);
+
+            info(response, bodyAsBytes);
+
+            return new HTTPClientResponse() {
+
+                @Override
+                public HTTPStatus status() {
+                    return response.status();
+                }
+
+                @Override
+                public HTTPHeaders headers() {
+                    return response.headers();
+                }
+
+                @Override
+                public HTTPResponseBody body() {
+                    return HTTPResponseBody.some(bodyAsBytes);
+                }
+
+                @Override
+                public <T, R extends Response<T>> Optional<R> success(Function<? super HTTPClientResponse, R> fn) {
+                    return response.success(r -> fn.apply(this));
+                }
+
+                @Override
+                public <T, R extends Response<T>> Optional<R> failure(Function<? super HTTPClientResponse, R> fn) {
+                    return response.failure(r -> fn.apply(this));
+                }
+            };
+        }
+
+        private void info(HTTPClientResponse response, byte[] bodyAsBytes) {
+            String headers = response.headers().toString();
+            String body = new String(bodyAsBytes);
+
+            String message = new StringBuilder()
+                    .append("HTTP response <<<<<-")
                     .append("\n")
-                .append(response.status())
+                    .append(response.status())
                     .append("\n")
-                .append(headers.isEmpty() ? headers : headers.concat("\n"))
-                .append(body.isEmpty() ? body : body.concat("\n"))
-                .append("<<<<<-")
-                .toString();
+                    .append(headers.isEmpty() ? headers : headers.concat("\n"))
+                    .append(body.isEmpty() ? body : body.concat("\n"))
+                    .append("<<<<<-")
+                    .toString();
 
-        log.log(Level.INFO, message);
+            log.log(Level.INFO, message);
+        }
+    }
 
-        return response;
+    private class DebugHTTPClientResponse implements HTTPClientResponse {
+
+        private final HTTPClientResponse source;
+        private final HTTPResponseBody body;
+
+        private DebugHTTPClientResponse(HTTPClientResponse source) {
+            this.source = source;
+            this.body = source.body().content()
+                    .map(publisher -> HTTPResponseBody.lazy(DebugHTTPResponsePublisher.process(publisher, this)))
+                    .orElseGet(HTTPResponseBody::empty);
+        }
+
+        @Override
+        public HTTPStatus status() {
+            return source.status();
+        }
+
+        @Override
+        public HTTPHeaders headers() {
+            return source.headers();
+        }
+
+        @Override
+        public HTTPResponseBody body() {
+            return body;
+        }
+
+        @Override
+        public <T, R extends Response<T>> Optional<R> success(Function<? super HTTPClientResponse, R> fn) {
+            return source.success(r -> fn.apply(this));
+        }
+
+        @Override
+        public <T, R extends Response<T>> Optional<R> failure(Function<? super HTTPClientResponse, R> fn) {
+            return source.failure(r -> fn.apply(this));
+        }
+    }
+
+    private static class DebugHTTPResponsePublisher
+            extends SubmissionPublisher<List<ByteBuffer>>
+            implements Processor<List<ByteBuffer>, List<ByteBuffer>> {
+
+        private final HTTPClientResponse response;
+
+        private final List<byte[]> allBytes = new ArrayList<>();
+
+        private Subscription subscription = null;
+
+        public DebugHTTPResponsePublisher(HTTPClientResponse response) {
+            this.response = response;
+        }
+
+        @Override
+        public void onSubscribe(Subscription subscription) {
+            this.subscription = subscription;
+            this.subscription.request(Long.MAX_VALUE);
+        }
+
+        @Override
+        public void onNext(List<ByteBuffer> buffers) {
+            byte[] bufferAsBytes = joinBytes(buffers);
+            allBytes.add(bufferAsBytes);
+            submit(List.of(ByteBuffer.wrap(bufferAsBytes)));
+            subscription.request(Long.MAX_VALUE);
+        }
+
+        private byte[] joinBytes(List<ByteBuffer> buffers) {
+            int expectedSize = buffers.stream().mapToInt(Buffer::remaining).sum();
+            byte[] allBytes = new byte[expectedSize];
+
+            buffers.stream().reduce(0,
+                    (f, b) -> { int l = b.remaining(); b.get(allBytes, f, l); return f + l; },
+                    (a, b) -> b);
+
+            return allBytes;
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+            log.log(Level.ERROR, throwable.getMessage(), throwable);
+            subscription.cancel();
+        }
+
+        @Override
+        public void onComplete() {
+            String headers = response.headers().toString();
+            String body = new String(bodyAsBytes());
+
+            String message = new StringBuilder()
+                    .append("HTTP response <<<<<-")
+                    .append("\n")
+                    .append(response.status())
+                    .append("\n")
+                    .append(headers.isEmpty() ? headers : headers.concat("\n"))
+                    .append(body.isEmpty() ? body : body.concat("\n"))
+                    .append("<<<<<-")
+                    .toString();
+
+            log.log(Level.INFO, message);
+
+            close();
+        }
+
+        private byte[] bodyAsBytes() {
+            return allBytes.stream().reduce(new ByteArrayOutputStream(),
+                    (output, bytes) -> { output.write(bytes, 0, bytes.length); return output; },
+                    (a, b) -> b).toByteArray();
+        }
+
+        private static DebugHTTPResponsePublisher process(Publisher<List<ByteBuffer>> publisher, HTTPClientResponse source) {
+            DebugHTTPResponsePublisher processor = new DebugHTTPResponsePublisher(source);
+            publisher.subscribe(processor);
+            return processor;
+        }
     }
 }

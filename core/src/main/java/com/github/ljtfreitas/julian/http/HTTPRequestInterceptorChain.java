@@ -51,7 +51,7 @@ public class HTTPRequestInterceptorChain implements HTTPRequestInterceptor {
     }
 
     @Override
-    public <T> Promise<HTTPRequest<T>, HTTPException> intercepts(Promise<HTTPRequest<T>, HTTPException> request) {
+    public <T> Promise<HTTPRequest<T>> intercepts(Promise<HTTPRequest<T>> request) {
         return interceptors.stream().reduce(request, (r, i) -> i.intercepts(r), (a, b) -> b);
     }
 }

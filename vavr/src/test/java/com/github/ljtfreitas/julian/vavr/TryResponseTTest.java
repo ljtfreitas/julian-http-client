@@ -7,8 +7,6 @@ import com.github.ljtfreitas.julian.ObjectResponseT;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
-import io.vavr.API;
-import io.vavr.control.Either;
 import io.vavr.control.Try;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -20,7 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static io.vavr.API.$;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -78,7 +75,7 @@ class TryResponseTTest {
         String content = "hello";
 
         ResponseFn<String, String> fn = new ObjectResponseT<String>().bind(endpoint, null);
-        Promise<Response<String, Exception>, Exception> promise = Promise.done(Response.done(content));
+        Promise<Response<String>> promise = Promise.done(Response.done(content));
 
         Try<String> attempt = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
 
@@ -92,7 +89,7 @@ class TryResponseTTest {
         RuntimeException failure = new RuntimeException("oops");
 
         ResponseFn<String, String> fn = new ObjectResponseT<String>().bind(endpoint, null);
-        Promise<Response<String, Exception>, Exception> promise = Promise.failed(failure);
+        Promise<Response<String>> promise = Promise.failed(failure);
 
         Arguments arguments = Arguments.empty();
 

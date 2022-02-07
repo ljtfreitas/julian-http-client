@@ -31,19 +31,18 @@ import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
 import com.github.ljtfreitas.julian.ResponseT;
 
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
-public class HTTPResponseT<T> implements ResponseT<Response<T, ?>, HTTPResponse<T>> {
+public class HTTPResponseT<T> implements ResponseT<Response<T>, HTTPResponse<T>> {
 
     private static final HTTPResponseT<Object> SINGLE_INSTANCE = new HTTPResponseT<>();
 
     @Override
-    public <A> ResponseFn<A, HTTPResponse<T>> bind(Endpoint endpoint, ResponseFn<A, Response<T, ?>> fn) {
+    public <A> ResponseFn<A, HTTPResponse<T>> bind(Endpoint endpoint, ResponseFn<A, Response<T>> fn) {
         return new ResponseFn<>() {
 
             @Override
-            public Promise<HTTPResponse<T>, ? extends Exception> run(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+            public Promise<HTTPResponse<T>> run(Promise<? extends Response<A>> response, Arguments arguments) {
                 return fn.run(response, arguments).then(r -> r.cast(new Kind<HTTPResponse<T>>() {})
                         .orElseThrow(() -> new IllegalArgumentException("It was expected a HTTPResponse instance, but it was " + r)));
             }

@@ -42,6 +42,7 @@ import java.security.UnrecoverableKeyException;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -53,7 +54,9 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
@@ -82,7 +85,7 @@ class DefaultHTTPClientTest {
             HTTPClientResponse response = client.request(request).execute().join().unsafe();
 
             assertAll(() -> assertEquals(expectedResponse.getStatusCode(), response.status().code()),
-                      () -> assertEquals(expectedResponse.getBodyAsString(), response.body().deserialize(String::new).orElse(null)));
+                      () -> assertEquals(expectedResponse.getBodyAsString(), response.body().readAsBytes(String::new).map(CompletableFuture::join).orElse(null)));
         }
     }
 
@@ -136,7 +139,7 @@ class DefaultHTTPClientTest {
 
                     HTTPClientResponse response = client.request(request).execute().join().unsafe();
 
-                    assertEquals(expectedResponse, response.body().deserialize(String::new).orElse(""));
+                    assertEquals(expectedResponse, response.body().readAsBytes(String::new).map(CompletableFuture::join).orElse(""));
                 }
             }
         }
@@ -163,7 +166,7 @@ class DefaultHTTPClientTest {
 
                     HTTPClientResponse response = client.request(request).execute().join().unsafe();
 
-                    assertEquals(expectedResponse, response.body().deserialize(String::new).orElse(""));
+                    assertEquals(expectedResponse, response.body().readAsBytes(String::new).map(CompletableFuture::join).orElse(""));
                 }
             }
         }
@@ -240,7 +243,7 @@ class DefaultHTTPClientTest {
 
                     HTTPClientResponse response = httpClient.request(new SimpleHTTPRequestDefinition("https://localhost:8094/hello")).execute().join().unsafe();
 
-                    String body = response.body().deserialize(String::new).orElse("");
+                    String body = response.body().readAsBytes(String::new).map(CompletableFuture::join).orElse("");
 
                     assertEquals("hello", body);
                 }
@@ -262,7 +265,7 @@ class DefaultHTTPClientTest {
 
                     HTTPClientResponse response = httpClient.request(new SimpleHTTPRequestDefinition("http://www.google.com.br")).execute().join().unsafe();
 
-                    String body = response.body().deserialize(String::new).orElse("");
+                    String body = response.body().readAsBytes(String::new).map(CompletableFuture::join).orElse("");
 
                     assertEquals("it's working...", body);
                 }

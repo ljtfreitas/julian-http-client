@@ -27,6 +27,6 @@ import com.github.ljtfreitas.julian.RequestDefinition;
 
 public interface HTTP {
 
-    <T> Promise<HTTPResponse<T>, HTTPException> run(RequestDefinition request);
+    <T> Promise<HTTPResponse<T>> run(RequestDefinition request);
 
 }

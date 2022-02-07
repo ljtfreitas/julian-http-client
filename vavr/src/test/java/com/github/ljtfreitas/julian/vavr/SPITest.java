@@ -16,7 +16,7 @@ public class SPITest {
     @SuppressWarnings({"rawtypes"})
     @Test
     void shouldRegisterAllServices() {
-        Collection<Class<? extends ResponseT>> expected = List.of(ArrayResponseT.class, EitherHTTPResponseT.class,
+        Collection<Class<? extends ResponseT>> expected = List.of(ArrayResponseT.class,
                 EitherResponseT.class, FutureResponseT.class, IndexedSeqResponseT.class, LazyResponseT.class,
                 LinearSeqResponseT.class, ListResponseT.class, OptionResponseT.class, QueueResponseT.class,
                 SeqResponseT.class, SetResponseT.class, TraversableResponseT.class, TryResponseT.class, VectorResponseT.class);

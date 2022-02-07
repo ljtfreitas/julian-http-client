@@ -25,6 +25,7 @@ package com.github.ljtfreitas.julian.http.codec.json.gson;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.DefaultHTTPRequestBody;
 import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.MediaType;
 import com.github.ljtfreitas.julian.http.codec.HTTPRequestWriterException;
 import com.github.ljtfreitas.julian.http.codec.HTTPResponseReaderException;
@@ -35,14 +36,21 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
+import java.net.http.HttpResponse.BodySubscriber;
+import java.net.http.HttpResponse.BodySubscribers;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Flow.Publisher;
 
 import static com.github.ljtfreitas.julian.http.MediaType.APPLICATION_JSON;
 
@@ -89,10 +97,13 @@ public class GsonJsonHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
     }
 
     @Override
-    public T read(byte[] body, JavaType javaType) {
-        try (ByteArrayInputStream stream = new ByteArrayInputStream(body);
-            InputStreamReader reader = new InputStreamReader(stream);
-            BufferedReader buffered = new BufferedReader(reader)) {
+    public Optional<CompletableFuture<T>> read(HTTPResponseBody body, JavaType javaType) {
+        return body.readAsInputStream(s -> deserialize(s, javaType));
+    }
+
+    private T deserialize(InputStream bodyAsStream, JavaType javaType) {
+        try (InputStreamReader reader = new InputStreamReader(bodyAsStream);
+             BufferedReader buffered = new BufferedReader(reader)) {
 
             TypeToken<?> token = TypeToken.get(javaType.get());
             return gson.fromJson(buffered, token.getType());

@@ -22,14 +22,10 @@
 
 package com.github.ljtfreitas.julian.http.auth;
 
-import com.github.ljtfreitas.julian.http.HTTPException;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.github.ljtfreitas.julian.Promise;
@@ -39,7 +35,6 @@ import com.github.ljtfreitas.julian.http.HTTPRequest;
 
 import static com.github.ljtfreitas.julian.http.HTTPHeader.AUTHORIZATION;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.contains;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -59,7 +54,7 @@ class HTTPAuthenticationInterceptorTest {
             return newHTTPRequest;
         });
 
-        Promise<HTTPRequest<Void>, HTTPException> authorized = interceptor.intercepts(Promise.done(request));
+        Promise<HTTPRequest<Void>> authorized = interceptor.intercepts(Promise.done(request));
 
         assertThat(authorized.join().unsafe().headers(), contains(new HTTPHeader(AUTHORIZATION, "abc1234")));
     }

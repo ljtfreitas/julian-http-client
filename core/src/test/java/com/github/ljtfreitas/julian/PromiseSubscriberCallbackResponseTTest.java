@@ -9,10 +9,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Flow.Publisher;
-import java.util.concurrent.TimeUnit;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -33,7 +29,7 @@ class PromiseSubscriberCallbackResponseTTest {
         @Test
         void supported() {
             when(endpoint.parameters()).thenReturn(Parameters.create(Parameter.callback(0, "subscriber",
-                    JavaType.parameterized(Promise.Subscriber.class, String.class, Exception.class))));
+                    JavaType.parameterized(Subscriber.class, String.class))));
             when(endpoint.returnType()).thenReturn(JavaType.none());
 
             assertTrue(responseT.test(endpoint));
@@ -53,24 +49,24 @@ class PromiseSubscriberCallbackResponseTTest {
         @Test
         void parameterized() {
             when(endpoint.parameters()).thenReturn(Parameters.create(Parameter.callback(0, "success",
-                    JavaType.parameterized(Promise.Subscriber.class, String.class, Exception.class))));
+                    JavaType.parameterized(Subscriber.class, String.class))));
 
-            assertEquals(JavaType.parameterized(Promise.class, String.class, Exception.class), responseT.adapted(endpoint));
+            assertEquals(JavaType.parameterized(Promise.class, String.class), responseT.adapted(endpoint));
         }
 
         @Test
         void unsupported() {
             when(endpoint.parameters()).thenReturn(Parameters.empty());
 
-            assertEquals(JavaType.parameterized(Promise.class, Object.class, Exception.class), responseT.adapted(endpoint));
+            assertEquals(JavaType.parameterized(Promise.class, Object.class), responseT.adapted(endpoint));
         }
     }
 
     @Test
     void compose(@Mock Endpoint endpoint, TestReporter reporter) throws InterruptedException {
-        Promise<Response<String, ? extends Exception>, Exception> response = Promise.done(new DoneResponse<>("it works!"));
+        Promise<Response<String>> response = Promise.done(new DoneResponse<>("it works!"));
 
-        Promise.Subscriber<String, Exception> subscriber = new Promise.Subscriber<>() {
+        Subscriber<String> subscriber = new Subscriber<>() {
 
             @Override
             public void success(String item) {
@@ -90,14 +86,14 @@ class PromiseSubscriberCallbackResponseTTest {
         };
 
         when(endpoint.parameters()).thenReturn(Parameters.create(Parameter.callback(0, "subscriber",
-                JavaType.parameterized(Promise.Subscriber.class, String.class, Exception.class))));
+                JavaType.parameterized(Subscriber.class, String.class))));
 
         Arguments arguments = Arguments.create(subscriber);
 
         ObjectResponseT<String> objectResponseT = new ObjectResponseT<>();
 
         PromiseResponseT<String> promiseResponseT = new PromiseResponseT<>();
-        ResponseFn<String, Promise<String, ?>> publisherFn = promiseResponseT.bind(endpoint, objectResponseT.bind(endpoint, null));
+        ResponseFn<String, Promise<String>> publisherFn = promiseResponseT.bind(endpoint, objectResponseT.bind(endpoint, null));
 
         responseT.bind(endpoint, publisherFn).join(response, arguments);
 

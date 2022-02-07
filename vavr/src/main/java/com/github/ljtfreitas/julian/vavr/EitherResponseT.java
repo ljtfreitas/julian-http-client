@@ -39,7 +39,7 @@ public class EitherResponseT<R, L extends Exception> implements ResponseT<R, Eit
 
             @SuppressWarnings("unchecked")
             @Override
-            public Promise<Either<L, R>, ? extends Exception> run(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+            public Promise<Either<L, R>> run(Promise<? extends Response<A>> response, Arguments arguments) {
                 Class<?> leftClassType = JavaType.valueOf(endpoint.returnType().parameterized().map(JavaType.Parameterized::firstArg).orElse(Exception.class)).rawClassType();
 
                 return fn.run(response, arguments)

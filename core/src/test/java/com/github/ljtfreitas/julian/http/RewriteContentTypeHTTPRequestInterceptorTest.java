@@ -29,7 +29,7 @@ class RewriteContentTypeHTTPRequestInterceptorTest {
 
         HTTPRequest<Void> request = new SimpleHTTPRequest(headers, body);
 
-        Promise<HTTPRequest<Void>, HTTPException> promise = interceptor.intercepts(Promise.done(request));
+        Promise<HTTPRequest<Void>> promise = interceptor.intercepts(Promise.done(request));
 
         HTTPRequest<Void> newRequest = promise.join().unsafe();
 
@@ -45,7 +45,7 @@ class RewriteContentTypeHTTPRequestInterceptorTest {
 
         HTTPRequest<Void> request = new SimpleHTTPRequest(headers, body);
 
-        Promise<HTTPRequest<Void>, HTTPException> promise = interceptor.intercepts(Promise.done(request));
+        Promise<HTTPRequest<Void>> promise = interceptor.intercepts(Promise.done(request));
 
         HTTPRequest<Void> newRequest = promise.join().unsafe();
 
@@ -60,7 +60,7 @@ class RewriteContentTypeHTTPRequestInterceptorTest {
 
         HTTPRequest<Void> request = new SimpleHTTPRequest(headers, null);
 
-        Promise<HTTPRequest<Void>, HTTPException> promise = interceptor.intercepts(Promise.done(request));
+        Promise<HTTPRequest<Void>> promise = interceptor.intercepts(Promise.done(request));
 
         HTTPRequest<Void> newRequest = promise.join().unsafe();
 
@@ -123,7 +123,7 @@ class RewriteContentTypeHTTPRequestInterceptorTest {
         }
 
         @Override
-        public Promise<HTTPResponse<Void>, HTTPException> execute() {
+        public Promise<HTTPResponse<Void>> execute() {
             return null;
         }
     }

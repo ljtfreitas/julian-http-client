@@ -8,6 +8,7 @@ import com.github.ljtfreitas.julian.http.HTTPHeader;
 import com.github.ljtfreitas.julian.http.HTTPHeaders;
 import com.github.ljtfreitas.julian.http.HTTPRequestInterceptor;
 import com.github.ljtfreitas.julian.http.HTTPResponse;
+import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.HTTPStatus;
 import com.github.ljtfreitas.julian.http.HTTPStatusCode;
 import com.github.ljtfreitas.julian.http.MediaType;
@@ -383,8 +384,8 @@ class ProxyBuilderTest {
                     }
 
                     @Override
-                    public String read(byte[] body, JavaType javaType) {
-                        return new String(body);
+                    public Optional<CompletableFuture<String>> read(HTTPResponseBody body, JavaType javaType) {
+                        return body.readAsBytes(String::new);
                     }
 
                     @Override
@@ -477,7 +478,7 @@ class ProxyBuilderTest {
         CompletableFuture<String> completableFuture();
 
         @GET("/response")
-        Response<String, Exception> response();
+        Response<String> response();
 
         @GET("/http-response")
         HTTPResponse<String> httpResponse();
@@ -498,7 +499,7 @@ class ProxyBuilderTest {
         Optional<String> optional();
 
         @GET("/promise")
-        Promise<String, Exception> promise();
+        Promise<String> promise();
 
         @GET("/lazy")
         Lazy<String> lazy();

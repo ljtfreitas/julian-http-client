@@ -68,9 +68,9 @@ class HTTPResponseTTest {
 
     @Test
     void compose() {
-        Promise<HTTPResponse<String>, Exception> promise = Promise.done(HTTPResponse.success(HTTPStatus.valueOf(HTTPStatusCode.OK), HTTPHeaders.empty(), "hello"));
+        Promise<HTTPResponse<String>> promise = Promise.done(HTTPResponse.success(HTTPStatus.valueOf(HTTPStatusCode.OK), HTTPHeaders.empty(), "hello"));
 
-        ResponseFn<String, Response<String, ?>> fn = new DefaultResponseT<String>().bind(endpoint,
+        ResponseFn<String, Response<String>> fn = new DefaultResponseT<String>().bind(endpoint,
                 new ObjectResponseT<String>().bind(endpoint, null));
 
         HTTPResponse<String> actual = responseT.bind(endpoint, fn).join(promise, Arguments.empty());

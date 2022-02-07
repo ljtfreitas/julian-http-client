@@ -22,12 +22,6 @@
 
 package com.github.ljtfreitas.julian.http;
 
-import com.github.ljtfreitas.julian.Arguments;
-import com.github.ljtfreitas.julian.Cookies;
-import com.github.ljtfreitas.julian.Endpoint;
-import com.github.ljtfreitas.julian.Endpoint.BodyParameter;
-import com.github.ljtfreitas.julian.Header;
-import com.github.ljtfreitas.julian.Headers;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.RequestDefinition;
@@ -38,7 +32,6 @@ import com.github.ljtfreitas.julian.http.codec.HTTPRequestWriterException;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.stream.Stream;
 
 import static com.github.ljtfreitas.julian.Message.format;
 import static com.github.ljtfreitas.julian.http.HTTPHeader.CONTENT_TYPE;
@@ -64,7 +57,7 @@ public class DefaultHTTP implements HTTP {
 	}
 
 	@Override
-	public <T> Promise<HTTPResponse<T>, HTTPException> run(RequestDefinition definition) {
+	public <T> Promise<HTTPResponse<T>> run(RequestDefinition definition) {
 		URI uri = definition.path();
 
 		HTTPHeaders headers = definition.headers().all().stream()
@@ -81,7 +74,7 @@ public class DefaultHTTP implements HTTP {
 		return intercepts(Promise.pending(() -> request)).bind(HTTPRequest::execute);
 	}
 
-	private <T> Promise<HTTPRequest<T>, HTTPException> intercepts(Promise<HTTPRequest<T>, HTTPException> request) {
+	private <T> Promise<HTTPRequest<T>> intercepts(Promise<HTTPRequest<T>> request) {
 		return interceptor.intercepts(request);
 	}
 

@@ -25,7 +25,6 @@ package com.github.ljtfreitas.julian.http.spring.webflux;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.RequestDefinition;
 import com.github.ljtfreitas.julian.http.HTTP;
-import com.github.ljtfreitas.julian.http.HTTPException;
 import com.github.ljtfreitas.julian.http.HTTPResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -52,7 +51,7 @@ public class WebClientHTTP implements HTTP {
     }
 
     @Override
-    public <T> Promise<HTTPResponse<T>, HTTPException> run(RequestDefinition definition) {
+    public <T> Promise<HTTPResponse<T>> run(RequestDefinition definition) {
         HttpHeaders headers = definition.headers().all().stream()
                 .reduce(new HttpHeaders(), (c, h) -> { c.addAll(h.name(), List.copyOf(h.values())); return c; }, (a, b) -> b);
 

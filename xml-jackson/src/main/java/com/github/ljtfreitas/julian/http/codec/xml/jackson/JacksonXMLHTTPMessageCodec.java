@@ -30,6 +30,7 @@ import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.DefaultHTTPRequestBody;
 import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.MediaType;
 import com.github.ljtfreitas.julian.http.codec.HTTPRequestWriterException;
 import com.github.ljtfreitas.julian.http.codec.HTTPResponseReaderException;
@@ -39,11 +40,14 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.nio.charset.Charset;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 import static com.github.ljtfreitas.julian.Preconditions.nonNull;
@@ -105,9 +109,12 @@ public class JacksonXMLHTTPMessageCodec<T> implements XMLHTTPMessageCodec<T> {
     }
 
     @Override
-    public T read(byte[] body, JavaType javaType) {
-        try (ByteArrayInputStream stream = new ByteArrayInputStream(body);
-            InputStreamReader reader = new InputStreamReader(stream);
+    public Optional<CompletableFuture<T>> read(HTTPResponseBody body, JavaType javaType) {
+        return body.readAsInputStream(s -> deserialize(s, javaType));
+    }
+
+    private T deserialize(InputStream bodyAsStream, JavaType javaType) {
+        try (InputStreamReader reader = new InputStreamReader(bodyAsStream);
             BufferedReader buffered = new BufferedReader(reader)) {
 
             return xmlMapper.readValue(buffered, typeFactory.constructType(javaType.get()));

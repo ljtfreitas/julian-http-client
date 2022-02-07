@@ -69,7 +69,7 @@ class CompletionStageResponseTTest {
 	}
 		
 	@Test
-	void compose(@Mock ResponseFn<String, String> fn, @Mock Promise<Response<String, Exception>, Exception> request) {
+	void compose(@Mock ResponseFn<String, String> fn, @Mock Promise<Response<String>> request) {
 		Arguments arguments = Arguments.empty();
 
 		when(fn.run(request, arguments)).thenReturn(Promise.done("expected"));

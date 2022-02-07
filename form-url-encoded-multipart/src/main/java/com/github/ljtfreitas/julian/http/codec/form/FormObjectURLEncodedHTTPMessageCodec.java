@@ -26,6 +26,7 @@ import com.github.ljtfreitas.julian.Form;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.DefaultHTTPRequestBody;
 import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.MediaType;
 import com.github.ljtfreitas.julian.http.codec.FormURLEncodedHTTPMessageCodec;
 import com.github.ljtfreitas.julian.http.codec.HTTPResponseReaderException;
@@ -36,7 +37,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.http.HttpRequest.BodyPublishers;
+import java.net.http.HttpResponse.BodySubscriber;
+import java.net.http.HttpResponse.BodySubscribers;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Flow.Publisher;
 import java.util.stream.Collectors;
 
 import static com.github.ljtfreitas.julian.http.MediaType.APPLICATION_FORM_URLENCODED;
@@ -61,18 +69,22 @@ public class FormObjectURLEncodedHTTPMessageCodec implements FormURLEncodedHTTPM
     }
 
     @Override
-    public Form read(byte[] body, JavaType javaType) {
-        try (InputStream stream = new ByteArrayInputStream(body);
-            InputStreamReader reader = new InputStreamReader(stream);
-            BufferedReader buffer = new BufferedReader(reader)) {
+    public Optional<CompletableFuture<Form>> read(HTTPResponseBody body, JavaType javaType) {
+        return body.readAsInputStream(this::deserialize);
+    }
+
+    private Form deserialize(InputStream bodyAsStream) {
+        try (InputStreamReader reader = new InputStreamReader(bodyAsStream);
+             BufferedReader buffer = new BufferedReader(reader)) {
 
             String content = buffer.lines().collect(Collectors.joining("\n"));
 
             return Form.parse(content);
 
         } catch (IOException e) {
-            throw new HTTPResponseReaderException("Form deserialization failed. The target type was: " + javaType, e);
+            throw new HTTPResponseReaderException("Form deserialization failed", e);
         }
+
     }
 
     public static FormObjectURLEncodedHTTPMessageCodec provider() {

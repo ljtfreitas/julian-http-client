@@ -38,7 +38,7 @@ public class LazyResponseT<T> implements ResponseT<T, Lazy<T>> {
         return new ResponseFn<>() {
 
             @Override
-            public Lazy<T> join(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+            public Lazy<T> join(Promise<? extends Response<A>> response, Arguments arguments) {
                 return Lazy.of(() -> fn.run(response, arguments).join().unsafe());
             }
 

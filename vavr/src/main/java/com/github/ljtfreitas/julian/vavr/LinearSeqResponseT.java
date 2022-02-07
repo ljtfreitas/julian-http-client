@@ -44,7 +44,7 @@ public class LinearSeqResponseT<T> implements ResponseT<Collection<T>, LinearSeq
         return new ResponseFn<>() {
 
             @Override
-            public Promise<LinearSeq<T>, ? extends Exception> run(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+            public Promise<LinearSeq<T>> run(Promise<? extends Response<A>> response, Arguments arguments) {
                 return fn.run(response, arguments)
                         .then(c -> Optional.ofNullable(c)
                                 .filter(not(Collection::isEmpty))

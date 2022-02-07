@@ -75,7 +75,7 @@ class MultiResponseTTest {
 
     @Test
     void bind() {
-        Promise<Response<Collection<String>, Exception>, Exception> response = Promise.done(Response.done(List.of("one", "two", "three")));
+        Promise<Response<Collection<String>>> response = Promise.done(Response.done(List.of("one", "two", "three")));
 
         when(endpoint.returnType()).thenReturn(JavaType.parameterized(Collection.class, String.class));
 
@@ -94,7 +94,7 @@ class MultiResponseTTest {
     void failure() {
         RuntimeException exception = new RuntimeException("oops");
 
-        Promise<Response<Collection<String>, Exception>, Exception> response = Promise.failed(exception);
+        Promise<Response<Collection<String>>> response = Promise.failed(exception);
 
         ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
                 new ObjectResponseT<Collection<String>>().bind(endpoint, null));

@@ -32,7 +32,7 @@ public class ObjectResponseT<T> implements ResponseT<T, T> {
 		return new ResponseFn<>() {
 
 			@Override
-			public Promise<T, ? extends Exception> run(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+			public Promise<T> run(Promise<? extends Response<A>> response, Arguments arguments) {
 				return response.bind(r -> r.map(value -> (T) value).fold(Promise::done, Promise::failed));
 			}
 

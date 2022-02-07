@@ -26,6 +26,7 @@ import java.net.URI;
 import java.util.Optional;
 
 import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.Preconditions;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.http.client.HTTPClient;
 import com.github.ljtfreitas.julian.http.codec.HTTPMessageCodecs;
@@ -84,7 +85,7 @@ class DefaultHTTPRequest<T> implements HTTPRequest<T> {
 	}
 
 	@Override
-	public Promise<HTTPResponse<T>, HTTPException> execute() {
+	public Promise<HTTPResponse<T>> execute() {
 		return io.execute();
 	}
 

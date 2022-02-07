@@ -19,7 +19,7 @@ import static org.mockito.Mockito.verify;
 class FailedPromiseTest {
 
     private final Exception failure = new RuntimeException("oops");
-    private final Promise<String, Exception> promise = new FailedPromise<>(failure);
+    private final Promise<String> promise = new FailedPromise<>(failure);
 
     @Test
     void onSuccess(@Mock Consumer<String> consumer) {

@@ -23,13 +23,11 @@
 package com.github.ljtfreitas.julian;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-class DonePromise<T, E extends Exception> implements Promise<T, E> {
+class DonePromise<T> implements Promise<T> {
 
 	private final T value;
 
@@ -38,43 +36,48 @@ class DonePromise<T, E extends Exception> implements Promise<T, E> {
 	}
 
 	@Override
-	public Promise<T, E> onSuccess(Consumer<T> fn) {
+	public Promise<T> onSuccess(Consumer<? super T> fn) {
 		fn.accept(value);
 		return this;
 	}
 
 	@Override
-	public <R> Promise<R, E> then(Function<? super T, R> fn) {
+	public <R> Promise<R> then(Function<? super T, R> fn) {
 		return new DonePromise<>(fn.apply(value));
 	}
 
 	@Override
-	public <R, Err extends Exception> Promise<R, Err> bind(Function<? super T, Promise<R, Err>> fn) {
+	public <R> Promise<R> fold(Function<? super T, R> success, Function<? super Exception, R> failure) {
+		return new DonePromise<>(success.apply(value));
+	}
+
+	@Override
+	public <R> Promise<R> bind(Function<? super T, Promise<R>> fn) {
 		return fn.apply(value);
 	}
 
 	@Override
-	public Promise<T, E> recover(Function<? super E, T> fn) {
+	public Promise<T> recover(Function<? super Exception, T> fn) {
 		return this;
 	}
 
 	@Override
-	public <Err extends E> Promise<T, E> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
+	public <Err extends Exception> Promise<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
 		return this;
 	}
 
 	@Override
-	public Promise<T, E> recover(Predicate<? super E> p, Function<? super E, T> fn) {
+	public Promise<T> recover(Predicate<? super Exception> p, Function<? super Exception, T> fn) {
 		return this;
 	}
 
 	@Override
-	public <Err extends Exception> Promise<T, Err> failure(Function<? super E, Err> fn) {
+	public <Err extends Exception> Promise<T> failure(Function<? super Exception, Err> fn) {
 		return new DonePromise<>(value);
 	}
 
 	@Override
-	public Promise<T, E> onFailure(Consumer<? super E> fn) {
+	public Promise<T> onFailure(Consumer<? super Exception> fn) {
 		return this;
 	}
 
@@ -89,7 +92,7 @@ class DonePromise<T, E extends Exception> implements Promise<T, E> {
 	}
 
 	@Override
-	public Promise<T, E> subscribe(Subscriber<? super T, ? super E> subscriber) {
+	public Promise<T> subscribe(Subscriber<? super T> subscriber) {
 		subscriber.success(value);
 		subscriber.done();
 		return this;

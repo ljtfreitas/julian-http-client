@@ -26,12 +26,16 @@ import com.github.ljtfreitas.julian.Bracket;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.DefaultHTTPRequestBody;
 import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.MediaType;
 
 import java.io.ByteArrayInputStream;
-import java.net.http.HttpRequest;
+import java.net.http.HttpRequest.BodyPublishers;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 public class ByteBufferHTTPMessageCodec implements WildcardHTTPMessageCodec<ByteBuffer> {
 
@@ -55,11 +59,11 @@ public class ByteBufferHTTPMessageCodec implements WildcardHTTPMessageCodec<Byte
 	}
 
 	@Override
-	public ByteBuffer read(byte[] body, JavaType javaType) {
-		return Bracket.acquire(() -> new ByteArrayInputStream(body))
+	public Optional<CompletableFuture<ByteBuffer>> read(HTTPResponseBody body, JavaType javaType) {
+		return body.readAsBytes(bodyAsBytes -> Bracket.acquire(() -> new ByteArrayInputStream(bodyAsBytes))
 				.map(stream -> stream.readNBytes(bufferSize))
 				.map(ByteBuffer::wrap)
-				.prop(HTTPResponseReaderException::new);
+				.prop(HTTPResponseReaderException::new));
 	}
 
 	@Override
@@ -69,7 +73,7 @@ public class ByteBufferHTTPMessageCodec implements WildcardHTTPMessageCodec<Byte
 
 	@Override
 	public HTTPRequestBody write(ByteBuffer body, Charset encoding) {
-		return new DefaultHTTPRequestBody(() -> HttpRequest.BodyPublishers.ofByteArray(read(body)));
+		return new DefaultHTTPRequestBody(() -> BodyPublishers.ofByteArray(read(body)));
 	}
 
 	private byte[] read(ByteBuffer body) {

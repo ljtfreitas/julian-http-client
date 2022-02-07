@@ -38,7 +38,7 @@ public class MaybeResponseT<T> implements ResponseT<T, Maybe<T>> {
         return new ResponseFn<>() {
 
             @Override
-            public Maybe<T> join(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+            public Maybe<T> join(Promise<? extends Response<A>> response, Arguments arguments) {
                 return Maybe.fromCompletionStage(fn.run(response, arguments).future());
             }
 

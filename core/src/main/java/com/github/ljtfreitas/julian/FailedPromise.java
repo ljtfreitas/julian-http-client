@@ -29,38 +29,42 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-class FailedPromise<T, E extends Exception> implements Promise<T, E> {
+class FailedPromise<T> implements Promise<T> {
 
-	private final E failure;
+	private final Exception failure;
 
-	FailedPromise(E failure) {
+	FailedPromise(Exception failure) {
 		this.failure = failure;
 	}
 
 	@Override
-	public Promise<T, E> onSuccess(Consumer<T> fn) {
+	public Promise<T> onSuccess(Consumer<? super T> fn) {
 		return this;
 	}
 
 	@Override
-	public <R> Promise<R, E> then(Function<? super T, R> fn) {
+	public <R> Promise<R> then(Function<? super T, R> fn) {
 		return new FailedPromise<>(failure);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public <R, Err extends Exception> Promise<R, Err> bind(Function<? super T, Promise<R, Err>> fn) {
-		return new FailedPromise<>((Err) failure);
+	public <R> Promise<R> bind(Function<? super T, Promise<R>> fn) {
+		return new FailedPromise<>(failure);
 	}
 
 	@Override
-	public Promise<T, E> recover(Function<? super E, T> fn) {
+	public <R> Promise<R> fold(Function<? super T, R> success, Function<? super Exception, R> failure) {
+		return new DonePromise<>(failure.apply(this.failure));
+	}
+
+	@Override
+	public Promise<T> recover(Function<? super Exception, T> fn) {
 		return new DonePromise<>(fn.apply(failure));
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <Err extends E> Promise<T, E> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
+	public <Err extends Exception> Promise<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
 		Exception cause = deep(failure);
 
 		if (expected.isInstance(cause))
@@ -69,12 +73,11 @@ class FailedPromise<T, E extends Exception> implements Promise<T, E> {
 			return this;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public Promise<T, E> recover(Predicate<? super E> p, Function<? super E, T> fn) {
+	public Promise<T> recover(Predicate<? super Exception> p, Function<? super Exception, T> fn) {
 		Exception cause = deep(failure);
 
-		if (cause != null && p.test((E) cause))
+		if (cause != null && p.test((Exception) cause))
 			return new DonePromise<>(fn.apply(failure));
 		else
 			return this;
@@ -82,17 +85,17 @@ class FailedPromise<T, E extends Exception> implements Promise<T, E> {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <Err extends Exception> Promise<T, Err> failure(Function<? super E, Err> fn) {
+	public <Err extends Exception> Promise<T> failure(Function<? super Exception, Err> fn) {
 		Exception cause = deep(failure);
 
 		if (cause != null)
-			return new FailedPromise<>(fn.apply((E) cause));
+			return new FailedPromise<>(fn.apply((Exception) cause));
 		else
 			return new FailedPromise<>((Err) failure);
 	}
 
 	@Override
-	public Promise<T, E> onFailure(Consumer<? super E> fn) {
+	public Promise<T> onFailure(Consumer<? super Exception> fn) {
 		fn.accept(failure);
 		return this;
 	}
@@ -112,7 +115,7 @@ class FailedPromise<T, E extends Exception> implements Promise<T, E> {
 	}
 
 	@Override
-	public Promise<T, E> subscribe(Subscriber<? super T, ? super E> subscriber) {
+	public Promise<T> subscribe(Subscriber<? super T> subscriber) {
 		subscriber.failure(failure);
 		subscriber.done();
 		return this;

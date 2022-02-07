@@ -28,6 +28,7 @@ module com.github.ljtfreitas.julian.http.client.reactor {
 
     requires io.netty.buffer;
     requires io.netty.codec.http;
+    requires org.reactivestreams;
     requires reactor.core;
     requires reactor.netty.core;
     requires reactor.netty.http;

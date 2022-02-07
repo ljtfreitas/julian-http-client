@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ObjectResponseTTest {
@@ -24,7 +23,7 @@ class ObjectResponseTTest {
     void compose(@Mock ResponseFn<String, String> fn) {
         Arguments arguments = Arguments.empty();
 
-        Response<String, Exception> response = Response.done("expected");
+        Response<String> response = Response.done("expected");
 
         String actual = responseT.bind(endpoint, fn).join(Promise.done(response), arguments);
 

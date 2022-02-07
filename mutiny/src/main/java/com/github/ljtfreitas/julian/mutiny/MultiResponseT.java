@@ -44,7 +44,7 @@ public class MultiResponseT<T> implements ResponseT<Collection<T>, Multi<T>> {
         return new ResponseFn<>() {
 
             @Override
-            public Multi<T> join(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+            public Multi<T> join(Promise<? extends Response<A>> response, Arguments arguments) {
                 return Multi.createFrom()
                         .completionStage(fn.run(response, arguments).future())
                         .onItem().transformToIterable(identity());

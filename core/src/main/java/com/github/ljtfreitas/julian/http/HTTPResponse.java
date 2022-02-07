@@ -22,13 +22,15 @@
 
 package com.github.ljtfreitas.julian.http;
 
+import com.github.ljtfreitas.julian.Promise;
+import com.github.ljtfreitas.julian.Response;
+import com.github.ljtfreitas.julian.Subscriber;
+
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import com.github.ljtfreitas.julian.Response;
-
-public interface HTTPResponse<T> extends Response<T, HTTPResponseException> {
+public interface HTTPResponse<T> extends Response<T> {
 
 	HTTPStatus status();
 
@@ -45,28 +47,23 @@ public interface HTTPResponse<T> extends Response<T, HTTPResponseException> {
 	HTTPResponse<T> onSuccess(HTTPResponseConsumer<? super T> fn);
 
 	@Override
-	default HTTPResponse<T> onFailure(Consumer<? super HTTPResponseException> fn) {
-		return this;
-	}
+	HTTPResponse<T> subscribe(Subscriber<? super T> subscriber);
+
+	HTTPResponse<T> subscribe(HTTPResponseSubscriber<? super T> subscriber);
 
 	@Override
-	default HTTPResponse<T> recover(Function<? super HTTPResponseException, T> fn) {
-		return this;
-	}
+	HTTPResponse<T> onFailure(Consumer<? super Exception> fn);
 
 	@Override
-	default HTTPResponse<T> recover(Predicate<? super HTTPResponseException> p, Function<? super HTTPResponseException, T> fn) {
-		return this;
-	}
+	HTTPResponse<T> recover(Function<? super Exception, T> fn);
 
 	@Override
-	default <Err extends HTTPResponseException> HTTPResponse<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
-		return this;
-	}
+	HTTPResponse<T> recover(Predicate<? super Exception> p, Function<? super Exception, T> fn);
 
-	default HTTPResponse<T> recover(HTTPStatusCode code, Function<HTTPResponse<T>, T> fn) {
-		return this;
-	}
+	@Override
+	<Err extends Exception> HTTPResponse<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn);
+
+	HTTPResponse<T> recover(HTTPStatusCode code, HTTPResponseFn<byte[], T> fn);
 
 	interface HTTPResponseFn<T, R> {
 
@@ -78,15 +75,28 @@ public interface HTTPResponse<T> extends Response<T, HTTPResponseException> {
 		void accept(HTTPStatus status, HTTPHeaders headers, T body);
 	}
 
+	interface HTTPResponseSubscriber<T> {
+
+		void success(HTTPStatus status, HTTPHeaders headers, T body);
+
+		void failure(Exception failure);
+
+		void done();
+	}
+
 	static <T> HTTPResponse<T> success(HTTPStatus status, HTTPHeaders headers, T body) {
 		return new SuccessHTTPResponse<>(status, headers, body);
+	}
+
+	static <T> HTTPResponse<T> lazy(HTTPStatus status, HTTPHeaders headers, Promise<T> body) {
+		return new LazyHTTPResponse<>(status, headers, body);
 	}
 
 	static <T> HTTPResponse<T> empty(HTTPStatus status, HTTPHeaders headers) {
 		return new EmptyHTTPResponse<>(status, headers);
 	}
 
-	static <T> HTTPResponse<T> failed(HTTPStatus status, HTTPHeaders headers, HTTPResponseException failure) {
-		return new FailureHTTPResponse<>(status, headers, failure);
+	static <T> HTTPResponse<T> failed(HTTPResponseException failure) {
+		return new FailureHTTPResponse<>(failure);
 	}
 }

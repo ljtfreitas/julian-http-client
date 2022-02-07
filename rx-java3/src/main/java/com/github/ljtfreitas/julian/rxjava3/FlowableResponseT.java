@@ -40,7 +40,7 @@ public class FlowableResponseT<T> implements ResponseT<Collection<T>, Flowable<T
         return new ResponseFn<>() {
 
             @Override
-            public Flowable<T> join(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+            public Flowable<T> join(Promise<? extends Response<A>> response, Arguments arguments) {
                 return Flowable.fromCompletionStage(fn.run(response, arguments).future())
                         .flatMapIterable(c -> c);
             }

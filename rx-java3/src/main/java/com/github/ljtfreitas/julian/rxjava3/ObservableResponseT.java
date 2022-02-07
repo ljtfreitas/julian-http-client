@@ -40,7 +40,7 @@ public class ObservableResponseT<T> implements ResponseT<Collection<T>, Observab
         return new ResponseFn<>() {
 
             @Override
-            public Observable<T> join(Promise<? extends Response<A, ? extends Exception>, ? extends Exception> response, Arguments arguments) {
+            public Observable<T> join(Promise<? extends Response<A>> response, Arguments arguments) {
                 return Observable.fromCompletionStage(fn.run(response, arguments).future())
                         .flatMapIterable(c -> c);
             }

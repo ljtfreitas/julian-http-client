@@ -25,6 +25,7 @@ package com.github.ljtfreitas.julian.reactor;
 import com.github.ljtfreitas.julian.Except;
 import com.github.ljtfreitas.julian.Kind;
 import com.github.ljtfreitas.julian.Promise;
+import com.github.ljtfreitas.julian.Subscriber;
 import reactor.core.publisher.Mono;
 
 import java.util.concurrent.CompletableFuture;
@@ -32,7 +33,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class MonoPromise<T, E extends Exception> implements Promise<T, E> {
+public class MonoPromise<T> implements Promise<T> {
 
     private final Mono<T> mono;
 
@@ -41,50 +42,51 @@ public class MonoPromise<T, E extends Exception> implements Promise<T, E> {
     }
 
     @Override
-    public MonoPromise<T, E> onSuccess(Consumer<T> fn) {
+    public MonoPromise<T> onSuccess(Consumer<? super T> fn) {
         return new MonoPromise<>(mono.doOnNext(fn));
     }
 
     @Override
-    public <R> MonoPromise<R, E> then(Function<? super T, R> fn) {
+    public <R> MonoPromise<R> then(Function<? super T, R> fn) {
         return new MonoPromise<>(mono.map(fn));
     }
 
     @Override
-    public <R, Err extends Exception> MonoPromise<R, Err> bind(Function<? super T, Promise<R, Err>> fn) {
-        return new MonoPromise<>(mono.flatMap(value -> fn.andThen(that -> that.cast(new Kind<MonoPromise<R, Err>>(){})
+    public <R> MonoPromise<R> bind(Function<? super T, Promise<R>> fn) {
+        return new MonoPromise<>(mono.flatMap(value -> fn.andThen(that -> that.cast(new Kind<MonoPromise<R>>(){})
                         .map(MonoPromise::mono)
                         .orElseGet(() -> Mono.fromCompletionStage(that.future())))
                         .apply(value)));
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public MonoPromise<T, E> recover(Function<? super E, T> fn) {
-        return new MonoPromise<>(mono.onErrorResume(e -> Mono.just(fn.apply((E) e))));
+    public <R> Promise<R> fold(Function<? super T, R> success, Function<? super Exception, R> failure) {
+        return new MonoPromise<>(mono.map(success).onErrorResume(e -> Mono.just(failure.apply((Exception) e))));
     }
 
     @Override
-    public <Err extends E> MonoPromise<T, E> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
+    public MonoPromise<T> recover(Function<? super Exception, T> fn) {
+        return new MonoPromise<>(mono.onErrorResume(e -> Mono.just(fn.apply((Exception) e))));
+    }
+
+    @Override
+    public <Err extends Exception> MonoPromise<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
         return new MonoPromise<>(mono.onErrorResume(expected, e -> Mono.just(fn.apply(e))));
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public <Err extends Exception> MonoPromise<T, Err> failure(Function<? super E, Err> fn) {
-        return new MonoPromise<>(mono.onErrorMap(t -> fn.apply((E) t)));
+    public <Err extends Exception> MonoPromise<T> failure(Function<? super Exception, Err> fn) {
+        return new MonoPromise<>(mono.onErrorMap(t -> fn.apply((Exception) t)));
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public Promise<T, E> recover(Predicate<? super E> p, Function<? super E, T> fn) {
-        return new MonoPromise<>(mono.onErrorResume(t -> p.test((E) t), e -> Mono.just(fn.apply((E) e))));
+    public Promise<T> recover(Predicate<? super Exception> p, Function<? super Exception, T> fn) {
+        return new MonoPromise<>(mono.onErrorResume(t -> p.test((Exception) t), e -> Mono.just(fn.apply((Exception) e))));
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public MonoPromise<T, E> onFailure(Consumer<? super E> fn) {
-        return new MonoPromise<>(mono.doOnError(t -> fn.accept((E) t)));
+    public MonoPromise<T> onFailure(Consumer<? super Exception> fn) {
+        return new MonoPromise<>(mono.doOnError(t -> fn.accept((Exception) t)));
     }
 
     @Override
@@ -97,10 +99,9 @@ public class MonoPromise<T, E extends Exception> implements Promise<T, E> {
         return mono.toFuture();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public MonoPromise<T, E> subscribe(Subscriber<? super T, ? super E> subscriber) {
-        mono.subscribe(subscriber::success, e -> subscriber.failure((E) e), subscriber::done);
+    public MonoPromise<T> subscribe(Subscriber<? super T> subscriber) {
+        mono.subscribe(subscriber::success, e -> subscriber.failure((Exception) e), subscriber::done);
         return this;
     }
 

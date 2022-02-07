@@ -24,6 +24,7 @@ package com.github.ljtfreitas.julian.http.codec;
 
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.MediaType;
 
 import java.nio.charset.Charset;
@@ -31,7 +32,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import static com.github.ljtfreitas.julian.Message.format;
 import static com.github.ljtfreitas.julian.Preconditions.state;
@@ -74,15 +77,10 @@ public class ScalarHTTPMessageCodec implements HTTPRequestWriter<Object>, HTTPRe
 		return supports(candidate) && isScalarType(javaType);
 	}
 
-	private boolean isScalarType(JavaType javaType) {
-		return SCALAR_TYPES.stream().anyMatch(javaType::is);
-	}
-
 	@Override
-	public Object read(byte[] body, JavaType javaType) {
-		String responseAsString = codec.read(body, javaType);
-
-		return ScalarType.valueOf(javaType).convert(responseAsString);
+	public Optional<CompletableFuture<Object>> read(HTTPResponseBody body, JavaType javaType) {
+		return codec.read(body, javaType)
+				.map(f -> f.thenApplyAsync(responseAsString -> ScalarType.valueOf(javaType).convert(responseAsString)));
 	}
 
 	@Override
@@ -94,7 +92,11 @@ public class ScalarHTTPMessageCodec implements HTTPRequestWriter<Object>, HTTPRe
 	public HTTPRequestBody write(Object body, Charset encoding) {
 		return codec.write(body.toString(), encoding);
 	}
-	
+
+	private boolean isScalarType(JavaType javaType) {
+		return SCALAR_TYPES.stream().anyMatch(javaType::is);
+	}
+
 	private enum ScalarType {
 		BYTE(byte.class, Byte.class) {
 			@Override

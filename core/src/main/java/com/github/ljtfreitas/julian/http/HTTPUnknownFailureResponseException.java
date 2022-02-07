@@ -22,11 +22,17 @@
 
 package com.github.ljtfreitas.julian.http;
 
-public class HTTPUknownFailureResponseException extends HTTPResponseException {
+import com.github.ljtfreitas.julian.Promise;
+
+public class HTTPUnknownFailureResponseException extends HTTPResponseException {
 
 	private static final long serialVersionUID = 1L;
 
-	public HTTPUknownFailureResponseException(HTTPStatus status, HTTPHeaders headers, byte[] body) {
+	public HTTPUnknownFailureResponseException(HTTPStatus status, HTTPHeaders headers, byte[] body) {
+		this(status, headers, Promise.done(body));
+	}
+
+	public HTTPUnknownFailureResponseException(HTTPStatus status, HTTPHeaders headers, Promise<byte[]> body) {
 		super(status, headers, body);
 	}
 }

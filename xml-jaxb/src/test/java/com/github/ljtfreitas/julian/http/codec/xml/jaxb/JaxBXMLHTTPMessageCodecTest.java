@@ -2,6 +2,7 @@ package com.github.ljtfreitas.julian.http.codec.xml.jaxb;
 
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.MediaType;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Flow;
 import java.util.concurrent.Flow.Subscriber;
 
@@ -44,7 +46,9 @@ class JaxBXMLHTTPMessageCodecTest {
             void read() {
                 String value = "<person><name>Tiago</name><age>35</age></person>";
 
-                Person person = codec.read(value.getBytes(), JavaType.valueOf(Person.class));
+                Person person = codec.read(HTTPResponseBody.some(value.getBytes()), JavaType.valueOf(Person.class))
+                        .map(CompletableFuture::join)
+                        .orElse(null);
 
                 assertAll(() -> assertEquals("Tiago", person.name),
                           () -> assertEquals(35, person.age));

@@ -1,6 +1,6 @@
 package com.github.ljtfreitas.julian.reactor;
 
-import com.github.ljtfreitas.julian.Promise;
+import com.github.ljtfreitas.julian.Subscriber;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +24,7 @@ class MonoPromiseTest {
     @Nested
     class WhenSuccess {
 
-        private final MonoPromise<String, Exception> promise = new MonoPromise<>(Mono.just("hello"));
+        private final MonoPromise<String> promise = new MonoPromise<>(Mono.just("hello"));
 
         @Test
         void onSuccess(@Mock Consumer<String> consumer) {
@@ -65,7 +65,7 @@ class MonoPromiseTest {
 
         @Test
         void subscribe() {
-            Promise.Subscriber<String, Exception> subscriber = spy(new Promise.Subscriber<>() {
+            Subscriber<String> subscriber = spy(new Subscriber<>() {
 
                 @Override
                 public void success(String value) {
@@ -78,8 +78,7 @@ class MonoPromiseTest {
                 }
 
                 @Override
-                public void done() {
-                }
+                public void done() {}
             });
 
             Mono<String> result = promise.subscribe(subscriber).mono();
@@ -99,7 +98,7 @@ class MonoPromiseTest {
     class WhenFailed {
 
         private final Exception failure = new RuntimeException("oops");
-        private final MonoPromise<String, Exception> promise = new MonoPromise<>(Mono.error(failure));
+        private final MonoPromise<String> promise = new MonoPromise<>(Mono.error(failure));
 
         @Test
         void onFailure(@Mock Consumer<Exception> consumer) {
@@ -126,7 +125,7 @@ class MonoPromiseTest {
 
         @Test
         void recover() {
-            Mono<String> result = new MonoPromise<String, Exception>(Mono.error(new RuntimeException("oops")))
+            Mono<String> result = new MonoPromise<String>(Mono.error(new RuntimeException("oops")))
                     .recover(e -> e.getMessage() + "...but i'm recovered")
                     .mono();
 
@@ -137,7 +136,7 @@ class MonoPromiseTest {
 
         @Test
         void subscribe() {
-            Promise.Subscriber<String, Exception> subscriber = spy(new Promise.Subscriber<>() {
+            Subscriber<String> subscriber = spy(new Subscriber<>() {
 
                 @Override
                 public void success(String value) {
@@ -150,8 +149,7 @@ class MonoPromiseTest {
                 }
 
                 @Override
-                public void done() {
-                }
+                public void done() {}
             });
 
             Mono<String> result = promise.subscribe(subscriber).mono();
@@ -163,5 +161,4 @@ class MonoPromiseTest {
             verify(subscriber).failure(failure);
         }
     }
-
 }

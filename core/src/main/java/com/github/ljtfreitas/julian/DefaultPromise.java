@@ -30,7 +30,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-class DefaultPromise<T, E extends Exception> implements Promise<T, E> {
+class DefaultPromise<T> implements Promise<T> {
 
 	private final CompletableFuture<T> future;
 
@@ -39,28 +39,38 @@ class DefaultPromise<T, E extends Exception> implements Promise<T, E> {
 	}
 
 	@Override
-	public Promise<T, E> onSuccess(Consumer<T> fn) {
+	public Promise<T> onSuccess(Consumer<? super T> fn) {
 		return new DefaultPromise<>(future.whenCompleteAsync((r, e) -> { if (e == null) fn.accept(r); }));
 	}
 
 	@Override
-	public <R> Promise<R, E> then(Function<? super T, R> fn) {
+	public <R> Promise<R> then(Function<? super T, R> fn) {
 		return new DefaultPromise<>(future.thenApplyAsync(fn));
 	}
 
 	@Override
-	public <R, Err extends Exception> Promise<R, Err> bind(Function<? super T, Promise<R, Err>> fn) {
+	public <R> Promise<R> fold(Function<? super T, R> success, Function<? super Exception, R> failure) {
+		return new DefaultPromise<>(future.handleAsync((r, e) -> {
+			if (e != null)
+				return failure.apply((Exception) e);
+			else
+				return success.apply(r);
+		}));
+
+	}
+
+	@Override
+	public <R> Promise<R> bind(Function<? super T, Promise<R>> fn) {
 		return new DefaultPromise<>(future.thenComposeAsync(t -> fn.apply(t).future()));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public Promise<T, E> recover(Function<? super E, T> fn) {
-		return new DefaultPromise<>(future.exceptionally(t -> fn.apply((E) t)));
+	public Promise<T> recover(Function<? super Exception, T> fn) {
+		return new DefaultPromise<>(future.exceptionally(t -> fn.apply((Exception) t)));
 	}
 
 	@Override
-	public <Err extends E> Promise<T, E> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
+	public <Err extends Exception> Promise<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
 		return new DefaultPromise<>(future.handleAsync((r, e) -> {
 			Exception cause = deep(e);
 			if (expected.isInstance(cause))
@@ -70,37 +80,34 @@ class DefaultPromise<T, E extends Exception> implements Promise<T, E> {
 		}));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public Promise<T, E> recover(Predicate<? super E> p, Function<? super E, T> fn) {
+	public Promise<T> recover(Predicate<? super Exception> p, Function<? super Exception, T> fn) {
 		return new DefaultPromise<>(future.handleAsync((r, e) -> {
 			Exception cause = deep(e);
-			if (cause != null && p.test((E) cause))
-				return fn.apply((E) cause);
+			if (cause != null && p.test((Exception) cause))
+				return fn.apply((Exception) cause);
 			else
 				return r;
 		}));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public <Err extends Exception> Promise<T, Err> failure(Function<? super E, Err> fn) {
+	public <Err extends Exception> Promise<T> failure(Function<? super Exception, Err> fn) {
 		return new DefaultPromise<>(future.handleAsync((r, e) -> {
 			Exception cause = deep(e);
 			if (cause != null)
-				throw failure(fn.apply((E) cause));
+				throw failure(fn.apply((Exception) cause));
 			else
 				return r;
 		}));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public Promise<T, E> onFailure(Consumer<? super E> fn) {
+	public Promise<T> onFailure(Consumer<? super Exception> fn) {
 		return new DefaultPromise<>(future.whenCompleteAsync((r, e) -> {
 			Exception cause = deep(e);
 			if (cause != null)
-				fn.accept((E) cause);
+				fn.accept((Exception) cause);
 		}));
 	}
 
@@ -124,10 +131,9 @@ class DefaultPromise<T, E extends Exception> implements Promise<T, E> {
 		return future;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public Promise<T, E> subscribe(Subscriber<? super T, ? super E> subscriber) {
-		BiConsumer<T, Throwable> handle = (r, e) -> { if (e == null) subscriber.success(r); else subscriber.failure((E) e); };
+	public Promise<T> subscribe(Subscriber<? super T> subscriber) {
+		BiConsumer<T, Throwable> handle = (r, e) -> { if (e == null) subscriber.success(r); else subscriber.failure((Exception) e); };
 		BiConsumer<T, Throwable> done = (r, e) -> subscriber.done();
 		return new DefaultPromise<>(future.whenCompleteAsync(handle).whenCompleteAsync(done));
 	}

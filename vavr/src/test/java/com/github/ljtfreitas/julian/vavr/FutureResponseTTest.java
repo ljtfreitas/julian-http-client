@@ -68,7 +68,7 @@ class FutureResponseTTest {
     }
 
     @Test
-    void bind(@Mock Promise<Response<String, Exception>, Exception> promise, @Mock ResponseFn<String, String> fn) {
+    void bind(@Mock Promise<Response<String>> promise, @Mock ResponseFn<String, String> fn) {
         Arguments arguments = Arguments.empty();
 
         String content = "hello";
@@ -81,7 +81,7 @@ class FutureResponseTTest {
     }
 
     @Test
-    void bindFailure(@Mock Promise<Response<String, Exception>, Exception> promise, @Mock ResponseFn<String, String> fn) {
+    void bindFailure(@Mock Promise<Response<String>> promise, @Mock ResponseFn<String, String> fn) {
         Arguments arguments = Arguments.empty();
 
         RuntimeException failure = new RuntimeException("oops");

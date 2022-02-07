@@ -2,11 +2,13 @@ package com.github.ljtfreitas.julian.http.codec;
 
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.MediaType;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Flow;
 import java.util.concurrent.Flow.Subscriber;
 
@@ -37,7 +39,10 @@ class ByteBufferHTTPMessageCodecTest {
 	@Test
 	void read() {
 		byte[] source = "response body".getBytes();
-		assertArrayEquals(ByteBuffer.wrap(source).array(), codec.read(source, JavaType.valueOf(ByteBuffer.class)).array());
+		assertArrayEquals(ByteBuffer.wrap(source).array(), codec.read(HTTPResponseBody.some(source), JavaType.valueOf(ByteBuffer.class))
+				.map(CompletableFuture::join)
+				.map(ByteBuffer::array)
+				.orElse(new byte[0]));
 	}
 
 	@Nested

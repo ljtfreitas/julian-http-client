@@ -32,6 +32,8 @@ import java.nio.charset.Charset;
 
 class ByteBufferSerializer implements MultipartFormFieldSerializer<ByteBuffer> {
 
+    private static final ByteBufferSerializer SINGLE_INSTANCE = new ByteBufferSerializer();
+
     private final MediaType MEDIA_TYPE_OCTET_STREAM = MediaType.valueOf("application/octet-stream");
 
     @Override
@@ -48,5 +50,9 @@ class ByteBufferSerializer implements MultipartFormFieldSerializer<ByteBuffer> {
         new MultipartFormFieldWriter(output, boundary, contentDisposition, mediaType)
                 .write(o -> output.write(field.value.array()))
                 .prop(e -> new HTTPRequestWriterException(Message.format("Cannot write multipart/form-data field {0}", field.name), e));
+    }
+
+    static ByteBufferSerializer get() {
+        return SINGLE_INSTANCE;
     }
 }

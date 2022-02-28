@@ -38,7 +38,7 @@ class IterableSerializer implements MultipartFormFieldSerializer<Iterable<Object
         return Iterable.class.isAssignableFrom(candidate);
     }
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public void write(String boundary, MultipartFormField<Iterable<Object>> field, Charset charset, OutputStream output) {
         field.value.forEach(v -> serializers.select(v.getClass()).write(boundary, new MultipartFormField(field.name, v), charset, output));

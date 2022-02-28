@@ -22,21 +22,20 @@
 
 package com.github.ljtfreitas.julian;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-
 import com.github.ljtfreitas.julian.Endpoint.CallbackParameter;
 import com.github.ljtfreitas.julian.Endpoint.Parameters;
 import com.github.ljtfreitas.julian.JavaType.Parameterized;
 
-class CompletionStageCallbackResponseT<T> implements ResponseT<T, Void> {
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
-	private static final CompletionStageCallbackResponseT<Object> SINGLE_INSTANCE = new CompletionStageCallbackResponseT<>();
+class PromiseCallbackResponseT<T> implements ResponseT<T, Void> {
+
+	private static final PromiseCallbackResponseT<Object> SINGLE_INSTANCE = new PromiseCallbackResponseT<>();
 
 	@Override
 	public <A> ResponseFn<A, Void> bind(Endpoint endpoint, ResponseFn<A, T> fn) {
@@ -44,16 +43,29 @@ class CompletionStageCallbackResponseT<T> implements ResponseT<T, Void> {
 
 			@Override
 			public Void join(Promise<? extends Response<A>> response, Arguments arguments) {
-				CompletableFuture<T> future = fn.run(response, arguments).future();
+				Promise<T> promise = fn.run(response, arguments);
 
 				success(endpoint.parameters(), arguments)
-						.ifPresent(future::thenAccept);
+						.ifPresent(promise::onSuccess);
 
 				failure(endpoint.parameters(), arguments)
-						.ifPresent(callback -> future.whenComplete((a, t) -> Optional.ofNullable(t).ifPresent(callback)));
+						.ifPresent(promise::onFailure);
 
 				subscriber(endpoint.parameters(), fn.returnType(), arguments)
-						.ifPresent(future::whenComplete);
+						.ifPresent(c -> promise.subscribe(new Subscriber<>() {
+							@Override
+							public void success(T value) {
+								c.accept(value, null);
+							}
+
+							@Override
+							public void failure(Exception failure) {
+								c.accept(null, failure);
+							}
+
+							@Override
+							public void done() {}
+						}));
 
 				return null;
 			}
@@ -61,7 +73,11 @@ class CompletionStageCallbackResponseT<T> implements ResponseT<T, Void> {
 			@SuppressWarnings("unchecked")
 			private Optional<Consumer<T>> success(Parameters parameters, Arguments arguments) {
 				return parameters.callbacks()
-						.filter(c -> c.javaType().compatible(Consumer.class))
+						.filter(c -> consumer(c) && c.javaType().parameterized()
+								.map(Parameterized::firstArg)
+								.map(JavaType::valueOf)
+								.filter(a -> !a.is(Throwable.class))
+								.isPresent())
 						.findFirst()
 						.flatMap(c -> arguments.of(c.position()))
 						.map(arg -> (Consumer<T>) arg);
@@ -134,7 +150,7 @@ class CompletionStageCallbackResponseT<T> implements ResponseT<T, Void> {
 			.flatMap(c -> c.javaType().parameterized().map(Parameterized::firstArg));
 	}
 
-	public static CompletionStageCallbackResponseT<Object> get() {
+	public static PromiseCallbackResponseT<Object> get() {
 		return SINGLE_INSTANCE;
 	}
 }

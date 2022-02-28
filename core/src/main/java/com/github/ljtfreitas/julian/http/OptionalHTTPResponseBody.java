@@ -54,7 +54,7 @@ class OptionalHTTPResponseBody implements HTTPResponseBody {
     }
 
     @Override
-    public <T> Optional<Publisher<List<ByteBuffer>>> content() {
+    public Optional<Publisher<List<ByteBuffer>>> content() {
         return readable() ? body.get().content() : Optional.empty();
     }
 

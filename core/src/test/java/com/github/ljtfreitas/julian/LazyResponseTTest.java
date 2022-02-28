@@ -56,13 +56,13 @@ class LazyResponseTTest {
 	}
 
 	@Test
-	void compose(@Mock ResponseFn<String, String> fn, @Mock Promise<Response<String>> response) {
-		Arguments arguments = Arguments.empty();
+	void compose() {
+		ResponseFn<String, String> fn = new ObjectResponseT<String>().bind(endpoint, null);
 
-		when(fn.run(response, arguments)).thenReturn(Promise.done("expected"));
+		Promise<Response<String>> response = Promise.done(Response.done("expected"));
 
-		Lazy<String> lazy = responseT.bind(endpoint, fn).join(response, arguments);
+		Lazy<String> lazy = responseT.bind(endpoint, fn).join(response, Arguments.empty());
 
-		assertEquals("expected", lazy.run());
+		assertEquals("expected", lazy.run().unsafe());
 	}
 }

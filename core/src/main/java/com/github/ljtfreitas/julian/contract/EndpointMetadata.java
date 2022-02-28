@@ -24,14 +24,18 @@ package com.github.ljtfreitas.julian.contract;
 
 import com.github.ljtfreitas.julian.Endpoint;
 
+import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Optional;
+
+import static java.util.Collections.emptyList;
 
 public interface EndpointMetadata {
 
-	default Endpoint endpoint() {
-		return endpoint(Optional.empty());
+	default Endpoint endpoint(Class<?> javaClass, Method javaMethod) {
+		return endpoint(javaClass, javaMethod, emptyList(), Optional.empty());
 	}
 
-	Endpoint endpoint(Optional<URL> root);
+	Endpoint endpoint(Class<?> javaClass, Method javaMethod, Collection<Class<?>> unhandledParameterTypes, Optional<URL> root);
 }

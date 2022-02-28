@@ -32,7 +32,7 @@ class LazyResponseT<T> implements ResponseT<T, Lazy<T>> {
 
 			@Override
 			public Lazy<T> join(Promise<? extends Response<A>> response, Arguments arguments) {
-				return () -> fn.run(response, arguments).join().unsafe();
+				return () -> fn.run(response, arguments).join();
 			}
 
 			@Override

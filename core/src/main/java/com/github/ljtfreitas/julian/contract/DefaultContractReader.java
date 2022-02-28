@@ -22,16 +22,27 @@
 
 package com.github.ljtfreitas.julian.contract;
 
+import com.github.ljtfreitas.julian.Definition;
+import com.github.ljtfreitas.julian.Endpoint;
+
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Optional;
 
-import com.github.ljtfreitas.julian.Definition;
-import com.github.ljtfreitas.julian.Endpoint;
-
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toUnmodifiableList;
 
 public class DefaultContractReader implements ContractReader {
+
+	private final EndpointMetadata endpointMetadata;
+
+	public DefaultContractReader() {
+		this(new DefaultEndpointMetadata());
+	}
+
+	public DefaultContractReader(EndpointMetadata endpointMetadata) {
+		this.endpointMetadata = endpointMetadata;
+	}
 
 	@Override
 	public Contract read(Definition definition) {
@@ -40,6 +51,6 @@ public class DefaultContractReader implements ContractReader {
 	}
 	
 	private Endpoint endpoint(Class<?> javaClass, Method javaMethod, Optional<URL> root) {
-		return new DefaultEndpointMetadata(javaClass, javaMethod).endpoint(root);
+		return endpointMetadata.endpoint(javaClass, javaMethod, emptyList(), root);
 	}
 }

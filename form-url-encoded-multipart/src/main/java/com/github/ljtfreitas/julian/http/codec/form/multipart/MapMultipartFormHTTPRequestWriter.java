@@ -66,7 +66,7 @@ public class MapMultipartFormHTTPRequestWriter implements MultipartFormDataHTTPR
         return new DefaultHTTPRequestBody(mediaType, () -> serialize(map, encoding, "----" + boundary));
     }
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "unchecked"})
     private Publisher<ByteBuffer> serialize(Map<String, ?> form, Charset encoding, String boundary) {
         try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
 

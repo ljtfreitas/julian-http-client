@@ -22,15 +22,12 @@
 
 package com.github.ljtfreitas.julian.http.codec.form.multipart;
 
-import com.github.ljtfreitas.julian.http.MediaType;
 import com.github.ljtfreitas.julian.multipart.MultipartForm;
 
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 
 class PartSerializer implements MultipartFormFieldSerializer<MultipartForm.Part> {
-
-    private final MediaType MEDIA_TYPE_OCTET_STREAM = MediaType.valueOf("application/octet-stream");
 
     private final MultipartFormFieldSerializers serializers;
 
@@ -43,7 +40,7 @@ class PartSerializer implements MultipartFormFieldSerializer<MultipartForm.Part>
         return MultipartForm.Part.class.equals(candidate);
     }
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public void write(String boundary, MultipartFormField<MultipartForm.Part> field, Charset charset, OutputStream output) {
         MultipartForm.Part part = field.value;

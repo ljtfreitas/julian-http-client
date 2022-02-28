@@ -95,7 +95,7 @@ class JavaMethod {
 		return returnType;
 	}
 
-	static JavaMethod create(Class<?> declaredOn, Method javaMethod) {
+	static JavaMethod create(Class<?> declaredOn, Method javaMethod, Collection<Class<?>> unhandledParameterTypes) {
 		nonNull(declaredOn);
 		nonNull(javaMethod);
 
@@ -124,7 +124,7 @@ class JavaMethod {
         Stream<Cookie> cookies = scannotation.scan(Cookie.class);
         Stream<QueryParameter> queryParameters = scannotation.scan(QueryParameter.class);
 
-		Parameters parameters = new JavaMethodParameters(declaredOn, javaMethod).read();
+		Parameters parameters = new JavaMethodParameters(declaredOn, javaMethod).read(unhandledParameterTypes);
 
 		JavaType returnType = JavaType.valueOf(declaredOn, javaMethod.getGenericReturnType());
 

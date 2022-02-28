@@ -31,12 +31,12 @@ class Responses {
 
 	private final ResponseT<Object, Object> defaultResponseT = ObjectResponseT.get();
 
-	private final ConcurrentHashMap<Endpoint, ResponseFn<?, ?>> cache;
 	private final Collection<ResponseT<?, ?>> responses;
+	private final ConcurrentHashMap<Endpoint, ResponseFn<?, ?>> cache;
 
 	Responses(Collection<ResponseT<?, ?>> responses) {
-		this.cache = new ConcurrentHashMap<>();
 		this.responses = responses;
+		this.cache = new ConcurrentHashMap<>();
 	}
 
 	@SuppressWarnings("unchecked")

@@ -41,15 +41,15 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class DefaultEndpointMetadataTest {
 
+	private final EndpointMetadata endpointMetadata = new DefaultEndpointMetadata();
+
 	@Nested
 	class HTTPMethods {
 
 		@ParameterizedTest(name = "HTTP Method: {0}")
 		@ArgumentsSource(HTTPMethodProvider.class)
 		void httpMethods(String httpMethod, URI path, Method javaMethod) {
-			EndpointMetadata endpointMetadata = new DefaultEndpointMetadata(MyType.class, javaMethod);
-
-			Endpoint endpoint = endpointMetadata.endpoint();
+			Endpoint endpoint = endpointMetadata.endpoint(MyType.class, javaMethod);
 
 			assertAll(() -> assertNotNull(endpoint),
 					() -> assertEquals(path, endpoint.path().expand().unsafe()),
@@ -67,10 +67,7 @@ class DefaultEndpointMetadataTest {
 		@ParameterizedTest(name = "@ParameterDefinition: {0}")
 		@ArgumentsSource(ParameterDefinitionsProvider.class)
 		void parameterDefinitions(String parameterDefinition, String httpMethod, URI path, Parameter parameter, Method javaMethod, Arguments arguments) {
-
-			EndpointMetadata endpointMetadata = new DefaultEndpointMetadata(WithParameters.class, javaMethod);
-
-			Endpoint endpoint = endpointMetadata.endpoint();
+			Endpoint endpoint = endpointMetadata.endpoint(WithParameters.class, javaMethod);
 
 			assertAll(() -> assertNotNull(endpoint),
 					() -> assertEquals(path, endpoint.path().expand(arguments).unsafe()),
@@ -83,9 +80,7 @@ class DefaultEndpointMetadataTest {
 
 	@Test
 	void headers() throws Exception {
-		EndpointMetadata endpointMetadata = new DefaultEndpointMetadata(WithHeaders.class, WithHeaders.class.getMethod("headers"));
-
-		Endpoint endpoint = endpointMetadata.endpoint();
+		Endpoint endpoint = endpointMetadata.endpoint(WithHeaders.class, WithHeaders.class.getMethod("headers"));
 
 		assertAll(() -> assertNotNull(endpoint),
 				  () -> assertEquals(URI.create("http://my.api.com/headers"), endpoint.path().expand().unsafe()),
@@ -103,9 +98,7 @@ class DefaultEndpointMetadataTest {
 
 		@Test
 		void authorization() throws Exception {
-			EndpointMetadata endpointMetadata = new DefaultEndpointMetadata(WithMetaHeaders.class, WithMetaHeaders.class.getDeclaredMethod("authorization", String.class));
-
-			Endpoint endpoint = endpointMetadata.endpoint();
+			Endpoint endpoint = endpointMetadata.endpoint(WithMetaHeaders.class, WithMetaHeaders.class.getDeclaredMethod("authorization", String.class));
 
 			assertAll(() -> assertNotNull(endpoint),
 					() -> assertEquals(URI.create("http://my.api.com/headers/authorization"), endpoint.path().expand().unsafe()),
@@ -117,9 +110,7 @@ class DefaultEndpointMetadataTest {
 
 		@Test
 		void contentType() throws Exception {
-			EndpointMetadata endpointMetadata = new DefaultEndpointMetadata(WithMetaHeaders.class, WithMetaHeaders.class.getDeclaredMethod("contentType", String.class));
-
-			Endpoint endpoint = endpointMetadata.endpoint();
+			Endpoint endpoint = endpointMetadata.endpoint(WithMetaHeaders.class, WithMetaHeaders.class.getDeclaredMethod("contentType", String.class));
 
 			assertAll(() -> assertNotNull(endpoint),
 					() -> assertEquals(URI.create("http://my.api.com/headers/content-type"), endpoint.path().expand().unsafe()),
@@ -132,9 +123,7 @@ class DefaultEndpointMetadataTest {
 
 	@Test
 	void cookies() throws Exception {
-		EndpointMetadata endpointMetadata = new DefaultEndpointMetadata(WithCookies.class, WithCookies.class.getMethod("cookies"));
-
-		Endpoint endpoint = endpointMetadata.endpoint();
+		Endpoint endpoint = endpointMetadata.endpoint(WithCookies.class, WithCookies.class.getMethod("cookies"));
 
 		assertAll(() -> assertNotNull(endpoint),
 				  () -> assertEquals(URI.create("http://my.api.com/headers"), endpoint.path().expand().unsafe()),
@@ -149,9 +138,7 @@ class DefaultEndpointMetadataTest {
 
 	@Test
 	void queryParameters() throws Exception {
-		EndpointMetadata endpointMetadata = new DefaultEndpointMetadata(WithQueryParameters.class, WithQueryParameters.class.getMethod("query"));
-
-		Endpoint endpoint = endpointMetadata.endpoint();
+		Endpoint endpoint = endpointMetadata.endpoint(WithQueryParameters.class, WithQueryParameters.class.getMethod("query"));
 
 		URI path = endpoint.path().expand().unsafe();
 
@@ -170,9 +157,7 @@ class DefaultEndpointMetadataTest {
 		@ParameterizedTest(name = "Meta-annotation: {0}")
 		@ArgumentsSource(MetaAnnotationsProvider.class)
 		void metaAnnotations(String annotation, String httpMethod, URI path, com.github.ljtfreitas.julian.Header header, Method javaMethod) {
-			EndpointMetadata endpointMetadata = new DefaultEndpointMetadata(WithMetaAnnotations.class, javaMethod);
-
-			Endpoint endpoint = endpointMetadata.endpoint();
+			Endpoint endpoint = endpointMetadata.endpoint(WithMetaAnnotations.class, javaMethod);
 
 			assertAll(() -> assertNotNull(endpoint),
 					() -> assertEquals(path, endpoint.path().expand().unsafe()),
@@ -186,9 +171,7 @@ class DefaultEndpointMetadataTest {
 		@ParameterizedTest(name = "Meta-annotation: {0}")
 		@ArgumentsSource(MetaAnnotationsOnBodyProvider.class)
 		void metaAnnotationsOnBodyParameter(String annotation, String httpMethod, URI path, String contentType, Method javaMethod) {
-			EndpointMetadata endpointMetadata = new DefaultEndpointMetadata(WithMetaAnnotations.class, javaMethod);
-
-			Endpoint endpoint = endpointMetadata.endpoint();
+			Endpoint endpoint = endpointMetadata.endpoint(WithMetaAnnotations.class, javaMethod);
 
 			assertAll(() -> assertNotNull(endpoint),
 					() -> assertEquals(path, endpoint.path().expand().unsafe()),
@@ -210,10 +193,7 @@ class DefaultEndpointMetadataTest {
 		@ParameterizedTest(name = "Inherited operation: {7}")
 		@ArgumentsSource(InheritedDefinitionsProvider.class)
 		void inheritedDefinitions(String httpMethod, URI path, Headers headers, Cookies cookies, Parameters parameters, JavaType returnType, Arguments arguments, Method javaMethod) {
-
-			EndpointMetadata endpointMetadata = new DefaultEndpointMetadata(SomeExtendedApi.class, javaMethod);
-
-			Endpoint endpoint = endpointMetadata.endpoint();
+			Endpoint endpoint = endpointMetadata.endpoint(SomeExtendedApi.class, javaMethod);
 
 			assertAll(() -> assertNotNull(endpoint),
 					() -> assertEquals(path, endpoint.path().expand(arguments).unsafe()),
@@ -230,17 +210,17 @@ class DefaultEndpointMetadataTest {
 		
 		@Test
 		void rejectMethodWithMoreThanOneBodyParameter() {
-			assertThrows(IllegalStateException.class, () -> new DefaultEndpointMetadata(Wrong.class, Wrong.class.getMethod("moreThanOneBody", Object.class, Object.class)));
+			assertThrows(IllegalStateException.class, () -> endpointMetadata.endpoint(Wrong.class, Wrong.class.getMethod("moreThanOneBody", Object.class, Object.class)));
 		}
 
 		@Test
 		void rejectMethodWithoutHTTPMethod() {
-			assertThrows(IllegalStateException.class, () -> new DefaultEndpointMetadata(Wrong.class, Wrong.class.getMethod("withoutHTTPMethod")));
+			assertThrows(IllegalStateException.class, () -> endpointMetadata.endpoint(Wrong.class, Wrong.class.getMethod("withoutHTTPMethod")));
 		}
 
 		@Test
 		void rejectMethodWithMoreThanOneHTTPMethod() {
-			assertThrows(IllegalStateException.class, () -> new DefaultEndpointMetadata(Wrong.class, Wrong.class.getMethod("moreThanOneHTTPMethod")));
+			assertThrows(IllegalStateException.class, () -> endpointMetadata.endpoint(Wrong.class, Wrong.class.getMethod("moreThanOneHTTPMethod")));
 		}
 	}
 

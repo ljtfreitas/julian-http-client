@@ -38,7 +38,7 @@ public interface HTTPResponseBody {
 
     <T> Optional<CompletableFuture<T>> readAsBytes(Function<byte[], T> fn);
 
-    <T> Optional<Publisher<List<ByteBuffer>>> content();
+    Optional<Publisher<List<ByteBuffer>>> content();
 
     static HTTPResponseBody empty() {
         return new EmptyHTTPResponseBody();

@@ -26,7 +26,7 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class StreamResponseT<T> implements ResponseT<Collection<T>, Stream<T>> {
+public class StreamResponseT<T> implements ResponseT<Collection<T>, Stream<T>> {
 
 	private static final StreamResponseT<Object> SINGLE_INSTANCE = new StreamResponseT<>();
 

@@ -28,60 +28,62 @@ import java.util.Optional;
 public enum HTTPStatusCode {
 
 	// Informational 1xx
-	CONTINUE(100, "Continue"),
-	SWITCHING_PROTOCOLS(101, "Switching Protocols"),
+	CONTINUE(100, "Continue", HTTPStatusGroup.INFORMATIONAL),
+	SWITCHING_PROTOCOLS(101, "Switching Protocols", HTTPStatusGroup.INFORMATIONAL),
 
 	// Successful 2xx
-	OK(200, "Ok"),
-	CREATED(201, "Created"),
-	ACCEPTED(202, "Accepted"),
-	NON_AUTHORITATIVE_INFORMATION(203, "Non-Authoritative Information"),
-	NO_CONTENT(204, "No Content"),
-	RESET_CONTENT(205, "Reset Content"),
-	PARTIAL_CONTENT(206, "Partial Content"),
+	OK(200, "Ok", HTTPStatusGroup.SUCCESSFUL),
+	CREATED(201, "Created", HTTPStatusGroup.SUCCESSFUL),
+	ACCEPTED(202, "Accepted", HTTPStatusGroup.SUCCESSFUL),
+	NON_AUTHORITATIVE_INFORMATION(203, "Non-Authoritative Information", HTTPStatusGroup.SUCCESSFUL),
+	NO_CONTENT(204, "No Content", HTTPStatusGroup.SUCCESSFUL),
+	RESET_CONTENT(205, "Reset Content", HTTPStatusGroup.SUCCESSFUL),
+	PARTIAL_CONTENT(206, "Partial Content", HTTPStatusGroup.SUCCESSFUL),
 
 	// Redirection 3xx
-	MULTIPLES_CHOICES(300, "Multiple Choices"),
-	MOVED_PERMANENTLY(301, "Moved Permanently"),
-	FOUND(302, "Found"),
-	SEE_OTHER(303, "See Other"),
-	NOT_MODIFIED(304, "Not Modified"),
-	USE_PROXY(305, "Use Proxy"),
-	TEMPORARY_REDIRECT(307, "Temporary Redirect"),
+	MULTIPLES_CHOICES(300, "Multiple Choices", HTTPStatusGroup.REDIRECTION),
+	MOVED_PERMANENTLY(301, "Moved Permanently", HTTPStatusGroup.REDIRECTION),
+	FOUND(302, "Found", HTTPStatusGroup.REDIRECTION),
+	SEE_OTHER(303, "See Other", HTTPStatusGroup.REDIRECTION),
+	NOT_MODIFIED(304, "Not Modified", HTTPStatusGroup.REDIRECTION),
+	USE_PROXY(305, "Use Proxy", HTTPStatusGroup.REDIRECTION),
+	TEMPORARY_REDIRECT(307, "Temporary Redirect", HTTPStatusGroup.REDIRECTION),
 
 	// Client Error 4xx
-	BAD_REQUEST(400, "Bad Request"),
-	UNAUTHORIZED(401, "Unauthorized"),
-	FORBIDDEN(403, "Forbidden"),
-	NOT_FOUND(404, "Not Found"),
-	METHOD_NOT_ALLOWED(405, "Method Not Allowed"),
-	NOT_ACCEPTABLE(406, "Not Acceptable"),
-	PROXY_AUTHENTATION_REQUIRED(407, "Proxy Authentication Required"),
-	REQUEST_TIMEOUT(408, "Request Timeout"),
-	CONFLICT(409, "Conflict"),
-	GONE(410, "Gone"),
-	LENGTH_REQUIRED(411, "Length Required"),
-	PRECONDITION_FAILED(412, "Precondition Failed"),
-	REQUEST_ENTITY_TOO_LARGE(413, "Request Entity Too Large"),
-	REQUEST_URI_TOO_LONG(414, "Request-URI Too Long"),
-	UNSUPPORTED_MEDIA_TYPE(415, "Unsupported Media Type"),
-	REQUESTED_RANGE_NOT_SATISFIABLE(416, "Requested Range Not Satisfiable"),
-	EXPECTATION_FAILED(417, "Expectation Failed"),
+	BAD_REQUEST(400, "Bad Request", HTTPStatusGroup.CLIENT_ERROR),
+	UNAUTHORIZED(401, "Unauthorized", HTTPStatusGroup.CLIENT_ERROR),
+	FORBIDDEN(403, "Forbidden", HTTPStatusGroup.CLIENT_ERROR),
+	NOT_FOUND(404, "Not Found", HTTPStatusGroup.CLIENT_ERROR),
+	METHOD_NOT_ALLOWED(405, "Method Not Allowed", HTTPStatusGroup.CLIENT_ERROR),
+	NOT_ACCEPTABLE(406, "Not Acceptable", HTTPStatusGroup.CLIENT_ERROR),
+	PROXY_AUTHENTATION_REQUIRED(407, "Proxy Authentication Required", HTTPStatusGroup.CLIENT_ERROR),
+	REQUEST_TIMEOUT(408, "Request Timeout", HTTPStatusGroup.CLIENT_ERROR),
+	CONFLICT(409, "Conflict", HTTPStatusGroup.CLIENT_ERROR),
+	GONE(410, "Gone", HTTPStatusGroup.CLIENT_ERROR),
+	LENGTH_REQUIRED(411, "Length Required", HTTPStatusGroup.CLIENT_ERROR),
+	PRECONDITION_FAILED(412, "Precondition Failed", HTTPStatusGroup.CLIENT_ERROR),
+	REQUEST_ENTITY_TOO_LARGE(413, "Request Entity Too Large", HTTPStatusGroup.CLIENT_ERROR),
+	REQUEST_URI_TOO_LONG(414, "Request-URI Too Long", HTTPStatusGroup.CLIENT_ERROR),
+	UNSUPPORTED_MEDIA_TYPE(415, "Unsupported Media Type", HTTPStatusGroup.CLIENT_ERROR),
+	REQUESTED_RANGE_NOT_SATISFIABLE(416, "Requested Range Not Satisfiable", HTTPStatusGroup.CLIENT_ERROR),
+	EXPECTATION_FAILED(417, "Expectation Failed", HTTPStatusGroup.CLIENT_ERROR),
 
 	// Server Error 5xx
-	INTERNAL_SERVER_ERROR(500, "Internal Server Error"),
-	NOT_IMPLEMENTED(501, "Not Implemented"),
-	BAD_GATEWAY(502, "Bad Gateway"),
-	SERVICE_UNAVAILABLE(503, "Service Unavailable"),
-	GATEWAY_TIMEOUT(504, "Gateway Timeout"),
-	HTTP_VERSION_NOT_SUPPORTED(505, "HTTP Version Not Supported");
+	INTERNAL_SERVER_ERROR(500, "Internal Server Error", HTTPStatusGroup.SERVER_ERROR),
+	NOT_IMPLEMENTED(501, "Not Implemented", HTTPStatusGroup.SERVER_ERROR),
+	BAD_GATEWAY(502, "Bad Gateway", HTTPStatusGroup.SERVER_ERROR),
+	SERVICE_UNAVAILABLE(503, "Service Unavailable", HTTPStatusGroup.SERVER_ERROR),
+	GATEWAY_TIMEOUT(504, "Gateway Timeout", HTTPStatusGroup.SERVER_ERROR),
+	HTTP_VERSION_NOT_SUPPORTED(505, "HTTP Version Not Supported", HTTPStatusGroup.SERVER_ERROR);
 
 	private final int value;
 	private final String message;
+	private final HTTPStatusGroup group;
 
-	HTTPStatusCode(int code, String message) {
+	HTTPStatusCode(int code, String message, HTTPStatusGroup group) {
 		this.value = code;
 		this.message = message;
+		this.group = group;
 	}
 
 	public int value() {
@@ -92,31 +94,31 @@ public enum HTTPStatusCode {
 		return message;
 	}
 
-	public static Optional<HTTPStatusCode> select(int code) {
-		return Arrays.stream(values()).filter(s ->s.value == code).findFirst();
+	public HTTPStatusGroup group() {
+		return group;
+	}
+
+	public boolean onGroup(HTTPStatusGroup group) {
+		return this.group == group;
 	}
 
 	public boolean informational() {
-		return (value / 100) == 1;
+		return group == HTTPStatusGroup.INFORMATIONAL;
 	}
 
 	public boolean success() {
-		return (value / 100) == 2;
+		return group == HTTPStatusGroup.SUCCESSFUL;
 	}
 
 	public boolean redirection() {
-		return (value / 100) == 3;
+		return group == HTTPStatusGroup.REDIRECTION;
 	}
 
 	public boolean error() {
-		return a4xx() || a5xx();
+		return group == HTTPStatusGroup.CLIENT_ERROR || group == HTTPStatusGroup.SERVER_ERROR;
 	}
 
-	private boolean a4xx() {
-		return (value / 100) == 4;
-	}
-
-	private boolean a5xx() {
-		return (value / 100) == 5;
+	public static Optional<HTTPStatusCode> select(int code) {
+		return Arrays.stream(values()).filter(s ->s.value == code).findFirst();
 	}
 }

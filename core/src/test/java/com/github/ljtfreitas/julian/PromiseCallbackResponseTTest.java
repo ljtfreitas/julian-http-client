@@ -29,12 +29,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class CompletionStageCallbackResponseTTest {
+class PromiseCallbackResponseTTest {
 
 	@Mock
 	private Endpoint endpoint;
 	
-	private final CompletionStageCallbackResponseT<String> responseT = new CompletionStageCallbackResponseT<>();
+	private final PromiseCallbackResponseT<String> responseT = new PromiseCallbackResponseT<>();
 
 	@Nested
 	class Predicates {

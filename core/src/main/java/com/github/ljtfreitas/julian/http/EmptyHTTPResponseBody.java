@@ -29,6 +29,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Flow;
+import java.util.concurrent.Flow.Publisher;
 import java.util.function.Function;
 
 class EmptyHTTPResponseBody implements HTTPResponseBody {
@@ -44,7 +45,7 @@ class EmptyHTTPResponseBody implements HTTPResponseBody {
     }
 
     @Override
-    public <T> Optional<Flow.Publisher<List<ByteBuffer>>> content() {
+    public Optional<Publisher<List<ByteBuffer>>> content() {
         return Optional.empty();
     }
 }

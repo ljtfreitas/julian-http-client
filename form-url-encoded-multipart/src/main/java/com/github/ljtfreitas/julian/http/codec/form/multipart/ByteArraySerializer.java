@@ -28,9 +28,10 @@ import com.github.ljtfreitas.julian.http.codec.HTTPRequestWriterException;
 
 import java.io.OutputStream;
 import java.nio.charset.Charset;
-import java.util.Optional;
 
 class ByteArraySerializer implements MultipartFormFieldSerializer<byte[]> {
+
+    private static final ByteArraySerializer SINGLE_INSTANCE = new ByteArraySerializer();
 
     private final MediaType MEDIA_TYPE_OCTET_STREAM = MediaType.valueOf("application/octet-stream");
 
@@ -48,5 +49,9 @@ class ByteArraySerializer implements MultipartFormFieldSerializer<byte[]> {
         new MultipartFormFieldWriter(output, boundary, contentDisposition, mediaType)
                 .write(o -> output.write(field.value))
                 .prop(e -> new HTTPRequestWriterException(Message.format("Cannot write multipart/form-data field {0}", field.name), e));
+    }
+
+    static ByteArraySerializer get() {
+        return SINGLE_INSTANCE;
     }
 }

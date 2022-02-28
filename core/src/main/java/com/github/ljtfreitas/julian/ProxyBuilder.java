@@ -25,6 +25,8 @@ package com.github.ljtfreitas.julian;
 import com.github.ljtfreitas.julian.contract.Contract;
 import com.github.ljtfreitas.julian.contract.ContractReader;
 import com.github.ljtfreitas.julian.contract.DefaultContractReader;
+import com.github.ljtfreitas.julian.contract.DefaultEndpointMetadata;
+import com.github.ljtfreitas.julian.contract.EndpointMetadata;
 import com.github.ljtfreitas.julian.http.ConditionalHTTPResponseFailure;
 import com.github.ljtfreitas.julian.http.DefaultHTTP;
 import com.github.ljtfreitas.julian.http.DefaultHTTPResponseFailure;
@@ -35,6 +37,7 @@ import com.github.ljtfreitas.julian.http.HTTPRequestInterceptorChain;
 import com.github.ljtfreitas.julian.http.HTTPResponseFailure;
 import com.github.ljtfreitas.julian.http.HTTPStatusCode;
 import com.github.ljtfreitas.julian.http.HTTPStatusCodeResponseT;
+import com.github.ljtfreitas.julian.http.HTTPStatusGroup;
 import com.github.ljtfreitas.julian.http.HTTPStatusResponseT;
 import com.github.ljtfreitas.julian.http.client.ComposedHTTPClient;
 import com.github.ljtfreitas.julian.http.client.DebugHTTPClient;
@@ -58,6 +61,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -186,7 +190,7 @@ public class ProxyBuilder {
             return asMap(List.of(
                     CallableResponseT.get(),
                     CollectionResponseT.get(),
-                    CompletionStageCallbackResponseT.get(),
+                    PromiseCallbackResponseT.get(),
                     CompletionStageResponseT.get(),
                     DefaultResponseT.get(),
                     EnumerationResponseT.get(),
@@ -213,7 +217,7 @@ public class ProxyBuilder {
 
             private Executor executor = null;
 
-            public Async using(Executor executor) {
+            public Async executor(Executor executor) {
                 this.executor = executor;
                 return this;
             }
@@ -240,7 +244,7 @@ public class ProxyBuilder {
         private final HTTPResponseFailureSpec failure = new HTTPResponseFailureSpec();
         private final Encoding encoding = new Encoding();
 
-        public ProxyBuilder using(HTTP http) {
+        public ProxyBuilder with(HTTP http) {
             this.http = http;
             return ProxyBuilder.this;
         }
@@ -273,16 +277,16 @@ public class ProxyBuilder {
 
             private HTTPClient httpClient = null;
 
-            private final Decorators decorators = new Decorators();
+            private final Extensions extensions = new Extensions();
             private final Configuration configuration = new Configuration();
 
-            public HTTPSpec using(HTTPClient httpClient) {
+            public HTTPSpec with(HTTPClient httpClient) {
                 this.httpClient = httpClient;
                 return HTTPSpec.this;
             }
 
-            public HTTPClientSpec.Decorators decorators() {
-                return decorators;
+            public HTTPClientSpec.Extensions extensions() {
+                return extensions;
             }
 
             public HTTPClientSpec.Configuration configure() { return configuration; }
@@ -293,14 +297,14 @@ public class ProxyBuilder {
 
             private HTTPClient build() {
                 HTTPClient client = this.httpClient == null ? new DefaultHTTPClient(configuration.specification) : this.httpClient;
-                return decorators.decorate(client);
+                return extensions.apply(client);
             }
 
-            public class Decorators {
+            public class Extensions {
 
                 private final Debug debug = new Debug();
 
-                public HTTPClientSpec.Decorators.Debug debug() {
+                public Extensions.Debug debug() {
                     return debug;
                 }
 
@@ -308,7 +312,7 @@ public class ProxyBuilder {
                     return HTTPClientSpec.this;
                 }
 
-                private HTTPClient decorate(HTTPClient client) {
+                private HTTPClient apply(HTTPClient client) {
                     Collection<Function<HTTPClient, HTTPClient>> constructors = new ArrayList<>();
                     return new ComposedHTTPClient(client, debug.add(constructors));
                 }
@@ -332,8 +336,8 @@ public class ProxyBuilder {
                         return this;
                     }
 
-                    public HTTPClientSpec.Decorators and() {
-                        return Decorators.this;
+                    public Extensions and() {
+                        return Extensions.this;
                     }
 
                     private Collection<Function<HTTPClient, HTTPClient>> add(Collection<Function<HTTPClient, HTTPClient>> constructors) {
@@ -482,13 +486,18 @@ public class ProxyBuilder {
             private HTTPResponseFailure failure = null;
             private final HTTPResponseFailures failures = new HTTPResponseFailures();
 
-            public HTTPSpec using(HTTPResponseFailure failure) {
+            public HTTPSpec with(HTTPResponseFailure failure) {
                 this.failure = failure;
                 return HTTPSpec.this;
             }
 
             public HTTPResponseFailureSpec when(HTTPStatusCode status, HTTPResponseFailure failure) {
                 failures.add(status, failure);
+                return this;
+            }
+
+            public HTTPResponseFailureSpec when(HTTPStatusGroup group, HTTPResponseFailure failure) {
+                Arrays.stream(HTTPStatusCode.values()).filter(s -> s.onGroup(group)).forEach(s -> failures.add(s, failure));
                 return this;
             }
 
@@ -521,12 +530,12 @@ public class ProxyBuilder {
 
             private Charset charset = StandardCharsets.UTF_8;
 
-            public Encoding using(Charset charset) {
+            public Encoding with(Charset charset) {
                 this.charset = requireNonNull(charset);
                 return this;
             }
 
-            public Encoding using(String charset) {
+            public Encoding with(String charset) {
                 this.charset = Charset.forName(requireNonNull(charset));
                 return this;
             }
@@ -539,6 +548,8 @@ public class ProxyBuilder {
 
     public class ContractSpec {
 
+        private final Extensions extensions = new Extensions();
+
         private ContractReader reader = null;
 
         public ContractSpec reader(ContractReader reader) {
@@ -546,12 +557,40 @@ public class ProxyBuilder {
             return this;
         }
 
+        public Extensions extensions() {
+            return extensions;
+        }
+
         public ProxyBuilder and() {
             return ProxyBuilder.this;
         }
 
-        public ContractReader build() {
-            return reader == null ? new DefaultContractReader() : reader;
+        private ContractReader build() {
+            return reader == null ? new DefaultContractReader(endpointMetadata()) : reader;
+        }
+
+        private EndpointMetadata endpointMetadata() {
+            return extensions.all.stream().reduce((EndpointMetadata) new DefaultEndpointMetadata(),
+                    (m, f) -> f.apply(m), (a, b) -> b);
+        }
+
+        public class Extensions {
+
+            private final Collection<Function<EndpointMetadata, EndpointMetadata>> all = new ArrayList<>();
+
+            public Extensions apply(Function<EndpointMetadata, EndpointMetadata>... extensions) {
+                all.addAll(asList(extensions));
+                return this;
+            }
+
+            public Extensions apply(Collection<Function<EndpointMetadata, EndpointMetadata>> extensions) {
+                all.addAll(extensions);
+                return this;
+            }
+
+            public ContractSpec and() {
+                return ContractSpec.this;
+            }
         }
     }
 

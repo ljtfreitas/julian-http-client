@@ -26,23 +26,16 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 import com.github.ljtfreitas.julian.Endpoint;
 import com.github.ljtfreitas.julian.Endpoint.Parameter;
 import com.github.ljtfreitas.julian.Endpoint.Parameters;
-import com.github.ljtfreitas.julian.JavaType;
-import com.github.ljtfreitas.julian.JavaType.Parameterized;
 import com.github.ljtfreitas.julian.Preconditions.Precondition;
-import com.github.ljtfreitas.julian.Promise;
 
 import static com.github.ljtfreitas.julian.Message.format;
 import static com.github.ljtfreitas.julian.Preconditions.check;
 import static com.github.ljtfreitas.julian.Preconditions.state;
 import static java.util.Collections.emptyList;
-import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static java.util.stream.IntStream.range;
@@ -57,8 +50,9 @@ class JavaMethodParameters {
 		this.javaMethod = javaMethod;
 	}
 
-	Parameters read() {
+	Parameters read(Collection<Class<?>> unhandledParameterTypes) {
 		 Map<Class<? extends Parameter>, List<Parameter>> parameters = range(0, javaMethod.getParameterCount())
+				 .filter(i -> !unhandledParameterTypes.contains(javaMethod.getParameters()[i].getType()))
 				 .mapToObj(i -> JavaMethodParameter.create(i, javaMethod.getParameters()[i], declaredOn))
 				 .map(JavaMethodParameter::kind)
 				 .collect(toUnmodifiableList()).stream()

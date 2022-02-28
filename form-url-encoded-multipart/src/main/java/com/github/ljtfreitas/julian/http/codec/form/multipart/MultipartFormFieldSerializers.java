@@ -30,11 +30,11 @@ class MultipartFormFieldSerializers {
     private final Collection<MultipartFormFieldSerializer<?>> serializers = new ArrayList<>();
 
     MultipartFormFieldSerializers() {
-        serializers.add(new ByteArraySerializer());
-        serializers.add(new ByteBufferSerializer());
-        serializers.add(new FileSerializer());
-        serializers.add(new InputStreamSerializer());
-        serializers.add(new PathSerializer());
+        serializers.add(ByteArraySerializer.get());
+        serializers.add(ByteBufferSerializer.get());
+        serializers.add(FileSerializer.get());
+        serializers.add(InputStreamSerializer.get());
+        serializers.add(PathSerializer.get());
         serializers.add(new PartSerializer(this));
         serializers.add(new IterableSerializer(this));
     }

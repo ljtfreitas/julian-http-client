@@ -38,7 +38,11 @@ public class DefaultHTTPClient implements HTTPClient {
 	private final HTTPClient.Specification specification;
 
 	public DefaultHTTPClient() {
-		this.client = HttpClient.newHttpClient();
+		this(HttpClient.newHttpClient());
+	}
+
+	public DefaultHTTPClient(HttpClient client) {
+		this.client = client;
 		this.specification = new HTTPClient.Specification();
 	}
 

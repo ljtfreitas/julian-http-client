@@ -1,7 +1,6 @@
 package com.github.ljtfreitas.julian.http;
 
 import com.github.ljtfreitas.julian.Endpoint;
-import com.github.ljtfreitas.julian.Kind;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -400,12 +400,16 @@ public class JavaType {
 		
 		@Override
 		public String toString() {
-			return Message.format("? extends {0}, ? super {1}", Arrays.stream(upperBounds).map(Type::toString).collect(joining(",")), 
-																Arrays.stream(lowerBounds).map(Type::toString).collect(joining(",")));
+			return Message.format("(? extends {0}, ? super {1})", Arrays.stream(upperBounds).map(Type::toString).collect(joining(",")),
+					Arrays.stream(lowerBounds).map(Type::toString).collect(joining(",")));
 		}
 
 		public static WildcardType upper(Type...bounds) {
 			return new Wildcard(bounds, new Type[0]);
+		}
+
+		public static WildcardType lower(Type...bounds) {
+			return new Wildcard(new Type[0], bounds);
 		}
 	}
 	

@@ -26,14 +26,13 @@ import com.github.ljtfreitas.julian.Message;
 import com.github.ljtfreitas.julian.http.MediaType;
 import com.github.ljtfreitas.julian.http.codec.HTTPRequestWriterException;
 
-import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.util.Optional;
 
 class InputStreamSerializer implements MultipartFormFieldSerializer<InputStream> {
+
+    private static final InputStreamSerializer SINGLE_INSTANCE = new InputStreamSerializer();
 
     private final MediaType MEDIA_TYPE_OCTET_STREAM = MediaType.valueOf("application/octet-stream");
 
@@ -51,5 +50,9 @@ class InputStreamSerializer implements MultipartFormFieldSerializer<InputStream>
         new MultipartFormFieldWriter(output, boundary, contentDisposition, mediaType)
                 .write(o -> field.value.transferTo(output))
                 .prop(e -> new HTTPRequestWriterException(Message.format("Cannot write multipart/form-data field {0}", field.name), e));
+    }
+
+    static InputStreamSerializer get() {
+        return SINGLE_INSTANCE;
     }
 }

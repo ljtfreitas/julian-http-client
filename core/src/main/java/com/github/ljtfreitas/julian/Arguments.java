@@ -24,6 +24,9 @@ package com.github.ljtfreitas.julian;
 
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.stream.Stream;
+
+import static java.util.stream.IntStream.range;
 
 public class Arguments {
 
@@ -37,20 +40,26 @@ public class Arguments {
 		return args.length > position ? Optional.ofNullable(args[position]) : Optional.empty();
 	}
 
+	public Stream<Argument> of(Class<?> candidate) {
+		return range(0, args.length)
+				.filter(position -> candidate.isInstance(args[position]))
+				.mapToObj(position -> new Argument(position, args[position]));
+    }
+
 	@Override
 	public int hashCode() {
 		return Arrays.hashCode(args);
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof Arguments)) return false;
-		
+
 		Arguments that = (Arguments) obj;
-		
+
 		return Arrays.equals(args, that.args);
 	}
-	
+
 	@Override
 	public String toString() {
 		return Arrays.toString(args);
@@ -63,4 +72,24 @@ public class Arguments {
 	public static Arguments empty() {
 		return new Arguments(new Object[0]);
 	}
+
+	public class Argument {
+
+		private final int position;
+		private final Object value;
+
+		public Argument(int position, Object value) {
+			this.position = position;
+			this.value = value;
+		}
+
+		public int position() {
+			return position;
+		}
+
+		public Object value() {
+			return value;
+		}
+	}
+
 }

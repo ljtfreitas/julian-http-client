@@ -28,6 +28,7 @@ import java.lang.reflect.Parameter;
 import com.github.ljtfreitas.julian.Endpoint;
 import com.github.ljtfreitas.julian.JavaType;
 
+import static com.github.ljtfreitas.julian.Message.format;
 import static com.github.ljtfreitas.julian.Preconditions.isTrue;
 import static com.github.ljtfreitas.julian.Preconditions.nonNull;
 
@@ -35,32 +36,32 @@ class JavaMethodParameter {
 
 	private final int position;
 	private final String name;
-	private final JavaType returnType;
+	private final JavaType type;
 	private final ParameterDefinitionReader reader;
 
-	private JavaMethodParameter(int position, String name, JavaType returnType, ParameterDefinitionReader reader) {
+	private JavaMethodParameter(int position, String name, JavaType type, ParameterDefinitionReader reader) {
 		this.position = position;
 		this.name = name;
-		this.returnType = returnType;
+		this.type = type;
 		this.reader = reader;
 	}
 
 	Endpoint.Parameter kind() {
-		return reader.parameter(position, name, returnType);
+		return reader.parameter(position, name, type);
 	}
 
 	static JavaMethodParameter create(int position, Parameter javaParameter, Class<?> declaredOn) {
 		Scannotation scannotation = new Scannotation(nonNull(javaParameter));
 
 		Annotation definition = isTrue(scannotation.meta(ParameterDefinition.class).toArray(Annotation[]::new),
-				a -> a.length == 1, () -> "Method parameter must have a @ParameterDefinition annotation!")[0];
+				a -> a.length == 1, () -> format("Method parameter [{0}] must have a @ParameterDefinition annotation!", javaParameter))[0];
 
-		JavaType returnType = JavaType.valueOf(declaredOn, javaParameter.getParameterizedType());
+		JavaType parameterType = JavaType.valueOf(declaredOn, javaParameter.getParameterizedType());
 
 		ParameterDefinitionReader reader = new ParameterDefinitionReader(definition);
 		
 		String name = reader.name().orElseGet(javaParameter::getName);
 
-		return new JavaMethodParameter(position, name, returnType, reader);
+		return new JavaMethodParameter(position, name, parameterType, reader);
 	}
 }

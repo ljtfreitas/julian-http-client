@@ -99,10 +99,10 @@ class ProxyBuilderTest {
             private final SimpleApi simpleApi = new ProxyBuilder()
                     .http()
                         .encoding()
-                            .using(StandardCharsets.UTF_8)
+                            .with(StandardCharsets.UTF_8)
                             .and()
                         .client()
-                            .decorators()
+                            .extensions()
                                 .debug()
                                     .enabled()
                                     .and()
@@ -179,7 +179,7 @@ class ProxyBuilderTest {
         void shouldRunAHTTPRequestUsingACustomizedHTTPObject(@Mock com.github.ljtfreitas.julian.http.HTTP http) {
             SimpleApi simpleApi = new ProxyBuilder()
                     .http()
-                        .using(http)
+                        .with(http)
                     .build(SimpleApi.class, "http://localhost:8090");
 
             when(http.run(notNull())).thenReturn(Promise.done(HTTPResponse.success(new HTTPStatus(HTTPStatusCode.OK), HTTPHeaders.empty(), "success")));
@@ -202,7 +202,7 @@ class ProxyBuilderTest {
                 SimpleApi simpleApi = new ProxyBuilder()
                         .http()
                             .client()
-                                .using(httpClient)
+                                .with(httpClient)
                             .and()
                         .build(SimpleApi.class, "http://localhost:8090");
 
@@ -432,7 +432,7 @@ class ProxyBuilderTest {
                              arguments(request("/optional").withMethod("GET"), response("hello"), run(api -> assertEquals("hello", api.optional().get()))),
                              arguments(request("/response").withMethod("GET"), response("hello"), run(api -> assertEquals("hello", api.response().body().unsafe()))),
                              arguments(request("/promise").withMethod("GET"), response("hello"), run(api -> assertEquals("hello", api.promise().join().unsafe()))),
-                             arguments(request("/lazy").withMethod("GET"), response("hello"), run(api -> assertEquals("hello", api.lazy().run()))),
+                             arguments(request("/lazy").withMethod("GET"), response("hello"), run(api -> assertEquals("hello", api.lazy().run().unsafe()))),
                              arguments(request("/headers").withMethod("HEAD"), response().withHeader("x-response-header", "whatever"),
                                     run(api -> assertThat(api.headers(), hasItems(new Header("x-response-header", List.of("whatever")))))),
                              arguments(request("/http-response").withMethod("GET"), response("hello"), run(api -> assertEquals("hello", api.httpResponse().body().unsafe()))),

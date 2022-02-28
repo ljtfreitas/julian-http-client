@@ -31,9 +31,10 @@ import java.io.File;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.util.Optional;
 
 class FileSerializer implements MultipartFormFieldSerializer<File> {
+
+    private static final FileSerializer SINGLE_INSTANCE = new FileSerializer();
 
     private final MediaType MEDIA_TYPE_OCTET_STREAM = MediaType.valueOf("application/octet-stream");
 
@@ -56,5 +57,9 @@ class FileSerializer implements MultipartFormFieldSerializer<File> {
         new MultipartFormFieldWriter(output, boundary, contentDisposition, mediaType)
                 .write(o -> Files.copy(file.toPath(), output))
                 .prop(e -> new HTTPRequestWriterException(Message.format("Cannot write multipart/form-data field {0}", field.name), e));
+    }
+
+    static FileSerializer get() {
+        return SINGLE_INSTANCE;
     }
 }

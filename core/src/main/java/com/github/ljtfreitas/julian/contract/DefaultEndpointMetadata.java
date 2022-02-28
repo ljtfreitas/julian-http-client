@@ -29,6 +29,7 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -42,50 +43,46 @@ import com.github.ljtfreitas.julian.Headers;
 import com.github.ljtfreitas.julian.MethodEndpoint;
 import com.github.ljtfreitas.julian.QueryParameters;
 
-class DefaultEndpointMetadata implements EndpointMetadata {
-
-	private final JavaClass<?> javaClass;
-	private final JavaMethod javaMethod;
-
-	DefaultEndpointMetadata(Class<?> javaClass, Method javaMethod) {
-		this.javaClass = JavaClass.valueOf(javaClass);
-		this.javaMethod = JavaMethod.create(javaClass, javaMethod);
-	}
+public class DefaultEndpointMetadata implements EndpointMetadata {
 
 	@Override
-	public Endpoint endpoint(Optional<URL> root) {
-		return new MethodEndpoint(definition(root), javaMethod.source());
+	public Endpoint endpoint(Class<?> javaClass, Method javaMethod, Collection<Class<?>> unhandledParameterTypes, Optional<URL> root) {
+		return new MethodEndpoint(definition(JavaClass.valueOf(javaClass), JavaMethod.create(javaClass, javaMethod, unhandledParameterTypes), root), javaMethod);
 	}
 
-	private Endpoint definition(Optional<URL> root) {
-		return new Endpoint(path(root, javaMethod.parameters()), javaMethod.httpMethod(), headers(), cookies(), javaMethod.parameters(), javaMethod.returnType());
+	private Endpoint definition(JavaClass<?> javaClass, JavaMethod javaMethod, Optional<URL> root) {
+		return new Endpoint(path(javaClass, javaMethod, root, javaMethod.parameters()),
+				javaMethod.httpMethod(),
+				headers(javaClass, javaMethod),
+				cookies(javaClass, javaMethod),
+				javaMethod.parameters(),
+				javaMethod.returnType());
 	}
 
-	private Headers headers() {
+	private Headers headers(JavaClass<?> javaClass, JavaMethod javaMethod) {
 		return new Headers(Stream.concat(javaClass.headers(), javaMethod.headers())
 			.map(e -> new Header(e.getKey(), e.getValue()))
 			.collect(toUnmodifiableList()));
 	}
 
-	private Cookies cookies() {
+	private Cookies cookies(JavaClass<?> javaClass, JavaMethod javaMethod) {
 		return new Cookies(Stream.concat(javaClass.cookies(), javaMethod.cookies())
 				.map(e -> new Cookie(e.getKey(), e.getValue()))
 				.collect(toUnmodifiableList()));
 	}
 
-	private Endpoint.Path path(Optional<URL> root, Parameters parameters) {
-		return new Endpoint.Path(path(root), queryParameters(), parameters);
+	private Endpoint.Path path(JavaClass<?> javaClass, JavaMethod javaMethod, Optional<URL> root, Parameters parameters) {
+		return new Endpoint.Path(path(javaClass, javaMethod, root), queryParameters(javaClass, javaMethod), parameters);
 	}
 
-	private QueryParameters queryParameters() {
+	private QueryParameters queryParameters(JavaClass<?> javaClass, JavaMethod javaMethod) {
 		return new QueryParameters(Stream.concat(javaClass.query(), javaMethod.query())
 				.collect(groupingBy(Entry::getKey, flatMapping(e -> e.getValue().stream(), toUnmodifiableList()))));
 	}
 
-	private String path(Optional<URL> root) {
+	private String path(JavaClass<?> javaClass, JavaMethod javaMethod, Optional<URL> root) {
 		return Stream.concat(root.map(URL::toString).stream(), Stream.concat(javaClass.path(), javaMethod.path().stream()))
 				.map(path -> path.startsWith("/") ? path.substring(1) : path)
 				.collect(joining("/"));
 	}
-
 }

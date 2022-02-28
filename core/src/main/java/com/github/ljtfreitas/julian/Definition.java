@@ -32,12 +32,15 @@ import java.util.stream.Stream;
 import static com.github.ljtfreitas.julian.Message.format;
 import static com.github.ljtfreitas.julian.Preconditions.check;
 import static com.github.ljtfreitas.julian.Preconditions.isTrue;
-import static com.github.ljtfreitas.julian.Preconditions.nonNull;
 
 public class Definition {
 
 	private final Class<?> javaClass;
 	private final URL root;
+
+	Definition(Class<?> javaClass) {
+		this(javaClass, null);
+	}
 
 	Definition(Class<?> javaClass, URL root) {
 		this.javaClass = check(javaClass, Preconditions::nonNull, t -> isTrue(t, Class::isInterface, () -> format("{0} must be a interface.", javaClass)));

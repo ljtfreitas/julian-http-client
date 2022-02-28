@@ -29,6 +29,7 @@ import com.github.ljtfreitas.julian.Subscriber;
 import reactor.core.publisher.Mono;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -57,6 +58,15 @@ public class MonoPromise<T> implements Promise<T> {
                         .map(MonoPromise::mono)
                         .orElseGet(() -> Mono.fromCompletionStage(that.future())))
                         .apply(value)));
+    }
+
+    @Override
+    public <T2, R> MonoPromise<R> zip(Promise<T2> other, BiFunction<? super T, ? super T2, R> fn) {
+        Mono<T2> m2 = other.cast(new Kind<MonoPromise<T2>>() {})
+                .map(MonoPromise::mono)
+                .orElseGet(() -> Mono.fromCompletionStage(other.future()));
+
+        return new MonoPromise<>(mono.zipWith(m2).map(t -> fn.apply(t.getT1(), t.getT2())));
     }
 
     @Override

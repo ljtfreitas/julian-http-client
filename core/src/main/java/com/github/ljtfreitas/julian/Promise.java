@@ -24,6 +24,7 @@ package com.github.ljtfreitas.julian;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -38,6 +39,8 @@ public interface Promise<T> {
 	<R> Promise<R> then(Function<? super T, R> fn);
 
 	<R> Promise<R> bind(Function<? super T, Promise<R>> fn);
+
+	<T2, R> Promise<R> zip(Promise<T2> other, BiFunction<? super T, ? super T2, R> fn);
 
 	Except<T> join();
 

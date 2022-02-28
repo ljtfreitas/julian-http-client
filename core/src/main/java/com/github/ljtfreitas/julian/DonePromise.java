@@ -23,6 +23,7 @@
 package com.github.ljtfreitas.julian;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -54,6 +55,11 @@ class DonePromise<T> implements Promise<T> {
 	@Override
 	public <R> Promise<R> bind(Function<? super T, Promise<R>> fn) {
 		return fn.apply(value);
+	}
+
+	@Override
+	public <T2, R> Promise<R> zip(Promise<T2> other, BiFunction<? super T, ? super T2, R> fn) {
+		return other.then(t2 -> fn.apply(value, t2));
 	}
 
 	@Override

@@ -48,6 +48,13 @@ class DefaultPromiseTest {
         }
 
         @Test
+        void zip() {
+            CompletableFuture<String> future = promise.zip(Promise.done(" world"), String::concat).future();
+
+            assertEquals("hello world", future.join());
+        }
+
+        @Test
         void join() {
             assertEquals("hello", promise.join().unsafe());
         }

@@ -50,6 +50,13 @@ class DonePromiseTest {
     }
 
     @Test
+    void zip() {
+        CompletableFuture<String> future = promise.zip(Promise.done(" world"), String::concat).future();
+
+        assertEquals("hello world", future.join());
+    }
+
+    @Test
     void failure() {
         CompletableFuture<String> future = promise
                 .failure(e -> new RuntimeException(e.getMessage() + "...an error occurred"))

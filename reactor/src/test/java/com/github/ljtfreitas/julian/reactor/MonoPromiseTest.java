@@ -59,6 +59,16 @@ class MonoPromiseTest {
         }
 
         @Test
+        void zip() {
+            Mono<String> result = promise.zip(new MonoPromise<>(Mono.just(" world")), String::concat).mono();
+
+            StepVerifier.create(result)
+                    .expectNext("hello world")
+                    .expectComplete()
+                    .verify();
+        }
+
+        @Test
         void join() {
             assertEquals("hello", promise.join().unsafe());
         }

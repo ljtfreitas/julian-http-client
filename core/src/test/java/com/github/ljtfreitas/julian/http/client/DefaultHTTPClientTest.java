@@ -273,10 +273,8 @@ class DefaultHTTPClientTest {
                 mockServer.when(request("/proxy").withMethod("GET"))
                         .respond(response("it's working..."));
 
-                ProxySelector proxySelector = ProxySelector.of(new InetSocketAddress("localhost", 8090));
-
                 HTTPClient httpClient = new DefaultHTTPClient(new HTTPClient.Specification()
-                        .proxySelector(proxySelector));
+                        .proxyAddress(new InetSocketAddress("localhost", 8090)));
 
                 HTTPClientResponse response = httpClient.request(new SimpleHTTPRequestDefinition("http://www.google.com.br")).execute().join().unsafe();
 

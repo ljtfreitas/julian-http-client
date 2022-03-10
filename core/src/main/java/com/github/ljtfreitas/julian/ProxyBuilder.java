@@ -25,6 +25,7 @@ package com.github.ljtfreitas.julian;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
 import java.lang.reflect.InvocationHandler;
+import java.net.InetSocketAddress;
 import java.net.ProxySelector;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -365,8 +366,13 @@ public class ProxyBuilder {
                     return this;
                 }
 
-                public HTTPClientSpec.Configuration proxySelector(ProxySelector proxySelector) {
-                    this.specification = specification.proxySelector(proxySelector);
+                public HTTPClientSpec.Configuration proxyAddress(InetSocketAddress proxyAddress) {
+                    this.specification = specification.proxyAddress(proxyAddress);
+                    return this;
+                }
+
+                public HTTPClientSpec.Configuration proxyAddress(String host, int port) {
+                    this.specification = specification.proxyAddress(host, port);
                     return this;
                 }
 

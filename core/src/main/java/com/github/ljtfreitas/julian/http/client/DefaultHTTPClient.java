@@ -22,6 +22,7 @@
 
 package com.github.ljtfreitas.julian.http.client;
 
+import java.net.ProxySelector;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
@@ -50,7 +51,7 @@ public class DefaultHTTPClient implements HTTPClient {
 		specification.connectionTimeout().ifPresent(builder::connectTimeout);
 		specification.redirects().apply(() -> builder.followRedirects(HttpClient.Redirect.NORMAL),
 										() -> builder.followRedirects(HttpClient.Redirect.NEVER));
-		specification.proxySelector().ifPresent(builder::proxy);
+		specification.proxyAddress().ifPresent(proxyAddress -> builder.proxy(ProxySelector.of(proxyAddress)));
 		specification.ssl().context().ifPresent(builder::sslContext);
 		specification.ssl().parameters().ifPresent(builder::sslParameters);
 		specification.executor().ifPresent(builder::executor);

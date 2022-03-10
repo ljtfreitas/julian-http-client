@@ -1,19 +1,8 @@
 package com.github.ljtfreitas.julian.http.codec.form;
 
-import com.github.ljtfreitas.julian.Form;
-import com.github.ljtfreitas.julian.JavaType;
-import com.github.ljtfreitas.julian.http.HTTPRequestBody;
-import com.github.ljtfreitas.julian.http.HTTPResponseBody;
-import com.github.ljtfreitas.julian.http.MediaType;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-
 import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -22,13 +11,20 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Flow;
 import java.util.concurrent.Flow.Subscriber;
 
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+import com.github.ljtfreitas.julian.Form;
+import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPResponseBody;
+import com.github.ljtfreitas.julian.http.MediaType;
+
 import static com.github.ljtfreitas.julian.http.MediaType.APPLICATION_FORM_URLENCODED;
-import static java.util.Collections.emptyList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasKey;
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;

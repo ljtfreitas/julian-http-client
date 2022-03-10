@@ -27,7 +27,7 @@ class SubscriberCallbackResponseTTest {
     @Mock
     private Endpoint endpoint;
 
-    private final SubscriberCallbackResponseT<String> responseT = new SubscriberCallbackResponseT<>();
+    private final SubscriberCallbackResponseT responseT = new SubscriberCallbackResponseT();
 
     @Nested
     class Predicates {
@@ -98,10 +98,10 @@ class SubscriberCallbackResponseTTest {
         when(endpoint.parameters()).thenReturn(Parameters.create(Parameter.callback(0, "subscriber", JavaType.parameterized(Subscriber.class, String.class))));
         Arguments arguments = Arguments.create(subscriber);
 
-        ObjectResponseT<String> objectResponseT = new ObjectResponseT<>();
+        ObjectResponseT<Object> objectResponseT = new ObjectResponseT<>();
 
-        PublisherResponseT<String> publisherResponseT = new PublisherResponseT<>();
-        ResponseFn<String, Publisher<String>> publisherFn = publisherResponseT.bind(endpoint, objectResponseT.bind(endpoint, null));
+        PublisherResponseT publisherResponseT = new PublisherResponseT();
+        ResponseFn<String, Publisher<Object>> publisherFn = publisherResponseT.bind(endpoint, objectResponseT.bind(endpoint, null));
 
         responseT.bind(endpoint, publisherFn).join(response, arguments);
 

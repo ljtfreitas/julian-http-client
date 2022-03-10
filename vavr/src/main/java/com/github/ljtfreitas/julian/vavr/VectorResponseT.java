@@ -35,14 +35,14 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-public class VectorResponseT<T> implements ResponseT<Collection<T>, Vector<T>> {
+public class VectorResponseT implements ResponseT<Collection<Object>, Vector<Object>> {
 
     @Override
-    public <A> ResponseFn<A, Vector<T>> bind(Endpoint endpoint, ResponseFn<A, Collection<T>> fn) {
+    public <A> ResponseFn<A, Vector<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> fn) {
         return new ResponseFn<>() {
 
             @Override
-            public Promise<Vector<T>> run(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Promise<Vector<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
                 return fn.run(response, arguments)
                         .then(c -> Optional.ofNullable(c)
                                 .filter(Predicate.not(Collection::isEmpty))

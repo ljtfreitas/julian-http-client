@@ -22,9 +22,6 @@
 
 package com.github.ljtfreitas.julian.contract;
 
-import static java.util.stream.Collectors.toUnmodifiableList;
-
-import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Type;
 import java.util.Arrays;
@@ -32,10 +29,12 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
+import com.github.ljtfreitas.julian.Content;
 import com.github.ljtfreitas.julian.Header;
 import com.github.ljtfreitas.julian.Headers;
 import com.github.ljtfreitas.julian.JavaType;
-import com.github.ljtfreitas.julian.Content;
+
+import static java.util.stream.Collectors.toUnmodifiableList;
 
 public class HeadersParameterSerializer implements ParameterSerializer<Object, Headers> {
 

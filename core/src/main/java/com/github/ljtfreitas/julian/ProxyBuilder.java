@@ -228,8 +228,8 @@ public class ProxyBuilder {
 
             private Collection<ResponseT<?, ?>> all() {
                 Collection<ResponseT<?, ?>> all = new ArrayList<>();
-                all.add(executor == null ? PublisherResponseT.get() : new PublisherResponseT<>(executor));
-                all.add(new SubscriberCallbackResponseT<>());
+                all.add(executor == null ? PublisherResponseT.get() : new PublisherResponseT(executor));
+                all.add(new SubscriberCallbackResponseT());
                 return all;
             }
         }

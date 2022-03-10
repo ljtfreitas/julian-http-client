@@ -1,12 +1,10 @@
 package com.github.ljtfreitas.julian.http.client;
 
-import com.github.ljtfreitas.julian.http.DefaultHTTPRequestBody;
-import com.github.ljtfreitas.julian.http.HTTPHeader;
-import com.github.ljtfreitas.julian.http.HTTPHeaders;
-import com.github.ljtfreitas.julian.http.HTTPMethod;
-import com.github.ljtfreitas.julian.http.HTTPRequest;
-import com.github.ljtfreitas.julian.http.MediaType;
-import com.github.ljtfreitas.julian.http.codec.StringHTTPMessageCodec;
+import java.net.URI;
+import java.net.http.HttpRequest.BodyPublishers;
+import java.util.List;
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -15,10 +13,12 @@ import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.jupiter.MockServerExtension;
 import org.mockserver.junit.jupiter.MockServerSettings;
 
-import java.net.URI;
-import java.net.http.HttpRequest.BodyPublishers;
-import java.util.List;
-import java.util.Optional;
+import com.github.ljtfreitas.julian.http.DefaultHTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPHeader;
+import com.github.ljtfreitas.julian.http.HTTPHeaders;
+import com.github.ljtfreitas.julian.http.HTTPMethod;
+import com.github.ljtfreitas.julian.http.HTTPRequest;
+import com.github.ljtfreitas.julian.http.MediaType;
 
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;

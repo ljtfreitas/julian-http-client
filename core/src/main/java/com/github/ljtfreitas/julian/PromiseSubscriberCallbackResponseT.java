@@ -29,16 +29,16 @@ import java.lang.reflect.ParameterizedType;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-public class PromiseSubscriberCallbackResponseT<T> implements ResponseT<Promise<T>, Void> {
+public class PromiseSubscriberCallbackResponseT implements ResponseT<Promise<Object>, Void> {
 
-    private static final PromiseSubscriberCallbackResponseT<Object> SINGLE_INSTANCE = new PromiseSubscriberCallbackResponseT<>();
+    private static final PromiseSubscriberCallbackResponseT SINGLE_INSTANCE = new PromiseSubscriberCallbackResponseT();
 
-    public static PromiseSubscriberCallbackResponseT<Object> get() {
+    public static PromiseSubscriberCallbackResponseT get() {
         return SINGLE_INSTANCE;
     }
 
     @Override
-    public <A> ResponseFn<A, Void> bind(Endpoint endpoint, ResponseFn<A, Promise<T>> fn) {
+    public <A> ResponseFn<A, Void> bind(Endpoint endpoint, ResponseFn<A, Promise<Object>> fn) {
         return new ResponseFn<>() {
 
             @Override
@@ -48,12 +48,12 @@ public class PromiseSubscriberCallbackResponseT<T> implements ResponseT<Promise<
             }
 
             @SuppressWarnings("unchecked")
-            private Optional<Subscriber<T>> subscriber(Parameters parameters, Arguments arguments) {
+            private Optional<Subscriber<Object>> subscriber(Parameters parameters, Arguments arguments) {
                 return parameters.callbacks()
                         .filter(c -> c.javaType().compatible(Subscriber.class))
                         .findFirst()
                         .flatMap(c -> arguments.of(c.position()))
-                        .map(arg -> (Subscriber<T>) arg);
+                        .map(arg -> (Subscriber<Object>) arg);
             }
 
             @Override

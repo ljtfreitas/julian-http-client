@@ -1,10 +1,5 @@
 package com.github.ljtfreitas.julian;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -13,6 +8,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ResponsesTest {
@@ -26,7 +25,7 @@ class ResponsesTest {
 
 		Response<String> response = Response.done("oi");
 
-		Responses responses = new Responses(List.of(new CompletionStageResponseT<>(), new OptionalResponseT<>()));
+		Responses responses = new Responses(List.of(new CompletionStageResponseT(), new OptionalResponseT()));
 
 		ResponseFn<String, CompletableFuture<Optional<String>>> responseFn = responses.select(endpoint);
 

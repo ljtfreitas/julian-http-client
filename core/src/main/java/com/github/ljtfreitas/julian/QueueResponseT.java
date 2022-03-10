@@ -27,16 +27,16 @@ import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Queue;
 
-class QueueResponseT<T> implements ResponseT<Collection<T>, Queue<T>> {
+class QueueResponseT implements ResponseT<Collection<Object>, Queue<Object>> {
 
-	private static final QueueResponseT<Object> SINGLE_INSTANCE = new QueueResponseT<>();
+	private static final QueueResponseT SINGLE_INSTANCE = new QueueResponseT();
 
 	@Override
-	public <A> ResponseFn<A, Queue<T>> bind(Endpoint endpoint, ResponseFn<A, Collection<T>> fn) {
+	public <A> ResponseFn<A, Queue<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> fn) {
 		return new ResponseFn<>() {
 
 			@Override
-			public Promise<Queue<T>> run(Promise<? extends Response<A>> response, Arguments arguments) {
+			public Promise<Queue<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
 				return fn.run(response, arguments).then(c -> Optional.ofNullable(c).map(LinkedList::new).orElseGet(LinkedList::new));
 			}
 
@@ -58,7 +58,7 @@ class QueueResponseT<T> implements ResponseT<Collection<T>, Queue<T>> {
 				.orElseGet(JavaType::object));
 	}
 
-	public static QueueResponseT<Object> get() {
+	public static QueueResponseT get() {
 		return SINGLE_INSTANCE;
 	}
 }

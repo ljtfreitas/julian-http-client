@@ -24,16 +24,16 @@ package com.github.ljtfreitas.julian;
 
 import java.util.concurrent.Callable;
 
-class CallableResponseT<T> implements ResponseT<T, Callable<T>> {
+class CallableResponseT implements ResponseT<Object, Callable<Object>> {
 
-	private static final CallableResponseT<Object> SINGLE_INSTANCE = new CallableResponseT<>();
+	private static final CallableResponseT SINGLE_INSTANCE = new CallableResponseT();
 
 	@Override
-	public <A> ResponseFn<A, Callable<T>> bind(Endpoint endpoint, ResponseFn<A, T> fn) {
+	public <A> ResponseFn<A, Callable<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
 		return new ResponseFn<>() {
 
 			@Override
-			public Callable<T> join(Promise<? extends Response<A>> response, Arguments arguments) {
+			public Callable<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
 				return () -> fn.join(response, arguments);
 			}
 
@@ -56,7 +56,7 @@ class CallableResponseT<T> implements ResponseT<T, Callable<T>> {
 				.orElseGet(JavaType::object);
 	}
 
-	public static CallableResponseT<Object> get() {
+	public static CallableResponseT get() {
 		return SINGLE_INSTANCE;
 	}
 }

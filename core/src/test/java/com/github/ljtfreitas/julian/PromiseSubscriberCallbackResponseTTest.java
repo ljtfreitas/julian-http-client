@@ -21,7 +21,7 @@ class PromiseSubscriberCallbackResponseTTest {
     @Mock
     private Endpoint endpoint;
 
-    private final PromiseSubscriberCallbackResponseT<String> responseT = new PromiseSubscriberCallbackResponseT<>();
+    private final PromiseSubscriberCallbackResponseT responseT = new PromiseSubscriberCallbackResponseT();
 
     @Nested
     class Predicates {
@@ -90,10 +90,10 @@ class PromiseSubscriberCallbackResponseTTest {
 
         Arguments arguments = Arguments.create(subscriber);
 
-        ObjectResponseT<String> objectResponseT = new ObjectResponseT<>();
+        ObjectResponseT<Object> objectResponseT = new ObjectResponseT<>();
 
-        PromiseResponseT<String> promiseResponseT = new PromiseResponseT<>();
-        ResponseFn<String, Promise<String>> publisherFn = promiseResponseT.bind(endpoint, objectResponseT.bind(endpoint, null));
+        PromiseResponseT promiseResponseT = new PromiseResponseT();
+        ResponseFn<String, Promise<Object>> publisherFn = promiseResponseT.bind(endpoint, objectResponseT.bind(endpoint, null));
 
         responseT.bind(endpoint, publisherFn).join(response, arguments);
 

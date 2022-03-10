@@ -1,5 +1,14 @@
 package com.github.ljtfreitas.julian.reactor;
 
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.Endpoint;
 import com.github.ljtfreitas.julian.JavaType;
@@ -7,18 +16,10 @@ import com.github.ljtfreitas.julian.ObjectResponseT;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,7 +28,7 @@ class MonoResponseTTest {
     @Mock
     private Endpoint endpoint;
 
-    private final MonoResponseT<String> subject = new MonoResponseT<>();
+    private final MonoResponseT subject = new MonoResponseT();
 
     @Nested
     class Predicates {
@@ -73,9 +74,9 @@ class MonoResponseTTest {
     void bind() {
         Promise<Response<String>> response = Promise.done(Response.done("hello"));
 
-        ResponseFn<String, String> fn = new ObjectResponseT<String>().bind(endpoint, null);
+        ResponseFn<String, Object> fn = new ObjectResponseT<>().bind(endpoint, null);
 
-        Mono<String> mono = subject.bind(endpoint, fn).join(response, Arguments.empty());
+        Mono<Object> mono = subject.bind(endpoint, fn).join(response, Arguments.empty());
 
         StepVerifier.create(mono)
                 .expectNext("hello")
@@ -87,9 +88,9 @@ class MonoResponseTTest {
     void bindAsMono() {
         Promise<Response<String>> response = new MonoPromise<>(Mono.just(Response.done("hello")));
 
-        ResponseFn<String, String> fn = new ObjectResponseT<String>().bind(endpoint, null);
+        ResponseFn<String, Object> fn = new ObjectResponseT<>().bind(endpoint, null);
 
-        Mono<String> mono = subject.bind(endpoint, fn).join(response, Arguments.empty());
+        Mono<Object> mono = subject.bind(endpoint, fn).join(response, Arguments.empty());
 
         StepVerifier.create(mono)
                 .expectNext("hello")
@@ -103,9 +104,9 @@ class MonoResponseTTest {
 
         Promise<Response<String>> response = Promise.failed(exception);
 
-        ResponseFn<String, String> fn = new ObjectResponseT<String>().bind(endpoint, null);
+        ResponseFn<String, Object> fn = new ObjectResponseT<>().bind(endpoint, null);
 
-        Mono<String> mono = subject.bind(endpoint, fn).join(response, Arguments.empty());
+        Mono<Object> mono = subject.bind(endpoint, fn).join(response, Arguments.empty());
 
         StepVerifier.create(mono)
                 .expectErrorMatches(t -> t.equals(exception))
@@ -118,9 +119,9 @@ class MonoResponseTTest {
 
         Promise<Response<String>> response = new MonoPromise<>(Mono.error(exception));
 
-        ResponseFn<String, String> fn = new ObjectResponseT<String>().bind(endpoint, null);
+        ResponseFn<String, Object> fn = new ObjectResponseT<>().bind(endpoint, null);
 
-        Mono<String> mono = subject.bind(endpoint, fn).join(response, Arguments.empty());
+        Mono<Object> mono = subject.bind(endpoint, fn).join(response, Arguments.empty());
 
         StepVerifier.create(mono)
                 .expectErrorMatches(t -> t.equals(exception))

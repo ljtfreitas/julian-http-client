@@ -22,16 +22,16 @@
 
 package com.github.ljtfreitas.julian;
 
-public class DefaultResponseT<T> implements ResponseT<T, Response<T>> {
+public class DefaultResponseT implements ResponseT<Object, Response<Object>> {
 
-    private static final DefaultResponseT<Object> SINGLE_INSTANCE = new DefaultResponseT<>();
+    private static final DefaultResponseT SINGLE_INSTANCE = new DefaultResponseT();
 
     @Override
-    public <A> ResponseFn<A, Response<T>> bind(Endpoint endpoint, ResponseFn<A, T> fn) {
+    public <A> ResponseFn<A, Response<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
         return new ResponseFn<>() {
 
             @Override
-            public Promise<Response<T>> run(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Promise<Response<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
                 return response.then(r -> r.map(value -> fn.join(Promise.done(r), arguments)));
             }
 
@@ -55,7 +55,7 @@ public class DefaultResponseT<T> implements ResponseT<T, Response<T>> {
         return endpoint.returnType().compatible(Response.class);
     }
 
-    public static DefaultResponseT<Object> get() {
+    public static DefaultResponseT get() {
         return SINGLE_INSTANCE;
     }
 }

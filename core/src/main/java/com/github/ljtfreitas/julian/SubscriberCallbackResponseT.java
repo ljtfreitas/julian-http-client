@@ -32,16 +32,16 @@ import java.util.concurrent.Flow.Publisher;
 import java.util.concurrent.Flow.Subscriber;
 import java.util.function.Predicate;
 
-public class SubscriberCallbackResponseT<T> implements ResponseT<Publisher<T>, Void> {
+public class SubscriberCallbackResponseT implements ResponseT<Publisher<Object>, Void> {
 
-    private static final SubscriberCallbackResponseT<Object> SINGLE_INSTANCE = new SubscriberCallbackResponseT<>();
+    private static final SubscriberCallbackResponseT SINGLE_INSTANCE = new SubscriberCallbackResponseT();
 
-    public static SubscriberCallbackResponseT<Object> get() {
+    public static SubscriberCallbackResponseT get() {
         return SINGLE_INSTANCE;
     }
 
     @Override
-    public <A> ResponseFn<A, Void> bind(Endpoint endpoint, ResponseFn<A, Publisher<T>> fn) {
+    public <A> ResponseFn<A, Void> bind(Endpoint endpoint, ResponseFn<A, Publisher<Object>> fn) {
         return new ResponseFn<>() {
 
             @Override
@@ -52,12 +52,12 @@ public class SubscriberCallbackResponseT<T> implements ResponseT<Publisher<T>, V
             }
 
             @SuppressWarnings("unchecked")
-            private Optional<Subscriber<T>> subscriber(Parameters parameters, Arguments arguments) {
+            private Optional<Subscriber<Object>> subscriber(Parameters parameters, Arguments arguments) {
                 return parameters.callbacks()
                         .filter(c -> c.javaType().compatible(Subscriber.class))
                         .findFirst()
                         .flatMap(c -> arguments.of(c.position()))
-                        .map(arg -> (Subscriber<T>) arg);
+                        .map(arg -> (Subscriber<Object>) arg);
             }
 
             @Override

@@ -24,7 +24,7 @@ class StreamResponseTTest {
 	@Mock
 	private Endpoint endpoint;
 	
-	private final StreamResponseT<String> responseT = new StreamResponseT<>();
+	private final StreamResponseT responseT = new StreamResponseT();
 
 	@Nested
 	class Predicates {
@@ -63,12 +63,12 @@ class StreamResponseTTest {
 	}
 
 	@Test
-	void compose(@Mock ResponseFn<Collection<String>, Collection<String>> fn, @Mock Promise<Response<Collection<String>>> response) {
+	void compose(@Mock ResponseFn<Collection<String>, Collection<Object>> fn, @Mock Promise<Response<Collection<String>>> response) {
 		Arguments arguments = Arguments.empty();
 
 		when(fn.run(response, arguments)).thenReturn(Promise.done(List.of("expected")));
 
-		Stream<String> stream = responseT.bind(endpoint, fn).join(response, arguments);
+		Stream<Object> stream = responseT.bind(endpoint, fn).join(response, arguments);
 
 		assertThat(stream.collect(toList()), hasItem("expected"));
 	}

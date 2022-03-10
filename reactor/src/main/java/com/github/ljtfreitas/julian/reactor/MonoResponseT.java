@@ -32,19 +32,19 @@ import com.github.ljtfreitas.julian.ResponseFn;
 import com.github.ljtfreitas.julian.ResponseT;
 import reactor.core.publisher.Mono;
 
-public class MonoResponseT<T> implements ResponseT<T, Mono<T>> {
+public class MonoResponseT implements ResponseT<Object, Mono<Object>> {
 
-    private static final MonoResponseT<Object> SINGLE_INSTANCE = new MonoResponseT<>();
+    private static final MonoResponseT SINGLE_INSTANCE = new MonoResponseT();
 
     @Override
-    public <A> ResponseFn<A, Mono<T>> bind(Endpoint endpoint, ResponseFn<A, T> fn) {
+    public <A> ResponseFn<A, Mono<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
         return new ResponseFn<>() {
 
             @Override
-            public Mono<T> join(Promise<? extends Response<A>> response, Arguments arguments) {
-                Promise<T> promise = fn.run(response, arguments);
+            public Mono<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
+                Promise<Object> promise = fn.run(response, arguments);
 
-                return promise.cast(new Kind<MonoPromise<T>>() {})
+                return promise.cast(new Kind<MonoPromise<Object>>() {})
                         .map(MonoPromise::mono)
                         .orElseGet(() -> Mono.fromFuture(promise.future()));
             }
@@ -66,7 +66,7 @@ public class MonoResponseT<T> implements ResponseT<T, Mono<T>> {
         return endpoint.returnType().is(Mono.class);
     }
 
-    public static MonoResponseT<Object> provider() {
+    public static MonoResponseT provider() {
         return SINGLE_INSTANCE;
     }
 }

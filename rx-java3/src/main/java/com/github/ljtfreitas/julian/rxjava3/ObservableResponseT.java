@@ -33,14 +33,14 @@ import io.reactivex.rxjava3.core.Observable;
 
 import java.util.Collection;
 
-public class ObservableResponseT<T> implements ResponseT<Collection<T>, Observable<T>> {
+public class ObservableResponseT implements ResponseT<Collection<Object>, Observable<Object>> {
 
     @Override
-    public <A> ResponseFn<A, Observable<T>> bind(Endpoint endpoint, ResponseFn<A, Collection<T>> fn) {
+    public <A> ResponseFn<A, Observable<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> fn) {
         return new ResponseFn<>() {
 
             @Override
-            public Observable<T> join(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Observable<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
                 return Observable.fromCompletionStage(fn.run(response, arguments).future())
                         .flatMapIterable(c -> c);
             }

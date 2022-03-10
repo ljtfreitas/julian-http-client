@@ -23,7 +23,6 @@
 package com.github.ljtfreitas.julian.http;
 
 import java.io.InputStream;
-import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodySubscriber;
 import java.net.http.HttpResponse.BodySubscribers;
 import java.nio.ByteBuffer;

@@ -101,13 +101,11 @@ public class Form {
 	public Form join(String source) {
 		Map<String, Collection<String>> parameters = new LinkedHashMap<>(this.parameters);
 
-		asMap(source).forEach((name, values) -> {
-			parameters.merge(name, values, (a, b) -> {
-				Collection<String> e = new ArrayList<>(a);
-				e.addAll(b);
-				return e;
-			});
-		});
+		asMap(source).forEach((name, values) -> parameters.merge(name, values, (a, b) -> {
+			Collection<String> e = new ArrayList<>(a);
+			e.addAll(b);
+			return e;
+		}));
 
 		return new Form(parameters);
 	}

@@ -37,7 +37,6 @@ import com.github.ljtfreitas.julian.http.codec.HTTPResponseReaderException;
 import com.github.ljtfreitas.julian.http.codec.XMLHTTPMessageCodec;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -53,9 +52,9 @@ import java.util.stream.Stream;
 import static com.github.ljtfreitas.julian.Preconditions.nonNull;
 import static com.github.ljtfreitas.julian.http.MediaType.APPLICATION_XML;
 
-public class JacksonXMLHTTPMessageCodec<T> implements XMLHTTPMessageCodec<T> {
+public class JacksonXMLHTTPMessageCodec implements XMLHTTPMessageCodec<Object> {
 
-    private static final JacksonXMLHTTPMessageCodec<Object> SINGLE_INSTANCE = new JacksonXMLHTTPMessageCodec<>();
+    private static final JacksonXMLHTTPMessageCodec SINGLE_INSTANCE = new JacksonXMLHTTPMessageCodec();
 
     private final XmlMapper xmlMapper;
     private final TypeFactory typeFactory;
@@ -77,11 +76,11 @@ public class JacksonXMLHTTPMessageCodec<T> implements XMLHTTPMessageCodec<T> {
     }
 
     @Override
-    public HTTPRequestBody write(T body, Charset encoding) {
+    public HTTPRequestBody write(Object body, Charset encoding) {
         return new DefaultHTTPRequestBody(APPLICATION_XML, () -> serialize(body, encoding));
     }
 
-    private BodyPublisher serialize(T body, Charset encoding) {
+    private BodyPublisher serialize(Object body, Charset encoding) {
         JsonEncoding jsonEncoding = Stream.of(JsonEncoding.values()).filter(e -> e.getJavaName().equalsIgnoreCase(encoding.name()))
                 .findFirst()
                 .orElse(JsonEncoding.UTF8);
@@ -109,11 +108,11 @@ public class JacksonXMLHTTPMessageCodec<T> implements XMLHTTPMessageCodec<T> {
     }
 
     @Override
-    public Optional<CompletableFuture<T>> read(HTTPResponseBody body, JavaType javaType) {
+    public Optional<CompletableFuture<Object>> read(HTTPResponseBody body, JavaType javaType) {
         return body.readAsInputStream(s -> deserialize(s, javaType));
     }
 
-    private T deserialize(InputStream bodyAsStream, JavaType javaType) {
+    private Object deserialize(InputStream bodyAsStream, JavaType javaType) {
         try (InputStreamReader reader = new InputStreamReader(bodyAsStream);
             BufferedReader buffered = new BufferedReader(reader)) {
 
@@ -123,7 +122,7 @@ public class JacksonXMLHTTPMessageCodec<T> implements XMLHTTPMessageCodec<T> {
         }
     }
 
-    public static JacksonXMLHTTPMessageCodec<Object> provider() {
+    public static JacksonXMLHTTPMessageCodec provider() {
         return SINGLE_INSTANCE;
     }
 }

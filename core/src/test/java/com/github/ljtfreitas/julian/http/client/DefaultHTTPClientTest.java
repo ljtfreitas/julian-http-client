@@ -199,90 +199,90 @@ class DefaultHTTPClientTest {
         }
 
         @Nested
-        class Customizations {
-
-            @Nested
-            @MockServerSettings(ports = 8090)
-            class Timeout {
-
-                @Test
-                void requestTimeout() {
-                    HTTPClient httpClient = new DefaultHTTPClient(new HTTPClient.Specification()
-                            .requestTimeout(Duration.ofMillis(2000)));
-
-                    mockServer.when(request("/hello").withMethod("GET"))
-                            .respond(response("it works!")
-                                    .withDelay(TimeUnit.MILLISECONDS, 5000));
-
-                    SimpleHTTPRequestDefinition request = new SimpleHTTPRequestDefinition("http://localhost:8090/hello", "GET");
-
-                    Except<HTTPClientResponse> response = httpClient.request(request).execute().join();
-
-                    response.onSuccess(r -> fail("a timeout error was expected..."))
-                            .onFailure(e -> assertThat(e, instanceOf(HttpTimeoutException.class)));
-                }
-            }
-
-            @Nested
-            @MockServerSettings(ports = 8094)
-            class SSL {
-
-                @Test
-                void sslContext(MockServerClient httpsMockServer) throws NoSuchAlgorithmException, UnrecoverableKeyException, KeyStoreException, KeyManagementException {
-                    httpsMockServer.when(request("/hello").withMethod("GET"))
-                            .respond(response("hello"));
-
-                    KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-                    keyManagerFactory.init(new KeyStoreFactory(new MockServerLogger()).loadOrCreateKeyStore(), KeyStoreFactory.KEY_STORE_PASSWORD.toCharArray());
-
-                    SSLContext sslContext = SSLContext.getInstance("TLS");
-                    sslContext.init(keyManagerFactory.getKeyManagers(), null, null);
-
-                    HTTPClient httpClient = new DefaultHTTPClient(new HTTPClient.Specification()
-                            .ssl().context(sslContext));
-
-                    HTTPClientResponse response = httpClient.request(new SimpleHTTPRequestDefinition("https://localhost:8094/hello")).execute().join().unsafe();
-
-                    String body = response.body().readAsBytes(String::new).map(CompletableFuture::join).orElse("");
-
-                    assertEquals("hello", body);
-                }
-            }
-
-            @Nested
-            @MockServerSettings(ports = 8090)
-            class NetworkProxy {
-
-                @Test
-                void proxy() {
-                    mockServer.when(request("/proxy").withMethod("GET"))
-                            .respond(response("it's working..."));
-
-                    ProxySelector proxySelector = ProxySelector.of(new InetSocketAddress("localhost", 8090));
-
-                    HTTPClient httpClient = new DefaultHTTPClient(new HTTPClient.Specification()
-                            .proxySelector(proxySelector));
-
-                    HTTPClientResponse response = httpClient.request(new SimpleHTTPRequestDefinition("http://www.google.com.br")).execute().join().unsafe();
-
-                    String body = response.body().readAsBytes(String::new).map(CompletableFuture::join).orElse("");
-
-                    assertEquals("it's working...", body);
-                }
-            }
-        }
-
-        @Nested
         class ConnectionFailures {
 
             @Test
             void unknownHost() {
-                HTTPRequestDefinition request = new SimpleHTTPRequestDefinition("http://localhost:8091/hello");
+                HTTPRequestDefinition request = new SimpleHTTPRequestDefinition("http://localhost:8099/");
 
                 Except<HTTPClientResponse> response = client.request(request).execute().join();
 
                 response.onSuccess(r -> fail("a connection error was expected..."))
                         .onFailure(e -> assertThat(e, instanceOf(IOException.class)));
+            }
+        }
+    }
+
+    @Nested
+    class Customizations {
+
+        @Nested
+        @MockServerSettings(ports = 8090)
+        class Timeout {
+
+            @Test
+            void requestTimeout() {
+                HTTPClient httpClient = new DefaultHTTPClient(new HTTPClient.Specification()
+                        .requestTimeout(Duration.ofMillis(2000)));
+
+                mockServer.when(request("/hello").withMethod("GET"))
+                        .respond(response("it works!")
+                                .withDelay(TimeUnit.MILLISECONDS, 5000));
+
+                SimpleHTTPRequestDefinition request = new SimpleHTTPRequestDefinition("http://localhost:8090/hello", "GET");
+
+                Except<HTTPClientResponse> response = httpClient.request(request).execute().join();
+
+                response.onSuccess(r -> fail("a timeout error was expected..."))
+                        .onFailure(e -> assertThat(e, instanceOf(HttpTimeoutException.class)));
+            }
+        }
+
+        @Nested
+        @MockServerSettings(ports = 8094)
+        class SSL {
+
+            @Test
+            void sslContext(MockServerClient httpsMockServer) throws NoSuchAlgorithmException, UnrecoverableKeyException, KeyStoreException, KeyManagementException {
+                httpsMockServer.when(request("/hello").withMethod("GET"))
+                        .respond(response("hello"));
+
+                KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+                keyManagerFactory.init(new KeyStoreFactory(new MockServerLogger()).loadOrCreateKeyStore(), KeyStoreFactory.KEY_STORE_PASSWORD.toCharArray());
+
+                SSLContext sslContext = SSLContext.getInstance("TLS");
+                sslContext.init(keyManagerFactory.getKeyManagers(), null, null);
+
+                HTTPClient httpClient = new DefaultHTTPClient(new HTTPClient.Specification()
+                        .ssl().context(sslContext));
+
+                HTTPClientResponse response = httpClient.request(new SimpleHTTPRequestDefinition("https://localhost:8094/hello")).execute().join().unsafe();
+
+                String body = response.body().readAsBytes(String::new).map(CompletableFuture::join).orElse("");
+
+                assertEquals("hello", body);
+            }
+        }
+
+        @Nested
+        @MockServerSettings(ports = 8090)
+        class NetworkProxy {
+
+            @Test
+            void proxy() {
+                mockServer.when(request("/proxy").withMethod("GET"))
+                        .respond(response("it's working..."));
+
+                ProxySelector proxySelector = ProxySelector.of(new InetSocketAddress("localhost", 8090));
+
+                HTTPClient httpClient = new DefaultHTTPClient(new HTTPClient.Specification()
+                        .proxySelector(proxySelector));
+
+                HTTPClientResponse response = httpClient.request(new SimpleHTTPRequestDefinition("http://www.google.com.br")).execute().join().unsafe();
+
+                String body = response.body().readAsBytes(String::new).map(CompletableFuture::join).orElse("");
+
+                assertEquals("it's working...", body);
             }
         }
     }

@@ -33,14 +33,14 @@ import io.reactivex.rxjava3.core.Flowable;
 
 import java.util.Collection;
 
-public class FlowableResponseT<T> implements ResponseT<Collection<T>, Flowable<T>> {
+public class FlowableResponseT implements ResponseT<Collection<Object>, Flowable<Object>> {
 
     @Override
-    public <A> ResponseFn<A, Flowable<T>> bind(Endpoint endpoint, ResponseFn<A, Collection<T>> fn) {
+    public <A> ResponseFn<A, Flowable<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> fn) {
         return new ResponseFn<>() {
 
             @Override
-            public Flowable<T> join(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Flowable<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
                 return Flowable.fromCompletionStage(fn.run(response, arguments).future())
                         .flatMapIterable(c -> c);
             }

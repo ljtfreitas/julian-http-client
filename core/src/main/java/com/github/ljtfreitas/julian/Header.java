@@ -31,7 +31,6 @@ import static com.github.ljtfreitas.julian.Message.format;
 import static com.github.ljtfreitas.julian.Preconditions.nonNull;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableCollection;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toUnmodifiableList;
 
 public class Header {

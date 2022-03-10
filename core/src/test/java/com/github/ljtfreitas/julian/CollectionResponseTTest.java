@@ -33,7 +33,7 @@ class CollectionResponseTTest {
 	@Mock
 	private Endpoint endpoint;
 	
-	private final CollectionResponseT<String> responseT = new CollectionResponseT<>();
+	private final CollectionResponseT responseT = new CollectionResponseT();
 
 	@Nested
 	class Predicates {
@@ -81,7 +81,7 @@ class CollectionResponseTTest {
 	class Responses {
 
 		@Mock 
-		private ResponseFn<Collection<String>, Collection<String>> fn;
+		private ResponseFn<Collection<String>, Collection<Object>> fn;
 
 		@Mock 
 		private Promise<Response<Collection<String>>> response;
@@ -93,7 +93,7 @@ class CollectionResponseTTest {
 
 			when(fn.run(response, Arguments.empty())).thenReturn(Promise.done(List.of("expected")));
 
-			Collection<String> collection = responseT.bind(endpoint, fn).join(response, Arguments.empty());
+			Collection<Object> collection = responseT.bind(endpoint, fn).join(response, Arguments.empty());
 
 			assertThat(collection, contains("expected"));
 		}
@@ -105,7 +105,7 @@ class CollectionResponseTTest {
 
 			when(fn.run(response, Arguments.empty())).thenReturn(Promise.done(Collections.emptyList()));
 
-			Collection<String> collection = responseT.bind(endpoint, fn).join(response, Arguments.empty());
+			Collection<Object> collection = responseT.bind(endpoint, fn).join(response, Arguments.empty());
 
 			assertAll(() -> assertTrue(collection.isEmpty()),
 					  () -> assertTrue(expectedCollectionType.isInstance(collection)));

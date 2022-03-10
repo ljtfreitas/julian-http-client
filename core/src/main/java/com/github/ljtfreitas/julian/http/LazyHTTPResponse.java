@@ -69,7 +69,7 @@ class LazyHTTPResponse<T> implements HTTPResponse<T> {
 
 	@Override
 	public <R> R fold(Function<? super T, R> success, Function<? super Exception, R> failure) {
-		return body.fold(success, failure).join().unsafe();
+		return body.fold(success, failure);
 	}
 
 	@Override

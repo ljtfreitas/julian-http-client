@@ -1,14 +1,14 @@
 package com.github.ljtfreitas.julian.http;
 
-import com.github.ljtfreitas.julian.JavaType;
-import com.github.ljtfreitas.julian.http.client.HTTPClientResponse;
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Collections;
-import java.util.Map;
+import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.http.client.HTTPClientResponse;
 
 import static com.github.ljtfreitas.julian.http.HTTPResponseFailure.empty;
 import static com.github.ljtfreitas.julian.http.HTTPStatusCode.INTERNAL_SERVER_ERROR;

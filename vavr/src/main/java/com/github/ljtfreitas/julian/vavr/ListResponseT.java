@@ -36,14 +36,14 @@ import java.util.Optional;
 
 import static java.util.function.Predicate.not;
 
-public class ListResponseT<T> implements ResponseT<Collection<T>, List<T>> {
+public class ListResponseT implements ResponseT<Collection<Object>, List<Object>> {
 
     @Override
-    public <A> ResponseFn<A, List<T>> bind(Endpoint endpoint, ResponseFn<A, Collection<T>> fn) {
+    public <A> ResponseFn<A, List<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> fn) {
         return new ResponseFn<>() {
 
             @Override
-            public Promise<List<T>> run(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Promise<List<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
                 return fn.run(response, arguments)
                         .then(c -> Optional.ofNullable(c)
                                 .filter(not(Collection::isEmpty))

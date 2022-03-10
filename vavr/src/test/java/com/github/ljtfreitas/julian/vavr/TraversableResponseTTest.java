@@ -30,7 +30,7 @@ class TraversableResponseTTest {
     @Mock
     private Endpoint endpoint;
 
-    private final TraversableResponseT<String> responseT = new TraversableResponseT<>();
+    private final TraversableResponseT responseT = new TraversableResponseT();
 
     @Nested
     class Predicates {
@@ -79,10 +79,10 @@ class TraversableResponseTTest {
 
         Promise<Response<Collection<String>>> promise = Promise.done(Response.done(values));
 
-        ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
-                new ObjectResponseT<Collection<String>>().bind(endpoint, null));
+        ResponseFn<Collection<String>, Collection<Object>> fn = new CollectionResponseT().bind(endpoint,
+                new ObjectResponseT<Collection<Object>>().bind(endpoint, null));
 
-        Traversable<String> traversable = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
+        Traversable<Object> traversable = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
 
         assertTrue(traversable.containsAll(values));
     }
@@ -93,10 +93,10 @@ class TraversableResponseTTest {
 
         Promise<Response<Collection<String>>> promise = Promise.done(Response.done(null));
 
-        ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
-                new ObjectResponseT<Collection<String>>().bind(endpoint, null));
+        ResponseFn<Collection<String>, Collection<Object>> fn = new CollectionResponseT().bind(endpoint,
+                new ObjectResponseT<Collection<Object>>().bind(endpoint, null));
 
-        Traversable<String> traversable = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
+        Traversable<Object> traversable = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
 
         assertTrue(traversable.isEmpty());
     }

@@ -48,9 +48,9 @@ import java.util.concurrent.CompletableFuture;
 
 import static com.github.ljtfreitas.julian.http.MediaType.APPLICATION_JSON;
 
-public class JsonBHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
+public class JsonBHTTPMessageCodec implements JsonHTTPMessageCodec<Object> {
 
-    private static final JsonBHTTPMessageCodec<String> SINGLE_INSTANCE = new JsonBHTTPMessageCodec<>();
+    private static final JsonBHTTPMessageCodec SINGLE_INSTANCE = new JsonBHTTPMessageCodec();
 
     private final Jsonb jsonb;
 
@@ -68,11 +68,11 @@ public class JsonBHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
     }
 
     @Override
-    public HTTPRequestBody write(T body, Charset encoding) {
+    public HTTPRequestBody write(Object body, Charset encoding) {
         return new DefaultHTTPRequestBody(APPLICATION_JSON, () -> serialize(body, encoding));
     }
 
-    private BodyPublisher serialize(T body, Charset encoding) {
+    private BodyPublisher serialize(Object body, Charset encoding) {
         try (ByteArrayOutputStream output = new ByteArrayOutputStream();
              OutputStreamWriter writer = new OutputStreamWriter(output, encoding)) {
 
@@ -94,11 +94,11 @@ public class JsonBHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
 
 
     @Override
-    public Optional<CompletableFuture<T>> read(HTTPResponseBody body, JavaType javaType) {
+    public Optional<CompletableFuture<Object>> read(HTTPResponseBody body, JavaType javaType) {
         return body.readAsInputStream(s -> deserialize(s, javaType));
     }
 
-    private T deserialize(InputStream bodyAsStream, JavaType javaType) {
+    private Object deserialize(InputStream bodyAsStream, JavaType javaType) {
         try (InputStreamReader reader = new InputStreamReader(bodyAsStream);
             BufferedReader buffered = new BufferedReader(reader)) {
 
@@ -108,7 +108,7 @@ public class JsonBHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
         }
     }
 
-    public static JsonBHTTPMessageCodec<String> provider() {
+    public static JsonBHTTPMessageCodec provider() {
         return SINGLE_INSTANCE;
     }
 }

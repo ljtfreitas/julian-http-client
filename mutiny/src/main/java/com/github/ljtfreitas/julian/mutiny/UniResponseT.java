@@ -31,16 +31,16 @@ import com.github.ljtfreitas.julian.ResponseFn;
 import com.github.ljtfreitas.julian.ResponseT;
 import io.smallrye.mutiny.Uni;
 
-public class UniResponseT<T> implements ResponseT<T, Uni<T>> {
+public class UniResponseT implements ResponseT<Object, Uni<Object>> {
 
-    private static final UniResponseT<Object> SINGLE_INSTANCE = new UniResponseT<>();
+    private static final UniResponseT SINGLE_INSTANCE = new UniResponseT();
 
     @Override
-    public <A> ResponseFn<A, Uni<T>> bind(Endpoint endpoint, ResponseFn<A, T> fn) {
+    public <A> ResponseFn<A, Uni<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
         return new ResponseFn<>() {
 
             @Override
-            public Uni<T> join(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Uni<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
                 return Uni.createFrom().completionStage(fn.run(response, arguments).future());
             }
 
@@ -61,7 +61,7 @@ public class UniResponseT<T> implements ResponseT<T, Uni<T>> {
         return endpoint.returnType().is(Uni.class);
     }
 
-    public static UniResponseT<Object> provider() {
+    public static UniResponseT provider() {
         return SINGLE_INSTANCE;
     }
 }

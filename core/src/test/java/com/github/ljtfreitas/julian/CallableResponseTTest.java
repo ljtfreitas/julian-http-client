@@ -19,7 +19,7 @@ class CallableResponseTTest {
 	@Mock
 	private Endpoint endpoint;
 
-	private CallableResponseT<String> responseT = new CallableResponseT<>();
+	private final CallableResponseT responseT = new CallableResponseT();
 
 	@Nested
 	class Predicates {
@@ -58,12 +58,12 @@ class CallableResponseTTest {
 	}
 	
 	@Test
-	void compose(@Mock ResponseFn<String, String> fn, @Mock Promise<Response<String>> response) throws Exception {
+	void compose(@Mock ResponseFn<String, Object> fn, @Mock Promise<Response<String>> response) throws Exception {
 		Arguments arguments = Arguments.empty();
 
 		when(fn.join(response, arguments)).thenReturn("expected");
 
-		Callable<String> callable = responseT.bind(endpoint, fn).join(response, arguments);
+		Callable<Object> callable = responseT.bind(endpoint, fn).join(response, arguments);
 		
 		assertEquals("expected", callable.call());
 	}

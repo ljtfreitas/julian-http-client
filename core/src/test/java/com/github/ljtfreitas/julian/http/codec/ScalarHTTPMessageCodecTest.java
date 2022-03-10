@@ -84,7 +84,7 @@ class ScalarHTTPMessageCodecTest {
 			void write(Class<?> scalarClassType, Object value) {
 				HTTPRequestBody output = codec.write(value, StandardCharsets.UTF_8);
 
-				output.serialize().subscribe(new Flow.Subscriber<ByteBuffer>() {
+				output.serialize().subscribe(new Flow.Subscriber<>() {
 
 					@Override
 					public void onSubscribe(Flow.Subscription subscription) {

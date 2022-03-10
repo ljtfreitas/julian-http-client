@@ -31,14 +31,14 @@ import com.github.ljtfreitas.julian.ResponseFn;
 import com.github.ljtfreitas.julian.ResponseT;
 import io.reactivex.rxjava3.core.Single;
 
-public class SingleResponseT<T> implements ResponseT<T, Single<T>> {
+public class SingleResponseT implements ResponseT<Object, Single<Object>> {
 
     @Override
-    public <A> ResponseFn<A, Single<T>> bind(Endpoint endpoint, ResponseFn<A, T> fn) {
+    public <A> ResponseFn<A, Single<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
         return new ResponseFn<>() {
 
             @Override
-            public Single<T> join(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Single<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
                 return Single.fromCompletionStage(fn.run(response, arguments).future());
             }
 

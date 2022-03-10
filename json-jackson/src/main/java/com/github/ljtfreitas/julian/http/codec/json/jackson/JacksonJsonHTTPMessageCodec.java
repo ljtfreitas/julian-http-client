@@ -53,9 +53,9 @@ import java.util.stream.Stream;
 import static com.github.ljtfreitas.julian.Preconditions.nonNull;
 import static com.github.ljtfreitas.julian.http.MediaType.APPLICATION_JSON;
 
-public class JacksonJsonHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
+public class JacksonJsonHTTPMessageCodec implements JsonHTTPMessageCodec<Object> {
 
-    private static final JacksonJsonHTTPMessageCodec<Object> SINGLE_INSTANCE = new JacksonJsonHTTPMessageCodec<>();
+    private static final JacksonJsonHTTPMessageCodec SINGLE_INSTANCE = new JacksonJsonHTTPMessageCodec();
 
     private final ObjectMapper jsonMapper;
     private final TypeFactory typeFactory;
@@ -83,11 +83,11 @@ public class JacksonJsonHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
     }
 
     @Override
-    public HTTPRequestBody write(T body, Charset encoding) {
+    public HTTPRequestBody write(Object body, Charset encoding) {
         return new DefaultHTTPRequestBody(APPLICATION_JSON, () -> serialize(body, encoding));
     }
 
-    private BodyPublisher serialize(T body, Charset encoding) {
+    private BodyPublisher serialize(Object body, Charset encoding) {
         JsonEncoding jsonEncoding = Stream.of(JsonEncoding.values()).filter(e -> e.getJavaName().equalsIgnoreCase(encoding.name()))
                 .findFirst()
                 .orElse(JsonEncoding.UTF8);
@@ -115,11 +115,11 @@ public class JacksonJsonHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
     }
 
     @Override
-    public Optional<CompletableFuture<T>> read(HTTPResponseBody body, JavaType javaType) {
+    public Optional<CompletableFuture<Object>> read(HTTPResponseBody body, JavaType javaType) {
         return body.readAsInputStream(s -> deserialize(s, javaType));
     }
 
-    private T deserialize(InputStream bodyAsStream, JavaType javaType) {
+    private Object deserialize(InputStream bodyAsStream, JavaType javaType) {
         try (InputStreamReader reader = new InputStreamReader(bodyAsStream);
              BufferedReader buffered = new BufferedReader(reader)) {
 
@@ -129,7 +129,7 @@ public class JacksonJsonHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
         }
     }
 
-    public static JacksonJsonHTTPMessageCodec<Object> provider() {
+    public static JacksonJsonHTTPMessageCodec provider() {
         return SINGLE_INSTANCE;
     }
 }

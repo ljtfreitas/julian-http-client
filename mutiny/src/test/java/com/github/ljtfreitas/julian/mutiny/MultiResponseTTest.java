@@ -30,7 +30,7 @@ class MultiResponseTTest {
     @Mock
     private Endpoint endpoint;
 
-    private final MultiResponseT<String> subject = new MultiResponseT<>();
+    private final MultiResponseT subject = new MultiResponseT();
 
     @Nested
     class Predicates {
@@ -79,12 +79,12 @@ class MultiResponseTTest {
 
         when(endpoint.returnType()).thenReturn(JavaType.parameterized(Collection.class, String.class));
 
-        ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
-                new ObjectResponseT<Collection<String>>().bind(endpoint, null));
+        ResponseFn<Collection<String>, Collection<Object>> fn = new CollectionResponseT().bind(endpoint,
+                new ObjectResponseT<Collection<Object>>().bind(endpoint, null));
 
-        Multi<String> multi = subject.bind(endpoint, fn).join(response, Arguments.empty());
+        Multi<Object> multi = subject.bind(endpoint, fn).join(response, Arguments.empty());
 
-        AssertSubscriber<String> subscriber = multi.subscribe().withSubscriber(AssertSubscriber.create(3));
+        AssertSubscriber<Object> subscriber = multi.subscribe().withSubscriber(AssertSubscriber.create(3));
 
         subscriber.assertCompleted()
                 .assertItems("one", "two", "three");
@@ -96,12 +96,12 @@ class MultiResponseTTest {
 
         Promise<Response<Collection<String>>> response = Promise.failed(exception);
 
-        ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
-                new ObjectResponseT<Collection<String>>().bind(endpoint, null));
+        ResponseFn<Collection<String>, Collection<Object>> fn = new CollectionResponseT().bind(endpoint,
+                new ObjectResponseT<Collection<Object>>().bind(endpoint, null));
 
-        Multi<String> multi = subject.bind(endpoint, fn).join(response, Arguments.empty());
+        Multi<Object> multi = subject.bind(endpoint, fn).join(response, Arguments.empty());
 
-        AssertSubscriber<String> subscriber = multi.subscribe().withSubscriber(AssertSubscriber.create());
+        AssertSubscriber<Object> subscriber = multi.subscribe().withSubscriber(AssertSubscriber.create());
 
         subscriber.assertFailedWith(RuntimeException.class, exception.getMessage());
     }

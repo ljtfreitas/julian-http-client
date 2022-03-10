@@ -31,14 +31,14 @@ import com.github.ljtfreitas.julian.ResponseFn;
 import com.github.ljtfreitas.julian.ResponseT;
 import io.vavr.control.Option;
 
-public class OptionResponseT<T> implements ResponseT<T, Option<T>> {
+public class OptionResponseT implements ResponseT<Object, Option<Object>> {
 
     @Override
-    public <A> ResponseFn<A, Option<T>> bind(Endpoint endpoint, ResponseFn<A, T> fn) {
+    public <A> ResponseFn<A, Option<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
         return new ResponseFn<>() {
 
             @Override
-            public Promise<Option<T>> run(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Promise<Option<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
                 return fn.run(response, arguments).then(Option::of);
             }
 

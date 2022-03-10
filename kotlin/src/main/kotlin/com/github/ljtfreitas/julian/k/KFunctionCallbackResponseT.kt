@@ -88,7 +88,8 @@ object KFunctionCallbackResponseT : ResponseT<Any, Unit> {
         override fun returnType(): JavaType = fn.returnType()
     }
 
-    override fun adapted(endpoint: Endpoint) = endpoint.parameters().callbacks().filter { aSuccess(it) || aResult(it) }
+    override fun adapted(endpoint: Endpoint): JavaType = endpoint.parameters().callbacks()
+        .filter { aSuccess(it) || aResult(it) }
         .findFirst()
         .flatMap(::argument)
         .map(JavaType::valueOf)

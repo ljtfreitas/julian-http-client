@@ -30,7 +30,7 @@ class ListResponseTTest {
     @Mock
     private Endpoint endpoint;
 
-    private final ListResponseT<String> responseT = new ListResponseT<>();
+    private final ListResponseT responseT = new ListResponseT();
 
     @Nested
     class Predicates {
@@ -79,10 +79,10 @@ class ListResponseTTest {
 
         Promise<Response<Collection<String>>> promise = Promise.done(Response.done(values));
 
-        ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
-                new ObjectResponseT<Collection<String>>().bind(endpoint, null));
+        ResponseFn<Collection<String>, Collection<Object>> fn = new CollectionResponseT().bind(endpoint,
+                new ObjectResponseT<Collection<Object>>().bind(endpoint, null));
 
-        List<String> list = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
+        List<Object> list = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
 
         assertTrue(list.containsAll(values));
     }
@@ -93,10 +93,10 @@ class ListResponseTTest {
 
         Promise<Response<Collection<String>>> promise = Promise.done(Response.done(null));
 
-        ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
-                new ObjectResponseT<Collection<String>>().bind(endpoint, null));
+        ResponseFn<Collection<String>, Collection<Object>> fn = new CollectionResponseT().bind(endpoint,
+                new ObjectResponseT<Collection<Object>>().bind(endpoint, null));
 
-        List<String> list = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
+        List<Object> list = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
 
         assertTrue(list.isEmpty());
     }

@@ -13,21 +13,21 @@ import kotlin.coroutines.Continuation;
 
 import java.util.Optional;
 
-public class SuspendKFunctionResponseT<T> implements ResponseT<T, T> {
+public class SuspendKFunctionResponseT implements ResponseT<Object, Object> {
 
     @Override
-    public <A> ResponseFn<A, T> bind(Endpoint endpoint, ResponseFn<A, T> fn) {
+    public <A> ResponseFn<A, Object> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
         return new ResponseFn<>() {
 
             @SuppressWarnings("unchecked")
             @Override
-            public T join(Promise<? extends Response<A>> response, Arguments arguments) {
-                Continuation<T> continuation = arguments.of(Continuation.class).findFirst()
+            public Object join(Promise<? extends Response<A>> response, Arguments arguments) {
+                Continuation<Object> continuation = arguments.of(Continuation.class).findFirst()
                         .map(Argument::value)
                         .map(Continuation.class::cast)
                         .orElseThrow();
 
-                return (T) Coroutines.await(fn.run(response, arguments), continuation);
+                return Coroutines.await(fn.run(response, arguments), continuation);
             }
 
             @Override

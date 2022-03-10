@@ -43,22 +43,15 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
-import java.net.http.HttpResponse.BodySubscriber;
-import java.net.http.HttpResponse.BodySubscribers;
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Flow.Publisher;
 
 import static com.github.ljtfreitas.julian.http.MediaType.APPLICATION_JSON;
 
-public class GsonJsonHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
+public class GsonJsonHTTPMessageCodec implements JsonHTTPMessageCodec<Object> {
 
-    private static final GsonJsonHTTPMessageCodec<Object> SINGLE_INSTANCE = new GsonJsonHTTPMessageCodec<>();
+    private static final GsonJsonHTTPMessageCodec SINGLE_INSTANCE = new GsonJsonHTTPMessageCodec();
 
     private final Gson gson;
 
@@ -76,11 +69,11 @@ public class GsonJsonHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
     }
 
     @Override
-    public HTTPRequestBody write(T body, Charset encoding) {
+    public HTTPRequestBody write(Object body, Charset encoding) {
         return new DefaultHTTPRequestBody(APPLICATION_JSON, () -> serialize(body, encoding));
     }
 
-    private BodyPublisher serialize(T body, Charset encoding) {
+    private BodyPublisher serialize(Object body, Charset encoding) {
         try (ByteArrayOutputStream output = new ByteArrayOutputStream();
              OutputStreamWriter writer = new OutputStreamWriter(output, encoding)) {
 
@@ -99,11 +92,11 @@ public class GsonJsonHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
     }
 
     @Override
-    public Optional<CompletableFuture<T>> read(HTTPResponseBody body, JavaType javaType) {
+    public Optional<CompletableFuture<Object>> read(HTTPResponseBody body, JavaType javaType) {
         return body.readAsInputStream(s -> deserialize(s, javaType));
     }
 
-    private T deserialize(InputStream bodyAsStream, JavaType javaType) {
+    private Object deserialize(InputStream bodyAsStream, JavaType javaType) {
         try (InputStreamReader reader = new InputStreamReader(bodyAsStream);
              BufferedReader buffered = new BufferedReader(reader)) {
 
@@ -115,7 +108,7 @@ public class GsonJsonHTTPMessageCodec<T> implements JsonHTTPMessageCodec<T> {
         }
     }
 
-    public static GsonJsonHTTPMessageCodec<Object> provider() {
+    public static GsonJsonHTTPMessageCodec provider() {
         return SINGLE_INSTANCE;
     }
 }

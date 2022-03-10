@@ -24,16 +24,16 @@ package com.github.ljtfreitas.julian;
 
 import java.util.concurrent.CompletionStage;
 
-class CompletionStageResponseT<T> implements ResponseT<T, CompletionStage<T>> {
+class CompletionStageResponseT implements ResponseT<Object, CompletionStage<Object>> {
 
-	private static final CompletionStageResponseT<Object> SINGLE_INSTANCE = new CompletionStageResponseT<>();
+	private static final CompletionStageResponseT SINGLE_INSTANCE = new CompletionStageResponseT();
 
 	@Override
-	public <A> ResponseFn<A, CompletionStage<T>> bind(Endpoint endpoint, ResponseFn<A, T> fn) {
+	public <A> ResponseFn<A, CompletionStage<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
 		return new ResponseFn<>() {
 
 			@Override
-			public CompletionStage<T> join(Promise<? extends Response<A>> response, Arguments arguments) {
+			public CompletionStage<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
 				return fn.run(response, arguments).future();
 			}
 
@@ -55,7 +55,7 @@ class CompletionStageResponseT<T> implements ResponseT<T, CompletionStage<T>> {
 				.orElseGet(JavaType::object);
 	}
 
-	public static CompletionStageResponseT<Object> get() {
+	public static CompletionStageResponseT get() {
 		return SINGLE_INSTANCE;
 	}
 }

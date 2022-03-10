@@ -9,7 +9,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.when;
@@ -20,7 +19,7 @@ class PromiseResponseTTest {
     @Mock
     private Endpoint endpoint;
 
-    private PromiseResponseT<String> responseT = new PromiseResponseT<>();
+    private final PromiseResponseT responseT = new PromiseResponseT();
 
     @Nested
     class Predicates {
@@ -59,12 +58,12 @@ class PromiseResponseTTest {
     }
 
     @Test
-    void compose(@Mock ResponseFn<String, String> fn, @Mock Promise<Response<String>> response) {
+    void compose(@Mock ResponseFn<String, Object> fn, @Mock Promise<Response<String>> response) {
         Arguments arguments = Arguments.empty();
 
         when(fn.run(same(response), eq(arguments))).thenReturn(Promise.done("expected"));
 
-        Promise<String> actual = responseT.bind(endpoint, fn).join(response, arguments);
+        Promise<Object> actual = responseT.bind(endpoint, fn).join(response, arguments);
 
         assertEquals("expected", actual.join().unsafe());
     }

@@ -29,7 +29,6 @@ import com.github.ljtfreitas.julian.http.HTTPRequestBody;
 import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.MediaType;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,8 +36,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.http.HttpRequest.BodyPublishers;
-import java.net.http.HttpResponse;
-import java.net.http.HttpResponse.BodySubscriber;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Collection;
@@ -47,9 +44,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Flow.Publisher;
 
-import static java.net.http.HttpResponse.BodySubscribers.mapping;
-
-public class OctetStreamHTTPMessageCodec<T extends Serializable> implements HTTPRequestWriter<T>, HTTPResponseReader<T> {
+public class OctetStreamHTTPMessageCodec implements HTTPRequestWriter<Serializable>, HTTPResponseReader<Serializable> {
 
 	private static final Collection<MediaType> OCTET_STREAM_MEDIA_TYPES = List.of(MediaType.APPLICATION_OCTET_STREAM);
 
@@ -64,7 +59,7 @@ public class OctetStreamHTTPMessageCodec<T extends Serializable> implements HTTP
 	}
 
 	@Override
-	public HTTPRequestBody write(T body, Charset encoding) {
+	public HTTPRequestBody write(Serializable body, Charset encoding) {
 		return new DefaultHTTPRequestBody(MediaType.APPLICATION_OCTET_STREAM, () -> serialize(body));
 	}
 
@@ -90,14 +85,13 @@ public class OctetStreamHTTPMessageCodec<T extends Serializable> implements HTTP
 	}
 
 	@Override
-	public Optional<CompletableFuture<T>> read(HTTPResponseBody body, JavaType javaType) {
+	public Optional<CompletableFuture<Serializable>> read(HTTPResponseBody body, JavaType javaType) {
 		return body.readAsInputStream(s -> deserialize(s, javaType));
 	}
 
-	@SuppressWarnings("unchecked")
-	private T deserialize(InputStream bodyAsInputStream, JavaType javaType) {
+	private Serializable deserialize(InputStream bodyAsInputStream, JavaType javaType) {
 		return Bracket.acquire(() -> new ObjectInputStream(bodyAsInputStream))
-				.map(s -> (T) s.readObject())
+				.map(s -> (Serializable) s.readObject())
 				.prop(e -> new HTTPResponseReaderException("Object deserialization failed. The target type was: " + javaType, e));
 	}
 }

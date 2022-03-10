@@ -21,7 +21,7 @@ class FutureTaskResponseTTest {
 	@Mock
 	private Endpoint endpoint;
 
-	private final FutureTaskResponseT<String> responseT = new FutureTaskResponseT<>();
+	private final FutureTaskResponseT responseT = new FutureTaskResponseT();
 
 	@Nested
 	class Predicates {
@@ -60,12 +60,12 @@ class FutureTaskResponseTTest {
 	}
 	
 	@Test
-	void compose(@Mock ResponseFn<String, Callable<String>> fn, @Mock Promise<Response<String>> response) throws Exception {
+	void compose(@Mock ResponseFn<String, Callable<Object>> fn, @Mock Promise<Response<String>> response) throws Exception {
 		Arguments arguments = Arguments.empty();
 
 		when(fn.join(response, arguments)).thenReturn(() -> "expected");
 
-		FutureTask<String> task = responseT.bind(endpoint, fn).join(response, arguments);
+		FutureTask<Object> task = responseT.bind(endpoint, fn).join(response, arguments);
 
 		Executors.newSingleThreadExecutor().submit(task);
 

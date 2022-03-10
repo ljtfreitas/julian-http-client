@@ -1,18 +1,20 @@
 package com.github.ljtfreitas.julian.vavr;
 
-import com.github.ljtfreitas.julian.Arguments;
-import com.github.ljtfreitas.julian.Endpoint;
-import com.github.ljtfreitas.julian.JavaType;
-import com.github.ljtfreitas.julian.Promise;
-import com.github.ljtfreitas.julian.Response;
-import com.github.ljtfreitas.julian.ResponseFn;
 import io.vavr.concurrent.Future;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.github.ljtfreitas.julian.Arguments;
+import com.github.ljtfreitas.julian.Endpoint;
+import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.Promise;
+import com.github.ljtfreitas.julian.Response;
+import com.github.ljtfreitas.julian.ResponseFn;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -26,7 +28,7 @@ class FutureResponseTTest {
     @Mock
     private Endpoint endpoint;
 
-    private final FutureResponseT<String> responseT = new FutureResponseT<String>();
+    private final FutureResponseT responseT = new FutureResponseT();
 
     @Nested
     class Predicates {
@@ -68,31 +70,31 @@ class FutureResponseTTest {
     }
 
     @Test
-    void bind(@Mock Promise<Response<String>> promise, @Mock ResponseFn<String, String> fn) {
+    void bind(@Mock Promise<Response<String>> promise, @Mock ResponseFn<String, Object> fn) {
         Arguments arguments = Arguments.empty();
 
         String content = "hello";
 
         when(fn.run(promise, arguments)).thenReturn(Promise.done(content));
 
-        Future<String> future = responseT.bind(endpoint, fn).join(promise, arguments);
+        Future<Object> future = responseT.bind(endpoint, fn).join(promise, arguments);
 
         assertThat(future.get(), equalTo(content));
     }
 
     @Test
-    void bindFailure(@Mock Promise<Response<String>> promise, @Mock ResponseFn<String, String> fn) {
+    void bindFailure(@Mock Promise<Response<String>> promise, @Mock ResponseFn<String, Object> fn) {
         Arguments arguments = Arguments.empty();
 
         RuntimeException failure = new RuntimeException("oops");
 
         when(fn.run(promise, arguments)).then(i -> Promise.failed(failure));
 
-        Future<String> future = responseT.bind(endpoint, fn).join(promise, arguments);
+        Future<Object> future = responseT.bind(endpoint, fn).join(promise, arguments);
 
         assertTrue(future.isFailure());
 
-        String failureMessage = future.recover(Throwable::getMessage).get();
+        Object failureMessage = future.recover(Throwable::getMessage).get();
 
         assertThat(failureMessage, equalTo(failure.getMessage()));
     }

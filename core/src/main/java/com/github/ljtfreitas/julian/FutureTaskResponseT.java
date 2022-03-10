@@ -25,16 +25,16 @@ package com.github.ljtfreitas.julian;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 
-class FutureTaskResponseT<T> implements ResponseT<Callable<T>, FutureTask<T>> {
+class FutureTaskResponseT implements ResponseT<Callable<Object>, FutureTask<Object>> {
 
-	private static final FutureTaskResponseT<Object> SINGLE_INSTANCE = new FutureTaskResponseT<>();
+	private static final FutureTaskResponseT SINGLE_INSTANCE = new FutureTaskResponseT();
 
 	@Override
-	public <A> ResponseFn<A, FutureTask<T>> bind(Endpoint endpoint, ResponseFn<A, Callable<T>> fn) {
+	public <A> ResponseFn<A, FutureTask<Object>> bind(Endpoint endpoint, ResponseFn<A, Callable<Object>> fn) {
 		return new ResponseFn<>() {
 
 			@Override
-			public FutureTask<T> join(Promise<? extends Response<A>> response, Arguments arguments) {
+			public FutureTask<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
 				return new FutureTask<>(fn.join(response, arguments));
 			}
 
@@ -57,7 +57,7 @@ class FutureTaskResponseT<T> implements ResponseT<Callable<T>, FutureTask<T>> {
 				.orElseGet(JavaType::object);
 	}
 
-	public static FutureTaskResponseT<Object> get() {
+	public static FutureTaskResponseT get() {
 		return SINGLE_INSTANCE;
 	}
 }

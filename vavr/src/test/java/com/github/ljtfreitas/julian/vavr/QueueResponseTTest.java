@@ -30,7 +30,7 @@ class QueueResponseTTest {
     @Mock
     private Endpoint endpoint;
 
-    private final QueueResponseT<String> responseT = new QueueResponseT<>();
+    private final QueueResponseT responseT = new QueueResponseT();
 
     @Nested
     class Predicates {
@@ -79,10 +79,10 @@ class QueueResponseTTest {
 
         Promise<Response<Collection<String>>> promise = Promise.done(Response.done(values));
 
-        ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
-                new ObjectResponseT<Collection<String>>().bind(endpoint, null));
+        ResponseFn<Collection<String>, Collection<Object>> fn = new CollectionResponseT().bind(endpoint,
+                new ObjectResponseT<Collection<Object>>().bind(endpoint, null));
 
-        Queue<String> queue = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
+        Queue<Object> queue = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
 
         assertTrue(queue.containsAll(values));
     }
@@ -93,10 +93,10 @@ class QueueResponseTTest {
 
         Promise<Response<Collection<String>>> promise = Promise.done(Response.done(null));
 
-        ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
-                new ObjectResponseT<Collection<String>>().bind(endpoint, null));
+        ResponseFn<Collection<String>, Collection<Object>> fn = new CollectionResponseT().bind(endpoint,
+                new ObjectResponseT<Collection<Object>>().bind(endpoint, null));
 
-        Queue<String> queue = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
+        Queue<Object> queue = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
 
         assertTrue(queue.isEmpty());
     }

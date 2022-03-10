@@ -20,7 +20,7 @@ class OptionalResponseTTest {
 	@Mock
 	private Endpoint endpoint;
 
-	private final OptionalResponseT<String> responseT = new OptionalResponseT<>();
+	private final OptionalResponseT responseT = new OptionalResponseT();
 
 	@Nested
 	class Predicates {
@@ -59,12 +59,12 @@ class OptionalResponseTTest {
 	}
 
 	@Test
-	void compose(@Mock ResponseFn<String, String> fn, @Mock Promise<Response<String>> response) {
+	void compose(@Mock ResponseFn<String, Object> fn, @Mock Promise<Response<String>> response) {
 		Arguments arguments = Arguments.empty();
 
 		when(fn.run(response, arguments)).thenReturn(Promise.done("expected"));
 
-		Optional<String> optional = responseT.bind(endpoint, fn).join(response, arguments);
+		Optional<Object> optional = responseT.bind(endpoint, fn).join(response, arguments);
 
 		assertAll(() -> assertTrue(optional.isPresent()), () -> assertEquals("expected", optional.get()));
 	}

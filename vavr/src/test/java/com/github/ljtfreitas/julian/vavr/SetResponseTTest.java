@@ -1,5 +1,16 @@
 package com.github.ljtfreitas.julian.vavr;
 
+import io.vavr.collection.Set;
+
+import java.util.Collection;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.CollectionResponseT;
 import com.github.ljtfreitas.julian.Endpoint;
@@ -8,15 +19,6 @@ import com.github.ljtfreitas.julian.ObjectResponseT;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
-import io.vavr.collection.Set;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Collection;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -30,7 +32,7 @@ class SetResponseTTest {
     @Mock
     private Endpoint endpoint;
 
-    private final SetResponseT<String> responseT = new SetResponseT<>();
+    private final SetResponseT responseT = new SetResponseT();
 
     @Nested
     class Predicates {
@@ -79,10 +81,10 @@ class SetResponseTTest {
 
         Promise<Response<Collection<String>>> promise = Promise.done(Response.done(values));
 
-        ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
-                new ObjectResponseT<Collection<String>>().bind(endpoint, null));
+        ResponseFn<Collection<String>, Collection<Object>> fn = new CollectionResponseT().bind(endpoint,
+                new ObjectResponseT<Collection<Object>>().bind(endpoint, null));
 
-        Set<String> set = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
+        Set<Object> set = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
 
         assertTrue(set.containsAll(values));
     }
@@ -93,10 +95,10 @@ class SetResponseTTest {
 
         Promise<Response<Collection<String>>> promise = Promise.done(Response.done(null));
 
-        ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
-                new ObjectResponseT<Collection<String>>().bind(endpoint, null));
+        ResponseFn<Collection<String>, Collection<Object>> fn = new CollectionResponseT().bind(endpoint,
+                new ObjectResponseT<Collection<Object>>().bind(endpoint, null));
 
-        Set<String> set = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
+        Set<Object> set = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
 
         assertTrue(set.isEmpty());
     }

@@ -22,14 +22,6 @@
 
 package com.github.ljtfreitas.julian.http.codec.form;
 
-import com.github.ljtfreitas.julian.JavaType;
-import com.github.ljtfreitas.julian.contract.FormSerializer;
-import com.github.ljtfreitas.julian.http.DefaultHTTPRequestBody;
-import com.github.ljtfreitas.julian.http.HTTPRequestBody;
-import com.github.ljtfreitas.julian.http.HTTPResponseBody;
-import com.github.ljtfreitas.julian.http.MediaType;
-import com.github.ljtfreitas.julian.http.codec.FormURLEncodedHTTPMessageCodec;
-
 import java.net.http.HttpRequest.BodyPublishers;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -39,8 +31,15 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Flow.Publisher;
 import java.util.stream.Collectors;
 
+import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.contract.FormSerializer;
+import com.github.ljtfreitas.julian.http.DefaultHTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPResponseBody;
+import com.github.ljtfreitas.julian.http.MediaType;
+import com.github.ljtfreitas.julian.http.codec.FormURLEncodedHTTPMessageCodec;
+
 import static com.github.ljtfreitas.julian.http.MediaType.APPLICATION_FORM_URLENCODED;
-import static java.util.stream.Collectors.toUnmodifiableMap;
 
 public class SimpleMapFormURLEncodedHTTPMessageCodec implements FormURLEncodedHTTPMessageCodec<Map<String, String>> {
 

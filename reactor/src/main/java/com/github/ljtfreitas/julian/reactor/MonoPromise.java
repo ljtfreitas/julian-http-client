@@ -70,8 +70,10 @@ public class MonoPromise<T> implements Promise<T> {
     }
 
     @Override
-    public <R> Promise<R> fold(Function<? super T, R> success, Function<? super Exception, R> failure) {
-        return new MonoPromise<>(mono.map(success).onErrorResume(e -> Mono.just(failure.apply((Exception) e))));
+    public <R> R fold(Function<? super T, R> success, Function<? super Exception, R> failure) {
+        return mono.map(success)
+                .onErrorResume(e -> Mono.just(failure.apply((Exception) e)))
+                .block();
     }
 
     @Override

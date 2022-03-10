@@ -48,8 +48,8 @@ class DonePromise<T> implements Promise<T> {
 	}
 
 	@Override
-	public <R> Promise<R> fold(Function<? super T, R> success, Function<? super Exception, R> failure) {
-		return new DonePromise<>(success.apply(value));
+	public <R> R fold(Function<? super T, R> success, Function<? super Exception, R> failure) {
+		return success.apply(value);
 	}
 
 	@Override

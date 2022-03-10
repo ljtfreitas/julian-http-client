@@ -26,7 +26,7 @@ class UniResponseTTest {
     @Mock
     private Endpoint endpoint;
     
-    private final UniResponseT<String> subject = new UniResponseT<>();
+    private final UniResponseT subject = new UniResponseT();
 
     @Nested
     class Predicates {
@@ -72,11 +72,11 @@ class UniResponseTTest {
     void bind() {
         Promise<Response<String>> response = Promise.done(Response.done("hello"));
 
-        ResponseFn<String, String> fn = new ObjectResponseT<String>().bind(endpoint, null);
+        ResponseFn<String, Object> fn = new ObjectResponseT<>().bind(endpoint, null);
 
-        Uni<String> uni = subject.bind(endpoint, fn).join(response, Arguments.empty());
+        Uni<Object> uni = subject.bind(endpoint, fn).join(response, Arguments.empty());
 
-        UniAssertSubscriber<String> subscriber = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
+        UniAssertSubscriber<Object> subscriber = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
 
         subscriber.assertCompleted()
                 .assertItem("hello");
@@ -88,11 +88,11 @@ class UniResponseTTest {
 
         Promise<Response<String>> response = Promise.failed(exception);
 
-        ResponseFn<String, String> fn = new ObjectResponseT<String>().bind(endpoint, null);
+        ResponseFn<String, Object> fn = new ObjectResponseT<>().bind(endpoint, null);
 
-        Uni<String> uni = subject.bind(endpoint, fn).join(response, Arguments.empty());
+        Uni<Object> uni = subject.bind(endpoint, fn).join(response, Arguments.empty());
 
-        UniAssertSubscriber<String> subscriber = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
+        UniAssertSubscriber<Object> subscriber = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
 
         subscriber.assertFailedWith(RuntimeException.class, exception.getMessage());
     }

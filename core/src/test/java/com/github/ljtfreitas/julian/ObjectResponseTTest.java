@@ -6,10 +6,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 
 @ExtendWith(MockitoExtension.class)
 class ObjectResponseTTest {
@@ -17,15 +13,15 @@ class ObjectResponseTTest {
     @Mock
     private Endpoint endpoint;
 
-    private final ObjectResponseT<String> responseT = new ObjectResponseT<>();
+    private final ObjectResponseT<Object> responseT = new ObjectResponseT<>();
 
     @Test
-    void compose(@Mock ResponseFn<String, String> fn) {
+    void compose(@Mock ResponseFn<String, Object> fn) {
         Arguments arguments = Arguments.empty();
 
         Response<String> response = Response.done("expected");
 
-        String actual = responseT.bind(endpoint, fn).join(Promise.done(response), arguments);
+        Object actual = responseT.bind(endpoint, fn).join(Promise.done(response), arguments);
 
         assertEquals("expected", actual);
     }

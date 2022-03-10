@@ -31,19 +31,19 @@ import com.github.ljtfreitas.julian.ResponseFn;
 import com.github.ljtfreitas.julian.ResponseT;
 import io.vavr.control.Either;
 
-public class EitherResponseT<R, L extends Exception> implements ResponseT<R, Either<L, R>> {
+public class EitherResponseT<L extends Exception> implements ResponseT<Object, Either<L, Object>> {
 
     @Override
-    public <A> ResponseFn<A, Either<L, R>> bind(Endpoint endpoint, ResponseFn<A, R> fn) {
+    public <A> ResponseFn<A, Either<L, Object>> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
         return new ResponseFn<>() {
 
             @SuppressWarnings("unchecked")
             @Override
-            public Promise<Either<L, R>> run(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Promise<Either<L, Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
                 Class<?> leftClassType = JavaType.valueOf(endpoint.returnType().parameterized().map(JavaType.Parameterized::firstArg).orElse(Exception.class)).rawClassType();
 
                 return fn.run(response, arguments)
-                        .then(Either::<L, R>right)
+                        .then(Either::<L, Object>right)
                         .recover(leftClassType::isInstance, e -> Either.left((L) e));
             }
 

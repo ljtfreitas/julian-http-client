@@ -27,9 +27,9 @@ import java.util.concurrent.Flow;
 import java.util.concurrent.Flow.Publisher;
 import java.util.concurrent.SubmissionPublisher;
 
-public class PublisherResponseT<T> implements ResponseT<T, Publisher<T>> {
+public class PublisherResponseT implements ResponseT<Object, Publisher<Object>> {
 
-    private static final PublisherResponseT<Object> SINGLE_INSTANCE = new PublisherResponseT<>();
+    private static final PublisherResponseT SINGLE_INSTANCE = new PublisherResponseT();
 
     private final Executor executor;
 
@@ -42,12 +42,12 @@ public class PublisherResponseT<T> implements ResponseT<T, Publisher<T>> {
     }
 
     @Override
-    public <A> ResponseFn<A, Publisher<T>> bind(Endpoint endpoint, ResponseFn<A, T> fn) {
+    public <A> ResponseFn<A, Publisher<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
         return new ResponseFn<>() {
 
             @Override
-            public Publisher<T> join(Promise<? extends Response<A>> response, Arguments arguments) {
-                SubmissionPublisher<T> publisher = executor == null ?
+            public Publisher<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
+                SubmissionPublisher<Object> publisher = executor == null ?
                         new SubmissionPublisher<>() : new SubmissionPublisher<>(executor, Flow.defaultBufferSize());
 
                 fn.run(response, arguments).future()
@@ -76,7 +76,7 @@ public class PublisherResponseT<T> implements ResponseT<T, Publisher<T>> {
         return endpoint.returnType().is(Publisher.class);
     }
 
-    public static PublisherResponseT<Object> get() {
+    public static PublisherResponseT get() {
         return SINGLE_INSTANCE;
     }
 }

@@ -28,31 +28,31 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public class CollectionResponseT<T> implements ResponseT<Collection<T>, Collection<T>> {
+public class CollectionResponseT implements ResponseT<Collection<Object>, Collection<Object>> {
 
-	private static final CollectionResponseT<Object> SINGLE_INSTANCE = new CollectionResponseT<>();
+	private static final CollectionResponseT SINGLE_INSTANCE = new CollectionResponseT();
 
 	@Override
-	public <A> ResponseFn<A, Collection<T>> bind(Endpoint endpoint, ResponseFn<A, Collection<T>> fn) {
+	public <A> ResponseFn<A, Collection<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> fn) {
 		return new ResponseFn<>() {
 
 			@Override
-			public Promise<Collection<T>> run(Promise<? extends Response<A>> response, Arguments arguments) {
+			public Promise<Collection<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
 				return fn.run(response, arguments).then(c -> Optional.ofNullable(c).map(this::collectionByType).orElseGet(this::emptyCollectionByType));
 			}
 
-			private Collection<T> collectionByType(Collection<T> source) {
+			private Collection<Object> collectionByType(Collection<Object> source) {
 				JavaType returnType = endpoint.returnType();
 
-				return returnType.<Collection<T>>when(List.class, () -> List.copyOf(source))
+				return returnType.<Collection<Object>>when(List.class, () -> List.copyOf(source))
 						.or(() -> returnType.when(Set.class, () -> Set.copyOf(source)))
 						.orElse(source);
 			}
 
-			private Collection<T> emptyCollectionByType() {
+			private Collection<Object> emptyCollectionByType() {
 				JavaType returnType = endpoint.returnType();
 
-				return returnType.<Collection<T>>when(List.class, Collections::emptyList)
+				return returnType.<Collection<Object>>when(List.class, Collections::emptyList)
 						.or(() -> returnType.when(Set.class, Collections::emptySet))
 						.orElseGet(Collections::emptyList);
 			}
@@ -76,7 +76,7 @@ public class CollectionResponseT<T> implements ResponseT<Collection<T>, Collecti
 		return JavaType.parameterized(Collection.class, endpoint.returnType().parameterized().map(JavaType.Parameterized::firstArg).orElse(Object.class));
 	}
 
-	public static CollectionResponseT<Object> get() {
+	public static CollectionResponseT get() {
 		return SINGLE_INSTANCE;
 	}
 }

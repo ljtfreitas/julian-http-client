@@ -36,7 +36,7 @@ fun <T> Promise<T>.deferred(): Deferred<T> = future().asDeferred()
 
 suspend fun <T> Promise<T>.await(): T = future().await()
 
-suspend fun <T> promise(context: CoroutineContext = EmptyCoroutineContext, block: () -> T) = supervisorScope {
+suspend fun <T> promise(context: CoroutineContext = EmptyCoroutineContext, block: () -> T): Promise<T> = supervisorScope {
     try {
         withContext(context = context) {
             block()

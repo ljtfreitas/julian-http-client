@@ -64,7 +64,7 @@ fun ProxyBuilder.enableKotlinExtensions() : ProxyBuilder {
             FlowResponseT,
             JobResponseT,
             SequenceResponseT,
-            SuspendKFunctionResponseT<Any>()
+            SuspendKFunctionResponseT()
         )
     }
 
@@ -108,7 +108,7 @@ inline fun <reified T> proxy(endpoint: URL? = null, block: ProxyBuilder.() -> Un
     .enableKotlinExtensions()
     .build(T::class.java, endpoint)
 
-internal class KExtensions(val m: EndpointMetadata) : EndpointMetadata by m {
+internal class KExtensions(private val m: EndpointMetadata) : EndpointMetadata by m {
 
     override fun endpoint(javaClass: Class<*>, javaMethod: Method, unhandledParameterTypes: MutableCollection<Class<*>>, root: Optional<URL>): Endpoint {
         val source = m.endpoint(javaClass, javaMethod, unhandledParameterTypes + unhandledKotlinTypes, root)

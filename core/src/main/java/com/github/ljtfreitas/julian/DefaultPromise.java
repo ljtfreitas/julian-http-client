@@ -50,13 +50,13 @@ class DefaultPromise<T> implements Promise<T> {
 	}
 
 	@Override
-	public <R> Promise<R> fold(Function<? super T, R> success, Function<? super Exception, R> failure) {
-		return new DefaultPromise<>(future.handleAsync((r, e) -> {
+	public <R> R fold(Function<? super T, R> success, Function<? super Exception, R> failure) {
+		return new DefaultPromise<R>(future.handleAsync((r, e) -> {
 			if (e != null)
 				return failure.apply((Exception) e);
 			else
 				return success.apply(r);
-		}));
+		})).join().unsafe();
 
 	}
 
@@ -90,8 +90,8 @@ class DefaultPromise<T> implements Promise<T> {
 	public Promise<T> recover(Predicate<? super Exception> p, Function<? super Exception, T> fn) {
 		return new DefaultPromise<>(future.handleAsync((r, e) -> {
 			Exception cause = deep(e);
-			if (cause != null && p.test((Exception) cause))
-				return fn.apply((Exception) cause);
+			if (cause != null && p.test(cause))
+				return fn.apply(cause);
 			else
 				return r;
 		}));
@@ -102,7 +102,7 @@ class DefaultPromise<T> implements Promise<T> {
 		return new DefaultPromise<>(future.handleAsync((r, e) -> {
 			Exception cause = deep(e);
 			if (cause != null)
-				throw failure(fn.apply((Exception) cause));
+				throw failure(fn.apply(cause));
 			else
 				return r;
 		}));
@@ -113,7 +113,7 @@ class DefaultPromise<T> implements Promise<T> {
 		return new DefaultPromise<>(future.whenCompleteAsync((r, e) -> {
 			Exception cause = deep(e);
 			if (cause != null)
-				fn.accept((Exception) cause);
+				fn.accept(cause);
 		}));
 	}
 

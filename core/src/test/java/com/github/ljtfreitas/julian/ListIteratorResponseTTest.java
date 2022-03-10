@@ -22,7 +22,7 @@ class ListIteratorResponseTTest {
 	@Mock
 	private Endpoint endpoint;
 	
-	private final ListIteratorResponseT<String> responseT = new ListIteratorResponseT<>();
+	private final ListIteratorResponseT responseT = new ListIteratorResponseT();
 
 	@Nested
 	class Predicates {
@@ -61,13 +61,15 @@ class ListIteratorResponseTTest {
 	}
 
 	@Test
-	void compose(@Mock ResponseFn<List<String>, List<String>> fn, @Mock Promise<Response<List<String>>> response) {
+	void compose(@Mock ResponseFn<List<String>, List<Object>> fn, @Mock Promise<Response<List<String>>> response) {
 		Arguments arguments = Arguments.empty();
 
 		when(fn.run(response, arguments)).thenReturn(Promise.done(List.of("expected")));
 
-		ListIterator<String> listIterator = responseT.bind(endpoint, fn).join(response, arguments);
+		ListIterator<Object> listIterator = responseT.bind(endpoint, fn).join(response, arguments);
 
-		assertThat(() -> listIterator, hasItem("expected"));
+		Iterable<Object> iterable = () -> listIterator;
+
+		assertThat(iterable, hasItem("expected"));
 	}
 }

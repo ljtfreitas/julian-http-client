@@ -44,7 +44,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 class JsonBHTTPMessageCodecTest {
 
-    private final JsonBHTTPMessageCodec<Person> codec = new JsonBHTTPMessageCodec<>();
+    private final JsonBHTTPMessageCodec codec = new JsonBHTTPMessageCodec();
 
     @Nested
     class Readable {
@@ -66,7 +66,7 @@ class JsonBHTTPMessageCodecTest {
             void read() {
                 String value = "{\"name\":\"Tiago\",\"age\":35}";
 
-                Person person = codec.read(HTTPResponseBody.some(value.getBytes()), JavaType.valueOf(Person.class))
+                Person person = (Person) codec.read(HTTPResponseBody.some(value.getBytes()), JavaType.valueOf(Person.class))
                         .map(CompletableFuture::join)
                         .orElse(null);
 

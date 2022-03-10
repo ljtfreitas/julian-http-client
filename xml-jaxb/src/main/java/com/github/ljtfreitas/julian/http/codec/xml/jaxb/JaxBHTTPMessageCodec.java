@@ -44,7 +44,6 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -62,9 +61,9 @@ import java.util.concurrent.Flow.Publisher;
 import static com.github.ljtfreitas.julian.http.MediaType.APPLICATION_XML;
 import static jakarta.xml.bind.Marshaller.JAXB_ENCODING;
 
-public class JaxBHTTPMessageCodec<T> implements XMLHTTPMessageCodec<T> {
+public class JaxBHTTPMessageCodec implements XMLHTTPMessageCodec<Object> {
 
-    private static final JaxBHTTPMessageCodec<Object> SINGLE_INSTANCE = new JaxBHTTPMessageCodec<>();
+    private static final JaxBHTTPMessageCodec SINGLE_INSTANCE = new JaxBHTTPMessageCodec();
 
     private static final XMLInputFactory XML_INPUT_FACTORY = XMLInputFactory.newInstance();
 
@@ -78,11 +77,11 @@ public class JaxBHTTPMessageCodec<T> implements XMLHTTPMessageCodec<T> {
     }
 
     @Override
-    public HTTPRequestBody write(T body, Charset encoding) {
+    public HTTPRequestBody write(Object body, Charset encoding) {
         return new DefaultHTTPRequestBody(APPLICATION_XML, () -> serialize(body, encoding));
     }
 
-    private Publisher<ByteBuffer> serialize(T body, Charset encoding) {
+    private Publisher<ByteBuffer> serialize(Object body, Charset encoding) {
         JAXBContext context = context(body.getClass());
 
         try (ByteArrayOutputStream output = new ByteArrayOutputStream();
@@ -111,12 +110,11 @@ public class JaxBHTTPMessageCodec<T> implements XMLHTTPMessageCodec<T> {
     }
 
     @Override
-    public Optional<CompletableFuture<T>> read(HTTPResponseBody body, JavaType javaType) {
+    public Optional<CompletableFuture<Object>> read(HTTPResponseBody body, JavaType javaType) {
         return body.readAsInputStream(stream -> deserialize(stream, javaType));
     }
 
-    @SuppressWarnings("unchecked")
-    private T deserialize(InputStream bodyAsStream, JavaType javaType) {
+    private Object deserialize(InputStream bodyAsStream, JavaType javaType) {
         Class<?> expectedClassType = javaType.rawClassType();
 
         JAXBContext context = context(expectedClassType);
@@ -135,7 +133,7 @@ public class JaxBHTTPMessageCodec<T> implements XMLHTTPMessageCodec<T> {
             Object deserialized = isXmlRoot ? unmarshaller.unmarshal(xmlReader)
                     : unmarshaller.unmarshal(xmlReader, expectedClassType).getValue();
 
-            return (T) deserialized;
+            return deserialized;
 
         } catch (IOException | JAXBException | XMLStreamException e) {
             throw new HTTPResponseReaderException("JSON deserialization failed. The target type was: " + javaType, e);
@@ -150,7 +148,7 @@ public class JaxBHTTPMessageCodec<T> implements XMLHTTPMessageCodec<T> {
         return Except.run(() -> JAXBContext.newInstance(classType)).unsafe();
     }
 
-    public static JaxBHTTPMessageCodec<Object> provider() {
+    public static JaxBHTTPMessageCodec provider() {
         return SINGLE_INSTANCE;
     }
 }

@@ -31,7 +31,7 @@ class ArrayResponseTTest {
     @Mock
     private Endpoint endpoint;
 
-    private final ArrayResponseT<String> responseT = new ArrayResponseT<>();
+    private final ArrayResponseT responseT = new ArrayResponseT();
 
     @Nested
     class Predicates {
@@ -80,10 +80,10 @@ class ArrayResponseTTest {
 
         Promise<Response<Collection<String>>> promise = Promise.done(Response.done(values));
 
-        ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
-                new ObjectResponseT<Collection<String>>().bind(endpoint, null));
+        ResponseFn<Collection<String>, Collection<Object>> fn = new CollectionResponseT().bind(endpoint,
+                new ObjectResponseT<Collection<Object>>().bind(endpoint, null));
 
-        Array<String> array = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
+        Array<Object> array = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
 
         assertTrue(array.containsAll(values));
     }
@@ -94,10 +94,10 @@ class ArrayResponseTTest {
 
         Promise<Response<Collection<String>>> promise = Promise.done(Response.done(null));
 
-        ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
-                new ObjectResponseT<Collection<String>>().bind(endpoint, null));
+        ResponseFn<Collection<String>, Collection<Object>> fn = new CollectionResponseT().bind(endpoint,
+                new ObjectResponseT<Collection<Object>>().bind(endpoint, null));
 
-        Array<String> array = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
+        Array<Object> array = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
 
         assertTrue(array.isEmpty());
     }

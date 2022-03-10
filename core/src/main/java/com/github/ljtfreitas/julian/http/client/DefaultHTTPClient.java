@@ -26,9 +26,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
 
-import com.github.ljtfreitas.julian.http.HTTPRequest;
 import com.github.ljtfreitas.julian.http.HTTPRequestDefinition;
-import com.github.ljtfreitas.julian.http.codec.HTTPMessageCodecs;
 
 import static java.net.http.HttpRequest.BodyPublishers.fromPublisher;
 

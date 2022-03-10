@@ -19,7 +19,7 @@ class DefaultResponseTTest {
     @Mock
     private Endpoint endpoint;
 
-    private final DefaultResponseT<String> responseT = new DefaultResponseT<>();
+    private final DefaultResponseT responseT = new DefaultResponseT();
 
     @Nested
     class Predicates {
@@ -58,14 +58,14 @@ class DefaultResponseTTest {
     }
 
     @Test
-    void compose(@Mock ResponseFn<String, String> fn) {
+    void compose(@Mock ResponseFn<String, Object> fn) {
         Arguments arguments = Arguments.empty();
 
         Response<String> response = Response.done("expected");
 
         when(fn.join(any(), eq(arguments))).thenReturn(response.body().unsafe());
 
-        Response<String> actual = responseT.bind(endpoint, fn).join(Promise.done(response), arguments);
+        Response<Object> actual = responseT.bind(endpoint, fn).join(Promise.done(response), arguments);
 
         assertEquals("expected", actual.body().unsafe());
     }

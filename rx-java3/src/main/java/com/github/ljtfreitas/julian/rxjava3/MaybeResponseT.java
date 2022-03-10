@@ -31,14 +31,14 @@ import com.github.ljtfreitas.julian.ResponseFn;
 import com.github.ljtfreitas.julian.ResponseT;
 import io.reactivex.rxjava3.core.Maybe;
 
-public class MaybeResponseT<T> implements ResponseT<T, Maybe<T>> {
+public class MaybeResponseT implements ResponseT<Object, Maybe<Object>> {
 
     @Override
-    public <A> ResponseFn<A, Maybe<T>> bind(Endpoint endpoint, ResponseFn<A, T> fn) {
+    public <A> ResponseFn<A, Maybe<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
         return new ResponseFn<>() {
 
             @Override
-            public Maybe<T> join(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Maybe<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
                 return Maybe.fromCompletionStage(fn.run(response, arguments).future());
             }
 

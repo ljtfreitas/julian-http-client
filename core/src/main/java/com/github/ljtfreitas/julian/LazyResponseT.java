@@ -22,16 +22,16 @@
 
 package com.github.ljtfreitas.julian;
 
-class LazyResponseT<T> implements ResponseT<T, Lazy<T>> {
+class LazyResponseT implements ResponseT<Object, Lazy<Object>> {
 
-	private static final LazyResponseT<Object> SINGLE_INSTANCE = new LazyResponseT<>();
+	private static final LazyResponseT SINGLE_INSTANCE = new LazyResponseT();
 
 	@Override
-	public <A> ResponseFn<A, Lazy<T>> bind(Endpoint endpoint, ResponseFn<A, T> fn) {
+	public <A> ResponseFn<A, Lazy<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
 		return new ResponseFn<>() {
 
 			@Override
-			public Lazy<T> join(Promise<? extends Response<A>> response, Arguments arguments) {
+			public Lazy<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
 				return () -> fn.run(response, arguments).join();
 			}
 
@@ -53,7 +53,7 @@ class LazyResponseT<T> implements ResponseT<T, Lazy<T>> {
 				.orElseGet(JavaType::object);
 	}
 
-	public static LazyResponseT<Object> get() {
+	public static LazyResponseT get() {
 		return SINGLE_INSTANCE;
 	}
 }

@@ -54,7 +54,7 @@ public interface Promise<T> {
 
 	<Err extends Exception> Promise<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn);
 
-	<R> Promise<R> fold(Function<? super T, R> success, Function<? super Exception, R> failure);
+	<R> R fold(Function<? super T, R> success, Function<? super Exception, R> failure);
 
 	CompletableFuture<T> future();
 

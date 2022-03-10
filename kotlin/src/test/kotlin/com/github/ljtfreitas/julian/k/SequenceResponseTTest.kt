@@ -55,8 +55,8 @@ class SequenceResponseTTest : DescribeSpec({
         describe("bind") {
 
             it("bind a Stream<T> to a Sequence<T>") {
-                val fn = subject.bind<Collection<Any>>(endpoint, fn = StreamResponseT<Any>()
-                    .bind(endpoint, CollectionResponseT<Any>()
+                val fn = subject.bind<Collection<Any>>(endpoint, fn = StreamResponseT()
+                    .bind(endpoint, CollectionResponseT()
                         .bind(endpoint, ObjectResponseT<Collection<Any>>()
                             .bind(endpoint, null))))
 

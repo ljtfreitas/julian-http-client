@@ -21,7 +21,7 @@ class EnumerationResponseTTest {
 	@Mock
 	private Endpoint endpoint;
 	
-	private final EnumerationResponseT<String> responseT = new EnumerationResponseT<>();
+	private final EnumerationResponseT responseT = new EnumerationResponseT();
 
 	@Nested
 	class Predicates {
@@ -60,12 +60,12 @@ class EnumerationResponseTTest {
 	}
 
 	@Test
-	void compose(@Mock ResponseFn<Collection<String>, Collection<String>> fn, @Mock Promise<Response<Collection<String>>> response) {
+	void compose(@Mock ResponseFn<Collection<String>, Collection<Object>> fn, @Mock Promise<Response<Collection<String>>> response) {
 		Arguments arguments = Arguments.empty();
 
 		when(fn.run(response, arguments)).thenReturn(Promise.done(List.of("expected")));
 
-		Enumeration<String> enumeration = responseT.bind(endpoint, fn).join(response, arguments);
+		Enumeration<Object> enumeration = responseT.bind(endpoint, fn).join(response, arguments);
 
 		assertEquals("expected", enumeration.nextElement());
 	}

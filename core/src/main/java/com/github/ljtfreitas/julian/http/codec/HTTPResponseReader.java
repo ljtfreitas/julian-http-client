@@ -22,14 +22,12 @@
 
 package com.github.ljtfreitas.julian.http.codec;
 
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.MediaType;
-
-import java.io.InputStream;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 
 public interface HTTPResponseReader<T> extends HTTPMessageCodec {
 

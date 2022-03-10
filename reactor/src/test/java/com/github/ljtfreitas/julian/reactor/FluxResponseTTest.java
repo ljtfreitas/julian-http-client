@@ -22,7 +22,7 @@ class FluxResponseTTest {
     @Mock
     private Endpoint endpoint;
     
-    private final FluxResponseT<String> subject = new FluxResponseT<>();
+    private final FluxResponseT subject = new FluxResponseT();
 
     @Nested
     class Predicates {
@@ -71,10 +71,10 @@ class FluxResponseTTest {
 
         Promise<Response<Collection<String>>> response = Promise.done(Response.done(List.of("one", "two", "three")));
 
-        ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
-                new ObjectResponseT<Collection<String>>().bind(endpoint, null));
+        ResponseFn<Collection<String>, Collection<Object>> fn = new CollectionResponseT().bind(endpoint,
+                new ObjectResponseT<Collection<Object>>().bind(endpoint, null));
 
-        Flux<String> flux = subject.bind(endpoint, fn).join(response, Arguments.empty());
+        Flux<Object> flux = subject.bind(endpoint, fn).join(response, Arguments.empty());
 
         StepVerifier.create(flux)
                 .expectNext("one", "two", "three")
@@ -88,10 +88,10 @@ class FluxResponseTTest {
         Promise<Response<Collection<String>>> response = new MonoPromise<>(
                 Mono.just(Response.done(List.of("one", "two", "three"))));
 
-        ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
-                new ObjectResponseT<Collection<String>>().bind(endpoint, null));
+        ResponseFn<Collection<String>, Collection<Object>> fn = new CollectionResponseT().bind(endpoint,
+                new ObjectResponseT<Collection<Object>>().bind(endpoint, null));
 
-        Flux<String> flux = subject.bind(endpoint, fn).join(response, Arguments.empty());
+        Flux<Object> flux = subject.bind(endpoint, fn).join(response, Arguments.empty());
 
         StepVerifier.create(flux)
                 .expectNext("one", "two", "three")
@@ -105,10 +105,10 @@ class FluxResponseTTest {
 
         Promise<Response<Collection<String>>> response = Promise.failed(exception);
 
-        ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
-                new ObjectResponseT<Collection<String>>().bind(endpoint, null));
+        ResponseFn<Collection<String>, Collection<Object>> fn = new CollectionResponseT().bind(endpoint,
+                new ObjectResponseT<Collection<Object>>().bind(endpoint, null));
 
-        Flux<String> flux = subject.bind(endpoint, fn).join(response, Arguments.empty());
+        Flux<Object> flux = subject.bind(endpoint, fn).join(response, Arguments.empty());
 
         StepVerifier.create(flux)
                 .expectErrorMatches(t -> t.equals(exception))
@@ -121,10 +121,10 @@ class FluxResponseTTest {
 
         Promise<Response<Collection<String>>> response = new MonoPromise<>(Mono.error(exception));
 
-        ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
-                new ObjectResponseT<Collection<String>>().bind(endpoint, null));
+        ResponseFn<Collection<String>, Collection<Object>> fn = new CollectionResponseT().bind(endpoint,
+                new ObjectResponseT<Collection<Object>>().bind(endpoint, null));
 
-        Flux<String> flux = subject.bind(endpoint, fn).join(response, Arguments.empty());
+        Flux<Object> flux = subject.bind(endpoint, fn).join(response, Arguments.empty());
 
         StepVerifier.create(flux)
                 .expectErrorMatches(t -> t.equals(exception))

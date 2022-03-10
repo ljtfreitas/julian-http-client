@@ -27,16 +27,16 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Optional;
 
-class ListIteratorResponseT<T> implements ResponseT<List<T>, ListIterator<T>> {
+class ListIteratorResponseT implements ResponseT<List<Object>, ListIterator<Object>> {
 
-	private static final ListIteratorResponseT<Object> SINGLE_INSTANCE = new ListIteratorResponseT<>();
+	private static final ListIteratorResponseT SINGLE_INSTANCE = new ListIteratorResponseT();
 
 	@Override
-	public <A> ResponseFn<A, ListIterator<T>> bind(Endpoint endpoint, ResponseFn<A, List<T>> fn) {
+	public <A> ResponseFn<A, ListIterator<Object>> bind(Endpoint endpoint, ResponseFn<A, List<Object>> fn) {
 		return new ResponseFn<>() {
 
 			@Override
-			public Promise<ListIterator<T>> run(Promise<? extends Response<A>> response, Arguments arguments) {
+			public Promise<ListIterator<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
 				return fn.run(response, arguments).then(l -> Optional.ofNullable(l).map(List::listIterator).orElseGet(Collections::emptyListIterator));
 			}
 
@@ -57,7 +57,7 @@ class ListIteratorResponseT<T> implements ResponseT<List<T>, ListIterator<T>> {
 		return JavaType.parameterized(List.class, endpoint.returnType().parameterized().map(JavaType.Parameterized::firstArg).orElse(Object.class));
 	}
 
-	public static ListIteratorResponseT<Object> get() {
+	public static ListIteratorResponseT get() {
 		return SINGLE_INSTANCE;
 	}
 }

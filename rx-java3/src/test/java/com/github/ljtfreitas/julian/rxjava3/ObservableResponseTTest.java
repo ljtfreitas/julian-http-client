@@ -28,7 +28,7 @@ class ObservableResponseTTest {
     @Mock
     private Endpoint endpoint;
 
-    private final ObservableResponseT<String> subject = new ObservableResponseT<>();
+    private final ObservableResponseT subject = new ObservableResponseT();
 
     @Nested
     class Predicates {
@@ -75,14 +75,14 @@ class ObservableResponseTTest {
     void bind() {
         Promise<Response<Collection<String>>> response = Promise.done(Response.done(List.of("one", "two", "three")));
 
-        ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
-                new ObjectResponseT<Collection<String>>().bind(endpoint, null));
+        ResponseFn<Collection<String>, Collection<Object>> fn = new CollectionResponseT().bind(endpoint,
+                new ObjectResponseT<Collection<Object>>().bind(endpoint, null));
 
         when(endpoint.returnType()).thenReturn(JavaType.parameterized(Collection.class, String.class));
 
-        Observable<String> observable = subject.bind(endpoint, fn).join(response, Arguments.empty());
+        Observable<Object> observable = subject.bind(endpoint, fn).join(response, Arguments.empty());
 
-        TestObserver<String> observer = new TestObserver<>();
+        TestObserver<Object> observer = new TestObserver<>();
         observable.subscribe(observer);
 
         observer.assertComplete()

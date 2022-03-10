@@ -25,7 +25,7 @@ class PublisherResponseTTest {
     @Mock
     private Endpoint endpoint;
 
-    private final PublisherResponseT<String> responseT = new PublisherResponseT<>();
+    private final PublisherResponseT responseT = new PublisherResponseT();
 
     @Nested
     class Predicates {
@@ -64,7 +64,7 @@ class PublisherResponseTTest {
     }
 
     @Test
-    void compose(@Mock ResponseFn<String, String> fn, @Mock Promise<Response<String>> response, TestReporter reporter) throws InterruptedException {
+    void compose(@Mock ResponseFn<String, Object> fn, @Mock Promise<Response<String>> response, TestReporter reporter) throws InterruptedException {
         Arguments arguments = Arguments.empty();
 
         when(fn.run(response, arguments)).thenReturn(Promise.pending(CompletableFuture.supplyAsync(() -> "expected",
@@ -72,7 +72,7 @@ class PublisherResponseTTest {
 
         when(fn.run(response, arguments)).thenReturn(Promise.done("expected"));
 
-        Publisher<String> publisher = responseT.bind(endpoint, fn).join(response, arguments);
+        Publisher<Object> publisher = responseT.bind(endpoint, fn).join(response, arguments);
 
         publisher.subscribe(new Subscriber<>() {
 
@@ -83,7 +83,7 @@ class PublisherResponseTTest {
             }
 
             @Override
-            public void onNext(String value) {
+            public void onNext(Object value) {
                 reporter.publishEntry("onNext: " + Thread.currentThread());
                 assertEquals("expected", value);
             }

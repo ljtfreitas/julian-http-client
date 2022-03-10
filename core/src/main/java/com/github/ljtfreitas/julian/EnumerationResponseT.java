@@ -27,16 +27,16 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Optional;
 
-class EnumerationResponseT<T> implements ResponseT<Collection<T>, Enumeration<T>> {
+class EnumerationResponseT implements ResponseT<Collection<Object>, Enumeration<Object>> {
 
-	private static final EnumerationResponseT<Object> SINGLE_INSTANCE = new EnumerationResponseT<>();
+	private static final EnumerationResponseT SINGLE_INSTANCE = new EnumerationResponseT();
 
 	@Override
-	public <A> ResponseFn<A, Enumeration<T>> bind(Endpoint endpoint, ResponseFn<A, Collection<T>> fn) {
+	public <A> ResponseFn<A, Enumeration<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> fn) {
 		return new ResponseFn<>() {
 
 			@Override
-			public Promise<Enumeration<T>> run(Promise<? extends Response<A>> response, Arguments arguments) {
+			public Promise<Enumeration<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
 				return fn.run(response, arguments)
 						.then(c -> Optional.ofNullable(c).map(Collections::enumeration).orElseGet(Collections::emptyEnumeration));
 			}
@@ -58,7 +58,7 @@ class EnumerationResponseT<T> implements ResponseT<Collection<T>, Enumeration<T>
 		return JavaType.parameterized(Collection.class, endpoint.returnType().parameterized().map(JavaType.Parameterized::firstArg).orElse(Object.class));
 	}
 
-	public static EnumerationResponseT<Object> get() {
+	public static EnumerationResponseT get() {
 		return SINGLE_INSTANCE;
 	}
 }

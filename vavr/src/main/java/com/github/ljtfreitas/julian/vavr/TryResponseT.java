@@ -31,15 +31,15 @@ import com.github.ljtfreitas.julian.ResponseFn;
 import com.github.ljtfreitas.julian.ResponseT;
 import io.vavr.control.Try;
 
-public class TryResponseT<T> implements ResponseT<T, Try<T>> {
+public class TryResponseT implements ResponseT<Object, Try<Object>> {
 
     @Override
-    public <A> ResponseFn<A, Try<T>> bind(Endpoint endpoint, ResponseFn<A, T> fn) {
+    public <A> ResponseFn<A, Try<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
         return new ResponseFn<>() {
 
             @Override
-            public Promise<Try<T>> run(Promise<? extends Response<A>> response, Arguments arguments) {
-                return fn.run(response, arguments).then(Try::success).recover(Try::failure);
+            public Try<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
+                return fn.run(response, arguments).fold(Try::success, Try::failure);
             }
 
             @Override

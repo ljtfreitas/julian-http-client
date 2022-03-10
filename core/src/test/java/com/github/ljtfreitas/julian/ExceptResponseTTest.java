@@ -19,7 +19,7 @@ class ExceptResponseTTest {
     @Mock
     private Endpoint endpoint;
 
-    private final ExceptResponseT<String> subject = new ExceptResponseT<>();
+    private final ExceptResponseT subject = new ExceptResponseT();
 
     @Nested
     class Predicates {
@@ -58,12 +58,12 @@ class ExceptResponseTTest {
     }
 
     @Test
-    void compose(@Mock ResponseFn<String, String> fn, @Mock Promise<Response<String>> response) {
+    void compose(@Mock ResponseFn<String, Object> fn, @Mock Promise<Response<String>> response) {
         Arguments arguments = Arguments.empty();
 
         when(fn.run(same(response), eq(arguments))).thenReturn(Promise.done("expected"));
 
-        Except<String> actual = subject.bind(endpoint, fn).join(response, arguments);
+        Except<Object> actual = subject.bind(endpoint, fn).join(response, arguments);
 
         assertEquals("expected", actual.unsafe());
     }

@@ -1,12 +1,5 @@
 package com.github.ljtfreitas.julian;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.Answers.RETURNS_DEEP_STUBS;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
 import java.lang.reflect.InvocationHandler;
 import java.util.Optional;
 
@@ -19,6 +12,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.github.ljtfreitas.julian.Endpoint.Path;
 import com.github.ljtfreitas.julian.contract.Contract;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Answers.RETURNS_DEEP_STUBS;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ProxyFactoryTest {

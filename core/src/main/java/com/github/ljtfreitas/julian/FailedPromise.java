@@ -59,8 +59,8 @@ class FailedPromise<T> implements Promise<T> {
 	}
 
 	@Override
-	public <R> Promise<R> fold(Function<? super T, R> success, Function<? super Exception, R> failure) {
-		return new DonePromise<>(failure.apply(this.failure));
+	public <R> R fold(Function<? super T, R> success, Function<? super Exception, R> failure) {
+		return failure.apply(this.failure);
 	}
 
 	@Override
@@ -83,21 +83,20 @@ class FailedPromise<T> implements Promise<T> {
 	public Promise<T> recover(Predicate<? super Exception> p, Function<? super Exception, T> fn) {
 		Exception cause = deep(failure);
 
-		if (cause != null && p.test((Exception) cause))
+		if (cause != null && p.test(cause))
 			return new DonePromise<>(fn.apply(failure));
 		else
 			return this;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public <Err extends Exception> Promise<T> failure(Function<? super Exception, Err> fn) {
 		Exception cause = deep(failure);
 
 		if (cause != null)
-			return new FailedPromise<>(fn.apply((Exception) cause));
+			return new FailedPromise<>(fn.apply(cause));
 		else
-			return new FailedPromise<>((Err) failure);
+			return new FailedPromise<>(failure);
 	}
 
 	@Override

@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 class GsonJsonHTTPMessageCodecTest {
 
-    private final GsonJsonHTTPMessageCodec<Person> codec = new GsonJsonHTTPMessageCodec<>();
+    private final GsonJsonHTTPMessageCodec codec = new GsonJsonHTTPMessageCodec();
 
     @Nested
     class Readable {
@@ -44,7 +44,7 @@ class GsonJsonHTTPMessageCodecTest {
             void read() {
                 String value = "{\"name\":\"Tiago\",\"age\":35}";
 
-                Person person = codec.read(HTTPResponseBody.some(value.getBytes()), JavaType.valueOf(Person.class))
+                Person person = (Person) codec.read(HTTPResponseBody.some(value.getBytes()), JavaType.valueOf(Person.class))
                         .map(CompletableFuture::join)
                         .orElse(null);
 

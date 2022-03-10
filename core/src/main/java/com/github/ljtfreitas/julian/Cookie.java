@@ -23,7 +23,6 @@
 package com.github.ljtfreitas.julian;
 
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static com.github.ljtfreitas.julian.Message.format;
 import static com.github.ljtfreitas.julian.Preconditions.nonNull;

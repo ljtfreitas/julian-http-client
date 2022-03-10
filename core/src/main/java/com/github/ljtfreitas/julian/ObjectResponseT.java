@@ -22,13 +22,13 @@
 
 package com.github.ljtfreitas.julian;
 
-public class ObjectResponseT<T> implements ResponseT<T, T> {
+public class ObjectResponseT<T> implements ResponseT<Object, T> {
 
 	private static final ObjectResponseT<Object> SINGLE_INSTANCE = new ObjectResponseT<>();
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <A> ResponseFn<A, T> bind(Endpoint endpoint, ResponseFn<A, T> fn) {
+	public <A> ResponseFn<A, T> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
 		return new ResponseFn<>() {
 
 			@Override

@@ -22,13 +22,6 @@
 
 package com.github.ljtfreitas.julian.http.codec;
 
-import com.github.ljtfreitas.julian.Bracket;
-import com.github.ljtfreitas.julian.JavaType;
-import com.github.ljtfreitas.julian.http.DefaultHTTPRequestBody;
-import com.github.ljtfreitas.julian.http.HTTPRequestBody;
-import com.github.ljtfreitas.julian.http.HTTPResponseBody;
-import com.github.ljtfreitas.julian.http.MediaType;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
@@ -38,7 +31,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
+
+import com.github.ljtfreitas.julian.Bracket;
+import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.http.DefaultHTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPRequestBody;
+import com.github.ljtfreitas.julian.http.HTTPResponseBody;
+import com.github.ljtfreitas.julian.http.MediaType;
 
 import static java.util.stream.Collectors.joining;
 

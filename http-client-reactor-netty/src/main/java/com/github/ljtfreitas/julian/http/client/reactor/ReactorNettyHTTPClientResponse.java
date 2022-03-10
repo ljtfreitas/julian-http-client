@@ -22,6 +22,13 @@
 
 package com.github.ljtfreitas.julian.http.client.reactor;
 
+import reactor.core.publisher.Mono;
+import reactor.netty.ByteBufMono;
+import reactor.netty.http.client.HttpClientResponse;
+
+import java.util.Optional;
+import java.util.function.Function;
+
 import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.http.HTTPHeader;
 import com.github.ljtfreitas.julian.http.HTTPHeaders;
@@ -29,23 +36,6 @@ import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.HTTPStatus;
 import com.github.ljtfreitas.julian.http.HTTPStatusCode;
 import com.github.ljtfreitas.julian.http.client.HTTPClientResponse;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
-import io.netty.buffer.Unpooled;
-import reactor.adapter.JdkFlowAdapter;
-import reactor.core.publisher.Mono;
-import reactor.netty.ByteBufMono;
-import reactor.netty.http.client.HttpClientResponse;
-
-import java.net.http.HttpResponse;
-import java.nio.ByteBuffer;
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.Flow;
-import java.util.concurrent.Flow.Publisher;
-import java.util.function.Function;
 
 class ReactorNettyHTTPClientResponse implements HTTPClientResponse {
 

@@ -33,17 +33,17 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-class PromiseCallbackResponseT<T> implements ResponseT<T, Void> {
+class PromiseCallbackResponseT implements ResponseT<Object, Void> {
 
-	private static final PromiseCallbackResponseT<Object> SINGLE_INSTANCE = new PromiseCallbackResponseT<>();
+	private static final PromiseCallbackResponseT SINGLE_INSTANCE = new PromiseCallbackResponseT();
 
 	@Override
-	public <A> ResponseFn<A, Void> bind(Endpoint endpoint, ResponseFn<A, T> fn) {
+	public <A> ResponseFn<A, Void> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
 		return new ResponseFn<>() {
 
 			@Override
 			public Void join(Promise<? extends Response<A>> response, Arguments arguments) {
-				Promise<T> promise = fn.run(response, arguments);
+				Promise<Object> promise = fn.run(response, arguments);
 
 				success(endpoint.parameters(), arguments)
 						.ifPresent(promise::onSuccess);
@@ -54,7 +54,7 @@ class PromiseCallbackResponseT<T> implements ResponseT<T, Void> {
 				subscriber(endpoint.parameters(), fn.returnType(), arguments)
 						.ifPresent(c -> promise.subscribe(new Subscriber<>() {
 							@Override
-							public void success(T value) {
+							public void success(Object value) {
 								c.accept(value, null);
 							}
 
@@ -71,7 +71,7 @@ class PromiseCallbackResponseT<T> implements ResponseT<T, Void> {
 			}
 
 			@SuppressWarnings("unchecked")
-			private Optional<Consumer<T>> success(Parameters parameters, Arguments arguments) {
+			private Optional<Consumer<Object>> success(Parameters parameters, Arguments arguments) {
 				return parameters.callbacks()
 						.filter(c -> consumer(c) && c.javaType().parameterized()
 								.map(Parameterized::firstArg)
@@ -80,7 +80,7 @@ class PromiseCallbackResponseT<T> implements ResponseT<T, Void> {
 								.isPresent())
 						.findFirst()
 						.flatMap(c -> arguments.of(c.position()))
-						.map(arg -> (Consumer<T>) arg);
+						.map(arg -> (Consumer<Object>) arg);
 			}
 
 			@SuppressWarnings("unchecked")
@@ -150,7 +150,7 @@ class PromiseCallbackResponseT<T> implements ResponseT<T, Void> {
 			.flatMap(c -> c.javaType().parameterized().map(Parameterized::firstArg));
 	}
 
-	public static PromiseCallbackResponseT<Object> get() {
+	public static PromiseCallbackResponseT get() {
 		return SINGLE_INSTANCE;
 	}
 }

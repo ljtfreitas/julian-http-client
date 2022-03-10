@@ -24,16 +24,16 @@ package com.github.ljtfreitas.julian;
 
 import java.util.Optional;
 
-class OptionalResponseT<T> implements ResponseT<T, Optional<T>> {
+class OptionalResponseT implements ResponseT<Object, Optional<Object>> {
 
-	private static final OptionalResponseT<Object> SINGLE_INSTANCE = new OptionalResponseT<>();
+	private static final OptionalResponseT SINGLE_INSTANCE = new OptionalResponseT();
 
 	@Override
-	public <A> ResponseFn<A, Optional<T>> bind(Endpoint endpoint, ResponseFn<A, T> fn) {
+	public <A> ResponseFn<A, Optional<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
 		return new ResponseFn<>() {
 
 			@Override
-			public Promise<Optional<T>> run(Promise<? extends Response<A>> response, Arguments arguments) {
+			public Promise<Optional<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
 				return fn.run(response, arguments).then(Optional::ofNullable);
 			}
 
@@ -55,7 +55,7 @@ class OptionalResponseT<T> implements ResponseT<T, Optional<T>> {
 				.orElseGet(JavaType::object);
 	}
 
-	public static OptionalResponseT<Object> get() {
+	public static OptionalResponseT get() {
 		return SINGLE_INSTANCE;
 	}
 }

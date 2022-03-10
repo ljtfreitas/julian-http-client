@@ -35,16 +35,16 @@ import java.util.Collection;
 
 import static java.util.function.Function.identity;
 
-public class MultiResponseT<T> implements ResponseT<Collection<T>, Multi<T>> {
+public class MultiResponseT implements ResponseT<Collection<Object>, Multi<Object>> {
 
-    private static final MultiResponseT<Object> SINGLE_INSTANCE = new MultiResponseT<>();
+    private static final MultiResponseT SINGLE_INSTANCE = new MultiResponseT();
 
     @Override
-    public <A> ResponseFn<A, Multi<T>> bind(Endpoint endpoint, ResponseFn<A, Collection<T>> fn) {
+    public <A> ResponseFn<A, Multi<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> fn) {
         return new ResponseFn<>() {
 
             @Override
-            public Multi<T> join(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Multi<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
                 return Multi.createFrom()
                         .completionStage(fn.run(response, arguments).future())
                         .onItem().transformToIterable(identity());
@@ -67,7 +67,7 @@ public class MultiResponseT<T> implements ResponseT<Collection<T>, Multi<T>> {
         return endpoint.returnType().is(Multi.class);
     }
 
-    public static MultiResponseT<Object> provider() {
+    public static MultiResponseT provider() {
         return SINGLE_INSTANCE;
     }
 }

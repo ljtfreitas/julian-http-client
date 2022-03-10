@@ -25,7 +25,7 @@ import com.github.ljtfreitas.julian.QueryParameters;
 
 class QueryParameterSerializerTest {
 
-	private QueryParameterSerializer serializer = new QueryParameterSerializer();
+	private final QueryParameterSerializer serializer = new QueryParameterSerializer();
 
 	@SuppressWarnings("unchecked")
 	@ParameterizedTest

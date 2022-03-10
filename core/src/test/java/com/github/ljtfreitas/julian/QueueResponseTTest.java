@@ -25,7 +25,7 @@ class QueueResponseTTest {
 	@Mock
 	private Endpoint endpoint;
 	
-	private final QueueResponseT<String> responseT = new QueueResponseT<>();
+	private final QueueResponseT responseT = new QueueResponseT();
 
 	@Nested
 	class Predicates {
@@ -67,7 +67,7 @@ class QueueResponseTTest {
 	class Responses {
 
 		@Mock 
-		private ResponseFn<Collection<String>, Collection<String>> fn;
+		private ResponseFn<Collection<String>, Collection<Object>> fn;
 
 		@Mock 
 		private Promise<Response<Collection<String>>> response;
@@ -76,7 +76,7 @@ class QueueResponseTTest {
 		void compose() {
 			when(fn.run(response, Arguments.empty())).thenReturn(Promise.done(List.of("expected")));
 
-			Queue<String> queue = responseT.bind(endpoint, fn).join(response, Arguments.empty());
+			Queue<Object> queue = responseT.bind(endpoint, fn).join(response, Arguments.empty());
 
 			assertAll(() -> assertThat(queue, contains("expected")), () -> assertEquals("expected", queue.poll()));
 		}
@@ -85,7 +85,7 @@ class QueueResponseTTest {
 		void empty() {
 			when(fn.run(response, Arguments.empty())).thenReturn(Promise.done(Collections.emptyList()));
 
-			Queue<String> queue = responseT.bind(endpoint, fn).join(response, Arguments.empty());
+			Queue<Object> queue = responseT.bind(endpoint, fn).join(response, Arguments.empty());
 
 			assertTrue(queue.isEmpty());
 		}

@@ -31,14 +31,14 @@ import com.github.ljtfreitas.julian.ResponseFn;
 import com.github.ljtfreitas.julian.ResponseT;
 import io.vavr.concurrent.Future;
 
-public class FutureResponseT<T> implements ResponseT<T, Future<T>> {
+public class FutureResponseT implements ResponseT<Object, Future<Object>> {
 
     @Override
-    public <A> ResponseFn<A, Future<T>> bind(Endpoint endpoint, ResponseFn<A, T> fn) {
+    public <A> ResponseFn<A, Future<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
         return new ResponseFn<>() {
 
             @Override
-            public Future<T> join(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Future<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
                 return Future.fromCompletableFuture(fn.run(response, arguments).future());
             }
 

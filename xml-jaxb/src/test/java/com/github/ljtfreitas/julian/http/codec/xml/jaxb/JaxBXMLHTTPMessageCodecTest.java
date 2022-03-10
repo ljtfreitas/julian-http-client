@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 class JaxBXMLHTTPMessageCodecTest {
 
-    private final JaxBHTTPMessageCodec<Person> codec = new JaxBHTTPMessageCodec<>();
+    private final JaxBHTTPMessageCodec codec = new JaxBHTTPMessageCodec();
 
     @Nested
     class Readable {
@@ -46,7 +46,7 @@ class JaxBXMLHTTPMessageCodecTest {
             void read() {
                 String value = "<person><name>Tiago</name><age>35</age></person>";
 
-                Person person = codec.read(HTTPResponseBody.some(value.getBytes()), JavaType.valueOf(Person.class))
+                Person person = (Person) codec.read(HTTPResponseBody.some(value.getBytes()), JavaType.valueOf(Person.class))
                         .map(CompletableFuture::join)
                         .orElse(null);
 

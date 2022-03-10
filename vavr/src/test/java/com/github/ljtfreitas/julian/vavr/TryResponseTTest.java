@@ -1,13 +1,7 @@
 package com.github.ljtfreitas.julian.vavr;
 
-import com.github.ljtfreitas.julian.Arguments;
-import com.github.ljtfreitas.julian.Endpoint;
-import com.github.ljtfreitas.julian.JavaType;
-import com.github.ljtfreitas.julian.ObjectResponseT;
-import com.github.ljtfreitas.julian.Promise;
-import com.github.ljtfreitas.julian.Response;
-import com.github.ljtfreitas.julian.ResponseFn;
 import io.vavr.control.Try;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -15,7 +9,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static io.vavr.API.$;
+import com.github.ljtfreitas.julian.Arguments;
+import com.github.ljtfreitas.julian.Endpoint;
+import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.ObjectResponseT;
+import com.github.ljtfreitas.julian.Promise;
+import com.github.ljtfreitas.julian.Response;
+import com.github.ljtfreitas.julian.ResponseFn;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -29,7 +30,7 @@ class TryResponseTTest {
     @Mock
     private Endpoint endpoint;
 
-    private final TryResponseT<String> responseT = new TryResponseT<String>();
+    private final TryResponseT responseT = new TryResponseT();
 
     @Nested
     class Predicates {
@@ -74,10 +75,10 @@ class TryResponseTTest {
     void bind() {
         String content = "hello";
 
-        ResponseFn<String, String> fn = new ObjectResponseT<String>().bind(endpoint, null);
+        ResponseFn<String, Object> fn = new ObjectResponseT<>().bind(endpoint, null);
         Promise<Response<String>> promise = Promise.done(Response.done(content));
 
-        Try<String> attempt = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
+        Try<Object> attempt = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
 
         assertTrue(attempt.isSuccess());
 
@@ -88,12 +89,12 @@ class TryResponseTTest {
     void bindFailure() {
         RuntimeException failure = new RuntimeException("oops");
 
-        ResponseFn<String, String> fn = new ObjectResponseT<String>().bind(endpoint, null);
+        ResponseFn<String, Object> fn = new ObjectResponseT<>().bind(endpoint, null);
         Promise<Response<String>> promise = Promise.failed(failure);
 
         Arguments arguments = Arguments.empty();
 
-        Try<String> attempt = responseT.bind(endpoint, fn).join(promise, arguments);
+        Try<Object> attempt = responseT.bind(endpoint, fn).join(promise, arguments);
 
         assertTrue(attempt.isFailure());
 

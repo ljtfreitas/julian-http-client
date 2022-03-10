@@ -22,8 +22,6 @@
 
 package com.github.ljtfreitas.julian.http;
 
-import java.util.Arrays;
-
 public enum HTTPStatusGroup {
     INFORMATIONAL(100, 199),
     SUCCESSFUL(200, 299),

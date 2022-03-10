@@ -26,7 +26,7 @@ class SingleResponseTTest {
     @Mock
     private Endpoint endpoint;
     
-    private final SingleResponseT<String> subject = new SingleResponseT<>();
+    private final SingleResponseT subject = new SingleResponseT();
 
     @Nested
     class Predicates {
@@ -71,11 +71,11 @@ class SingleResponseTTest {
     @Test
     void bind() {
         Promise<Response<String>> response = Promise.done(Response.done("hello"));
-        ResponseFn<String, String> fn = new ObjectResponseT<String>().bind(endpoint, null);
+        ResponseFn<String, Object> fn = new ObjectResponseT<>().bind(endpoint, null);
 
-        Single<String> single = subject.bind(endpoint, fn).join(response, Arguments.empty());
+        Single<Object> single = subject.bind(endpoint, fn).join(response, Arguments.empty());
 
-        TestObserver<String> observer = new TestObserver<>();
+        TestObserver<Object> observer = new TestObserver<>();
         single.subscribe(observer);
 
         observer.assertComplete()

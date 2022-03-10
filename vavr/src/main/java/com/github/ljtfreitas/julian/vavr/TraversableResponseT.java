@@ -37,14 +37,14 @@ import java.util.Optional;
 
 import static java.util.function.Predicate.not;
 
-public class TraversableResponseT<T> implements ResponseT<Collection<T>, Traversable<T>> {
+public class TraversableResponseT implements ResponseT<Collection<Object>, Traversable<Object>> {
 
     @Override
-    public <A> ResponseFn<A, Traversable<T>> bind(Endpoint endpoint, ResponseFn<A, Collection<T>> fn) {
+    public <A> ResponseFn<A, Traversable<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> fn) {
         return new ResponseFn<>() {
 
             @Override
-            public Promise<Traversable<T>> run(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Promise<Traversable<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
                 return fn.run(response, arguments)
                         .then(c -> Optional.ofNullable(c)
                                 .filter(not(Collection::isEmpty))

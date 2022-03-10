@@ -22,14 +22,13 @@
 
 package com.github.ljtfreitas.julian.http.codec.form.multipart;
 
+import java.io.IOException;
+import java.io.OutputStream;
+
 import com.github.ljtfreitas.julian.Except;
 import com.github.ljtfreitas.julian.Except.ThrowableConsumer;
 import com.github.ljtfreitas.julian.http.HTTPHeader;
-import com.github.ljtfreitas.julian.http.HTTPHeaders;
 import com.github.ljtfreitas.julian.http.MediaType;
-
-import java.io.IOException;
-import java.io.OutputStream;
 
 class MultipartFormFieldWriter {
 

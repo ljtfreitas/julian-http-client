@@ -19,7 +19,7 @@ class FutureResponseTTest {
 	@Mock
 	private Endpoint endpoint;
 
-	private final FutureResponseT<String> responseT = new FutureResponseT<>();
+	private final FutureResponseT responseT = new FutureResponseT();
 
 	@Nested
 	class Predicates {
@@ -58,12 +58,12 @@ class FutureResponseTTest {
 	}
 	
 	@Test
-	void compose(@Mock ResponseFn<String, String> fn, @Mock Promise<Response<String>> response) throws Exception {
+	void compose(@Mock ResponseFn<String, Object> fn, @Mock Promise<Response<String>> response) throws Exception {
 		Arguments arguments = Arguments.empty();
 
 		when(fn.run(response, arguments)).thenReturn(Promise.done("expected"));
 		
-		Future<String> future = responseT.bind(endpoint, fn).join(response, arguments);
+		Future<Object> future = responseT.bind(endpoint, fn).join(response, arguments);
 
 		assertEquals("expected", future.get());
 	}

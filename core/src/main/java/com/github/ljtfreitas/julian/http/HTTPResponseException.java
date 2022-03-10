@@ -51,7 +51,7 @@ public class HTTPResponseException extends HTTPException {
 	}
 
 	public byte[] bodyAsBytes() {
-		return bodyAsBytes.fold(identity(), e -> new byte[0]).join().unsafe();
+		return bodyAsBytes.fold(identity(), e -> new byte[0]);
 	}
 
 	public String bodyAsString() {
@@ -72,6 +72,6 @@ public class HTTPResponseException extends HTTPException {
 	}
 
 	private static String bodyAsString(Promise<byte[]> body) {
-		return body.fold(String::new, e -> "[impossible to read]").join().unsafe();
+		return body.fold(String::new, e -> "[impossible to read]");
 	}
 }

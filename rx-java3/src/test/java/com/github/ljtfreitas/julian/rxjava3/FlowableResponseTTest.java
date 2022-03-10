@@ -30,7 +30,7 @@ class FlowableResponseTTest {
     @Mock
     private Endpoint endpoint;
     
-    private final FlowableResponseT<String> subject = new FlowableResponseT<>();
+    private final FlowableResponseT subject = new FlowableResponseT();
 
     @Nested
     class Predicates {
@@ -77,14 +77,14 @@ class FlowableResponseTTest {
     void bind() {
         Promise<Response<Collection<String>>> response = Promise.done(Response.done(List.of("one", "two", "three")));
 
-        ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
-                new ObjectResponseT<Collection<String>>().bind(endpoint, null));
+        ResponseFn<Collection<String>, Collection<Object>> fn = new CollectionResponseT().bind(endpoint,
+                new ObjectResponseT<Collection<Object>>().bind(endpoint, null));
 
         when(endpoint.returnType()).thenReturn(JavaType.parameterized(Collection.class, String.class));
 
-        Flowable<String> flowable = subject.bind(endpoint, fn).join(response, Arguments.empty());
+        Flowable<Object> flowable = subject.bind(endpoint, fn).join(response, Arguments.empty());
 
-        TestSubscriber<String> subscriber = new TestSubscriber<>();
+        TestSubscriber<Object> subscriber = new TestSubscriber<>();
         flowable.subscribe(subscriber);
 
         subscriber.assertComplete()

@@ -59,8 +59,8 @@ class FlowResponseTTest : DescribeSpec({
         describe("bind") {
 
             it("bind a Stream<T> to a Flow<T>") {
-                val fn = subject.bind<Collection<Any>>(endpoint, fn = StreamResponseT<Any>()
-                    .bind(endpoint, CollectionResponseT<Any>()
+                val fn = subject.bind<Collection<Any>>(endpoint, fn = StreamResponseT()
+                    .bind(endpoint, CollectionResponseT()
                         .bind(endpoint, ObjectResponseT<Collection<Any>>()
                             .bind(endpoint, null))))
 

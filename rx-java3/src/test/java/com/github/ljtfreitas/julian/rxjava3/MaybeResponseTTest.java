@@ -26,7 +26,7 @@ class MaybeResponseTTest {
     @Mock
     private Endpoint endpoint;
 
-    private final MaybeResponseT<String> subject = new MaybeResponseT<>();
+    private final MaybeResponseT subject = new MaybeResponseT();
 
     @Nested
     class Predicates {
@@ -73,11 +73,11 @@ class MaybeResponseTTest {
     void bind() {
         Promise<Response<String>> response = Promise.done(Response.done("hello"));
 
-        ResponseFn<String, String> fn = new ObjectResponseT<String>().bind(endpoint, null);
+        ResponseFn<String, Object> fn = new ObjectResponseT<>().bind(endpoint, null);
 
-        Maybe<String> maybe = subject.bind(endpoint, fn).join(response, Arguments.empty());
+        Maybe<Object> maybe = subject.bind(endpoint, fn).join(response, Arguments.empty());
 
-        TestObserver<String> observer = new TestObserver<>();
+        TestObserver<Object> observer = new TestObserver<>();
         maybe.subscribe(observer);
 
         observer.assertComplete()

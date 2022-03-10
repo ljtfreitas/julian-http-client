@@ -17,7 +17,7 @@ class LazyResponseTTest {
 	@Mock
 	private Endpoint endpoint;
 
-	private final LazyResponseT<String> responseT = new LazyResponseT<>();
+	private final LazyResponseT responseT = new LazyResponseT();
 
 	@Nested
 	class Predicates {
@@ -57,11 +57,11 @@ class LazyResponseTTest {
 
 	@Test
 	void compose() {
-		ResponseFn<String, String> fn = new ObjectResponseT<String>().bind(endpoint, null);
+		ResponseFn<String, Object> fn = new ObjectResponseT<>().bind(endpoint, null);
 
 		Promise<Response<String>> response = Promise.done(Response.done("expected"));
 
-		Lazy<String> lazy = responseT.bind(endpoint, fn).join(response, Arguments.empty());
+		Lazy<Object> lazy = responseT.bind(endpoint, fn).join(response, Arguments.empty());
 
 		assertEquals("expected", lazy.run().unsafe());
 	}

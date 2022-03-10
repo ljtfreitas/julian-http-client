@@ -27,7 +27,7 @@ class EitherResponseTTest {
     @Mock
     private Endpoint endpoint;
 
-    private final EitherResponseT<String, Exception> responseT = new EitherResponseT<>();
+    private final EitherResponseT<Exception> responseT = new EitherResponseT<>();
 
     @Nested
     class Predicates {
@@ -83,7 +83,7 @@ class EitherResponseTTest {
     }
 
     @Test
-    void bind(@Mock Promise<Response<String>> promise, @Mock ResponseFn<String, String> fn) {
+    void bind(@Mock Promise<Response<String>> promise, @Mock ResponseFn<String, Object> fn) {
         Arguments arguments = Arguments.empty();
 
         String content = "hello";
@@ -91,7 +91,7 @@ class EitherResponseTTest {
         when(endpoint.returnType()).thenReturn(JavaType.parameterized(Either.class, Exception.class, String.class));
         when(fn.run(promise, arguments)).thenReturn(Promise.done(content));
 
-        Either<Exception, String> either = responseT.bind(endpoint, fn).join(promise, arguments);
+        Either<Exception, Object> either = responseT.bind(endpoint, fn).join(promise, arguments);
 
         assertTrue(either.isRight());
 
@@ -99,7 +99,7 @@ class EitherResponseTTest {
     }
 
     @Test
-    void bindFailure(@Mock Promise<Response<String>> promise, @Mock ResponseFn<String, String> fn) {
+    void bindFailure(@Mock Promise<Response<String>> promise, @Mock ResponseFn<String, Object> fn) {
         Arguments arguments = Arguments.empty();
 
         RuntimeException failure = new RuntimeException("oops");
@@ -107,7 +107,7 @@ class EitherResponseTTest {
         when(endpoint.returnType()).thenReturn(JavaType.parameterized(Either.class, Exception.class, String.class));
         when(fn.run(promise, arguments)).then(i -> Promise.failed(failure));
 
-        Either<Exception, String> either = responseT.bind(endpoint, fn).join(promise, arguments);
+        Either<Exception, Object> either = responseT.bind(endpoint, fn).join(promise, arguments);
 
         assertTrue(either.isLeft());
 

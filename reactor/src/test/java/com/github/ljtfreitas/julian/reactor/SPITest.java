@@ -1,16 +1,16 @@
 package com.github.ljtfreitas.julian.reactor;
 
-import com.github.ljtfreitas.julian.ResponseT;
-import com.github.ljtfreitas.julian.spi.Plugins;
-import org.junit.jupiter.api.Test;
-
 import java.util.Collection;
 import java.util.List;
+
+import org.junit.jupiter.api.Test;
+
+import com.github.ljtfreitas.julian.ResponseT;
+import com.github.ljtfreitas.julian.spi.Plugins;
 
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SPITest {
 

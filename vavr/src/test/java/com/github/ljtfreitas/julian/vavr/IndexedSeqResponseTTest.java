@@ -31,7 +31,7 @@ class IndexedSeqResponseTTest {
     @Mock
     private Endpoint endpoint;
 
-    private final IndexedSeqResponseT<String> responseT = new IndexedSeqResponseT<>();
+    private final IndexedSeqResponseT responseT = new IndexedSeqResponseT();
 
     @Nested
     class Predicates {
@@ -80,10 +80,10 @@ class IndexedSeqResponseTTest {
 
         Promise<Response<Collection<String>>> promise = Promise.done(Response.done(values));
 
-        ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
-                new ObjectResponseT<Collection<String>>().bind(endpoint, null));
+        ResponseFn<Collection<String>, Collection<Object>> fn = new CollectionResponseT().bind(endpoint,
+                new ObjectResponseT<Collection<Object>>().bind(endpoint, null));
 
-        IndexedSeq<String> seq = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
+        IndexedSeq<Object> seq = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
 
         assertTrue(seq.containsAll(values));
     }
@@ -94,10 +94,10 @@ class IndexedSeqResponseTTest {
 
         Promise<Response<Collection<String>>> promise = Promise.done(Response.done(null));
 
-        ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
-                new ObjectResponseT<Collection<String>>().bind(endpoint, null));
+        ResponseFn<Collection<String>, Collection<Object>> fn = new CollectionResponseT().bind(endpoint,
+                new ObjectResponseT<Collection<Object>>().bind(endpoint, null));
 
-        IndexedSeq<String> seq = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
+        IndexedSeq<Object> seq = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
 
         assertTrue(seq.isEmpty());
     }

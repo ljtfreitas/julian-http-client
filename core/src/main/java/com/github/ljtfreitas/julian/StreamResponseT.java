@@ -26,16 +26,16 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class StreamResponseT<T> implements ResponseT<Collection<T>, Stream<T>> {
+public class StreamResponseT implements ResponseT<Collection<Object>, Stream<Object>> {
 
-	private static final StreamResponseT<Object> SINGLE_INSTANCE = new StreamResponseT<>();
+	private static final StreamResponseT SINGLE_INSTANCE = new StreamResponseT();
 
 	@Override
-	public <A> ResponseFn<A, Stream<T>> bind(Endpoint endpoint, ResponseFn<A, Collection<T>> fn) {
+	public <A> ResponseFn<A, Stream<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> fn) {
 		return new ResponseFn<>() {
 
 			@Override
-			public Promise<Stream<T>> run(Promise<? extends Response<A>> response, Arguments arguments) {
+			public Promise<Stream<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
 				return fn.run(response, arguments).then(c -> Optional.ofNullable(c).stream().flatMap(Collection::stream));
 			}
 
@@ -56,7 +56,7 @@ public class StreamResponseT<T> implements ResponseT<Collection<T>, Stream<T>> {
 		return JavaType.parameterized(Collection.class, endpoint.returnType().parameterized().map(JavaType.Parameterized::firstArg).orElse(Object.class));
 	}
 
-	public static StreamResponseT<Object> get() {
+	public static StreamResponseT get() {
 		return SINGLE_INSTANCE;
 	}
 }

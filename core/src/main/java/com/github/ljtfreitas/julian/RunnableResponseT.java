@@ -28,7 +28,7 @@ class RunnableResponseT implements ResponseT<Void, Runnable> {
 
 	@Override
 	public <A> ResponseFn<A, Runnable> bind(Endpoint endpoint, ResponseFn<A, Void> fn) {
-		return new ResponseFn<A, Runnable>() {
+		return new ResponseFn<>() {
 
 			@Override
 			public Runnable join(Promise<? extends Response<A>> response, Arguments arguments) {

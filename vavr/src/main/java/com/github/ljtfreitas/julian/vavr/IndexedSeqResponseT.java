@@ -37,14 +37,14 @@ import java.util.Optional;
 
 import static java.util.function.Predicate.not;
 
-public class IndexedSeqResponseT<T> implements ResponseT<Collection<T>, IndexedSeq<T>> {
+public class IndexedSeqResponseT implements ResponseT<Collection<Object>, IndexedSeq<Object>> {
 
     @Override
-    public <A> ResponseFn<A, IndexedSeq<T>> bind(Endpoint endpoint, ResponseFn<A, Collection<T>> fn) {
+    public <A> ResponseFn<A, IndexedSeq<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> fn) {
         return new ResponseFn<>() {
 
             @Override
-            public Promise<IndexedSeq<T>> run(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Promise<IndexedSeq<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
                 return fn.run(response, arguments)
                         .then(c -> Optional.ofNullable(c)
                                 .filter(not(Collection::isEmpty))

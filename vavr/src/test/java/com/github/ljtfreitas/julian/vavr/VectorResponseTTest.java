@@ -31,7 +31,7 @@ class VectorResponseTTest {
     @Mock
     private Endpoint endpoint;
 
-    private final VectorResponseT<String> responseT = new VectorResponseT<>();
+    private final VectorResponseT responseT = new VectorResponseT();
 
     @Nested
     class Predicates {
@@ -80,10 +80,10 @@ class VectorResponseTTest {
 
         Promise<Response<Collection<String>>> promise = Promise.done(Response.done(values));
 
-        ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
-                new ObjectResponseT<Collection<String>>().bind(endpoint, null));
+        ResponseFn<Collection<String>, Collection<Object>> fn = new CollectionResponseT().bind(endpoint,
+                new ObjectResponseT<Collection<Object>>().bind(endpoint, null));
 
-        Vector<String> vector = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
+        Vector<Object> vector = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
 
         assertTrue(vector.containsAll(values));
     }
@@ -94,10 +94,10 @@ class VectorResponseTTest {
 
         Promise<Response<Collection<String>>> promise = Promise.done(Response.done(null));
 
-        ResponseFn<Collection<String>, Collection<String>> fn = new CollectionResponseT<String>().bind(endpoint,
-                new ObjectResponseT<Collection<String>>().bind(endpoint, null));
+        ResponseFn<Collection<String>, Collection<Object>> fn = new CollectionResponseT().bind(endpoint,
+                new ObjectResponseT<Collection<Object>>().bind(endpoint, null));
 
-        Vector<String> vector = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
+        Vector<Object> vector = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
 
         assertTrue(vector.isEmpty());
     }

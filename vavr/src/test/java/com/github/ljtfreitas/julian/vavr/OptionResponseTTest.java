@@ -26,7 +26,7 @@ class OptionResponseTTest {
     @Mock
     private Endpoint endpoint;
 
-    private final OptionResponseT<String> responseT = new OptionResponseT<>();
+    private final OptionResponseT responseT = new OptionResponseT();
 
     @Nested
     class Predicates {
@@ -68,25 +68,25 @@ class OptionResponseTTest {
     }
 
     @Test
-    void bind(@Mock Promise<Response<String>> promise, @Mock ResponseFn<String, String> fn) {
+    void bind(@Mock Promise<Response<String>> promise, @Mock ResponseFn<String, Object> fn) {
         Arguments arguments = Arguments.empty();
 
         String content = "hello";
 
         when(fn.run(promise, arguments)).thenReturn(Promise.done(content));
 
-        Option<String> option = responseT.bind(endpoint, fn).join(promise, arguments);
+        Option<Object> option = responseT.bind(endpoint, fn).join(promise, arguments);
 
         assertTrue(option.exists(content::equals));
     }
 
     @Test
-    void bindNullValue(@Mock Promise<Response<String>> promise, @Mock ResponseFn<String, String> fn) {
+    void bindNullValue(@Mock Promise<Response<String>> promise, @Mock ResponseFn<String, Object> fn) {
         Arguments arguments = Arguments.empty();
 
         when(fn.run(promise, arguments)).thenReturn(Promise.done(null));
 
-        Option<String> option = responseT.bind(endpoint, fn).join(promise, arguments);
+        Option<Object> option = responseT.bind(endpoint, fn).join(promise, arguments);
 
         assertTrue(option.isEmpty());
     }

@@ -22,6 +22,11 @@
 
 package com.github.ljtfreitas.julian.reactor;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.util.Collection;
+
 import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.Endpoint;
 import com.github.ljtfreitas.julian.JavaType;
@@ -30,26 +35,22 @@ import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
 import com.github.ljtfreitas.julian.ResponseT;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
-import java.util.Collection;
 
 import static java.util.function.Function.identity;
 
-public class FluxResponseT<T> implements ResponseT<Collection<T>, Flux<T>> {
+public class FluxResponseT implements ResponseT<Collection<Object>, Flux<Object>> {
 
-    private static final FluxResponseT<Object> SINGLE_INSTANCE = new FluxResponseT<>();
+    private static final FluxResponseT SINGLE_INSTANCE = new FluxResponseT();
 
     @Override
-    public <A> ResponseFn<A, Flux<T>> bind(Endpoint endpoint, ResponseFn<A, Collection<T>> fn) {
+    public <A> ResponseFn<A, Flux<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> fn) {
         return new ResponseFn<>() {
 
             @Override
-            public Flux<T> join(Promise<? extends Response<A>> response, Arguments arguments) {
-                Promise<Collection<T>> promise = fn.run(response, arguments);
+            public Flux<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
+                Promise<Collection<Object>> promise = fn.run(response, arguments);
 
-                return promise.cast(new Kind<MonoPromise<Collection<T>>>() {})
+                return promise.cast(new Kind<MonoPromise<Collection<Object>>>() {})
                         .map(MonoPromise::mono)
                         .orElseGet(() -> Mono.fromFuture(promise.future()))
                         .flatMapIterable(identity());
@@ -72,7 +73,7 @@ public class FluxResponseT<T> implements ResponseT<Collection<T>, Flux<T>> {
         return endpoint.returnType().is(Flux.class);
     }
 
-    public static FluxResponseT<Object> provider() {
+    public static FluxResponseT provider() {
         return SINGLE_INSTANCE;
     }
 

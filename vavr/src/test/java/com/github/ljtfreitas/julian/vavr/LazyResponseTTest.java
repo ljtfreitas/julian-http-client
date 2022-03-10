@@ -28,7 +28,7 @@ class LazyResponseTTest {
     @Mock
     private Endpoint endpoint;
 
-    private final LazyResponseT<String> responseT = new LazyResponseT<>();
+    private final LazyResponseT responseT = new LazyResponseT();
 
     @Nested
     class Predicates {
@@ -71,14 +71,14 @@ class LazyResponseTTest {
     }
 
     @Test
-    void bind(@Mock Promise<Response<String>> promise, @Mock ResponseFn<String, String> fn) {
+    void bind(@Mock Promise<Response<String>> promise, @Mock ResponseFn<String, Object> fn) {
         Arguments arguments = Arguments.empty();
 
         String content = "hello";
 
         when(fn.run(promise, arguments)).thenReturn(Promise.done(content));
 
-        Lazy<String> lazy = responseT.bind(endpoint, fn).join(promise, arguments);
+        Lazy<Object> lazy = responseT.bind(endpoint, fn).join(promise, arguments);
 
         assertFalse(lazy.isEvaluated());
 
@@ -86,14 +86,14 @@ class LazyResponseTTest {
     }
 
     @Test
-    void bindFailure(@Mock Promise<Response<String>> promise, @Mock ResponseFn<String, String> fn) {
+    void bindFailure(@Mock Promise<Response<String>> promise, @Mock ResponseFn<String, Object> fn) {
         Arguments arguments = Arguments.empty();
 
         RuntimeException failure = new RuntimeException("oops");
 
         when(fn.run(promise, arguments)).then(i -> Promise.failed(failure));
 
-        Lazy<String> lazy = responseT.bind(endpoint, fn).join(promise, arguments);
+        Lazy<Object> lazy = responseT.bind(endpoint, fn).join(promise, arguments);
 
         assertFalse(lazy.isEvaluated());
 

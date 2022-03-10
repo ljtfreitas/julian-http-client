@@ -26,16 +26,16 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 
-class IterableResponseT<T> implements ResponseT<Collection<T>, Iterable<T>> {
+class IterableResponseT implements ResponseT<Collection<Object>, Iterable<Object>> {
 
-	private static final IterableResponseT<Object> SINGLE_INSTANCE = new IterableResponseT<>();
+	private static final IterableResponseT SINGLE_INSTANCE = new IterableResponseT();
 
 	@Override
-	public <A> ResponseFn<A, Iterable<T>> bind(Endpoint endpoint, ResponseFn<A, Collection<T>> fn) {
+	public <A> ResponseFn<A, Iterable<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> fn) {
 		return new ResponseFn<>() {
 
 			@Override
-			public Promise<Iterable<T>> run(Promise<? extends Response<A>> response, Arguments arguments) {
+			public Promise<Iterable<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
 				return fn.run(response, arguments).then(c -> Optional.ofNullable(c).orElseGet(Collections::emptyList));
 			}
 
@@ -56,7 +56,7 @@ class IterableResponseT<T> implements ResponseT<Collection<T>, Iterable<T>> {
 		return JavaType.parameterized(Collection.class, endpoint.returnType().parameterized().map(JavaType.Parameterized::firstArg).orElse(Object.class));
 	}
 
-	public static IterableResponseT<Object> get() {
+	public static IterableResponseT get() {
 		return SINGLE_INSTANCE;
 	}
 }

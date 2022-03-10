@@ -27,7 +27,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import com.github.ljtfreitas.julian.Except;
-import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.Subscriber;
 
 class EmptyHTTPResponse<T> implements HTTPResponse<T> {

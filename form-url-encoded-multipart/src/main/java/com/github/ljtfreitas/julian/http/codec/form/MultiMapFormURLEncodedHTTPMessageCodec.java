@@ -22,6 +22,15 @@
 
 package com.github.ljtfreitas.julian.http.codec.form;
 
+import java.net.http.HttpRequest.BodyPublishers;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Flow.Publisher;
+import java.util.stream.Collectors;
+
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.contract.FormSerializer;
 import com.github.ljtfreitas.julian.http.DefaultHTTPRequestBody;
@@ -29,17 +38,6 @@ import com.github.ljtfreitas.julian.http.HTTPRequestBody;
 import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.MediaType;
 import com.github.ljtfreitas.julian.http.codec.FormURLEncodedHTTPMessageCodec;
-
-import java.net.http.HttpRequest.BodyPublishers;
-import java.net.http.HttpResponse;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Flow.Publisher;
-import java.util.stream.Collectors;
 
 import static com.github.ljtfreitas.julian.http.MediaType.APPLICATION_FORM_URLENCODED;
 

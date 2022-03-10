@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 class JacksonJsonHTTPMessageCodecTest {
 
-    private JacksonJsonHTTPMessageCodec<Person> codec = new JacksonJsonHTTPMessageCodec<>();
+    private final JacksonJsonHTTPMessageCodec codec = new JacksonJsonHTTPMessageCodec();
 
     @Nested
     class Readable {
@@ -46,7 +46,7 @@ class JacksonJsonHTTPMessageCodecTest {
             void read() {
                 String value = "{\"name\":\"Tiago\",\"age\":35}";
 
-                Person person = codec.read(HTTPResponseBody.some(value.getBytes()), JavaType.valueOf(Person.class))
+                Person person = (Person) codec.read(HTTPResponseBody.some(value.getBytes()), JavaType.valueOf(Person.class))
                         .map(CompletableFuture::join)
                         .orElse(null);
 

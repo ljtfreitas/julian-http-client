@@ -53,6 +53,7 @@ public class DefaultHTTPClient implements HTTPClient {
 		specification.proxySelector().ifPresent(builder::proxy);
 		specification.ssl().context().ifPresent(builder::sslContext);
 		specification.ssl().parameters().ifPresent(builder::sslParameters);
+		specification.executor().ifPresent(builder::executor);
 
 		this.client = builder.build();
 		this.specification = specification;

@@ -32,6 +32,7 @@ import com.github.ljtfreitas.julian.http.codec.HTTPRequestWriterException;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.Executor;
 
 import static com.github.ljtfreitas.julian.Message.format;
 import static com.github.ljtfreitas.julian.http.HTTPHeader.CONTENT_TYPE;
@@ -43,17 +44,19 @@ public class DefaultHTTP implements HTTP {
 	private final HTTPMessageCodecs codecs;
 	private final HTTPResponseFailure failure;
 	private final Charset encoding;
+	private final Executor executor;
 
 	public DefaultHTTP(HTTPClient httpClient, HTTPRequestInterceptor interceptor, HTTPMessageCodecs codecs, HTTPResponseFailure failure) {
-		this(httpClient, interceptor, codecs, failure, StandardCharsets.UTF_8);
+		this(httpClient, interceptor, codecs, failure, StandardCharsets.UTF_8, null);
 	}
 
-	public DefaultHTTP(HTTPClient httpClient, HTTPRequestInterceptor interceptor, HTTPMessageCodecs codecs, HTTPResponseFailure failure, Charset encoding) {
+	public DefaultHTTP(HTTPClient httpClient, HTTPRequestInterceptor interceptor, HTTPMessageCodecs codecs, HTTPResponseFailure failure, Charset encoding, Executor executor) {
 		this.httpClient = httpClient;
 		this.interceptor = interceptor;
 		this.codecs = codecs;
 		this.failure = failure;
 		this.encoding = encoding;
+		this.executor = executor;
 	}
 
 	@Override
@@ -71,7 +74,7 @@ public class DefaultHTTP implements HTTP {
 
 		HTTPRequest<T> request = new DefaultHTTPRequest<>(uri, method, body, headers, definition.returnType(), httpClient, codecs, failure);
 
-		return intercepts(Promise.pending(() -> request)).bind(HTTPRequest::execute);
+		return intercepts(Promise.pending(() -> request, executor)).bind(HTTPRequest::execute);
 	}
 
 	private <T> Promise<HTTPRequest<T>> intercepts(Promise<HTTPRequest<T>> request) {

@@ -22,8 +22,6 @@
 
 package com.github.ljtfreitas.julian.http.client;
 
-import com.github.ljtfreitas.julian.http.HTTPRequestDefinition;
-
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
 import java.net.ProxySelector;
@@ -31,6 +29,9 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.Executor;
+
+import com.github.ljtfreitas.julian.http.HTTPRequestDefinition;
 
 public interface HTTPClient {
 
@@ -44,6 +45,7 @@ public interface HTTPClient {
         private final ProxySelector proxySelector;
         private final Redirects redirects;
         private final SSL ssl;
+        private final Executor executor;
 
         public Specification() {
             this.connectionTimeout = null;
@@ -52,19 +54,21 @@ public interface HTTPClient {
             this.proxySelector = null;
             this.redirects = new Redirects();
             this.ssl = new SSL();
+            this.executor = null;
         }
 
-        private Specification(Duration connectionTimeout, Duration requestTimeout, Charset charset, ProxySelector proxySelector, Redirects redirects, SSL ssl) {
+        private Specification(Duration connectionTimeout, Duration requestTimeout, Charset charset, ProxySelector proxySelector, Redirects redirects, SSL ssl, Executor executor) {
             this.connectionTimeout = connectionTimeout;
             this.requestTimeout = requestTimeout;
             this.charset = charset;
             this.proxySelector = proxySelector;
             this.redirects = redirects;
             this.ssl = ssl;
+            this.executor = executor;
         }
 
         public Specification connectionTimeout(Duration connectionTimeout) {
-            return new Specification(this.connectionTimeout, this.requestTimeout, this.charset, this.proxySelector, this.redirects, this.ssl);
+            return new Specification(connectionTimeout, this.requestTimeout, this.charset, this.proxySelector, this.redirects, this.ssl, this.executor);
         }
 
         public Optional<Duration> connectionTimeout() {
@@ -72,7 +76,7 @@ public interface HTTPClient {
         }
 
         public Specification requestTimeout(Duration requestTimeout) {
-            return new Specification(this.connectionTimeout, requestTimeout, this.charset, this.proxySelector, this.redirects, this.ssl);
+            return new Specification(this.connectionTimeout, requestTimeout, this.charset, this.proxySelector, this.redirects, this.ssl, this.executor);
         }
 
         public Optional<Duration> requestTimeout() {
@@ -80,11 +84,11 @@ public interface HTTPClient {
         }
 
         public Specification charset(Charset charset) {
-            return new Specification(this.connectionTimeout, this.requestTimeout, charset, this.proxySelector, this.redirects, this.ssl);
+            return new Specification(this.connectionTimeout, this.requestTimeout, charset, this.proxySelector, this.redirects, this.ssl, this.executor);
         }
 
         public Specification proxySelector(ProxySelector proxySelector) {
-            return new Specification(this.connectionTimeout, this.requestTimeout, this.charset, proxySelector, this.redirects, this.ssl);
+            return new Specification(this.connectionTimeout, this.requestTimeout, this.charset, proxySelector, this.redirects, this.ssl, this.executor);
         }
 
         public Optional<ProxySelector> proxySelector() {
@@ -96,7 +100,7 @@ public interface HTTPClient {
         }
 
         private Specification redirects(Redirects redirects) {
-            return new Specification(this.connectionTimeout, this.requestTimeout, this.charset, proxySelector, redirects, this.ssl);
+            return new Specification(this.connectionTimeout, this.requestTimeout, this.charset, proxySelector, redirects, this.ssl, this.executor);
         }
 
         public Specification.SSL ssl() {
@@ -104,7 +108,15 @@ public interface HTTPClient {
         }
 
         private Specification ssl(SSL ssl) {
-            return new Specification(this.connectionTimeout, this.requestTimeout, this.charset, proxySelector, redirects, ssl);
+            return new Specification(this.connectionTimeout, this.requestTimeout, this.charset, proxySelector, redirects, ssl, this.executor);
+        }
+
+        public Specification executor(Executor executor) {
+            return new Specification(this.connectionTimeout, this.requestTimeout, this.charset, proxySelector, redirects, this.ssl, executor);
+        }
+
+        public Optional<Executor> executor() {
+            return Optional.ofNullable(executor);
         }
 
         public class Redirects {

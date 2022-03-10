@@ -79,7 +79,7 @@ fun ProxyBuilder.codecs(spec: ProxyBuilder.HTTPMessageCodecs.() -> Unit): ProxyB
 
 fun ProxyBuilder.responses(spec: ProxyBuilder.ResponsesTs.() -> Unit): ProxyBuilder = responses().apply(spec).and()
 
-fun ProxyBuilder.ResponsesTs.async(spec: ProxyBuilder.ResponsesTs.Async.() -> Unit): ProxyBuilder.ResponsesTs = async().apply(spec).and()
+fun ProxyBuilder.async(spec: ProxyBuilder.Async.() -> Unit): ProxyBuilder = async().apply(spec).and()
 
 fun ProxyBuilder.http(spec: ProxyBuilder.HTTPSpec.() -> Unit): ProxyBuilder = http().apply(spec).and()
 

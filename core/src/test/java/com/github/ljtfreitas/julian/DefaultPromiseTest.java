@@ -2,11 +2,14 @@ package com.github.ljtfreitas.julian;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestReporter;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -140,6 +143,26 @@ class DefaultPromiseTest {
             promise.subscribe(subscriber).join();
 
             verify(subscriber).failure(failure);
+        }
+    }
+
+    @Nested
+    class WithThreadPool {
+
+        @Test
+        void sample(TestReporter reporter) {
+            Executor executor = Executors.newSingleThreadExecutor();
+
+            reporter.publishEntry("running on thread " + Thread.currentThread() + "...");
+
+            String result = Promise.pending(() -> "hello", executor)
+                    .onSuccess(value -> reporter.publishEntry("running 'onSucess' on thread " + Thread.currentThread() + "..."))
+                    .then(value -> {
+                        reporter.publishEntry("running 'then' on thread " + Thread.currentThread() + "...");
+                        return value + " world";
+                    }).join().unsafe();
+
+            assertEquals("hello world", result);
         }
     }
 }

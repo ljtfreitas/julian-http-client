@@ -22,6 +22,24 @@
 
 package com.github.ljtfreitas.julian;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLParameters;
+import java.lang.reflect.InvocationHandler;
+import java.net.ProxySelector;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.function.Function;
+
 import com.github.ljtfreitas.julian.contract.Contract;
 import com.github.ljtfreitas.julian.contract.ContractReader;
 import com.github.ljtfreitas.julian.contract.DefaultContractReader;
@@ -52,24 +70,6 @@ import com.github.ljtfreitas.julian.http.codec.StringHTTPMessageCodec;
 import com.github.ljtfreitas.julian.http.codec.UnprocessableHTTPMessageCodec;
 import com.github.ljtfreitas.julian.spi.Plugins;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLParameters;
-import java.lang.reflect.InvocationHandler;
-import java.net.ProxySelector;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Executor;
-import java.util.function.Function;
-
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableCollection;
 import static java.util.Objects.requireNonNull;
@@ -83,6 +83,7 @@ public class ProxyBuilder {
     private final HTTPSpec httpSpec = new HTTPSpec();
     private final ResponsesTs responseTs = new ResponsesTs();
     private final HTTPMessageCodecs codecs = new HTTPMessageCodecs();
+    private final Async async = new Async();
 
     private final Plugins plugins = new Plugins();
 
@@ -140,7 +141,6 @@ public class ProxyBuilder {
 
         @SuppressWarnings("rawtypes")
         private final Map<Class<? extends ResponseT>, ResponseT<?, ?>> responses = new LinkedHashMap<>();
-        private final Async async = new Async();
 
         public ResponsesTs add(ResponseT<?, ?>... responses) {
             return add(asList(responses));
@@ -156,10 +156,6 @@ public class ProxyBuilder {
             return responses.stream().collect(toMap(ResponseT::getClass, identity()));
         }
 
-        public Async async() {
-            return async;
-        }
-
         public ProxyBuilder and() {
             return ProxyBuilder.this;
         }
@@ -173,7 +169,7 @@ public class ProxyBuilder {
             Map<Class<? extends ResponseT>, ResponseT<?, ?>> all = new LinkedHashMap<>();
             all.putAll(plugins());
             all.putAll(all());
-            all.putAll(asMap(async.all()));
+            all.putAll(async());
             all.putAll(responses);
             return all.values();
         }
@@ -213,25 +209,11 @@ public class ProxyBuilder {
                     HTTPStatusResponseT.get()));
         }
 
-        public class Async {
-
-            private Executor executor = null;
-
-            public Async executor(Executor executor) {
-                this.executor = executor;
-                return this;
-            }
-
-            public ResponsesTs and() {
-                return ResponsesTs.this;
-            }
-
-            private Collection<ResponseT<?, ?>> all() {
-                Collection<ResponseT<?, ?>> all = new ArrayList<>();
-                all.add(executor == null ? PublisherResponseT.get() : new PublisherResponseT(executor));
-                all.add(new SubscriberCallbackResponseT());
-                return all;
-            }
+        private Map<? extends Class<? extends ResponseT>, ResponseT<?, ?>> async() {
+            return asMap(List.of(
+                    async.executor == null ? PublisherResponseT.get() : new PublisherResponseT(async.executor),
+                    new SubscriberCallbackResponseT()
+            ));
         }
     }
 
@@ -269,7 +251,7 @@ public class ProxyBuilder {
 
         public HTTP build() {
             return http == null ?
-                    new DefaultHTTP(client.build(), interceptors.build(), codecs.build(), failure.build(), encoding.charset) :
+                    new DefaultHTTP(client.build(), interceptors.build(), codecs.build(), failure.build(), encoding.charset, async.executor) :
                     http;
         }
 
@@ -394,6 +376,11 @@ public class ProxyBuilder {
 
                 public HTTPClientSpec.Configuration.SSL ssl() {
                     return ssl;
+                }
+
+                public HTTPClientSpec.Configuration executor(Executor executor) {
+                    this.specification = specification.executor(executor);
+                    return this;
                 }
 
                 private HTTPClientSpec.Configuration apply(HTTPClient.Specification specification) {
@@ -592,6 +579,24 @@ public class ProxyBuilder {
                 return ContractSpec.this;
             }
         }
+    }
+
+    public class Async {
+
+        private Executor executor = null;
+
+        public Async executor(Executor executor) {
+            this.executor = executor;
+            return this;
+        }
+
+        public ProxyBuilder and() {
+            return ProxyBuilder.this;
+        }
+    }
+
+    public Async async() {
+        return async;
     }
 
     public HTTPSpec http() {

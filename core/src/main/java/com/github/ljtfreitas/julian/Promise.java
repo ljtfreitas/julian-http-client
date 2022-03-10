@@ -24,6 +24,7 @@ package com.github.ljtfreitas.julian;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -34,7 +35,7 @@ import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 public interface Promise<T> {
 
-	Promise<T> onSuccess(Consumer<? super T> fn);
+    Promise<T> onSuccess(Consumer<? super T> fn);
 
 	<R> Promise<R> then(Function<? super T, R> fn);
 
@@ -84,6 +85,11 @@ public interface Promise<T> {
 
 	static <T> Promise<T> pending(Supplier<T> fn) {
 		return new DefaultPromise<>(supplyAsync(fn));
+	}
+
+	static <T> Promise<T> pending(Supplier<T> fn, Executor executor) {
+		CompletableFuture<T> future = executor == null ? supplyAsync(fn) : PromiseCompletableFuture.pending(fn, executor);
+		return new DefaultPromise<>(future);
 	}
 
 }

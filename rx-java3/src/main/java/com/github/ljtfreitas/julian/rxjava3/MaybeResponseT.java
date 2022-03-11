@@ -22,14 +22,17 @@
 
 package com.github.ljtfreitas.julian.rxjava3;
 
+import io.reactivex.rxjava3.core.Maybe;
+import io.reactivex.rxjava3.core.Single;
+
 import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.Endpoint;
 import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.Kind;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
 import com.github.ljtfreitas.julian.ResponseT;
-import io.reactivex.rxjava3.core.Maybe;
 
 public class MaybeResponseT implements ResponseT<Object, Maybe<Object>> {
 
@@ -39,7 +42,11 @@ public class MaybeResponseT implements ResponseT<Object, Maybe<Object>> {
 
             @Override
             public Maybe<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
-                return Maybe.fromCompletionStage(fn.run(response, arguments).future());
+                Promise<Object> promise = fn.run(response, arguments);
+                return promise.cast(new Kind<SinglePromise<Object>>() {})
+                        .map(SinglePromise::single)
+                        .map(Single::toMaybe)
+                        .orElseGet(() -> Maybe.fromCompletionStage(promise.future()));
             }
 
             @Override

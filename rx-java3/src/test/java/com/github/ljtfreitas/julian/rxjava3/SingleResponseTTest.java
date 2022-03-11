@@ -1,5 +1,14 @@
 package com.github.ljtfreitas.julian.rxjava3;
 
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.observers.TestObserver;
+
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.Endpoint;
 import com.github.ljtfreitas.julian.JavaType;
@@ -7,13 +16,6 @@ import com.github.ljtfreitas.julian.ObjectResponseT;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
-import io.reactivex.rxjava3.core.Single;
-import io.reactivex.rxjava3.observers.TestObserver;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -70,7 +72,8 @@ class SingleResponseTTest {
 
     @Test
     void bind() {
-        Promise<Response<String>> response = Promise.done(Response.done("hello"));
+        Promise<Response<String>> response = new SinglePromise<>(Single.just(Response.done("hello")));
+
         ResponseFn<String, Object> fn = new ObjectResponseT<>().bind(endpoint, null);
 
         Single<Object> single = subject.bind(endpoint, fn).join(response, Arguments.empty());

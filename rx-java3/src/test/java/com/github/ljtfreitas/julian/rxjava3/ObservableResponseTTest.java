@@ -1,5 +1,18 @@
 package com.github.ljtfreitas.julian.rxjava3;
 
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.observers.TestObserver;
+
+import java.util.Collection;
+import java.util.List;
+
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.CollectionResponseT;
 import com.github.ljtfreitas.julian.Endpoint;
@@ -8,18 +21,10 @@ import com.github.ljtfreitas.julian.ObjectResponseT;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
-import io.reactivex.rxjava3.core.Observable;
-import io.reactivex.rxjava3.observers.TestObserver;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Collection;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -73,7 +78,7 @@ class ObservableResponseTTest {
 
     @Test
     void bind() {
-        Promise<Response<Collection<String>>> response = Promise.done(Response.done(List.of("one", "two", "three")));
+        Promise<Response<Collection<String>>> response = new SinglePromise<>(Single.just(Response.done(List.of("one", "two", "three"))));
 
         ResponseFn<Collection<String>, Collection<Object>> fn = new CollectionResponseT().bind(endpoint,
                 new ObjectResponseT<Collection<Object>>().bind(endpoint, null));

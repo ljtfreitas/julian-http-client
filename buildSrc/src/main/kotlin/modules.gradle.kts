@@ -74,6 +74,12 @@ tasks.jar {
     manifest {
         val systemProperties = System.getProperties()
 
+        val manifest = File("${project.projectDir}/src/main/resources/META-INF/MANIFEST.MF")
+
+        if (manifest.exists()) {
+            from(manifest.toString())
+        }
+
         attributes(
             "Build-By" to systemProperties["user.name"],
             "Build-JDK" to "${systemProperties["java.version"]} (${systemProperties["java.version"]} ${systemProperties["java.vm.version"]})",
@@ -87,14 +93,34 @@ tasks.jar {
     }
 }
 
-java {
-    withJavadocJar()
-    withSourcesJar()
+//java {
+//    withJavadocJar()
+//    withSourcesJar()
+//}
+
+tasks {
+    val sourcesJar by creating(Jar::class) {
+        dependsOn(JavaPlugin.CLASSES_TASK_NAME)
+        archiveClassifier.set("sources")
+        archiveBaseName.set("julian-http-client-${project.name}")
+        from(sourceSets["main"].allSource)
+    }
+
+    val javadocJar by creating(Jar::class) {
+        dependsOn(JavaPlugin.JAVADOC_TASK_NAME)
+        archiveClassifier.set("javadoc")
+        archiveBaseName.set("julian-http-client-${project.name}")
+        from(tasks["javadoc"])
+    }
+
+    artifacts {
+        add("archives", sourcesJar)
+        add("archives", javadocJar)
+
+    }
 }
 
-tasks.javadoc {
-    (options as StandardJavadocDocletOptions).addBooleanOption("html5", true)
-}
+tasks.javadoc { (options as StandardJavadocDocletOptions).addBooleanOption("html5", true) }
 
 publishing {
     publications {

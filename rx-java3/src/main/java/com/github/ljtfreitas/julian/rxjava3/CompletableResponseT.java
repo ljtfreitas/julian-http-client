@@ -22,24 +22,31 @@
 
 package com.github.ljtfreitas.julian.rxjava3;
 
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Single;
+
 import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.Endpoint;
 import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.Kind;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
 import com.github.ljtfreitas.julian.ResponseT;
-import io.reactivex.rxjava3.core.Completable;
 
-public class CompletableResponseT implements ResponseT<Void, Completable> {
+public class CompletableResponseT implements ResponseT<Response<Object>, Completable> {
 
     @Override
-    public <A> ResponseFn<A, Completable> bind(Endpoint endpoint, ResponseFn<A, Void> fn) {
+    public <A> ResponseFn<A, Completable> bind(Endpoint endpoint, ResponseFn<A, Response<Object>> fn) {
         return new ResponseFn<>() {
 
             @Override
             public Completable join(Promise<? extends Response<A>> response, Arguments arguments) {
-                return Completable.fromCompletionStage(fn.run(response, arguments).future());
+                Promise<Response<Object>> promise = fn.run(response, arguments);
+                return promise.cast(new Kind<SinglePromise<Response<Object>>>() {})
+                        .map(SinglePromise::single)
+                        .map(Single::ignoreElement)
+                        .orElseGet(() -> Completable.fromCompletionStage(promise.future()));
             }
 
             @Override

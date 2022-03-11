@@ -22,16 +22,19 @@
 
 package com.github.ljtfreitas.julian.rxjava3;
 
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Single;
+
+import java.util.Collection;
+
 import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.Endpoint;
 import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.Kind;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
 import com.github.ljtfreitas.julian.ResponseT;
-import io.reactivex.rxjava3.core.Observable;
-
-import java.util.Collection;
 
 public class ObservableResponseT implements ResponseT<Collection<Object>, Observable<Object>> {
 
@@ -41,7 +44,11 @@ public class ObservableResponseT implements ResponseT<Collection<Object>, Observ
 
             @Override
             public Observable<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
-                return Observable.fromCompletionStage(fn.run(response, arguments).future())
+                Promise<Collection<Object>> promise = fn.run(response, arguments);
+                return promise.cast(new Kind<SinglePromise<Collection<Object>>>() {})
+                        .map(SinglePromise::single)
+                        .map(Single::toObservable)
+                        .orElseGet(() -> Observable.fromCompletionStage(promise.future()))
                         .flatMapIterable(c -> c);
             }
 

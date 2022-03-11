@@ -1,6 +1,7 @@
 package com.github.ljtfreitas.julian.rxjava3;
 
 import com.github.ljtfreitas.julian.Arguments;
+import com.github.ljtfreitas.julian.DefaultResponseT;
 import com.github.ljtfreitas.julian.Endpoint;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.ObjectResponseT;
@@ -8,6 +9,7 @@ import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
 import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.observers.TestObserver;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -56,9 +58,10 @@ class CompletableResponseTTest {
 
     @Test
     void bind() {
-        Promise<Response<Void>> response = Promise.done(Response.done(null));
+        Promise<Response<Void>> response = new SinglePromise<>(Single.just(Response.done(null)));
 
-        ResponseFn<Void, Void> fn = new ObjectResponseT<Void>().bind(endpoint, null);
+        ResponseFn<Void, Response<Object>> fn = new DefaultResponseT().bind(endpoint,
+                new ObjectResponseT<>().bind(endpoint, null));
 
         Completable completable = subject.bind(endpoint, fn).join(response, Arguments.empty());
 

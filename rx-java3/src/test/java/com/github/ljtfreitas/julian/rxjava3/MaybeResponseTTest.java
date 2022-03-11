@@ -8,6 +8,7 @@ import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
 import io.reactivex.rxjava3.core.Maybe;
+import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.observers.TestObserver;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -71,7 +72,7 @@ class MaybeResponseTTest {
 
     @Test
     void bind() {
-        Promise<Response<String>> response = Promise.done(Response.done("hello"));
+        Promise<Response<String>> response = new SinglePromise<>(Single.just(Response.done("hello")));
 
         ResponseFn<String, Object> fn = new ObjectResponseT<>().bind(endpoint, null);
 

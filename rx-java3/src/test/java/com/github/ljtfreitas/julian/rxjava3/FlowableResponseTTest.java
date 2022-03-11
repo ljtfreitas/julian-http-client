@@ -9,6 +9,7 @@ import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
 import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.subscribers.TestSubscriber;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -75,7 +76,7 @@ class FlowableResponseTTest {
 
     @Test
     void bind() {
-        Promise<Response<Collection<String>>> response = Promise.done(Response.done(List.of("one", "two", "three")));
+        Promise<Response<Collection<String>>> response = new SinglePromise<>(Single.just(Response.done(List.of("one", "two", "three"))));
 
         ResponseFn<Collection<String>, Collection<Object>> fn = new CollectionResponseT().bind(endpoint,
                 new ObjectResponseT<Collection<Object>>().bind(endpoint, null));

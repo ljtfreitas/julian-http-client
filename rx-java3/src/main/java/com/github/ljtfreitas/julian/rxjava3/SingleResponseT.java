@@ -22,14 +22,16 @@
 
 package com.github.ljtfreitas.julian.rxjava3;
 
+import io.reactivex.rxjava3.core.Single;
+
 import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.Endpoint;
 import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.Kind;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
 import com.github.ljtfreitas.julian.ResponseT;
-import io.reactivex.rxjava3.core.Single;
 
 public class SingleResponseT implements ResponseT<Object, Single<Object>> {
 
@@ -39,7 +41,10 @@ public class SingleResponseT implements ResponseT<Object, Single<Object>> {
 
             @Override
             public Single<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
-                return Single.fromCompletionStage(fn.run(response, arguments).future());
+                Promise<Object> promise = fn.run(response, arguments);
+                return promise.cast(new Kind<SinglePromise<Object>>() {})
+                        .map(SinglePromise::single)
+                        .orElseGet(() -> Single.fromCompletionStage(promise.future()));
             }
 
             @Override

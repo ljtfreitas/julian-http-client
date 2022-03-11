@@ -20,21 +20,17 @@
  * SOFTWARE.
  */
 
-rootProject.name = "julian-http-client-parent"
-include("core")
-include("form-url-encoded-multipart")
-include("json-jackson")
-include("json-gson")
-include("json-jsonb")
-include("json-jsonp")
-include("json-kotlin")
-include("xml-jackson")
-include("http-client-reactor-netty")
-include("http-client-vertx")
-include("http-spring-web-flux")
-include("xml-jaxb")
-include("rx-java3")
-include("mutiny")
-include("reactor")
-include("vavr")
-include("kotlin")
+plugins {
+    modules
+}
+
+tasks.jar.configure {
+    archiveBaseName.set("julian-http-client-reactor-vertx")
+}
+
+dependencies {
+    implementation(project(":core"))
+    implementation("org.reactivestreams:reactive-streams:1.0.3")
+    api(project(":rx-java3"))
+    api("io.vertx:vertx-rx-java3:4.2.5")
+}

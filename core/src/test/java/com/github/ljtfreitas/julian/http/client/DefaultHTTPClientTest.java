@@ -244,8 +244,9 @@ class DefaultHTTPClientTest {
 
             @Test
             void sslContext(MockServerClient httpsMockServer) throws NoSuchAlgorithmException, UnrecoverableKeyException, KeyStoreException, KeyManagementException {
-                httpsMockServer.when(request("/hello").withMethod("GET"))
-                        .respond(response("hello"));
+                httpsMockServer.withSecure(true)
+                        .when(request("/hello").withMethod("GET"))
+                            .respond(response("hello"));
 
                 KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
                 keyManagerFactory.init(new KeyStoreFactory(new MockServerLogger()).loadOrCreateKeyStore(), KeyStoreFactory.KEY_STORE_PASSWORD.toCharArray());
@@ -271,7 +272,7 @@ class DefaultHTTPClientTest {
             @Test
             void proxy() {
                 mockServer.when(request("/proxy").withMethod("GET"))
-                        .respond(response("it's working..."));
+                        .respond(response("proxy is working..."));
 
                 HTTPClient httpClient = new DefaultHTTPClient(new HTTPClient.Specification()
                         .proxyAddress(new InetSocketAddress("localhost", 8090)));
@@ -280,7 +281,7 @@ class DefaultHTTPClientTest {
 
                 String body = response.body().readAsBytes(String::new).map(CompletableFuture::join).orElse("");
 
-                assertEquals("it's working...", body);
+                assertEquals("proxy is working...", body);
             }
         }
     }
@@ -294,8 +295,9 @@ class DefaultHTTPClientTest {
 
             String requestBodyAsString = "{\"message\":\"hello\"}";
 
-            return Stream.of(arguments(request("/hello").withMethod("GET"),
-                    expectedResponse, new SimpleHTTPRequestDefinition("http://localhost:8090/hello")),
+            return Stream.of(
+                    arguments(request("/hello").withMethod("GET"),
+                            expectedResponse, new SimpleHTTPRequestDefinition("http://localhost:8090/hello")),
                     arguments(request("/hello").withMethod("POST").withBody(requestBodyAsString),
                             expectedResponse, new SimpleHTTPRequestDefinition("http://localhost:8090/hello", "POST",
                                     HTTPHeaders.create(new HTTPHeader("Content-Type", "text/plain")),

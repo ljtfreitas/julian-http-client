@@ -1,7 +1,6 @@
 package com.github.ljtfreitas.julian.k
 
 import com.github.ljtfreitas.julian.ProxyBuilder
-import com.github.ljtfreitas.julian.contract.Body
 import com.github.ljtfreitas.julian.contract.GET
 import com.github.ljtfreitas.julian.contract.JsonContent
 import com.github.ljtfreitas.julian.contract.POST
@@ -13,27 +12,24 @@ import io.kotest.extensions.mockserver.MockServerListener
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import org.mockserver.client.MockServerClient
 import org.mockserver.model.HttpRequest.request
 import org.mockserver.model.HttpResponse.response
 import java.net.URL
-import java.time.Duration
 import java.util.concurrent.TimeUnit
 
 class ProxyBuilderTest : DescribeSpec({
 
     listener(MockServerListener(port = intArrayOf(8090)))
 
-    val mockClient = MockServerClient("localhost", 8090)
+    val mockServer = MockServerClient("localhost", 8090)
 
     val spec : suspend (KtClient, DescribeSpecContainerScope) -> Unit = { ktClient, scope ->
         scope.apply {
 
             it("String should work, of course :)") {
-                mockClient.`when`(request("/string")
+                mockServer.`when`(request("/string")
                         .withMethod("GET"))
                     .respond(response()
                         .withBody("hello, kotlin"))
@@ -42,7 +38,7 @@ class ProxyBuilderTest : DescribeSpec({
             }
 
             it("and a nullable String?") {
-                mockClient.`when`(request("/null-string")
+                mockServer.`when`(request("/null-string")
                         .withMethod("GET"))
                     .respond(response()
                         .withStatusCode(204))
@@ -51,7 +47,7 @@ class ProxyBuilderTest : DescribeSpec({
             }
 
             it("and Deferred<T>") {
-                mockClient.`when`(request("/deferred")
+                mockServer.`when`(request("/deferred")
                         .withMethod("GET"))
                     .respond(response()
                         .withBody("hello, deferred"))
@@ -60,7 +56,7 @@ class ProxyBuilderTest : DescribeSpec({
             }
 
             it("and Job") {
-                mockClient.`when`(request("/job")
+                mockServer.`when`(request("/job")
                         .withMethod("GET"))
                     .respond(response()
                         .withStatusCode(200))
@@ -71,7 +67,7 @@ class ProxyBuilderTest : DescribeSpec({
             describe("kotlin codecs") {
 
                 it("kotlin deserializer for json should be available") {
-                    mockClient.`when`(request("/json")
+                    mockServer.`when`(request("/json")
                             .withMethod("GET"))
                         .respond(response()
                             .withBody("""{"name":"Tiago","age":36}""")
@@ -81,7 +77,7 @@ class ProxyBuilderTest : DescribeSpec({
                 }
 
                 it("kotlin serializer for json should be available") {
-                    mockClient.`when`(request("/json")
+                    mockServer.`when`(request("/json")
                             .withMethod("POST"))
                         .respond(response()
                             .withStatusCode(200))
@@ -96,11 +92,11 @@ class ProxyBuilderTest : DescribeSpec({
                     .withMethod("GET")
 
                 beforeTest {
-                    mockClient.clear(request)
+                    mockServer.clear(request)
                 }
 
                 it("running a suspend function") {
-                    mockClient.`when`(request)
+                    mockServer.`when`(request)
                         .respond(response()
                             .withBody("hello, suspend function"))
 
@@ -108,7 +104,7 @@ class ProxyBuilderTest : DescribeSpec({
                 }
 
                 it("...and a slow suspend function") {
-                    mockClient.`when`(request)
+                    mockServer.`when`(request)
                         .respond(response()
                             .withDelay(TimeUnit.MILLISECONDS, 5000)
                             .withBody("hello, suspend function"))

@@ -20,4 +20,4 @@
  * SOFTWARE.
  */
 
-rootProject.name = "julian-http-client-vertx"
+rootProject.name = "julian-http-client-ktor"

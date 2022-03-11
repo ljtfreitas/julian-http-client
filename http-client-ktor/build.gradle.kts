@@ -20,4 +20,27 @@
  * SOFTWARE.
  */
 
-rootProject.name = "julian-http-client-vertx"
+plugins {
+    modules
+    kotlin("jvm") version "1.6.10"
+}
+
+tasks.jar.configure {
+    archiveBaseName.set("julian-http-client-ktor")
+}
+
+dependencies {
+    implementation(project(":core"))
+
+    api("io.ktor:ktor-client-core:1.6.7")
+    api("io.ktor:ktor-client-cio:1.6.7")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk9:1.6.0")
+
+    testImplementation("io.kotest:kotest-runner-junit5:5.1.0")
+    testImplementation("io.kotest:kotest-assertions-core-jvm:5.1.0")
+    testImplementation("io.kotest.extensions:kotest-extensions-mockserver:1.1.0")
+    testImplementation("io.mockk:mockk:1.12.3")
+    testImplementation("io.ktor:ktor-client-logging:1.6.7")
+}

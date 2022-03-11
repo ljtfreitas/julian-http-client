@@ -25,7 +25,7 @@ plugins {
 }
 
 tasks.jar.configure {
-    archiveBaseName.set("julian-http-client-reactor-vertx")
+    archiveBaseName.set("julian-http-client-vertx")
 }
 
 dependencies {

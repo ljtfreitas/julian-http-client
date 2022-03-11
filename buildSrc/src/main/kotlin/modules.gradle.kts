@@ -1,4 +1,3 @@
-import net.researchgate.release.GitAdapter
 import net.researchgate.release.GitAdapter.GitConfig
 import net.researchgate.release.ReleaseExtension
 import java.time.LocalDateTime
@@ -93,32 +92,22 @@ tasks.jar {
     }
 }
 
-//java {
-//    withJavadocJar()
-//    withSourcesJar()
-//}
-
-tasks {
-    val sourcesJar by creating(Jar::class) {
-        dependsOn(JavaPlugin.CLASSES_TASK_NAME)
-        archiveClassifier.set("sources")
-        archiveBaseName.set("julian-http-client-${project.name}")
-        from(sourceSets["main"].allSource)
-    }
-
-    val javadocJar by creating(Jar::class) {
-        dependsOn(JavaPlugin.JAVADOC_TASK_NAME)
-        archiveClassifier.set("javadoc")
-        archiveBaseName.set("julian-http-client-${project.name}")
-        from(tasks["javadoc"])
-    }
-
-    artifacts {
-        add("archives", sourcesJar)
-        add("archives", javadocJar)
-
-    }
+val sourcesJarTask by tasks.creating(Jar::class) {
+    dependsOn(JavaPlugin.CLASSES_TASK_NAME)
+    archiveClassifier.set("sources")
+    archiveBaseName.set("julian-http-client-${project.name}")
+    from(sourceSets["main"].allSource)
 }
+
+val javadocJarTask by tasks.creating(Jar::class) {
+    dependsOn(JavaPlugin.JAVADOC_TASK_NAME)
+    archiveClassifier.set("javadoc")
+    archiveBaseName.set("julian-http-client-${project.name}")
+    from(tasks["javadoc"])
+}
+
+val sourcesJar = artifacts.add("archives", sourcesJarTask)
+val javadocJar = artifacts.add("archives", javadocJarTask)
 
 tasks.javadoc { (options as StandardJavadocDocletOptions).addBooleanOption("html5", true) }
 
@@ -127,6 +116,9 @@ publishing {
         create<MavenPublication>("maven") {
             artifactId = tasks.jar.get().archiveBaseName.get()
             from(components["java"])
+
+            artifact(sourcesJar)
+            artifact(javadocJar)
 
             pom {
                 name.set(artifactId)

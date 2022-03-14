@@ -35,7 +35,7 @@ public enum HTTPMethod {
 	OPTIONS,
 	TRACE;
 	
-	static Optional<HTTPMethod> select(String name) {
+	public static Optional<HTTPMethod> select(String name) {
 		return Arrays.stream(HTTPMethod.values()).filter(method -> method.name().equalsIgnoreCase(name)).findFirst();
 	}
 }

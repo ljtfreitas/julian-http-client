@@ -26,5 +26,19 @@ import com.github.ljtfreitas.julian.Promise;
 
 public interface HTTPRequestInterceptor {
 
+    HTTPRequestInterceptor NONE = new NoneHTTPRequestInterceptor();
+
     <T> Promise<HTTPRequest<T>> intercepts(Promise<HTTPRequest<T>> request);
+
+    static HTTPRequestInterceptor none() {
+        return NONE;
+    }
+
+    class NoneHTTPRequestInterceptor implements HTTPRequestInterceptor {
+
+        @Override
+        public <T> Promise<HTTPRequest<T>> intercepts(Promise<HTTPRequest<T>> request) {
+            return request;
+        }
+    }
 }

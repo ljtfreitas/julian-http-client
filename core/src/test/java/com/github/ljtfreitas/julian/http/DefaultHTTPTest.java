@@ -8,6 +8,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,11 +26,9 @@ import org.mockserver.model.NottableString;
 import com.github.ljtfreitas.julian.Cookie;
 import com.github.ljtfreitas.julian.Cookies;
 import com.github.ljtfreitas.julian.Except;
-import com.github.ljtfreitas.julian.Header;
 import com.github.ljtfreitas.julian.Headers;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.Promise;
-import com.github.ljtfreitas.julian.RequestDefinition;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.BadRequest;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.Conflict;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.ExpectationFailed;
@@ -70,6 +69,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockserver.model.HttpRequest.request;
@@ -91,8 +91,8 @@ class DefaultHTTPTest {
 	@BeforeEach
 	void setup() {
 		http = new DefaultHTTP(new DefaultHTTPClient(),
-							   new HTTPRequestInterceptorChain(),
 							   new HTTPMessageCodecs(List.of(new StringHTTPMessageCodec(MediaType.valueOf("text/*")), new UnprocessableHTTPMessageCodec())),
+							   new HTTPRequestInterceptorChain(),
 							   new DefaultHTTPResponseFailure());
 	}
 
@@ -102,11 +102,11 @@ class DefaultHTTPTest {
 
 		@ParameterizedTest(name = "HTTP Request: {0} and HTTP Response: {1}")
 		@ArgumentsSource(HTTPMethodProvider.class)
-		void shouldRunRequestAndReadTheResponse(HttpRequest expectedRequest, HttpResponse expectedResponse, RequestDefinition definition) {
+		void shouldRunRequestAndReadTheResponse(HttpRequest expectedRequest, HttpResponse expectedResponse, HTTPEndpoint request) {
 
 			mockServer.when(expectedRequest).respond(expectedResponse);
 
-			Promise<HTTPResponse<String>> promise = http.run(definition);
+			Promise<HTTPResponse<String>> promise = http.run(request);
 
 			HTTPResponse<String> response = promise.join().unsafe();
 
@@ -114,10 +114,6 @@ class DefaultHTTPTest {
 					  () -> assertEquals(expectedResponse.getBodyAsString(), response.body().unsafe()));
 		}
 
-		@Test
-		void shouldThrowExceptionToUnsupportedHTTPMethod() {
-			assertThrows(IllegalArgumentException.class, () -> http.run(new RequestDefinition(URI.create("http://my.api.com"), "whatever")));
-		}
 	}
 
 	@Nested
@@ -126,10 +122,10 @@ class DefaultHTTPTest {
 
 		@ParameterizedTest(name = "HTTP Request: {0} and HTTP Response: {1}")
 		@ArgumentsSource(HTTPHeadersProvider.class)
-		void shouldRunRequestAndReadTheHeaders(HttpRequest expectedRequest, HttpResponse expectedResponse, RequestDefinition definition) {
+		void shouldRunRequestAndReadTheHeaders(HttpRequest expectedRequest, HttpResponse expectedResponse, HTTPEndpoint request) {
 			mockServer.when(expectedRequest).respond(expectedResponse);
 
-			Promise<HTTPResponse<Void>> promise = http.run(definition);
+			Promise<HTTPResponse<Void>> promise = http.run(request);
 
 			HTTPResponse<Void> response = promise.join().unsafe();
 
@@ -166,8 +162,9 @@ class DefaultHTTPTest {
 							.respond(response(expectedResponse)
 									.withContentType(TEXT_PLAIN));
 
-					RequestDefinition request = new RequestDefinition(URI.create("http://localhost:8090/hello"), "POST",
-							Headers.create(new Header("Content-Type", "text/plain")), new RequestDefinition.Body(requestBodyAsString),
+					HTTPEndpoint request = new HTTPEndpoint(URI.create("http://localhost:8090/hello"), HTTPMethod.POST,
+							HTTPHeaders.create(new HTTPHeader("Content-Type", "text/plain")),
+							new HTTPEndpoint.Body(requestBodyAsString),
 							JavaType.valueOf(String.class));
 
 					Promise<HTTPResponse<String>> promise = http.run(request);
@@ -186,8 +183,8 @@ class DefaultHTTPTest {
 				void missingContentType() {
 					class MyObjectBody {}
 
-					RequestDefinition request = new RequestDefinition(URI.create("http://localhost:8090/hello"), "POST",
-							Headers.empty(), new RequestDefinition.Body(new MyObjectBody()));
+					HTTPEndpoint request = new HTTPEndpoint(URI.create("http://localhost:8090/hello"), HTTPMethod.POST,
+							HTTPHeaders.empty(), new HTTPEndpoint.Body(new MyObjectBody()));
 
 					assertThrows(HTTPRequestWriterException.class, () -> http.run(request));
 				}
@@ -196,16 +193,18 @@ class DefaultHTTPTest {
 				void unsupportedContentObject() {
 					class MyObjectBody {}
 
-					RequestDefinition request = new RequestDefinition(URI.create("http://localhost:8090/hello"), "POST",
-							Headers.create(new Header("Content-Type", "text/plain")), new RequestDefinition.Body(new MyObjectBody()));
+					HTTPEndpoint request = new HTTPEndpoint(URI.create("http://localhost:8090/hello"), HTTPMethod.POST,
+							HTTPHeaders.create(new HTTPHeader("Content-Type", "text/plain")),
+							new HTTPEndpoint.Body(new MyObjectBody()));
 
 					assertThrows(HTTPRequestWriterException.class, () -> http.run(request));
 				}
 
 				@Test
 				void unsupportedContentType() {
-					RequestDefinition request = new RequestDefinition(URI.create("http://localhost:8090/hello"), "POST",
-							Headers.create(new Header("Content-Type", "application/json")), new RequestDefinition.Body("hello"));
+					HTTPEndpoint request = new HTTPEndpoint(URI.create("http://localhost:8090/hello"), HTTPMethod.POST,
+							HTTPHeaders.create(new HTTPHeader("Content-Type", "application/json")),
+							new HTTPEndpoint.Body("hello"));
 
 					assertThrows(HTTPRequestWriterException.class, () -> http.run(request));
 				}
@@ -230,8 +229,8 @@ class DefaultHTTPTest {
 							.respond(response(expectedResponse)
 									.withContentType(TEXT_PLAIN));
 
-					RequestDefinition request = new RequestDefinition(URI.create("http://localhost:8090/hello"), "GET",
-							Headers.empty(), JavaType.valueOf(String.class));
+					HTTPEndpoint request = new HTTPEndpoint(URI.create("http://localhost:8090/hello"), HTTPMethod.GET,
+							HTTPHeaders.empty(), null, JavaType.valueOf(String.class));
 
 					Promise<HTTPResponse<String>> promise = http.run(request);
 
@@ -254,8 +253,8 @@ class DefaultHTTPTest {
 							.respond(response("{\"message\":\"it works!\"}")
 									.withContentType(APPLICATION_JSON));
 
-					RequestDefinition request = new RequestDefinition(URI.create("http://localhost:8090/hello"), "GET",
-							Headers.empty(), JavaType.valueOf(MyObjectBody.class));
+					HTTPEndpoint request = new HTTPEndpoint(URI.create("http://localhost:8090/hello"), HTTPMethod.GET,
+							HTTPHeaders.empty(), null, JavaType.valueOf(MyObjectBody.class));
 
 					Except<HTTPResponse<Object>> response = http.run(request).join();
 
@@ -270,8 +269,8 @@ class DefaultHTTPTest {
 							.respond(response("{\"message\":\"it works!\"}")
 								.withContentType(APPLICATION_JSON));
 
-					RequestDefinition request = new RequestDefinition(URI.create("http://localhost:8090/hello"), "GET",
-							Headers.empty(), JavaType.valueOf(String.class));
+					HTTPEndpoint request = new HTTPEndpoint(URI.create("http://localhost:8090/hello"), HTTPMethod.GET,
+							HTTPHeaders.empty(), null, JavaType.valueOf(String.class));
 
 					Except<Object> response = http.run(request)
 							.then(HTTPResponse::body)
@@ -301,8 +300,7 @@ class DefaultHTTPTest {
 							.withReasonPhrase(reason)
 							.withHeader("X-Whatever", "whatever"));
 
-				RequestDefinition request = new RequestDefinition(URI.create("http://localhost:8090/hello/" + statusCode), "GET",
-						Headers.empty());
+				HTTPEndpoint request = new HTTPEndpoint(URI.create("http://localhost:8090/hello/" + statusCode), HTTPMethod.GET);
 
 				HTTPResponse<Void> response = http.<Void> run(request)
 						.join()
@@ -329,8 +327,7 @@ class DefaultHTTPTest {
 							.withMethod("GET"))
 						.respond(response().withStatusCode(statusCode.value()));
 
-				RequestDefinition request = new RequestDefinition(URI.create("http://localhost:8090/hello/" + statusCode), "GET",
-						Headers.empty());
+				HTTPEndpoint request = new HTTPEndpoint(URI.create("http://localhost:8090/hello/" + statusCode), HTTPMethod.GET);
 
 				HTTPResponse<String> response = http.<String> run(request)
 						.join()
@@ -351,8 +348,7 @@ class DefaultHTTPTest {
 
 			@Test
 			void unknownHost() {
-				RequestDefinition request = new RequestDefinition(URI.create("http://localhost:8099/hello"), "GET",
-						Headers.empty());
+				HTTPEndpoint request = new HTTPEndpoint(URI.create("http://localhost:8099/hello"), HTTPMethod.GET);
 
 				Except<HTTPResponse<Void>> response = http.<Void> run(request).join();
 
@@ -360,6 +356,167 @@ class DefaultHTTPTest {
 						.onFailure(e -> assertThat(e, instanceOf(HTTPClientException.class)))
 						.onFailure(e -> assertThat(e.getCause(), instanceOf(IOException.class)));
 			}
+		}
+	}
+
+	@Nested
+	@MockServerSettings(ports = 8093)
+	class DSL {
+
+		private HTTP.DSL httpAsDsl;
+
+		@BeforeEach
+		void before() {
+			httpAsDsl = http.asDSL();
+		}
+
+		@Test
+		void shouldRunGET() {
+			HttpRequest requestDefinition = request("/get").withMethod("GET");
+
+			mockServer.clear(requestDefinition)
+					.when(requestDefinition)
+					.respond(response("GET is working")
+							.withContentType(TEXT_PLAIN));
+
+			Promise<String> promise = httpAsDsl.GET(URI.create("http://localhost:8093/get"))
+					.run(String.class)
+					.then(r -> r.body().unsafe());
+
+			assertEquals("GET is working", promise.join().unsafe());
+		}
+
+		@Test
+		void shouldRunPOST() {
+			HttpRequest requestDefinition = request("/post").withMethod("POST");
+
+			mockServer.clear(requestDefinition)
+					.when(requestDefinition)
+					.respond(response("POST is working")
+							.withContentType(TEXT_PLAIN));
+
+			Promise<String> promise = httpAsDsl.POST(URI.create("http://localhost:8093/post"))
+					.header(new HTTPHeader(HTTPHeader.CONTENT_TYPE, "text/plain"))
+					.body("i am a body")
+					.run(String.class)
+					.then(r -> r.body().unsafe());
+
+			assertEquals("POST is working", promise.join().unsafe());
+		}
+
+		@Test
+		void shouldRunPUT() {
+			HttpRequest requestDefinition = request("/put")
+					.withMethod("PUT")
+					.withBody("i am a body")
+					.withContentType(TEXT_PLAIN);
+
+			mockServer.clear(requestDefinition).when(requestDefinition)
+					.respond(response("PUT is working")
+							.withContentType(TEXT_PLAIN));
+
+			Promise<String> promise = httpAsDsl.PUT(URI.create("http://localhost:8093/put"))
+					.header(new HTTPHeader(HTTPHeader.CONTENT_TYPE, "text/plain"))
+					.body("i am a body")
+					.run(String.class)
+					.then(r -> r.body().unsafe());
+
+			assertEquals("PUT is working", promise.join().unsafe());
+		}
+
+		@Test
+		void shouldRunPATCH() {
+			HttpRequest requestDefinition = request("/patch")
+					.withMethod("PATCH")
+					.withBody("i am a body")
+					.withContentType(TEXT_PLAIN);
+
+			mockServer.clear(requestDefinition).when(requestDefinition)
+					.respond(response("PATCH is working")
+							.withContentType(TEXT_PLAIN));
+
+			Promise<String> promise = httpAsDsl.PATCH(URI.create("http://localhost:8093/patch"))
+					.header(new HTTPHeader(HTTPHeader.CONTENT_TYPE, "text/plain"))
+					.body("i am a body")
+					.run(String.class)
+					.then(r -> r.body().unsafe());
+
+			assertEquals("PATCH is working", promise.join().unsafe());
+		}
+
+		@Test
+		void shouldRunDELETE() {
+			mockServer.when(request("/delete")
+							.withMethod("DELETE"))
+					.respond(response().withStatusCode(200));
+
+			Promise<HTTPStatus> promise = httpAsDsl.DELETE(URI.create("http://localhost:8093/delete"))
+					.run()
+					.then(HTTPResponse::status);
+
+			HTTPStatus status = promise.join().unsafe();
+
+			assertTrue(status.is(HTTPStatusCode.OK));
+		}
+
+		@DisplayName("Should run a HEAD request.")
+		@Test
+		void shouldRunHEAD() {
+			HttpRequest requestDefinition = request("/head").withMethod("HEAD");
+
+			mockServer.clear(requestDefinition)
+					.when(requestDefinition)
+					.respond(response().withHeader("x-my-header", "whatever"));
+
+			Promise<HTTPHeaders> promise = httpAsDsl.HEAD(URI.create("http://localhost:8093/head"))
+					.run()
+					.then(HTTPResponse::headers);
+
+			HTTPHeaders headers = promise.join().unsafe();
+
+			assertThat(headers, hasItems(new HTTPHeader("x-my-header", "whatever")));
+
+			mockServer.verify(requestDefinition);
+		}
+
+		@DisplayName("Should run a OPTIONS request.")
+		@Test
+		void shouldRunOPTIONS() {
+			HttpRequest requestDefinition = request("/options").withMethod("OPTIONS");
+
+			mockServer.clear(requestDefinition)
+					.when(requestDefinition)
+					.respond(response().withHeader("Allow", "GET, POST, PUT, DELETE"));
+
+			Promise<HTTPHeaders> promise = httpAsDsl.OPTIONS(URI.create("http://localhost:8093/options"))
+					.run()
+					.then(HTTPResponse::headers);
+
+			HTTPHeaders headers = promise.join().unsafe();
+
+			assertThat(headers, hasItems(new HTTPHeader(HTTPHeader.ALLOW, "GET, POST, PUT, DELETE")));
+
+			mockServer.verify(requestDefinition);
+		}
+
+		@DisplayName("Should run a TRACE request.")
+		@Test
+		void shouldRunTRACE() {
+			HttpRequest requestDefinition = request("/trace").withMethod("TRACE");
+
+			mockServer.clear(requestDefinition)
+					.when(requestDefinition)
+					.respond(response().withStatusCode(200));
+
+			Promise<HTTPStatus> promise = httpAsDsl.TRACE(URI.create("http://localhost:8093/trace"))
+					.run()
+					.then(HTTPResponse::status);
+
+			HTTPStatus status = promise.join().unsafe();
+
+			assertTrue(status.is(HTTPStatusCode.OK));
+
+			mockServer.verify(requestDefinition);
 		}
 	}
 
@@ -373,34 +530,36 @@ class DefaultHTTPTest {
 
 			return Stream.of(arguments(request("/hello").withMethod("GET"), 
 									   expectedResponse,
-									   new RequestDefinition(URI.create("http://localhost:8090/hello"), "GET", JavaType.valueOf(String.class))),
+									   new HTTPEndpoint(URI.create("http://localhost:8090/hello"), HTTPMethod.GET,
+											   HTTPHeaders.empty(), null, JavaType.valueOf(String.class))),
 							 arguments(request("/hello").withMethod("POST").withBody(requestBodyAsString), 
 							  		   expectedResponse,
-							  		   new RequestDefinition(URI.create("http://localhost:8090/hello"), "POST",
-							  				   		Headers.create(new Header("Content-Type", "text/plain")),
-							  				   		new RequestDefinition.Body(requestBodyAsString),
+							  		   new HTTPEndpoint(URI.create("http://localhost:8090/hello"), HTTPMethod.POST,
+							  				   		HTTPHeaders.create(new HTTPHeader("Content-Type", "text/plain")),
+							  				   		new HTTPEndpoint.Body(requestBodyAsString),
 											   		JavaType.valueOf(String.class))),
 							 arguments(request("/hello").withMethod("PUT").withBody(requestBodyAsString), 
 							  		   expectedResponse,
-							  		   new RequestDefinition(URI.create("http://localhost:8090/hello"), "POST",
-							  				   		Headers.create(new Header("Content-Type", "text/plain")),
-							  				   		new RequestDefinition.Body(requestBodyAsString),
+							  		   new HTTPEndpoint(URI.create("http://localhost:8090/hello"), HTTPMethod.PUT,
+							  				   		HTTPHeaders.create(new HTTPHeader("Content-Type", "text/plain")),
+							  				   		new HTTPEndpoint.Body(requestBodyAsString),
 											   		JavaType.valueOf(String.class))),
 							 arguments(request("/hello").withMethod("PATCH").withBody(requestBodyAsString), 
 							  		   expectedResponse,
-							  		   new RequestDefinition(URI.create("http://localhost:8090/hello"), "PATCH",
-							  				   		Headers.create(new Header("Content-Type", "text/plain")),
-											   		new RequestDefinition.Body(requestBodyAsString),
+							  		   new HTTPEndpoint(URI.create("http://localhost:8090/hello"), HTTPMethod.PATCH,
+							  				   		HTTPHeaders.create(new HTTPHeader("Content-Type", "text/plain")),
+											   		new HTTPEndpoint.Body(requestBodyAsString),
 											   		JavaType.valueOf(String.class))),
 							 arguments(request("/hello").withMethod("DELETE"), 
 							  		   expectedResponse,
-							  		   new RequestDefinition(URI.create("http://localhost:8090/hello"), "DELETE", JavaType.valueOf(String.class))),
+							  		   new HTTPEndpoint(URI.create("http://localhost:8090/hello"), HTTPMethod.DELETE,
+											   HTTPHeaders.empty(), null, JavaType.valueOf(String.class))),
 							 arguments(request("/hello").withMethod("TRACE"),
 							  		   response().withStatusCode(200),
-							  		   new RequestDefinition(URI.create("http://localhost:8090/hello"), "TRACE")),
+							  		   new HTTPEndpoint(URI.create("http://localhost:8090/hello"), HTTPMethod.TRACE)),
 							 arguments(request("/hello").withMethod("HEAD"), 
 							  		   response().withStatusCode(200),
-							  		   new RequestDefinition(URI.create("http://localhost:8090/hello"), "HEAD")));
+							  		   new HTTPEndpoint(URI.create("http://localhost:8090/hello"), HTTPMethod.HEAD)));
 		}
 	}
 	
@@ -419,19 +578,20 @@ class DefaultHTTPTest {
 														.withHeader("X-Whatever-2", "whatever-header-value-2")
 														.withHeader("X-Whatever-3", "value1", "value2"),
 									   expectedResponse,
-									   new RequestDefinition(URI.create("http://localhost:8090/hello"), "GET",
-						  				   			Headers.create(new Header("X-Whatever-1", "whatever-header-value-1"),
-						  				   						   new Header("X-Whatever-2", "whatever-header-value-2"),
-						  				   						   new Header("X-Whatever-3", "value1", "value2")))),
+									   new HTTPEndpoint(URI.create("http://localhost:8090/hello"), HTTPMethod.GET,
+						  				   			HTTPHeaders.create(new HTTPHeader("X-Whatever-1", "whatever-header-value-1"),
+						  				   						   new HTTPHeader("X-Whatever-2", "whatever-header-value-2"),
+						  				   						   new HTTPHeader("X-Whatever-3", List.of("value1", "value2"))))),
 							 arguments(request("/hello").withMethod("GET")
 									 					.withCookie("session-id", "abc1234")
 									 					.withCookie("csrftoken", "xyz9876")
 									 					.withCookie("_gat", "1"),
 								       expectedResponse,
-						       		   new RequestDefinition(URI.create("http://localhost:8090/hello"), "GET",
-											   		Headers.create(Cookies.create(new Cookie("session-id", "abc1234"),
-																				  new Cookie("csrftoken", "xyz9876"),
-																				  new Cookie("_gat", "1")).header().get()))));
+						       		   new HTTPEndpoint(URI.create("http://localhost:8090/hello"), HTTPMethod.GET,
+											   		HTTPHeaders.create(Headers.create(Cookies.create(
+														   	new Cookie("session-id", "abc1234"),
+															new Cookie("csrftoken", "xyz9876"),
+															new Cookie("_gat", "1")).header().get())))));
 		}
 	}
 

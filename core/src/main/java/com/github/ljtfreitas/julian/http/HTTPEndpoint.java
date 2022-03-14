@@ -20,41 +20,36 @@
  * SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian;
+package com.github.ljtfreitas.julian.http;
 
 import java.net.URI;
 import java.util.Objects;
 import java.util.Optional;
 
-public class RequestDefinition implements Request {
+import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.Preconditions;
+
+public class HTTPEndpoint {
 
     private final URI path;
-    private final String method;
-    private final Headers headers;
+    private final HTTPMethod method;
+    private final HTTPHeaders headers;
     private final Body body;
     private final JavaType returnType;
 
-    public RequestDefinition(URI path, String method) {
-        this(path, method, Headers.empty());
+    public HTTPEndpoint(URI path, HTTPMethod method) {
+        this(path, method, HTTPHeaders.empty(), null);
     }
 
-    public RequestDefinition(URI path, String method, JavaType returnType) {
-        this(path, method, Headers.empty(), null, returnType);
+    public HTTPEndpoint(URI path, HTTPMethod method, HTTPHeaders headers) {
+        this(path, method, headers, null);
     }
 
-    public RequestDefinition(URI path, String method, Headers headers) {
-        this(path, method, headers, null, JavaType.none());
-    }
-
-    public RequestDefinition(URI path, String method, Headers headers, JavaType returnType) {
-        this(path, method, headers, null, returnType);
-    }
-
-    public RequestDefinition(URI path, String method, Headers headers, Body body) {
+    public HTTPEndpoint(URI path, HTTPMethod method, HTTPHeaders headers, HTTPEndpoint.Body body) {
         this(path, method, headers, body, JavaType.none());
     }
 
-    public RequestDefinition(URI path, String method, Headers headers, Body body, JavaType returnType) {
+    public HTTPEndpoint(URI path, HTTPMethod method, HTTPHeaders headers, HTTPEndpoint.Body body, JavaType returnType) {
         this.path = path;
         this.method = method;
         this.headers = headers;
@@ -66,19 +61,18 @@ public class RequestDefinition implements Request {
         return path;
     }
 
-    public String method() {
+    public HTTPMethod method() {
         return method;
     }
 
-    public Headers headers() {
+    public HTTPHeaders headers() {
         return headers;
     }
 
-    public Optional<Body> body() {
+    public Optional<HTTPEndpoint.Body> body() {
         return Optional.ofNullable(body);
     }
 
-    @Override
     public JavaType returnType() {
         return returnType;
     }
@@ -108,14 +102,20 @@ public class RequestDefinition implements Request {
 
         private final Object value;
         private final JavaType javaType;
+        private final MediaType contentType;
 
         public Body(Object value) {
-            this(value, JavaType.valueOf(value.getClass()));
+            this(value, JavaType.valueOf(value.getClass()), (MediaType) null);
         }
 
-        public Body(Object value, JavaType javaType) {
+        public Body(Object value, JavaType javaType, String contentType) {
+            this(value, javaType, contentType == null ? null : MediaType.valueOf(Preconditions.nonNull(contentType)));
+        }
+
+        public Body(Object value, JavaType javaType, MediaType contentType) {
             this.value = value;
             this.javaType = javaType;
+            this.contentType = contentType;
         }
 
         public Object content() {
@@ -124,6 +124,10 @@ public class RequestDefinition implements Request {
 
         public JavaType javaType() {
             return javaType;
+        }
+
+        public Optional<MediaType> contentType() {
+            return Optional.ofNullable(contentType);
         }
 
         @Override

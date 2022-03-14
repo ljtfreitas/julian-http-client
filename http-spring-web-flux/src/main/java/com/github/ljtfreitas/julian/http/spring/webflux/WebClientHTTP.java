@@ -22,9 +22,10 @@
 
 package com.github.ljtfreitas.julian.http.spring.webflux;
 
+import com.github.ljtfreitas.julian.Message;
 import com.github.ljtfreitas.julian.Promise;
-import com.github.ljtfreitas.julian.RequestDefinition;
 import com.github.ljtfreitas.julian.http.HTTP;
+import com.github.ljtfreitas.julian.http.HTTPEndpoint;
 import com.github.ljtfreitas.julian.http.HTTPResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -35,8 +36,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 import java.util.Optional;
-
-import static com.github.ljtfreitas.julian.Message.format;
 
 public class WebClientHTTP implements HTTP {
 
@@ -51,17 +50,17 @@ public class WebClientHTTP implements HTTP {
     }
 
     @Override
-    public <T> Promise<HTTPResponse<T>> run(RequestDefinition definition) {
-        HttpHeaders headers = definition.headers().all().stream()
+    public <T> Promise<HTTPResponse<T>> run(HTTPEndpoint endpoint) {
+        HttpHeaders headers = endpoint.headers().all().stream()
                 .reduce(new HttpHeaders(), (c, h) -> { c.addAll(h.name(), List.copyOf(h.values())); return c; }, (a, b) -> b);
 
-        BodyInserter<?, ReactiveHttpOutputMessage> body = definition.body()
-                .map(RequestDefinition.Body::content)
+        BodyInserter<?, ReactiveHttpOutputMessage> body = endpoint.body()
+                .map(HTTPEndpoint.Body::content)
                 .map(BodyInserters::fromValue).orElseGet(BodyInserters::empty);
 
-        HttpMethod method = Optional.ofNullable(HttpMethod.resolve(definition.method()))
-                .orElseThrow(() -> new IllegalArgumentException(format("Unsupported HTTP method: {0}", definition.method())));
+        HttpMethod method = Optional.ofNullable(HttpMethod.resolve(endpoint.method().name()))
+                .orElseThrow(() -> new IllegalArgumentException(Message.format("Unsupported HTTP method: {0}", endpoint.method())));
 
-        return new WebClientHTTPRequest<T>(definition.path(), method, headers, body, definition.returnType(), webClient).execute();
+        return new WebClientHTTPRequest<T>(endpoint.path(), method, headers, body, endpoint.returnType(), webClient).execute();
     }
 }

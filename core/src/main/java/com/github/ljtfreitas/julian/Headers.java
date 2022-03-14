@@ -28,6 +28,8 @@ import java.util.Iterator;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import com.github.ljtfreitas.julian.http.HTTPHeaders;
+
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableCollection;

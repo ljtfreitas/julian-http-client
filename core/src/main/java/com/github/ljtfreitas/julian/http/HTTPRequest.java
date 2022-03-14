@@ -33,36 +33,4 @@ public interface HTTPRequest<T> extends HTTPRequestDefinition, HTTPRequestIO<T> 
 	HTTPRequest<T> headers(HTTPHeaders headers);
 
 	HTTPRequest<T> body(HTTPRequestBody body);
-
-	static HTTPRequestBuilder.HasHeaders<Void> GET(String path) {
-		return new HTTPRequestBuilder.HasHeaders<>(path, HTTPMethod.GET);
-	}
-
-	static HTTPRequestBuilder.HasBody<Void> POST(String path) {
-		return new HTTPRequestBuilder.HasBody<>(path, HTTPMethod.POST);
-	}
-
-	static HTTPRequestBuilder.HasBody<Void> PUT(String path) {
-		return new HTTPRequestBuilder.HasBody<>(path, HTTPMethod.PUT);
-	}
-
-	static HTTPRequestBuilder.HasBody<Void> PATCH(String path) {
-		return new HTTPRequestBuilder.HasBody<>(path, HTTPMethod.PATCH);
-	}
-
-	static HTTPRequestBuilder.HasBody<Void> DELETE(String path) {
-		return new HTTPRequestBuilder.HasBody<>(path, HTTPMethod.DELETE);
-	}
-
-	static HTTPRequestBuilder.JustHeaders<Void> HEAD(String path) {
-		return new HTTPRequestBuilder.JustHeaders<>(path, HTTPMethod.HEAD);
-	}
-
-	static HTTPRequestBuilder.JustHeaders<Void> OPTIONS(String path) {
-		return new HTTPRequestBuilder.JustHeaders<>(path, HTTPMethod.OPTIONS);
-	}
-
-	static HTTPRequestBuilder.JustHeaders<Void> TRACE(String path) {
-		return new HTTPRequestBuilder.JustHeaders<>(path, HTTPMethod.TRACE);
-	}
 }

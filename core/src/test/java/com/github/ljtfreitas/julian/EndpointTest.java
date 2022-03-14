@@ -7,6 +7,11 @@ import com.github.ljtfreitas.julian.contract.CookiesParameterSerializer;
 import com.github.ljtfreitas.julian.contract.HeadersParameterSerializer;
 import com.github.ljtfreitas.julian.contract.ParameterSerializer;
 import com.github.ljtfreitas.julian.contract.QueryParameterSerializer;
+import com.github.ljtfreitas.julian.http.HTTPEndpoint;
+import com.github.ljtfreitas.julian.http.HTTPHeader;
+import com.github.ljtfreitas.julian.http.HTTPHeaders;
+import com.github.ljtfreitas.julian.http.HTTPMethod;
+
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -45,16 +50,22 @@ class EndpointTest {
 			@ParameterizedTest(name = "Endpoint: {0}")
 			@ArgumentsSource(StaticEndpointProvider.class)
 			void staticDefinitions(Endpoint endpoint) {
-				RequestDefinition request = endpoint.request(Arguments.empty(), endpoint.returnType());
+				HTTPEndpoint request = endpoint.http(Arguments.empty(), endpoint.returnType());
 
-				Header[] expectedHeaders = endpoint.headers().merge(endpoint.cookies().header().stream())
-						.all().toArray(Header[]::new);
+				HTTPHeader[] expectedHeaders = HTTPHeaders.create(endpoint.headers().merge(endpoint.cookies().header().stream()))
+						.all().toArray(HTTPHeader[]::new);
 
 				assertAll(() -> assertThat(request.path().toString(), equalTo(endpoint.path().show())),
-						() -> assertThat(request.method(), equalTo(endpoint.method())),
+						() -> assertThat(request.method().name(), equalTo(endpoint.method())),
 						() -> assertThat(request.returnType(), equalTo(endpoint.returnType())),
 						() -> assertThat(request.headers(), hasItems(expectedHeaders)));
 
+			}
+
+			@Test
+			void shouldThrowExceptionToUnsupportedHTTPMethod() {
+				assertThrows(IllegalArgumentException.class, () -> new Endpoint(new Path("http://my.api.com"), "whatever")
+						.http(Arguments.empty(), JavaType.none()));
 			}
 
 			@Nested
@@ -65,7 +76,7 @@ class EndpointTest {
 					Endpoint endpoint = new Endpoint(new Path("http://my.api.com",
 							QueryParameters.create(Map.of("param1", "value1", "param2", "value2"))), "GET");
 
-					RequestDefinition definition = endpoint.request(Arguments.empty(), endpoint.returnType());
+					HTTPEndpoint definition = endpoint.http(Arguments.empty(), endpoint.returnType());
 
 					assertThat(definition.path(), equalTo(URI.create("http://my.api.com?param1=value1&param2=value2")));
 				}
@@ -80,8 +91,8 @@ class EndpointTest {
 
 				@ParameterizedTest(name = "Expected request: [{2}], using this endpoint: [{0}] and these arguments: [{1}]")
 				@ArgumentsSource(DynamicEndpointPathsProvider.class)
-				void dynamicDefinitions(Endpoint endpoint, Arguments arguments, RequestDefinition expected) {
-					RequestDefinition request = endpoint.request(arguments, endpoint.returnType());
+				void dynamicDefinitions(Endpoint endpoint, Arguments arguments, HTTPEndpoint expected) {
+					HTTPEndpoint request = endpoint.http(arguments, endpoint.returnType());
 
 					assertAll(() -> assertThat(request.path().toString(), equalTo(expected.path().toString())),
 							() -> assertThat(request.method(), equalTo(expected.method())),
@@ -112,7 +123,7 @@ class EndpointTest {
 					void dynamicDefinitions(Parameters parameters, Arguments arguments, String expected) {
 						Endpoint endpoint = new Endpoint(new Path("http://my.api.com", parameters), "GET", parameters);
 
-						RequestDefinition request = endpoint.request(arguments, endpoint.returnType());
+						HTTPEndpoint request = endpoint.http(arguments, endpoint.returnType());
 
 						assertThat(request.path().toString(), equalTo(expected));
 					}
@@ -127,9 +138,10 @@ class EndpointTest {
 				void dynamicDefinitions(Parameters parameters, Arguments arguments, Headers expected) {
 					Endpoint endpoint = new Endpoint(new Path("http://my.api.com"), "GET", parameters);
 
-					RequestDefinition request = endpoint.request(arguments, endpoint.returnType());
+					HTTPEndpoint request = endpoint.http(arguments, endpoint.returnType());
 
-					Header[] expectedHeaders = expected.all().toArray(Header[]::new);
+					HTTPHeader[] expectedHeaders = HTTPHeaders.create(endpoint.headers().merge(endpoint.cookies().header().stream()))
+							.all().toArray(HTTPHeader[]::new);
 
 					assertThat(request.headers(), hasItems(expectedHeaders));
 				}
@@ -143,9 +155,10 @@ class EndpointTest {
 				void dynamicDefinitions(Parameters parameters, Arguments arguments, Headers expected) {
 					Endpoint endpoint = new Endpoint(new Path("http://my.api.com"), "GET", parameters);
 
-					RequestDefinition request = endpoint.request(arguments, endpoint.returnType());
+					HTTPEndpoint request = endpoint.http(arguments, endpoint.returnType());
 
-					Header[] expectedHeaders = expected.all().toArray(Header[]::new);
+					HTTPHeader[] expectedHeaders = HTTPHeaders.create(endpoint.headers().merge(endpoint.cookies().header().stream()))
+							.all().toArray(HTTPHeader[]::new);
 
 					assertThat(request.headers(), hasItems(expectedHeaders));
 				}
@@ -159,17 +172,18 @@ class EndpointTest {
 				void dynamicDefinitions(Endpoint.BodyParameter bodyParameter, Arguments arguments) {
 					Endpoint endpoint = new Endpoint(new Path("http://my.api.com"), "POST", Parameters.create(bodyParameter));
 
-					RequestDefinition request = endpoint.request(arguments, endpoint.returnType());
+					HTTPEndpoint request = endpoint.http(arguments, endpoint.returnType());
 
 					assertThat(request.body().isPresent(), is(true));
 
 					Object expectedContent = arguments.of(0).orElse(null);
 					JavaType expectedBodyJavaType = bodyParameter.javaType();
 
-					Consumer<RequestDefinition.Body> assertions = body ->
+					Consumer<HTTPEndpoint.Body> assertions = body ->
 							assertAll(() -> assertThat(body.content(), equalTo(expectedContent)),
 									  () -> assertThat(body.javaType(), equalTo(expectedBodyJavaType)),
-									  () -> bodyParameter.contentType().ifPresent(c -> assertThat(request.headers(), hasItems(new Header("Content-Type", c)))));
+									  () -> bodyParameter.contentType()
+											  .ifPresent(c -> assertThat(request.headers(), hasItems(new HTTPHeader("Content-Type", c)))));
 
 					request.body().ifPresentOrElse(assertions, () -> fail("a request body was expected here..."));
 				}
@@ -189,7 +203,7 @@ class EndpointTest {
 
 				Endpoint endpoint = new Endpoint(new Path("http://my.api.com?param1=value1", queryParameters, parameters), "GET", parameters);
 
-				RequestDefinition request = endpoint.request(Arguments.create("value3"), endpoint.returnType());
+				HTTPEndpoint request = endpoint.http(Arguments.create("value3"), endpoint.returnType());
 
 				QueryParameters actual = QueryParameters.parse(request.path().getQuery());
 
@@ -207,10 +221,10 @@ class EndpointTest {
 				Endpoint endpoint = new Endpoint(new Path("http://my.api.com"), "GET", headers,
 						Parameters.create(Parameter.header(0, "x-my-header-2", JavaType.valueOf(String.class), headersParameterSerializer)));
 
-				RequestDefinition request = endpoint.request(Arguments.create("value2"), endpoint.returnType());
+				HTTPEndpoint request = endpoint.http(Arguments.create("value2"), endpoint.returnType());
 
-				Header[] expectedHeaders = headers.join(new Header("x-my-header-2", "value2")).all()
-						.toArray(Header[]::new);
+				HTTPHeader[] expectedHeaders = HTTPHeaders.create(headers.join(new Header("x-my-header-2", "value2")))
+						.all().toArray(HTTPHeader[]::new);
 
 				assertThat(request.headers(), contains(expectedHeaders));
 			}
@@ -225,12 +239,12 @@ class EndpointTest {
 						Headers.empty(), cookies,
 						Parameters.create(Parameter.cookie(0, "another-cookie", JavaType.valueOf(String.class), cookiesParameterSerializer)));
 
-				RequestDefinition request = endpoint.request(Arguments.create("another-cookie-value"), endpoint.returnType());
+				HTTPEndpoint request = endpoint.http(Arguments.create("another-cookie-value"), endpoint.returnType());
 
 				Header expectedCookieHeader = cookies.join(new Cookie("another-cookie", "another-cookie-value"))
 								.header().get();
 
-				assertThat(request.headers(), contains(expectedCookieHeader));
+				assertThat(request.headers(), contains(new HTTPHeader(expectedCookieHeader.name(), expectedCookieHeader.values())));
 			}
 		}
 	}
@@ -264,7 +278,7 @@ class EndpointTest {
 									Parameters.create(Parameter.path(0, "arg1", JavaType.valueOf(String.class), pathParameterSerializer),
 													  Parameter.path(1, "arg2", JavaType.valueOf(String.class), pathParameterSerializer))), "GET"),
 							Arguments.create("value1", "value2"),
-							new RequestDefinition(URI.create("http://my.api.com/value1/value2"), "GET")));
+							new HTTPEndpoint(URI.create("http://my.api.com/value1/value2"), HTTPMethod.GET)));
 		}
 	}
 

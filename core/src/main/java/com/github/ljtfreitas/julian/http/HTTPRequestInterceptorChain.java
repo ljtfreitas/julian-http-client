@@ -33,17 +33,17 @@ public class HTTPRequestInterceptorChain implements HTTPRequestInterceptor {
 
     private static final RewriteContentTypeHTTPRequestInterceptor REWRITE_CONTENT_TYPE_HTTP_REQUEST_INTERCEPTOR = new RewriteContentTypeHTTPRequestInterceptor();
 
-    private final Collection<HTTPRequestInterceptor> interceptors;
+    private final Collection<? extends HTTPRequestInterceptor> interceptors;
 
     public HTTPRequestInterceptorChain() {
         this(emptyList());
     }
 
-    public HTTPRequestInterceptorChain(Collection<HTTPRequestInterceptor> interceptors) {
+    public HTTPRequestInterceptorChain(Collection<? extends HTTPRequestInterceptor> interceptors) {
         this.interceptors = all(interceptors);
     }
 
-    private Collection<HTTPRequestInterceptor> all(Collection<HTTPRequestInterceptor> interceptors) {
+    private Collection<HTTPRequestInterceptor> all(Collection<? extends HTTPRequestInterceptor> interceptors) {
         Collection<HTTPRequestInterceptor> all = new ArrayList<>();
         all.add(REWRITE_CONTENT_TYPE_HTTP_REQUEST_INTERCEPTOR);
         all.addAll(interceptors);

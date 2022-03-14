@@ -35,7 +35,7 @@ class QueryParametersTest {
 	void shouldBeAbleToAppendNewParameters() {
 		QueryParameters queryParameters = new QueryParameters(Map.of("first-name", List.of("John")));
 
-		QueryParameters newQueryParameters = queryParameters.append("last-name", "Doe");
+		QueryParameters newQueryParameters = queryParameters.join("last-name", "Doe");
 
 		assertAll(() -> assertNotSame(queryParameters, newQueryParameters),
 				  () -> assertEquals("first-name=John&last-name=Doe", newQueryParameters.serialize()));

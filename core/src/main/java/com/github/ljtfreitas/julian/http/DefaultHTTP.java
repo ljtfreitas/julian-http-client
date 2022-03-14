@@ -22,14 +22,12 @@
 
 package com.github.ljtfreitas.julian.http;
 
-import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.Promise;
-import com.github.ljtfreitas.julian.RequestDefinition;
+import com.github.ljtfreitas.julian.http.HTTPEndpoint.Body;
 import com.github.ljtfreitas.julian.http.client.HTTPClient;
 import com.github.ljtfreitas.julian.http.codec.HTTPMessageCodecs;
 import com.github.ljtfreitas.julian.http.codec.HTTPRequestWriterException;
 
-import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Executor;
@@ -46,7 +44,15 @@ public class DefaultHTTP implements HTTP {
 	private final Charset encoding;
 	private final Executor executor;
 
-	public DefaultHTTP(HTTPClient httpClient, HTTPRequestInterceptor interceptor, HTTPMessageCodecs codecs, HTTPResponseFailure failure) {
+	public DefaultHTTP(HTTPClient httpClient, HTTPMessageCodecs codecs) {
+		this(httpClient, codecs, HTTPRequestInterceptor.none());
+	}
+
+	public DefaultHTTP(HTTPClient httpClient, HTTPMessageCodecs codecs, HTTPRequestInterceptor interceptor) {
+		this(httpClient, codecs, interceptor, new DefaultHTTPResponseFailure());
+	}
+
+	public DefaultHTTP(HTTPClient httpClient, HTTPMessageCodecs codecs, HTTPRequestInterceptor interceptor, HTTPResponseFailure failure) {
 		this(httpClient, interceptor, codecs, failure, StandardCharsets.UTF_8, null);
 	}
 
@@ -60,19 +66,11 @@ public class DefaultHTTP implements HTTP {
 	}
 
 	@Override
-	public <T> Promise<HTTPResponse<T>> run(RequestDefinition definition) {
-		URI uri = definition.path();
+	public <T> Promise<HTTPResponse<T>> run(HTTPEndpoint endpoint) {
+		HTTPRequestBody body = endpoint.body().map(b -> body(b, endpoint.headers())).orElse(null);
 
-		HTTPHeaders headers = definition.headers().all().stream()
-				.map(h -> new HTTPHeader(h.name(), h.values()))
-				.reduce(HTTPHeaders.empty(), HTTPHeaders::join, (a, b) -> b);
-
-		HTTPRequestBody body = definition.body().map(b -> body(b.content(), b.javaType(), headers)).orElse(null);
-
-		HTTPMethod method = HTTPMethod.select(definition.method())
-				.orElseThrow(() -> new IllegalArgumentException(format("Unsupported HTTP method: {0}", definition.method())));
-
-		HTTPRequest<T> request = new DefaultHTTPRequest<>(uri, method, body, headers, definition.returnType(), httpClient, codecs, failure);
+		HTTPRequest<T> request = new DefaultHTTPRequest<>(endpoint.path(), endpoint.method(), body, endpoint.headers(),
+				endpoint.returnType(), httpClient, codecs, failure);
 
 		return intercepts(Promise.pending(() -> request, executor)).bind(HTTPRequest::execute);
 	}
@@ -81,14 +79,17 @@ public class DefaultHTTP implements HTTP {
 		return interceptor.intercepts(request);
 	}
 
-	private HTTPRequestBody body(Object content, JavaType javaType, HTTPHeaders headers) {
-		return headers.select(CONTENT_TYPE)
-				.map(HTTPHeader::value)
-				.map(MediaType::valueOf)
-				.map(contentType -> codecs.writers().select(contentType, javaType)
-						.map(writer -> writer.write(content, encoding(contentType)))
-						.orElseThrow(() -> new HTTPRequestWriterException(format("There isn't any HTTPRequestWriter able to convert {0} to {1}", javaType, contentType))))
-				.orElseThrow(() -> new HTTPRequestWriterException("The HTTP request has a body, but doesn't have a Content-Type header."));
+	private HTTPRequestBody body(Body content, HTTPHeaders headers) {
+		return content.contentType()
+				.or(() -> headers.select(CONTENT_TYPE)
+					.map(HTTPHeader::value)
+					.map(MediaType::valueOf))
+				.map(contentType -> codecs.writers().select(contentType, content.javaType())
+						.map(writer -> writer.write(content.content(), encoding(contentType)))
+						.orElseThrow(() -> new HTTPRequestWriterException(
+								format("There isn't any HTTPRequestWriter able to convert {0} to {1}", content.javaType(), contentType))))
+				.orElseThrow(() -> new HTTPRequestWriterException(
+						"The HTTP request has a body, but doesn't have a Content-Type header."));
 	}
 
 	private Charset encoding(MediaType contentType) {

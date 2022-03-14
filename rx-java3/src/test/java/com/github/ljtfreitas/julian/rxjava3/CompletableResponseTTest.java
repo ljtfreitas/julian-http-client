@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -58,12 +59,13 @@ class CompletableResponseTTest {
 
     @Test
     void bind() {
-        Promise<Response<Void>> response = new SinglePromise<>(Single.just(Response.done(null)));
+        Promise<Response<Object>> response = new SinglePromise<>(Single.just(Response.done(null)));
 
-        ResponseFn<Void, Response<Object>> fn = new DefaultResponseT().bind(endpoint,
-                new ObjectResponseT<>().bind(endpoint, null));
+        ResponseFn<Object, Response<Object>> bla = new DefaultResponseT().bind(endpoint, new ObjectResponseT<>().bind(endpoint, null));
 
-        Completable completable = subject.bind(endpoint, fn).join(response, Arguments.empty());
+        Arguments arguments = Arguments.empty();
+
+        Completable completable = subject.bind(endpoint, bla).join(response, arguments);
 
         TestObserver<Void> observer = new TestObserver<>();
         completable.subscribe(observer);

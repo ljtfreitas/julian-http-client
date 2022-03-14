@@ -28,6 +28,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import com.github.ljtfreitas.julian.Headers;
+
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.unmodifiableMap;
@@ -69,6 +71,12 @@ public class HTTPHeaders implements Iterable<HTTPHeader> {
 		return new HTTPHeaders(headers);
 	}
 
+	public HTTPHeaders join(HTTPHeaders headers) {
+		Map<String, HTTPHeader> joined = new LinkedHashMap<>(this.headers);
+		joined.putAll(headers.headers);
+		return new HTTPHeaders(joined);
+	}
+
 	@Override
 	public String toString() {
 		return headers.values().stream().map(HTTPHeader::toString).collect(joining(", "));
@@ -85,5 +93,10 @@ public class HTTPHeaders implements Iterable<HTTPHeader> {
 
 	public static HTTPHeaders create(HTTPHeader... headers) {
 		return new HTTPHeaders(asList(headers));
+	}
+
+	public static HTTPHeaders create(Headers headers) {
+		return headers.all().stream()
+				.reduce(HTTPHeaders.empty(), (a, b) -> a.join(new HTTPHeader(b.name(), b.values())), (a, b) -> b);
 	}
 }

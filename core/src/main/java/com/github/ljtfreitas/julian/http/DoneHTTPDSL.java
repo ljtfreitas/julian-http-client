@@ -24,33 +24,51 @@ package com.github.ljtfreitas.julian.http;
 
 import java.net.URI;
 
-import com.github.ljtfreitas.julian.Promise;
-import com.github.ljtfreitas.julian.http.client.HTTPClient;
+class DoneHTTPDSL implements HTTP.DSL {
 
-public interface HTTP {
+    private final HTTP http;
 
-    <T> Promise<HTTPResponse<T>> run(HTTPEndpoint request);
-
-    default HTTP.DSL asDSL() {
-        return new DoneHTTPDSL(this);
+    DoneHTTPDSL(HTTP http) {
+        this.http = http;
     }
 
-    interface DSL {
+    @Override
+    public HTTPDSLRequest GET(URI path) {
+        return new HTTPDSLRequest(http, path, HTTPMethod.GET);
+    }
 
-        HTTPDSLRequest GET(URI path);
+    @Override
+    public HTTPDSLRequest POST(URI path) {
+        return new HTTPDSLRequest(http, path, HTTPMethod.POST);
+    }
 
-        HTTPDSLRequest POST(URI path);
+    @Override
+    public HTTPDSLRequest PUT(URI path) {
+        return new HTTPDSLRequest(http, path, HTTPMethod.PUT);
+    }
 
-        HTTPDSLRequest PUT(URI path);
+    @Override
+    public HTTPDSLRequest PATCH(URI path) {
+        return new HTTPDSLRequest(http, path, HTTPMethod.PATCH);
+    }
 
-        HTTPDSLRequest PATCH(URI path);
+    @Override
+    public HTTPDSLRequest DELETE(URI path) {
+        return new HTTPDSLRequest(http, path, HTTPMethod.DELETE);
+    }
 
-        HTTPDSLRequest DELETE(URI path);
+    @Override
+    public HTTPDSLRequest HEAD(URI path) {
+        return new HTTPDSLRequest(http, path, HTTPMethod.HEAD);
+    }
 
-        HTTPDSLRequest HEAD(URI path);
+    @Override
+    public HTTPDSLRequest OPTIONS(URI path) {
+        return new HTTPDSLRequest(http, path, HTTPMethod.OPTIONS);
+    }
 
-        HTTPDSLRequest OPTIONS(URI path);
-
-        HTTPDSLRequest TRACE(URI path);
+    @Override
+    public HTTPDSLRequest TRACE(URI path) {
+        return new HTTPDSLRequest(http, path, HTTPMethod.TRACE);
     }
 }

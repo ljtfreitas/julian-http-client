@@ -31,19 +31,19 @@ public class HTTPMessageCodecs {
 	private final HTTPRequestWriters writers;
 	private final HTTPResponseReaders readers;
 
-	public HTTPMessageCodecs(Collection<HTTPMessageCodec> converters) {
+	public HTTPMessageCodecs(Collection<? extends HTTPMessageCodec> converters) {
 		this.writers = new HTTPRequestWriters(writers(converters));
 		this.readers = new HTTPResponseReaders(readers(converters));
 	}
 
-	private Collection<HTTPResponseReader<?>> readers(Collection<HTTPMessageCodec> converters) {
+	private Collection<HTTPResponseReader<?>> readers(Collection<? extends HTTPMessageCodec> converters) {
 		return converters.stream().filter(HTTPResponseReader.class::isInstance)
 				.map(r -> (HTTPResponseReader<?>) r)
 				.collect(toUnmodifiableList());
 	}
 
 	@SuppressWarnings("unchecked")
-	private Collection<HTTPRequestWriter<? super Object>> writers(Collection<HTTPMessageCodec> converters) {
+	private Collection<HTTPRequestWriter<? super Object>> writers(Collection<? extends HTTPMessageCodec> converters) {
 		return converters.stream().filter(HTTPRequestWriter.class::isInstance)
 				.map(HTTPRequestWriter.class::cast)
 				.map(w -> (HTTPRequestWriter<? super Object>) w)

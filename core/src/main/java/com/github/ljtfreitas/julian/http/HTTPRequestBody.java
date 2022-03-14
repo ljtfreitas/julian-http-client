@@ -22,6 +22,7 @@
 
 package com.github.ljtfreitas.julian.http;
 
+import java.net.http.HttpRequest.BodyPublishers;
 import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.concurrent.Flow.Publisher;
@@ -31,4 +32,12 @@ public interface HTTPRequestBody {
     Optional<MediaType> contentType();
 
     Publisher<ByteBuffer> serialize();
+
+    static HTTPRequestBody create(MediaType contentType, Publisher<ByteBuffer> content) {
+        return new DefaultHTTPRequestBody(contentType, () -> content);
+    }
+
+    static HTTPRequestBody empty() {
+        return new DefaultHTTPRequestBody(BodyPublishers::noBody);
+    }
 }

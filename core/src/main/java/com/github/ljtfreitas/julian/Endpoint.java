@@ -24,6 +24,11 @@ package com.github.ljtfreitas.julian;
 
 import com.github.ljtfreitas.julian.Preconditions.Precondition;
 import com.github.ljtfreitas.julian.contract.ParameterSerializer;
+import com.github.ljtfreitas.julian.http.HTTPEndpoint;
+import com.github.ljtfreitas.julian.http.HTTPEndpoint.Body;
+import com.github.ljtfreitas.julian.http.HTTPHeader;
+import com.github.ljtfreitas.julian.http.HTTPHeaders;
+import com.github.ljtfreitas.julian.http.HTTPMethod;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -136,22 +141,26 @@ public class Endpoint {
         return new Endpoint(path, method, headers, cookies, parameters, adapted);
     }
 
-    RequestDefinition request(Arguments arguments, JavaType returnType) {
+    HTTPEndpoint http(Arguments arguments, JavaType returnType) {
         URI uri = path.expand(arguments)
                 .prop(cause -> new IllegalArgumentException(path.show(), cause));
 
-        Headers headers = headers(arguments).merge(cookies(arguments)).all().stream()
-                .map(h -> new Header(h.name(), h.values()))
-                .reduce(Headers.empty(), Headers::join, (a, b) -> b);
+        HTTPMethod httpMethod = HTTPMethod.select(method)
+				.orElseThrow(() -> new IllegalArgumentException(format("Unsupported HTTP method: {0}", method)));
 
-        RequestDefinition.Body body = body(arguments);
+        HTTPHeaders headers = headers(arguments).merge(cookies(arguments)).all().stream()
+                .map(h -> new HTTPHeader(h.name(), h.values()))
+                .reduce(HTTPHeaders.empty(), HTTPHeaders::join, (a, b) -> b);
 
-        return new RequestDefinition(uri, method, headers, body, returnType);
+        Body content = content(arguments);
+
+        return new HTTPEndpoint(uri, httpMethod, headers, content, returnType);
     }
 
-    private RequestDefinition.Body body(Arguments arguments) {
+    private Body content(Arguments arguments) {
         return parameters.body()
-                .flatMap(p -> arguments.of(p.position()).map(value -> new RequestDefinition.Body(value, p.javaType())))
+                .flatMap(p -> arguments.of(p.position())
+                        .map(value -> new Body(value, p.javaType(), p.contentType().orElse(null))))
                 .orElse(null);
     }
 
@@ -576,7 +585,7 @@ public class Endpoint {
             return Stream.concat(Stream.of(source), dynamic(arguments))
                     .filter(not(Objects::isNull))
                     .filter(not(String::isEmpty))
-                    .reduce(queryParameters, (q, s) -> q.append(QueryParameters.parse(s)), (a, b) -> b)
+                    .reduce(queryParameters, (q, s) -> q.join(QueryParameters.parse(s)), (a, b) -> b)
                     .serialize();
         }
 

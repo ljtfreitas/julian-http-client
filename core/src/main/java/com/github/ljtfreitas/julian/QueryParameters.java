@@ -24,41 +24,34 @@ package com.github.ljtfreitas.julian;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
-import static com.github.ljtfreitas.julian.Preconditions.nonNull;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.singleton;
-import static java.util.Collections.unmodifiableMap;
-import static java.util.stream.Collectors.flatMapping;
 import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toUnmodifiableList;
 
 public class QueryParameters {
 
-	private final Map<String, Collection<String>> parameters;
+	private final MultiMap<String, String> parameters;
 
 	public QueryParameters(Map<String, ? extends Collection<String>> parameters) {
-		this.parameters = unmodifiableMap(parameters);
+		this(new MultiMap<>(parameters));
+	}
+
+	private QueryParameters(MultiMap<String, String> parameters) {
+		this.parameters = parameters;
 	}
 
 	public Map<String, Collection<String>> all() {
-		return parameters;
+		return parameters.all();
 	}
 
 	public String serialize() {
-		return parameters.entrySet().stream()
-				.flatMap(e -> e.getValue().stream().map(value -> encode(e.getKey()) + "=" + encode(value)))
-				.collect(joining("&"));
+		return parameters.serialize((name, value) -> encode(name) + "=" + encode(value), "&");
 	}
 
 	private String encode(String value) {
@@ -67,34 +60,16 @@ public class QueryParameters {
 				.unsafe();
 	}
 
-	public QueryParameters append(String name, String... values) {
-		Map<String, Collection<String>> parameters = new LinkedHashMap<>(this.parameters);
-
-		parameters.merge(name, asList(values), (a, b) -> {
-			Collection<String> e = new ArrayList<>(a);
-			e.addAll(b);
-			return e;
-		});
-
-		return new QueryParameters(parameters);
+	public QueryParameters join(String name, String... values) {
+		return new QueryParameters(parameters.join(name, values));
 	}
 
-	public QueryParameters append(QueryParameters that) {
-		Map<String, Collection<String>> parameters = new LinkedHashMap<>(this.parameters);
-
-		that.parameters.forEach((name, values) -> {
-			parameters.merge(name, values, (a, b) -> {
-				Collection<String> e = new ArrayList<>(a);
-				e.addAll(b);
-				return e;
-			});
-		});
-
-		return new QueryParameters(parameters);
+	public QueryParameters join(QueryParameters that) {
+		return new QueryParameters(parameters.join(that.parameters));
 	}
 
 	public static QueryParameters empty() {
-		return new QueryParameters(emptyMap());
+		return new QueryParameters(MultiMap.empty());
 	}
 
 	public static QueryParameters create(String name, String... values) {
@@ -102,9 +77,7 @@ public class QueryParameters {
 	}
 
 	public static QueryParameters create(Map<String, String> parameters) {
-		return new QueryParameters(nonNull(parameters).entrySet().stream()
-				.map(e -> Map.entry(e.getKey(), singleton(e.getValue())))
-				.collect(groupingBy(Entry::getKey, flatMapping(e -> e.getValue().stream(), toUnmodifiableList()))));
+		return new QueryParameters(MultiMap.valueOf(parameters));
 	}
 
 	public static QueryParameters parse(String source) {

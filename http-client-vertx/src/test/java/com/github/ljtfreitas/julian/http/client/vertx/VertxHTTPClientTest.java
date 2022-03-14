@@ -1,7 +1,32 @@
 package com.github.ljtfreitas.julian.http.client.vertx;
 
 import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpClientOptions;
+
+import java.net.ConnectException;
+import java.net.URI;
+import java.net.http.HttpRequest.BodyPublishers;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ArgumentsProvider;
+import org.junit.jupiter.params.provider.ArgumentsSource;
+import org.mockserver.client.MockServerClient;
+import org.mockserver.junit.jupiter.MockServerExtension;
+import org.mockserver.junit.jupiter.MockServerSettings;
+import org.mockserver.model.HttpRequest;
+import org.mockserver.model.HttpResponse;
+import org.mockserver.model.NottableString;
 
 import com.github.ljtfreitas.julian.Except;
 import com.github.ljtfreitas.julian.JavaType;
@@ -19,43 +44,6 @@ import com.github.ljtfreitas.julian.http.MediaType;
 import com.github.ljtfreitas.julian.http.client.HTTPClientResponse;
 import com.github.ljtfreitas.julian.http.codec.StringHTTPMessageCodec;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.TestInstance.Lifecycle;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ArgumentsProvider;
-import org.junit.jupiter.params.provider.ArgumentsSource;
-import org.mockserver.client.MockServerClient;
-import org.mockserver.junit.jupiter.MockServerExtension;
-import org.mockserver.junit.jupiter.MockServerSettings;
-import org.mockserver.model.HttpRequest;
-import org.mockserver.model.HttpResponse;
-import org.mockserver.model.NottableString;
-
-import java.net.ConnectException;
-import java.net.URI;
-import java.net.http.HttpRequest.BodyPublishers;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
-import static com.github.ljtfreitas.julian.http.HTTPRequest.DELETE;
-import static com.github.ljtfreitas.julian.http.HTTPRequest.GET;
-import static com.github.ljtfreitas.julian.http.HTTPRequest.HEAD;
-import static com.github.ljtfreitas.julian.http.HTTPRequest.OPTIONS;
-import static com.github.ljtfreitas.julian.http.HTTPRequest.PATCH;
-import static com.github.ljtfreitas.julian.http.HTTPRequest.POST;
-import static com.github.ljtfreitas.julian.http.HTTPRequest.PUT;
-import static com.github.ljtfreitas.julian.http.HTTPRequest.TRACE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.equalTo;
@@ -277,168 +265,6 @@ class VertxHTTPClientTest {
                 response.onSuccess(r -> fail("a connection error was expected..."))
                         .onFailure(e -> assertThat(e.getCause(), instanceOf(ConnectException.class)));
             }
-        }
-    }
-
-    @Nested
-    @MockServerSettings(ports = 8092)
-    class DSL {
-
-        @Test
-        void shouldRunGET() {
-            HttpRequest requestDefinition = request("/hello").withMethod("GET");
-
-            mockServer.clear(requestDefinition)
-                    .when(requestDefinition)
-                    .respond(response("GET is working")
-                            .withContentType(TEXT_PLAIN));
-
-            Promise<String> promise = GET("http://localhost:8092/hello")
-                    .response(String.class, StringHTTPMessageCodec.get())
-                    .build(client)
-                        .execute()
-                        .then(r -> r.body().unsafe());
-
-            assertEquals("GET is working", promise.join().unsafe());
-        }
-
-        @Test
-        void shouldRunPOST() {
-            HttpRequest requestDefinition = request("/hello").withMethod("POST");
-
-            mockServer.clear(requestDefinition)
-                    .when(requestDefinition)
-                    .respond(response("POST is working")
-                            .withContentType(TEXT_PLAIN));
-
-            Promise<String> promise = POST("http://localhost:8092/hello")
-                    .header(new HTTPHeader(HTTPHeader.CONTENT_TYPE, "text/plain"))
-                    .body("i am a body", StringHTTPMessageCodec.get())
-                    .response(String.class, StringHTTPMessageCodec.get())
-                    .build(client)
-                        .execute()
-                        .then(r -> r.body().unsafe());
-
-            assertEquals("POST is working", promise.join().unsafe());
-        }
-
-        @Test
-        void shouldRunPUT() {
-            mockServer.when(request("/hello")
-                            .withMethod("PUT")
-                            .withBody("i am a body")
-                            .withContentType(TEXT_PLAIN))
-                    .respond(response("PUT is working")
-                            .withContentType(TEXT_PLAIN));
-
-            Promise<String> promise = PUT("http://localhost:8092/hello")
-                    .header(new HTTPHeader(HTTPHeader.CONTENT_TYPE, "text/plain"))
-                    .body("i am a body", StringHTTPMessageCodec.get())
-                    .response(String.class, new StringHTTPMessageCodec())
-                    .build(client)
-                        .execute()
-                        .then(r -> r.body().unsafe());
-
-            assertEquals("PUT is working", promise.join().unsafe());
-        }
-
-        @Test
-        void shouldRunPATCH() {
-            mockServer.when(request("/hello")
-                            .withMethod("PATCH")
-                            .withBody("i am a body")
-                            .withContentType(TEXT_PLAIN))
-                    .respond(response("PATCH is working")
-                            .withContentType(TEXT_PLAIN));
-
-            Promise<String> promise = PATCH("http://localhost:8092/hello")
-                    .header(new HTTPHeader(HTTPHeader.CONTENT_TYPE, "text/plain"))
-                    .body("i am a body", StringHTTPMessageCodec.get())
-                    .response(String.class, new StringHTTPMessageCodec())
-                    .build(client)
-                        .execute()
-                        .then(r -> r.body().unsafe());
-
-            assertEquals("PATCH is working", promise.join().unsafe());
-        }
-
-        @Test
-        void shouldRunDELETE() {
-            mockServer.when(request("/hello")
-                            .withMethod("DELETE"))
-                    .respond(response().withStatusCode(200));
-
-            Promise<HTTPStatus> promise = DELETE("http://localhost:8092/hello")
-                    .build(client)
-                        .execute()
-                        .then(HTTPResponse::status);
-
-            HTTPStatus status = promise.join().unsafe();
-
-            assertTrue(status.is(HTTPStatusCode.OK));
-        }
-
-        @DisplayName("Should run a HEAD request.")
-        @Test
-        void shouldRunHEAD() {
-            HttpRequest requestDefinition = request("/hello").withMethod("HEAD");
-
-            mockServer.clear(requestDefinition)
-                    .when(requestDefinition)
-                    .respond(response().withHeader("x-my-header", "whatever"));
-
-            Promise<HTTPHeaders> promise = HEAD("http://localhost:8092/hello")
-                    .build(client)
-                        .execute()
-                        .then(HTTPResponse::headers);
-
-            HTTPHeaders headers = promise.join().unsafe();
-
-            assertThat(headers, hasItems(new HTTPHeader("x-my-header", "whatever")));
-
-            mockServer.verify(requestDefinition);
-        }
-
-        @DisplayName("Should run a OPTIONS request.")
-        @Test
-        void shouldRunOPTIONS() {
-            HttpRequest requestDefinition = request("/hello").withMethod("OPTIONS");
-
-            mockServer.clear(requestDefinition)
-                    .when(requestDefinition)
-                    .respond(response().withHeader("Allow", "GET, POST, PUT, DELETE"));
-
-            Promise<HTTPHeaders> promise = OPTIONS("http://localhost:8092/hello")
-                    .build(client)
-                    .execute()
-                    .then(HTTPResponse::headers);
-
-            HTTPHeaders headers = promise.join().unsafe();
-
-            assertThat(headers, hasItems(new HTTPHeader(HTTPHeader.ALLOW, "GET, POST, PUT, DELETE")));
-
-            mockServer.verify(requestDefinition);
-        }
-
-        @DisplayName("Should run a TRACE request.")
-        @Test
-        void shouldRunTRACE() {
-            HttpRequest requestDefinition = request("/hello").withMethod("TRACE");
-
-            mockServer.clear(requestDefinition)
-                    .when(requestDefinition)
-                    .respond(response().withStatusCode(200));
-
-            Promise<HTTPStatus> promise = TRACE("http://localhost:8092/hello")
-                    .build(client)
-                    .execute()
-                    .then(HTTPResponse::status);
-
-            HTTPStatus status = promise.join().unsafe();
-
-            assertTrue(status.is(HTTPStatusCode.OK));
-
-            mockServer.verify(requestDefinition);
         }
     }
 

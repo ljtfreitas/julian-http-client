@@ -29,17 +29,17 @@ class FutureResponseT implements ResponseT<Object, Future<Object>> {
 	private static final FutureResponseT SINGLE_INSTANCE = new FutureResponseT();
 
 	@Override
-	public <A> ResponseFn<A, Future<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
+	public <A> ResponseFn<A, Future<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> next) {
 		return new ResponseFn<>() {
 
 			@Override
 			public Future<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
-				return fn.run(response, arguments).future();
+				return next.run(response, arguments).future();
 			}
 
 			@Override
 			public JavaType returnType() {
-				return fn.returnType();
+				return next.returnType();
 			}
 		};
 	}

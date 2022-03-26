@@ -29,17 +29,17 @@ class OptionalResponseT implements ResponseT<Object, Optional<Object>> {
 	private static final OptionalResponseT SINGLE_INSTANCE = new OptionalResponseT();
 
 	@Override
-	public <A> ResponseFn<A, Optional<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
+	public <A> ResponseFn<A, Optional<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> next) {
 		return new ResponseFn<>() {
 
 			@Override
 			public Promise<Optional<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
-				return fn.run(response, arguments).then(Optional::ofNullable);
+				return next.run(response, arguments).then(Optional::ofNullable);
 			}
 
 			@Override
 			public JavaType returnType() {
-				return fn.returnType();
+				return next.returnType();
 			}
 		};
 	}

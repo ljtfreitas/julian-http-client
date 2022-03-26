@@ -5,6 +5,14 @@ import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.BadRequest;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.Conflict;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.ExpectationFailed;
+import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.FailedDependency;
+import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.IamATeapot;
+import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.PreconditionRequired;
+import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.RequestHeaderFieldsTooLarge;
+import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.TooEarly;
+import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.TooManyRequests;
+import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.UnavailableForLegalReasons;
+import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.UnprocessableEntity;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.Forbidden;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.Gone;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.LengthRequired;
@@ -19,9 +27,16 @@ import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.Requ
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.RequestedRangeNotSatisfiable;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.Unauthorized;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.UnsupportedMediaType;
+import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.UpgradeRequired;
 import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.BadGateway;
+import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.BandwidthLimitExceeded;
 import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.GatewayTimeout;
 import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.HTTPVersionNotSupported;
+import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.InsufficientStorage;
+import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.LoopDetected;
+import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.NetWorkAuthenticationRequired;
+import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.NotExtended;
+import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.VariantAlsoNegotiates;
 import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.InternalServerError;
 import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.NotImplemented;
 import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.ServiceUnavailable;
@@ -112,13 +127,31 @@ class DefaultHTTPResponseFailureTest {
 					     arguments(HTTPStatus.valueOf(HTTPStatusCode.UNSUPPORTED_MEDIA_TYPE), UnsupportedMediaType.class),
 					     arguments(HTTPStatus.valueOf(HTTPStatusCode.REQUESTED_RANGE_NOT_SATISFIABLE), RequestedRangeNotSatisfiable.class),
 					     arguments(HTTPStatus.valueOf(HTTPStatusCode.EXPECTATION_FAILED), ExpectationFailed.class),
+						 arguments(HTTPStatus.valueOf(HTTPStatusCode.I_AM_A_TEAPOT), IamATeapot.class),
+						 arguments(HTTPStatus.valueOf(HTTPStatusCode.UNPROCESSABLE_ENTITY), UnprocessableEntity.class),
+						 arguments(HTTPStatus.valueOf(HTTPStatusCode.LOCKED), HTTPClientFailureResponseException.Locked.class),
+						 arguments(HTTPStatus.valueOf(HTTPStatusCode.FAILED_DEPENDENCY), FailedDependency.class),
+						 arguments(HTTPStatus.valueOf(HTTPStatusCode.TOO_EARLY), TooEarly.class),
+						 arguments(HTTPStatus.valueOf(HTTPStatusCode.UPGRADE_REQUIRED), UpgradeRequired.class),
+						 arguments(HTTPStatus.valueOf(HTTPStatusCode.PRECONDITION_REQUIRED), PreconditionRequired.class),
+						 arguments(HTTPStatus.valueOf(HTTPStatusCode.TOO_MANY_REQUESTS), TooManyRequests.class),
+						 arguments(HTTPStatus.valueOf(HTTPStatusCode.REQUEST_HEADER_FIELDS_TOO_LARGE), RequestHeaderFieldsTooLarge.class),
+						 arguments(HTTPStatus.valueOf(HTTPStatusCode.UNAVAILABLE_FOR_LEGAL_REASONS), UnavailableForLegalReasons.class),
+						 arguments(HTTPStatus.valueOf(499), HTTPResponseException.class),
+
 					     arguments(HTTPStatus.valueOf(HTTPStatusCode.INTERNAL_SERVER_ERROR), InternalServerError.class),
 					     arguments(HTTPStatus.valueOf(HTTPStatusCode.NOT_IMPLEMENTED), NotImplemented.class),
 					     arguments(HTTPStatus.valueOf(HTTPStatusCode.BAD_GATEWAY), BadGateway.class),
 					     arguments(HTTPStatus.valueOf(HTTPStatusCode.SERVICE_UNAVAILABLE), ServiceUnavailable.class),
 					     arguments(HTTPStatus.valueOf(HTTPStatusCode.GATEWAY_TIMEOUT), GatewayTimeout.class),
 					     arguments(HTTPStatus.valueOf(HTTPStatusCode.HTTP_VERSION_NOT_SUPPORTED), HTTPVersionNotSupported.class),
-					     arguments(HTTPStatus.valueOf(499), HTTPResponseException.class));
+						 arguments(HTTPStatus.valueOf(HTTPStatusCode.VARIANT_ALSO_NEGOTIATES), VariantAlsoNegotiates.class),
+						 arguments(HTTPStatus.valueOf(HTTPStatusCode.INSUFFICIENT_STORAGE), InsufficientStorage.class),
+						 arguments(HTTPStatus.valueOf(HTTPStatusCode.LOOP_DETECTED), LoopDetected.class),
+						 arguments(HTTPStatus.valueOf(HTTPStatusCode.BANDWIDTH_LIMIT_EXCEEDED), BandwidthLimitExceeded.class),
+						 arguments(HTTPStatus.valueOf(HTTPStatusCode.NOT_EXTENDED), NotExtended.class),
+						 arguments(HTTPStatus.valueOf(HTTPStatusCode.NETWORK_AUTHENTICATION_REQUIRED), NetWorkAuthenticationRequired.class));
+
 	}
 
 	private class SimplePublisher implements Flow.Publisher<List<ByteBuffer>> {

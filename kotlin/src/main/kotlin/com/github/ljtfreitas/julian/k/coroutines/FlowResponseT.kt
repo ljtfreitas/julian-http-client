@@ -37,11 +37,11 @@ import java.util.stream.Stream
 
 object FlowResponseT : ResponseT<Stream<Any>, Flow<Any>> {
 
-    override fun <A> bind(endpoint: Endpoint, fn: ResponseFn<A, Stream<Any>>): ResponseFn<A, Flow<Any>> = object : ResponseFn<A, Flow<Any>> {
+    override fun <A> bind(endpoint: Endpoint, next: ResponseFn<A, Stream<Any>>): ResponseFn<A, Flow<Any>> = object : ResponseFn<A, Flow<Any>> {
 
-        override fun join(response: Promise<out Response<A>>, arguments: Arguments) = fn.join(response, arguments).consumeAsFlow()
+        override fun join(response: Promise<out Response<A>>, arguments: Arguments) = next.join(response, arguments).consumeAsFlow()
 
-        override fun returnType(): JavaType = fn.returnType()
+        override fun returnType(): JavaType = next.returnType()
     }
 
 

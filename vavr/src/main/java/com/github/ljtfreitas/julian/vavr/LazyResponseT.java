@@ -34,17 +34,17 @@ import io.vavr.Lazy;
 public class LazyResponseT implements ResponseT<Object, Lazy<Object>> {
 
     @Override
-    public <A> ResponseFn<A, Lazy<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
+    public <A> ResponseFn<A, Lazy<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> next) {
         return new ResponseFn<>() {
 
             @Override
             public Lazy<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
-                return Lazy.of(() -> fn.run(response, arguments).join().unsafe());
+                return Lazy.of(() -> next.run(response, arguments).join().unsafe());
             }
 
             @Override
             public JavaType returnType() {
-                return fn.returnType();
+                return next.returnType();
             }
         };
     }

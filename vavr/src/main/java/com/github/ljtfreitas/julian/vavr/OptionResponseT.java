@@ -34,17 +34,17 @@ import io.vavr.control.Option;
 public class OptionResponseT implements ResponseT<Object, Option<Object>> {
 
     @Override
-    public <A> ResponseFn<A, Option<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
+    public <A> ResponseFn<A, Option<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> next) {
         return new ResponseFn<>() {
 
             @Override
             public Promise<Option<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
-                return fn.run(response, arguments).then(Option::of);
+                return next.run(response, arguments).then(Option::of);
             }
 
             @Override
             public JavaType returnType() {
-                return fn.returnType();
+                return next.returnType();
             }
         };
     }

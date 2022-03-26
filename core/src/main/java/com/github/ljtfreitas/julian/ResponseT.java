@@ -26,7 +26,7 @@ import java.util.function.Predicate;
 
 public interface ResponseT<T, M> extends Predicate<Endpoint> {
 
-	<A> ResponseFn<A, M> bind(Endpoint endpoint, ResponseFn<A, T> fn);
+	<A> ResponseFn<A, M> bind(Endpoint endpoint, ResponseFn<A, T> next);
 
 	JavaType adapted(Endpoint endpoint);
 }

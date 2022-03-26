@@ -32,17 +32,17 @@ class ListIteratorResponseT implements ResponseT<List<Object>, ListIterator<Obje
 	private static final ListIteratorResponseT SINGLE_INSTANCE = new ListIteratorResponseT();
 
 	@Override
-	public <A> ResponseFn<A, ListIterator<Object>> bind(Endpoint endpoint, ResponseFn<A, List<Object>> fn) {
+	public <A> ResponseFn<A, ListIterator<Object>> bind(Endpoint endpoint, ResponseFn<A, List<Object>> next) {
 		return new ResponseFn<>() {
 
 			@Override
 			public Promise<ListIterator<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
-				return fn.run(response, arguments).then(l -> Optional.ofNullable(l).map(List::listIterator).orElseGet(Collections::emptyListIterator));
+				return next.run(response, arguments).then(l -> Optional.ofNullable(l).map(List::listIterator).orElseGet(Collections::emptyListIterator));
 			}
 
 			@Override
 			public JavaType returnType() {
-				return fn.returnType();
+				return next.returnType();
 			}
 		};
 	}

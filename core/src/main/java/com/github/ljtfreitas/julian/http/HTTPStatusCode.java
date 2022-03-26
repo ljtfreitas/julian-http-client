@@ -67,6 +67,16 @@ public enum HTTPStatusCode {
 	UNSUPPORTED_MEDIA_TYPE(415, "Unsupported Media Type", HTTPStatusGroup.CLIENT_ERROR),
 	REQUESTED_RANGE_NOT_SATISFIABLE(416, "Requested Range Not Satisfiable", HTTPStatusGroup.CLIENT_ERROR),
 	EXPECTATION_FAILED(417, "Expectation Failed", HTTPStatusGroup.CLIENT_ERROR),
+	I_AM_A_TEAPOT(418, "I'm a teapot", HTTPStatusGroup.CLIENT_ERROR),
+	UNPROCESSABLE_ENTITY(422, "Unprocessable Entity", HTTPStatusGroup.CLIENT_ERROR),
+	LOCKED(423, "Locked", HTTPStatusGroup.CLIENT_ERROR),
+	FAILED_DEPENDENCY(424, "Failed Dependency", HTTPStatusGroup.CLIENT_ERROR),
+	TOO_EARLY(425, "Too Early", HTTPStatusGroup.CLIENT_ERROR),
+	UPGRADE_REQUIRED(426, "Upgrade Required", HTTPStatusGroup.CLIENT_ERROR),
+	PRECONDITION_REQUIRED(428, "Precondition Required", HTTPStatusGroup.CLIENT_ERROR),
+	TOO_MANY_REQUESTS(429, "Too Many Requests", HTTPStatusGroup.CLIENT_ERROR),
+	REQUEST_HEADER_FIELDS_TOO_LARGE(431, "Request Header Fields Too Large", HTTPStatusGroup.CLIENT_ERROR),
+	UNAVAILABLE_FOR_LEGAL_REASONS(451, "Unavailable For Legal Reasons", HTTPStatusGroup.CLIENT_ERROR),
 
 	// Server Error 5xx
 	INTERNAL_SERVER_ERROR(500, "Internal Server Error", HTTPStatusGroup.SERVER_ERROR),
@@ -74,7 +84,13 @@ public enum HTTPStatusCode {
 	BAD_GATEWAY(502, "Bad Gateway", HTTPStatusGroup.SERVER_ERROR),
 	SERVICE_UNAVAILABLE(503, "Service Unavailable", HTTPStatusGroup.SERVER_ERROR),
 	GATEWAY_TIMEOUT(504, "Gateway Timeout", HTTPStatusGroup.SERVER_ERROR),
-	HTTP_VERSION_NOT_SUPPORTED(505, "HTTP Version Not Supported", HTTPStatusGroup.SERVER_ERROR);
+	HTTP_VERSION_NOT_SUPPORTED(505, "HTTP Version Not Supported", HTTPStatusGroup.SERVER_ERROR),
+	VARIANT_ALSO_NEGOTIATES(506, "Variant Also Negotiates", HTTPStatusGroup.SERVER_ERROR),
+	INSUFFICIENT_STORAGE(507, "Insufficient Storage", HTTPStatusGroup.SERVER_ERROR),
+	LOOP_DETECTED(508, "Loop Detected", HTTPStatusGroup.SERVER_ERROR),
+	BANDWIDTH_LIMIT_EXCEEDED(509, "Bandwidth Limit Exceeded", HTTPStatusGroup.SERVER_ERROR),
+	NOT_EXTENDED(510, "Not Extended", HTTPStatusGroup.SERVER_ERROR),
+	NETWORK_AUTHENTICATION_REQUIRED(511, "Network Authentication Required", HTTPStatusGroup.SERVER_ERROR);
 
 	private final int value;
 	private final String message;

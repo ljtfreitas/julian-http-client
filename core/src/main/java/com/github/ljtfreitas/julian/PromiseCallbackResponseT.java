@@ -38,12 +38,12 @@ class PromiseCallbackResponseT implements ResponseT<Object, Void> {
 	private static final PromiseCallbackResponseT SINGLE_INSTANCE = new PromiseCallbackResponseT();
 
 	@Override
-	public <A> ResponseFn<A, Void> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
+	public <A> ResponseFn<A, Void> bind(Endpoint endpoint, ResponseFn<A, Object> next) {
 		return new ResponseFn<>() {
 
 			@Override
 			public Void join(Promise<? extends Response<A>> response, Arguments arguments) {
-				Promise<Object> promise = fn.run(response, arguments);
+				Promise<Object> promise = next.run(response, arguments);
 
 				success(endpoint.parameters(), arguments)
 						.ifPresent(promise::onSuccess);
@@ -51,7 +51,7 @@ class PromiseCallbackResponseT implements ResponseT<Object, Void> {
 				failure(endpoint.parameters(), arguments)
 						.ifPresent(promise::onFailure);
 
-				subscriber(endpoint.parameters(), fn.returnType(), arguments)
+				subscriber(endpoint.parameters(), next.returnType(), arguments)
 						.ifPresent(c -> promise.subscribe(new Subscriber<>() {
 							@Override
 							public void success(Object value) {
@@ -110,7 +110,7 @@ class PromiseCallbackResponseT implements ResponseT<Object, Void> {
 
 			@Override
 			public JavaType returnType() {
-				return fn.returnType();
+				return next.returnType();
 			}
 		};
 	}

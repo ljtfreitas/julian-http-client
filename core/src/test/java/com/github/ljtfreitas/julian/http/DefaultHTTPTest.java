@@ -7,6 +7,22 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.ExpectationFailed;
+import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.FailedDependency;
+import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.IamATeapot;
+import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.Locked;
+import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.PreconditionRequired;
+import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.RequestHeaderFieldsTooLarge;
+import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.TooEarly;
+import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.TooManyRequests;
+import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.UnavailableForLegalReasons;
+import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.UpgradeRequired;
+import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.BandwidthLimitExceeded;
+import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.HTTPVersionNotSupported;
+import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.InsufficientStorage;
+import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.LoopDetected;
+import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.NetWorkAuthenticationRequired;
+import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.NotExtended;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -31,7 +47,7 @@ import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.BadRequest;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.Conflict;
-import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.ExpectationFailed;
+import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.UnprocessableEntity;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.Forbidden;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.Gone;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.LengthRequired;
@@ -48,7 +64,7 @@ import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.Unau
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.UnsupportedMediaType;
 import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.BadGateway;
 import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.GatewayTimeout;
-import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.HTTPVersionNotSupported;
+import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.VariantAlsoNegotiates;
 import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.InternalServerError;
 import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.NotImplemented;
 import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.ServiceUnavailable;
@@ -625,12 +641,29 @@ class DefaultHTTPTest {
 						     arguments(HTTPStatusCode.UNSUPPORTED_MEDIA_TYPE, UnsupportedMediaType.class),
 						     arguments(HTTPStatusCode.REQUESTED_RANGE_NOT_SATISFIABLE, RequestedRangeNotSatisfiable.class),
 						     arguments(HTTPStatusCode.EXPECTATION_FAILED, ExpectationFailed.class),
+						     arguments(HTTPStatusCode.I_AM_A_TEAPOT, IamATeapot.class),
+							 arguments(HTTPStatusCode.UNPROCESSABLE_ENTITY, UnprocessableEntity.class),
+						     arguments(HTTPStatusCode.LOCKED, Locked.class),
+						     arguments(HTTPStatusCode.FAILED_DEPENDENCY, FailedDependency.class),
+						     arguments(HTTPStatusCode.TOO_EARLY, TooEarly.class),
+						     arguments(HTTPStatusCode.UPGRADE_REQUIRED, UpgradeRequired.class),
+						     arguments(HTTPStatusCode.PRECONDITION_REQUIRED, PreconditionRequired.class),
+						     arguments(HTTPStatusCode.TOO_MANY_REQUESTS, TooManyRequests.class),
+						     arguments(HTTPStatusCode.REQUEST_HEADER_FIELDS_TOO_LARGE, RequestHeaderFieldsTooLarge.class),
+						     arguments(HTTPStatusCode.UNAVAILABLE_FOR_LEGAL_REASONS, UnavailableForLegalReasons.class),
+
 						     arguments(HTTPStatusCode.INTERNAL_SERVER_ERROR, InternalServerError.class),
 						     arguments(HTTPStatusCode.NOT_IMPLEMENTED, NotImplemented.class),
 						     arguments(HTTPStatusCode.BAD_GATEWAY, BadGateway.class),
 						     arguments(HTTPStatusCode.SERVICE_UNAVAILABLE, ServiceUnavailable.class),
 						     arguments(HTTPStatusCode.GATEWAY_TIMEOUT, GatewayTimeout.class),
-						     arguments(HTTPStatusCode.HTTP_VERSION_NOT_SUPPORTED, HTTPVersionNotSupported.class));
+						     arguments(HTTPStatusCode.HTTP_VERSION_NOT_SUPPORTED, HTTPVersionNotSupported.class),
+						     arguments(HTTPStatusCode.VARIANT_ALSO_NEGOTIATES, VariantAlsoNegotiates.class),
+						     arguments(HTTPStatusCode.INSUFFICIENT_STORAGE, InsufficientStorage.class),
+						     arguments(HTTPStatusCode.LOOP_DETECTED, LoopDetected.class),
+						     arguments(HTTPStatusCode.BANDWIDTH_LIMIT_EXCEEDED, BandwidthLimitExceeded.class),
+						     arguments(HTTPStatusCode.NOT_EXTENDED, NotExtended.class),
+						     arguments(HTTPStatusCode.NETWORK_AUTHENTICATION_REQUIRED, NetWorkAuthenticationRequired.class));
 		}
 	}
 }

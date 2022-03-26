@@ -38,10 +38,10 @@ import java.util.function.Predicate.not
 
 object KFunctionCallbackResponseT : ResponseT<Any, Unit> {
 
-    override fun <A> bind(endpoint: Endpoint, fn: ResponseFn<A, Any>): ResponseFn<A, Unit> = object : ResponseFn<A, Unit> {
+    override fun <A> bind(endpoint: Endpoint, next: ResponseFn<A, Any>): ResponseFn<A, Unit> = object : ResponseFn<A, Unit> {
 
         override fun join(response: Promise<out Response<A>>, arguments: Arguments) {
-            val promise = fn.run(response, arguments)
+            val promise = next.run(response, arguments)
 
             success(endpoint.parameters(), arguments)
                 .ifPresent { f -> promise.onSuccess(f::invoke) }
@@ -85,7 +85,7 @@ object KFunctionCallbackResponseT : ResponseT<Any, Unit> {
             .flatMap { arguments.of(it.position()) }
             .map { it as Function1<Result<Any>, Any> }
 
-        override fun returnType(): JavaType = fn.returnType()
+        override fun returnType(): JavaType = next.returnType()
     }
 
     override fun adapted(endpoint: Endpoint): JavaType = endpoint.parameters().callbacks()

@@ -33,12 +33,12 @@ public class CollectionResponseT implements ResponseT<Collection<Object>, Collec
 	private static final CollectionResponseT SINGLE_INSTANCE = new CollectionResponseT();
 
 	@Override
-	public <A> ResponseFn<A, Collection<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> fn) {
+	public <A> ResponseFn<A, Collection<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> next) {
 		return new ResponseFn<>() {
 
 			@Override
 			public Promise<Collection<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
-				return fn.run(response, arguments).then(c -> Optional.ofNullable(c).map(this::collectionByType).orElseGet(this::emptyCollectionByType));
+				return next.run(response, arguments).then(c -> Optional.ofNullable(c).map(this::collectionByType).orElseGet(this::emptyCollectionByType));
 			}
 
 			private Collection<Object> collectionByType(Collection<Object> source) {
@@ -59,7 +59,7 @@ public class CollectionResponseT implements ResponseT<Collection<Object>, Collec
 
 			@Override
 			public JavaType returnType() {
-				return fn.returnType();
+				return next.returnType();
 			}
 		};
 	}

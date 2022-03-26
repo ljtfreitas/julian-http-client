@@ -34,17 +34,17 @@ import io.vavr.control.Try;
 public class TryResponseT implements ResponseT<Object, Try<Object>> {
 
     @Override
-    public <A> ResponseFn<A, Try<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
+    public <A> ResponseFn<A, Try<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> next) {
         return new ResponseFn<>() {
 
             @Override
             public Try<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
-                return fn.run(response, arguments).fold(Try::success, Try::failure);
+                return next.run(response, arguments).fold(Try::success, Try::failure);
             }
 
             @Override
             public JavaType returnType() {
-                return fn.returnType();
+                return next.returnType();
             }
         };
     }

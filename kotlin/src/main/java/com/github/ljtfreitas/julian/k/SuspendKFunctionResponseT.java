@@ -16,7 +16,7 @@ import java.util.Optional;
 public class SuspendKFunctionResponseT implements ResponseT<Object, Object> {
 
     @Override
-    public <A> ResponseFn<A, Object> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
+    public <A> ResponseFn<A, Object> bind(Endpoint endpoint, ResponseFn<A, Object> next) {
         return new ResponseFn<>() {
 
             @SuppressWarnings("unchecked")
@@ -27,12 +27,12 @@ public class SuspendKFunctionResponseT implements ResponseT<Object, Object> {
                         .map(Continuation.class::cast)
                         .orElseThrow();
 
-                return Coroutines.await(fn.run(response, arguments), continuation);
+                return Coroutines.await(next.run(response, arguments), continuation);
             }
 
             @Override
             public JavaType returnType() {
-                return fn.returnType();
+                return next.returnType();
             }
         };
     }

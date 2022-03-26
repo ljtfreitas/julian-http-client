@@ -49,7 +49,7 @@ class DeferredResponseTTest : DescribeSpec({
         describe("bind") {
 
             it("bind to a successful Deferred<T> value") {
-                val fn = subject.bind<Any>(endpoint, fn = ObjectResponseT<Any>().bind(endpoint, null))
+                val fn = subject.bind<Any>(endpoint, next = ObjectResponseT<Any>().bind(endpoint, null))
 
                 val actual = fn.join(Promise.done(Response.done("hello")), Arguments.empty())
 
@@ -57,7 +57,7 @@ class DeferredResponseTTest : DescribeSpec({
             }
 
             it("bind to a failure Deferred<T> value") {
-                val fn = subject.bind<Any>(endpoint, fn = ObjectResponseT<Any>().bind(endpoint, null))
+                val fn = subject.bind<Any>(endpoint, next = ObjectResponseT<Any>().bind(endpoint, null))
 
                 val failure = RuntimeException("oops")
 

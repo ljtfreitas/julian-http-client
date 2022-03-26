@@ -27,17 +27,17 @@ class RunnableResponseT implements ResponseT<Void, Runnable> {
 	private static final RunnableResponseT SINGLE_INSTANCE = new RunnableResponseT();
 
 	@Override
-	public <A> ResponseFn<A, Runnable> bind(Endpoint endpoint, ResponseFn<A, Void> fn) {
+	public <A> ResponseFn<A, Runnable> bind(Endpoint endpoint, ResponseFn<A, Void> next) {
 		return new ResponseFn<>() {
 
 			@Override
 			public Runnable join(Promise<? extends Response<A>> response, Arguments arguments) {
-				return () -> fn.join(response, arguments);
+				return () -> next.join(response, arguments);
 			}
 
 			@Override
 			public JavaType returnType() {
-				return fn.returnType();
+				return next.returnType();
 			}
 		};
 	}

@@ -29,17 +29,17 @@ class CallableResponseT implements ResponseT<Object, Callable<Object>> {
 	private static final CallableResponseT SINGLE_INSTANCE = new CallableResponseT();
 
 	@Override
-	public <A> ResponseFn<A, Callable<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
+	public <A> ResponseFn<A, Callable<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> next) {
 		return new ResponseFn<>() {
 
 			@Override
 			public Callable<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
-				return () -> fn.join(response, arguments);
+				return () -> next.join(response, arguments);
 			}
 
 			@Override
 			public JavaType returnType() {
-				return fn.returnType();
+				return next.returnType();
 			}
 		};
 	}

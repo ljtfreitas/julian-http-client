@@ -38,18 +38,18 @@ public class HTTPResponseT implements ResponseT<Response<Object>, HTTPResponse<O
     private static final HTTPResponseT SINGLE_INSTANCE = new HTTPResponseT();
 
     @Override
-    public <A> ResponseFn<A, HTTPResponse<Object>> bind(Endpoint endpoint, ResponseFn<A, Response<Object>> fn) {
+    public <A> ResponseFn<A, HTTPResponse<Object>> bind(Endpoint endpoint, ResponseFn<A, Response<Object>> next) {
         return new ResponseFn<>() {
 
             @Override
             public Promise<HTTPResponse<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
-                return fn.run(response, arguments).then(r -> r.cast(new Kind<HTTPResponse<Object>>() {})
+                return next.run(response, arguments).then(r -> r.cast(new Kind<HTTPResponse<Object>>() {})
                         .orElseThrow(() -> new IllegalArgumentException("It was expected a HTTPResponse instance, but it was " + r)));
             }
 
             @Override
             public JavaType returnType() {
-                return fn.returnType();
+                return next.returnType();
             }
         };
     }

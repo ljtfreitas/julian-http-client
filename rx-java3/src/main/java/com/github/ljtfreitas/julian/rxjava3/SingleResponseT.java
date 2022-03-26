@@ -36,12 +36,12 @@ import com.github.ljtfreitas.julian.ResponseT;
 public class SingleResponseT implements ResponseT<Object, Single<Object>> {
 
     @Override
-    public <A> ResponseFn<A, Single<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
+    public <A> ResponseFn<A, Single<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> next) {
         return new ResponseFn<>() {
 
             @Override
             public Single<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
-                Promise<Object> promise = fn.run(response, arguments);
+                Promise<Object> promise = next.run(response, arguments);
                 return promise.cast(new Kind<SinglePromise<Object>>() {})
                         .map(SinglePromise::single)
                         .orElseGet(() -> Single.fromCompletionStage(promise.future()));
@@ -49,7 +49,7 @@ public class SingleResponseT implements ResponseT<Object, Single<Object>> {
 
             @Override
             public JavaType returnType() {
-                return fn.returnType();
+                return next.returnType();
             }
         };
     }

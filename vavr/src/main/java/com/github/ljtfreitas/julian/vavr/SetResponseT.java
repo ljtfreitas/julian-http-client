@@ -40,12 +40,12 @@ import static java.util.function.Predicate.not;
 public class SetResponseT implements ResponseT<Collection<Object>, Set<Object>> {
 
     @Override
-    public <A> ResponseFn<A, Set<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> fn) {
+    public <A> ResponseFn<A, Set<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> next) {
         return new ResponseFn<>() {
 
             @Override
             public Promise<Set<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
-                return fn.run(response, arguments)
+                return next.run(response, arguments)
                         .then(c -> Optional.ofNullable(c)
                                 .filter(not(Collection::isEmpty))
                                 .map(HashSet::ofAll)
@@ -54,7 +54,7 @@ public class SetResponseT implements ResponseT<Collection<Object>, Set<Object>> 
 
             @Override
             public JavaType returnType() {
-                return fn.returnType();
+                return next.returnType();
             }
         };
     }

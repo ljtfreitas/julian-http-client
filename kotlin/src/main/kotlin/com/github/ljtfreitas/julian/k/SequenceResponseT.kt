@@ -37,11 +37,11 @@ import kotlin.streams.asSequence
 
 object SequenceResponseT : ResponseT<Stream<Any>, Sequence<Any>> {
 
-    override fun <A> bind(endpoint: Endpoint, fn: ResponseFn<A, Stream<Any>>): ResponseFn<A, Sequence<Any>> = object : ResponseFn<A, Sequence<Any>> {
+    override fun <A> bind(endpoint: Endpoint, next: ResponseFn<A, Stream<Any>>): ResponseFn<A, Sequence<Any>> = object : ResponseFn<A, Sequence<Any>> {
 
-        override fun run(response: Promise<out Response<A>>, arguments: Arguments) = fn.run(response, arguments).then { it.asSequence() }
+        override fun run(response: Promise<out Response<A>>, arguments: Arguments) = next.run(response, arguments).then { it.asSequence() }
 
-        override fun returnType(): JavaType = fn.returnType()
+        override fun returnType(): JavaType = next.returnType()
     }
 
 

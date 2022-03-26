@@ -11,7 +11,6 @@ import com.github.ljtfreitas.julian.Response
 import com.github.ljtfreitas.julian.StreamResponseT
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.collections.shouldContainExactly
-import io.kotest.matchers.sequences.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -59,7 +58,7 @@ class FlowResponseTTest : DescribeSpec({
         describe("bind") {
 
             it("bind a Stream<T> to a Flow<T>") {
-                val fn = subject.bind<Collection<Any>>(endpoint, fn = StreamResponseT()
+                val fn = subject.bind<Collection<Any>>(endpoint, next = StreamResponseT()
                     .bind(endpoint, CollectionResponseT()
                         .bind(endpoint, ObjectResponseT<Collection<Any>>()
                             .bind(endpoint, null))))

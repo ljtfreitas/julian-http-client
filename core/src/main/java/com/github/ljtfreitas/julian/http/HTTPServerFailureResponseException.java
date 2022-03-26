@@ -25,11 +25,17 @@ package com.github.ljtfreitas.julian.http;
 import com.github.ljtfreitas.julian.Promise;
 
 import static com.github.ljtfreitas.julian.http.HTTPStatusCode.BAD_GATEWAY;
+import static com.github.ljtfreitas.julian.http.HTTPStatusCode.BANDWIDTH_LIMIT_EXCEEDED;
 import static com.github.ljtfreitas.julian.http.HTTPStatusCode.GATEWAY_TIMEOUT;
 import static com.github.ljtfreitas.julian.http.HTTPStatusCode.HTTP_VERSION_NOT_SUPPORTED;
+import static com.github.ljtfreitas.julian.http.HTTPStatusCode.INSUFFICIENT_STORAGE;
 import static com.github.ljtfreitas.julian.http.HTTPStatusCode.INTERNAL_SERVER_ERROR;
+import static com.github.ljtfreitas.julian.http.HTTPStatusCode.LOOP_DETECTED;
+import static com.github.ljtfreitas.julian.http.HTTPStatusCode.NETWORK_AUTHENTICATION_REQUIRED;
+import static com.github.ljtfreitas.julian.http.HTTPStatusCode.NOT_EXTENDED;
 import static com.github.ljtfreitas.julian.http.HTTPStatusCode.NOT_IMPLEMENTED;
 import static com.github.ljtfreitas.julian.http.HTTPStatusCode.SERVICE_UNAVAILABLE;
+import static com.github.ljtfreitas.julian.http.HTTPStatusCode.VARIANT_ALSO_NEGOTIATES;
 
 public class HTTPServerFailureResponseException extends HTTPFailureResponseException {
 
@@ -90,6 +96,60 @@ public class HTTPServerFailureResponseException extends HTTPFailureResponseExcep
 
 		public HTTPVersionNotSupported(HTTPHeaders headers, Promise<byte[]> body) {
 			super(HTTP_VERSION_NOT_SUPPORTED, headers, body);
+		}
+	}
+
+	public static class VariantAlsoNegotiates extends HTTPServerFailureResponseException {
+
+		private static final long serialVersionUID = 1L;
+
+		public VariantAlsoNegotiates(HTTPHeaders headers, Promise<byte[]> body) {
+			super(VARIANT_ALSO_NEGOTIATES, headers, body);
+		}
+	}
+
+	public static class InsufficientStorage extends HTTPServerFailureResponseException {
+
+		private static final long serialVersionUID = 1L;
+
+		public InsufficientStorage(HTTPHeaders headers, Promise<byte[]> body) {
+			super(INSUFFICIENT_STORAGE, headers, body);
+		}
+	}
+
+	public static class LoopDetected extends HTTPServerFailureResponseException {
+
+		private static final long serialVersionUID = 1L;
+
+		public LoopDetected(HTTPHeaders headers, Promise<byte[]> body) {
+			super(LOOP_DETECTED, headers, body);
+		}
+	}
+
+	public static class BandwidthLimitExceeded extends HTTPServerFailureResponseException {
+
+		private static final long serialVersionUID = 1L;
+
+		public BandwidthLimitExceeded(HTTPHeaders headers, Promise<byte[]> body) {
+			super(BANDWIDTH_LIMIT_EXCEEDED, headers, body);
+		}
+	}
+
+	public static class NotExtended extends HTTPServerFailureResponseException {
+
+		private static final long serialVersionUID = 1L;
+
+		public NotExtended(HTTPHeaders headers, Promise<byte[]> body) {
+			super(NOT_EXTENDED, headers, body);
+		}
+	}
+
+	public static class NetWorkAuthenticationRequired extends HTTPServerFailureResponseException {
+
+		private static final long serialVersionUID = 1L;
+
+		public NetWorkAuthenticationRequired(HTTPHeaders headers, Promise<byte[]> body) {
+			super(NETWORK_AUTHENTICATION_REQUIRED, headers, body);
 		}
 	}
 }

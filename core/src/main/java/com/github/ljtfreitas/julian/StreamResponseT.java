@@ -31,17 +31,17 @@ public class StreamResponseT implements ResponseT<Collection<Object>, Stream<Obj
 	private static final StreamResponseT SINGLE_INSTANCE = new StreamResponseT();
 
 	@Override
-	public <A> ResponseFn<A, Stream<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> fn) {
+	public <A> ResponseFn<A, Stream<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> next) {
 		return new ResponseFn<>() {
 
 			@Override
 			public Promise<Stream<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
-				return fn.run(response, arguments).then(c -> Optional.ofNullable(c).stream().flatMap(Collection::stream));
+				return next.run(response, arguments).then(c -> Optional.ofNullable(c).stream().flatMap(Collection::stream));
 			}
 
 			@Override
 			public JavaType returnType() {
-				return fn.returnType();
+				return next.returnType();
 			}
 		};
 	}

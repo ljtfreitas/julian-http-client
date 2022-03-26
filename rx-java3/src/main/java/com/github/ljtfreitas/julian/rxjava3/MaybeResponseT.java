@@ -37,12 +37,12 @@ import com.github.ljtfreitas.julian.ResponseT;
 public class MaybeResponseT implements ResponseT<Object, Maybe<Object>> {
 
     @Override
-    public <A> ResponseFn<A, Maybe<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
+    public <A> ResponseFn<A, Maybe<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> next) {
         return new ResponseFn<>() {
 
             @Override
             public Maybe<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
-                Promise<Object> promise = fn.run(response, arguments);
+                Promise<Object> promise = next.run(response, arguments);
                 return promise.cast(new Kind<SinglePromise<Object>>() {})
                         .map(SinglePromise::single)
                         .map(Single::toMaybe)
@@ -51,7 +51,7 @@ public class MaybeResponseT implements ResponseT<Object, Maybe<Object>> {
 
             @Override
             public JavaType returnType() {
-                return fn.returnType();
+                return next.returnType();
             }
         };
     }

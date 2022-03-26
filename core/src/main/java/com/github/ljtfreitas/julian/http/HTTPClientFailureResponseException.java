@@ -27,20 +27,30 @@ import com.github.ljtfreitas.julian.Promise;
 import static com.github.ljtfreitas.julian.http.HTTPStatusCode.BAD_REQUEST;
 import static com.github.ljtfreitas.julian.http.HTTPStatusCode.CONFLICT;
 import static com.github.ljtfreitas.julian.http.HTTPStatusCode.EXPECTATION_FAILED;
+import static com.github.ljtfreitas.julian.http.HTTPStatusCode.FAILED_DEPENDENCY;
 import static com.github.ljtfreitas.julian.http.HTTPStatusCode.FORBIDDEN;
 import static com.github.ljtfreitas.julian.http.HTTPStatusCode.GONE;
+import static com.github.ljtfreitas.julian.http.HTTPStatusCode.I_AM_A_TEAPOT;
 import static com.github.ljtfreitas.julian.http.HTTPStatusCode.LENGTH_REQUIRED;
+import static com.github.ljtfreitas.julian.http.HTTPStatusCode.LOCKED;
 import static com.github.ljtfreitas.julian.http.HTTPStatusCode.METHOD_NOT_ALLOWED;
 import static com.github.ljtfreitas.julian.http.HTTPStatusCode.NOT_ACCEPTABLE;
 import static com.github.ljtfreitas.julian.http.HTTPStatusCode.NOT_FOUND;
 import static com.github.ljtfreitas.julian.http.HTTPStatusCode.PRECONDITION_FAILED;
+import static com.github.ljtfreitas.julian.http.HTTPStatusCode.PRECONDITION_REQUIRED;
 import static com.github.ljtfreitas.julian.http.HTTPStatusCode.PROXY_AUTHENTATION_REQUIRED;
 import static com.github.ljtfreitas.julian.http.HTTPStatusCode.REQUESTED_RANGE_NOT_SATISFIABLE;
 import static com.github.ljtfreitas.julian.http.HTTPStatusCode.REQUEST_ENTITY_TOO_LARGE;
+import static com.github.ljtfreitas.julian.http.HTTPStatusCode.REQUEST_HEADER_FIELDS_TOO_LARGE;
 import static com.github.ljtfreitas.julian.http.HTTPStatusCode.REQUEST_TIMEOUT;
 import static com.github.ljtfreitas.julian.http.HTTPStatusCode.REQUEST_URI_TOO_LONG;
+import static com.github.ljtfreitas.julian.http.HTTPStatusCode.TOO_EARLY;
+import static com.github.ljtfreitas.julian.http.HTTPStatusCode.TOO_MANY_REQUESTS;
 import static com.github.ljtfreitas.julian.http.HTTPStatusCode.UNAUTHORIZED;
+import static com.github.ljtfreitas.julian.http.HTTPStatusCode.UNAVAILABLE_FOR_LEGAL_REASONS;
+import static com.github.ljtfreitas.julian.http.HTTPStatusCode.UNPROCESSABLE_ENTITY;
 import static com.github.ljtfreitas.julian.http.HTTPStatusCode.UNSUPPORTED_MEDIA_TYPE;
+import static com.github.ljtfreitas.julian.http.HTTPStatusCode.UPGRADE_REQUIRED;
 
 public class HTTPClientFailureResponseException extends HTTPFailureResponseException {
 
@@ -200,6 +210,93 @@ public class HTTPClientFailureResponseException extends HTTPFailureResponseExcep
 
 		public ExpectationFailed(HTTPHeaders headers, Promise<byte[]> body) {
 			super(EXPECTATION_FAILED, headers, body);
+		}
+	}
+
+	public static class IamATeapot extends HTTPClientFailureResponseException {
+
+		private static final long serialVersionUID = 1L;
+
+		public IamATeapot(HTTPHeaders headers, Promise<byte[]> body) {
+			super(I_AM_A_TEAPOT, headers, body);
+		}
+	}
+
+	public static class UnprocessableEntity extends HTTPClientFailureResponseException {
+
+		private static final long serialVersionUID = 1L;
+
+		public UnprocessableEntity(HTTPHeaders headers, Promise<byte[]> body) {
+			super(UNPROCESSABLE_ENTITY, headers, body);
+		}
+	}
+
+	public static class Locked extends HTTPClientFailureResponseException {
+
+		private static final long serialVersionUID = 1L;
+
+		public Locked(HTTPHeaders headers, Promise<byte[]> body) {
+			super(LOCKED, headers, body);
+		}
+	}
+
+	public static class FailedDependency extends HTTPClientFailureResponseException {
+
+		private static final long serialVersionUID = 1L;
+
+		public FailedDependency(HTTPHeaders headers, Promise<byte[]> body) {
+			super(FAILED_DEPENDENCY, headers, body);
+		}
+	}
+
+	public static class TooEarly extends HTTPClientFailureResponseException {
+
+		private static final long serialVersionUID = 1L;
+
+		public TooEarly(HTTPHeaders headers, Promise<byte[]> body) {
+			super(TOO_EARLY, headers, body);
+		}
+	}
+
+	public static class UpgradeRequired extends HTTPClientFailureResponseException {
+
+		private static final long serialVersionUID = 1L;
+
+		public UpgradeRequired(HTTPHeaders headers, Promise<byte[]> body) {
+			super(UPGRADE_REQUIRED, headers, body);
+		}
+	}
+
+	public static class PreconditionRequired extends HTTPClientFailureResponseException {
+
+		private static final long serialVersionUID = 1L;
+
+		public PreconditionRequired(HTTPHeaders headers, Promise<byte[]> body) {
+			super(PRECONDITION_REQUIRED, headers, body);
+		}
+	}
+	public static class TooManyRequests extends HTTPClientFailureResponseException {
+
+		private static final long serialVersionUID = 1L;
+
+		public TooManyRequests(HTTPHeaders headers, Promise<byte[]> body) {
+			super(TOO_MANY_REQUESTS, headers, body);
+		}
+	}
+	public static class RequestHeaderFieldsTooLarge extends HTTPClientFailureResponseException {
+
+		private static final long serialVersionUID = 1L;
+
+		public RequestHeaderFieldsTooLarge(HTTPHeaders headers, Promise<byte[]> body) {
+			super(REQUEST_HEADER_FIELDS_TOO_LARGE, headers, body);
+		}
+	}
+	public static class UnavailableForLegalReasons extends HTTPClientFailureResponseException {
+
+		private static final long serialVersionUID = 1L;
+
+		public UnavailableForLegalReasons(HTTPHeaders headers, Promise<byte[]> body) {
+			super(UNAVAILABLE_FOR_LEGAL_REASONS, headers, body);
 		}
 	}
 }

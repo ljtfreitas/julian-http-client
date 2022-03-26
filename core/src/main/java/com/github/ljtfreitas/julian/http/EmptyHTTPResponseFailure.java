@@ -25,7 +25,7 @@ package com.github.ljtfreitas.julian.http;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.client.HTTPClientResponse;
 
-public class EmptyHTTPResponseFailure implements HTTPResponseFailure {
+class EmptyHTTPResponseFailure implements HTTPResponseFailure {
 
     private static final EmptyHTTPResponseFailure SINGLE_INSTANCE = new EmptyHTTPResponseFailure();
 

@@ -34,17 +34,17 @@ import io.vavr.concurrent.Future;
 public class FutureResponseT implements ResponseT<Object, Future<Object>> {
 
     @Override
-    public <A> ResponseFn<A, Future<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
+    public <A> ResponseFn<A, Future<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> next) {
         return new ResponseFn<>() {
 
             @Override
             public Future<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
-                return Future.fromCompletableFuture(fn.run(response, arguments).future());
+                return Future.fromCompletableFuture(next.run(response, arguments).future());
             }
 
             @Override
             public JavaType returnType() {
-                return fn.returnType();
+                return next.returnType();
             }
         };
     }

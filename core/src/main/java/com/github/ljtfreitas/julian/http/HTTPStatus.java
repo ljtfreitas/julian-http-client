@@ -52,6 +52,10 @@ public class HTTPStatus {
 		return this.code == code.value();
 	}
 
+	public boolean is(HTTPStatusGroup statuses) {
+		return statuses.contains(code);
+	}
+
 	public boolean informational() {
 		return (code / 100) == 1;
 	}
@@ -66,6 +70,14 @@ public class HTTPStatus {
 
 	public boolean error() {
 		return a4xx() || a5xx();
+	}
+
+	public boolean clientError() {
+		return a4xx();
+	}
+
+	public boolean serverError() {
+		return a5xx();
 	}
 
 	boolean readable() {
@@ -104,7 +116,7 @@ public class HTTPStatus {
 		return new HTTPStatus(code, null);
 	}
 
-	static HTTPStatus valueOf(HTTPStatusCode status) {
+	public static HTTPStatus valueOf(HTTPStatusCode status) {
 		return new HTTPStatus(status.value(), status.message());
 	}
 }

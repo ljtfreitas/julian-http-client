@@ -28,7 +28,7 @@ public class ObjectResponseT<T> implements ResponseT<Object, T> {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <A> ResponseFn<A, T> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
+	public <A> ResponseFn<A, T> bind(Endpoint endpoint, ResponseFn<A, Object> next) {
 		return new ResponseFn<>() {
 
 			@Override

@@ -40,12 +40,12 @@ import static java.util.function.Predicate.not;
 public class IndexedSeqResponseT implements ResponseT<Collection<Object>, IndexedSeq<Object>> {
 
     @Override
-    public <A> ResponseFn<A, IndexedSeq<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> fn) {
+    public <A> ResponseFn<A, IndexedSeq<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> next) {
         return new ResponseFn<>() {
 
             @Override
             public Promise<IndexedSeq<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
-                return fn.run(response, arguments)
+                return next.run(response, arguments)
                         .then(c -> Optional.ofNullable(c)
                                 .filter(not(Collection::isEmpty))
                                 .map(Array::ofAll)
@@ -54,7 +54,7 @@ public class IndexedSeqResponseT implements ResponseT<Collection<Object>, Indexe
 
             @Override
             public JavaType returnType() {
-                return fn.returnType();
+                return next.returnType();
             }
         };
     }

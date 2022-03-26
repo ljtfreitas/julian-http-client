@@ -29,7 +29,7 @@ public class HeadersResponseT implements ResponseT<Void, Headers> {
     private static final HeadersResponseT SINGLE_INSTANCE = new HeadersResponseT();
 
     @Override
-    public <A> ResponseFn<A, Headers> bind(Endpoint endpoint, ResponseFn<A, Void> fn) {
+    public <A> ResponseFn<A, Headers> bind(Endpoint endpoint, ResponseFn<A, Void> next) {
         return new ResponseFn<>() {
 
             @Override
@@ -43,7 +43,7 @@ public class HeadersResponseT implements ResponseT<Void, Headers> {
 
             @Override
             public JavaType returnType() {
-                return fn.returnType();
+                return next.returnType();
             }
         };
     }

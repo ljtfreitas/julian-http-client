@@ -37,12 +37,12 @@ import com.github.ljtfreitas.julian.ResponseT;
 public class CompletableResponseT implements ResponseT<Response<Object>, Completable> {
 
     @Override
-    public <A> ResponseFn<A, Completable> bind(Endpoint endpoint, ResponseFn<A, Response<Object>> fn) {
+    public <A> ResponseFn<A, Completable> bind(Endpoint endpoint, ResponseFn<A, Response<Object>> next) {
         return new ResponseFn<>() {
 
             @Override
             public Completable join(Promise<? extends Response<A>> response, Arguments arguments) {
-                Promise<Response<Object>> promise = fn.run(response, arguments);
+                Promise<Response<Object>> promise = next.run(response, arguments);
                 return promise.cast(new Kind<SinglePromise<Response<Object>>>() {})
                         .map(SinglePromise::single)
                         .map(Single::ignoreElement)
@@ -51,7 +51,7 @@ public class CompletableResponseT implements ResponseT<Response<Object>, Complet
 
             @Override
             public JavaType returnType() {
-                return fn.returnType();
+                return next.returnType();
             }
         };
     }

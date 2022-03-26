@@ -29,17 +29,17 @@ class CompletionStageResponseT implements ResponseT<Object, CompletionStage<Obje
 	private static final CompletionStageResponseT SINGLE_INSTANCE = new CompletionStageResponseT();
 
 	@Override
-	public <A> ResponseFn<A, CompletionStage<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
+	public <A> ResponseFn<A, CompletionStage<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> next) {
 		return new ResponseFn<>() {
 
 			@Override
 			public CompletionStage<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
-				return fn.run(response, arguments).future();
+				return next.run(response, arguments).future();
 			}
 
 			@Override
 			public JavaType returnType() {
-				return fn.returnType();
+				return next.returnType();
 			}
 		};
 	}

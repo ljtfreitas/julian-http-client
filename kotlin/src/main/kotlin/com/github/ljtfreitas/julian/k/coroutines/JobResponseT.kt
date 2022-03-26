@@ -33,11 +33,11 @@ import kotlinx.coroutines.Job
 
 object JobResponseT : ResponseT<Unit, Job> {
 
-    override fun <A> bind(endpoint: Endpoint, fn: ResponseFn<A, Unit>): ResponseFn<A, Job> = object : ResponseFn<A, Job> {
+    override fun <A> bind(endpoint: Endpoint, next: ResponseFn<A, Unit>): ResponseFn<A, Job> = object : ResponseFn<A, Job> {
 
-        override fun join(response: Promise<out Response<A>>, arguments: Arguments) = fn.run(response, arguments).deferred()
+        override fun join(response: Promise<out Response<A>>, arguments: Arguments) = next.run(response, arguments).deferred()
 
-        override fun returnType(): JavaType = fn.returnType()
+        override fun returnType(): JavaType = next.returnType()
     }
 
     override fun adapted(endpoint: Endpoint): JavaType = JavaType.none()

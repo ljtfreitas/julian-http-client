@@ -38,12 +38,12 @@ public class PromiseSubscriberCallbackResponseT implements ResponseT<Promise<Obj
     }
 
     @Override
-    public <A> ResponseFn<A, Void> bind(Endpoint endpoint, ResponseFn<A, Promise<Object>> fn) {
+    public <A> ResponseFn<A, Void> bind(Endpoint endpoint, ResponseFn<A, Promise<Object>> next) {
         return new ResponseFn<>() {
 
             @Override
             public Void join(Promise<? extends Response<A>> response, Arguments arguments) {
-                subscriber(endpoint.parameters(), arguments).ifPresent(subscriber -> fn.join(response, arguments).subscribe(subscriber));
+                subscriber(endpoint.parameters(), arguments).ifPresent(subscriber -> next.join(response, arguments).subscribe(subscriber));
                 return null;
             }
 
@@ -58,7 +58,7 @@ public class PromiseSubscriberCallbackResponseT implements ResponseT<Promise<Obj
 
             @Override
             public JavaType returnType() {
-                return fn.returnType();
+                return next.returnType();
             }
         };
     }

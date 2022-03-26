@@ -43,12 +43,12 @@ public class FluxResponseT implements ResponseT<Collection<Object>, Flux<Object>
     private static final FluxResponseT SINGLE_INSTANCE = new FluxResponseT();
 
     @Override
-    public <A> ResponseFn<A, Flux<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> fn) {
+    public <A> ResponseFn<A, Flux<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> next) {
         return new ResponseFn<>() {
 
             @Override
             public Flux<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
-                Promise<Collection<Object>> promise = fn.run(response, arguments);
+                Promise<Collection<Object>> promise = next.run(response, arguments);
 
                 return promise.cast(new Kind<MonoPromise<Collection<Object>>>() {})
                         .map(MonoPromise::mono)
@@ -58,7 +58,7 @@ public class FluxResponseT implements ResponseT<Collection<Object>, Flux<Object>
 
             @Override
             public JavaType returnType() {
-                return fn.returnType();
+                return next.returnType();
             }
         };
     }

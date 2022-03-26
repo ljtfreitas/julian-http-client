@@ -35,7 +35,7 @@ public class HTTPResponseException extends HTTPException {
 	private final HTTPHeaders headers;
 	private final Promise<byte[]> bodyAsBytes;
 
-	HTTPResponseException(HTTPStatus status, HTTPHeaders headers, Promise<byte[]> body) {
+	public HTTPResponseException(HTTPStatus status, HTTPHeaders headers, Promise<byte[]> body) {
 		super(HTTPResponseException.message(status, headers, body));
 		this.status = status;
 		this.headers = headers;

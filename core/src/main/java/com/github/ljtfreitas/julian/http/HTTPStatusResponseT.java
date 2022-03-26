@@ -36,7 +36,7 @@ public class HTTPStatusResponseT implements ResponseT<Void, HTTPStatus> {
     private static final HTTPStatusResponseT SINGLE_INSTANCE = new HTTPStatusResponseT();
 
     @Override
-    public <A> ResponseFn<A, HTTPStatus> bind(Endpoint endpoint, ResponseFn<A, Void> fn) {
+    public <A> ResponseFn<A, HTTPStatus> bind(Endpoint endpoint, ResponseFn<A, Void> next) {
         return new ResponseFn<>() {
 
             @Override
@@ -46,7 +46,7 @@ public class HTTPStatusResponseT implements ResponseT<Void, HTTPStatus> {
 
             @Override
             public JavaType returnType() {
-                return fn.returnType();
+                return next.returnType();
             }
         };
     }

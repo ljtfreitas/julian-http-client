@@ -36,7 +36,7 @@ public class HTTPHeadersResponseT implements ResponseT<Void, HTTPHeaders> {
     private static final HTTPHeadersResponseT SINGLE_INSTANCE = new HTTPHeadersResponseT();
 
     @Override
-    public <A> ResponseFn<A, HTTPHeaders> bind(Endpoint endpoint, ResponseFn<A, Void> fn) {
+    public <A> ResponseFn<A, HTTPHeaders> bind(Endpoint endpoint, ResponseFn<A, Void> next) {
         return new ResponseFn<>() {
 
             @Override
@@ -47,7 +47,7 @@ public class HTTPHeadersResponseT implements ResponseT<Void, HTTPHeaders> {
 
             @Override
             public JavaType returnType() {
-                return fn.returnType();
+                return next.returnType();
             }
         };
     }

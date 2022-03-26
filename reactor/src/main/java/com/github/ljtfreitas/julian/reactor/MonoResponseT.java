@@ -37,12 +37,12 @@ public class MonoResponseT implements ResponseT<Object, Mono<Object>> {
     private static final MonoResponseT SINGLE_INSTANCE = new MonoResponseT();
 
     @Override
-    public <A> ResponseFn<A, Mono<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
+    public <A> ResponseFn<A, Mono<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> next) {
         return new ResponseFn<>() {
 
             @Override
             public Mono<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
-                Promise<Object> promise = fn.run(response, arguments);
+                Promise<Object> promise = next.run(response, arguments);
 
                 return promise.cast(new Kind<MonoPromise<Object>>() {})
                         .map(MonoPromise::mono)
@@ -51,7 +51,7 @@ public class MonoResponseT implements ResponseT<Object, Mono<Object>> {
 
             @Override
             public JavaType returnType() {
-                return fn.returnType();
+                return next.returnType();
             }
         };
     }

@@ -30,17 +30,17 @@ class FutureTaskResponseT implements ResponseT<Callable<Object>, FutureTask<Obje
 	private static final FutureTaskResponseT SINGLE_INSTANCE = new FutureTaskResponseT();
 
 	@Override
-	public <A> ResponseFn<A, FutureTask<Object>> bind(Endpoint endpoint, ResponseFn<A, Callable<Object>> fn) {
+	public <A> ResponseFn<A, FutureTask<Object>> bind(Endpoint endpoint, ResponseFn<A, Callable<Object>> next) {
 		return new ResponseFn<>() {
 
 			@Override
 			public FutureTask<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
-				return new FutureTask<>(fn.join(response, arguments));
+				return new FutureTask<>(next.join(response, arguments));
 			}
 
 			@Override
 			public JavaType returnType() {
-				return fn.returnType();
+				return next.returnType();
 			}
 		};
 	}

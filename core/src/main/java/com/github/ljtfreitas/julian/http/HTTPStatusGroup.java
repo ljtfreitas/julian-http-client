@@ -38,7 +38,10 @@ public enum HTTPStatusGroup {
     }
 
     boolean contains(HTTPStatusCode statusCode) {
-        int value = statusCode.value();
-        return value >= start && value <= end;
+        return contains(statusCode.value());
+    }
+
+    boolean contains(int code) {
+        return code >= start && code <= end;
     }
 }

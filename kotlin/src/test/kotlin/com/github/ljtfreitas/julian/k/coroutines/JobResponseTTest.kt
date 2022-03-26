@@ -43,7 +43,7 @@ class JobResponseTTest : DescribeSpec({
         }
 
         it("bind to a Job value") {
-            val fn = subject.bind<Unit>(endpoint, fn = ObjectResponseT<Unit>().bind(endpoint, null))
+            val fn = subject.bind<Unit>(endpoint, next = ObjectResponseT<Unit>().bind(endpoint, null))
 
             val actual = fn.join(Promise.done(Response.done(null)), Arguments.empty())
 
@@ -51,7 +51,7 @@ class JobResponseTTest : DescribeSpec({
         }
 
         it("bind a failed Promise to a Job") {
-            val fn = subject.bind<Unit>(endpoint, fn = ObjectResponseT<Unit>().bind(endpoint, null))
+            val fn = subject.bind<Unit>(endpoint, next = ObjectResponseT<Unit>().bind(endpoint, null))
 
             val actual = fn.join(Promise.failed(RuntimeException("ue")), Arguments.empty())
 

@@ -89,6 +89,36 @@ public class HTTPFailureResponseException extends HTTPResponseException {
 			case EXPECTATION_FAILED:
 				return new HTTPClientFailureResponseException.ExpectationFailed(headers, responseBody);
 
+			case I_AM_A_TEAPOT:
+				return new HTTPClientFailureResponseException.IamATeapot(headers, responseBody);
+
+			case UNPROCESSABLE_ENTITY:
+				return new HTTPClientFailureResponseException.UnprocessableEntity(headers, responseBody);
+
+			case LOCKED:
+				return new HTTPClientFailureResponseException.Locked(headers, responseBody);
+
+			case FAILED_DEPENDENCY:
+				return new HTTPClientFailureResponseException.FailedDependency(headers, responseBody);
+
+			case TOO_EARLY:
+				return new HTTPClientFailureResponseException.TooEarly(headers, responseBody);
+
+			case UPGRADE_REQUIRED:
+				return new HTTPClientFailureResponseException.UpgradeRequired(headers, responseBody);
+
+			case PRECONDITION_REQUIRED:
+				return new HTTPClientFailureResponseException.PreconditionRequired(headers, responseBody);
+
+			case TOO_MANY_REQUESTS:
+				return new HTTPClientFailureResponseException.TooManyRequests(headers, responseBody);
+
+			case REQUEST_HEADER_FIELDS_TOO_LARGE:
+				return new HTTPClientFailureResponseException.RequestHeaderFieldsTooLarge(headers, responseBody);
+
+			case UNAVAILABLE_FOR_LEGAL_REASONS:
+				return new HTTPClientFailureResponseException.UnavailableForLegalReasons(headers, responseBody);
+
 			case INTERNAL_SERVER_ERROR:
 				return new HTTPServerFailureResponseException.InternalServerError(headers, responseBody);
 
@@ -106,6 +136,24 @@ public class HTTPFailureResponseException extends HTTPResponseException {
 
 			case HTTP_VERSION_NOT_SUPPORTED:
 				return new HTTPServerFailureResponseException.HTTPVersionNotSupported(headers, responseBody);
+
+			case VARIANT_ALSO_NEGOTIATES:
+				return new HTTPServerFailureResponseException.VariantAlsoNegotiates(headers, responseBody);
+
+			case INSUFFICIENT_STORAGE:
+				return new HTTPServerFailureResponseException.InsufficientStorage(headers, responseBody);
+
+			case LOOP_DETECTED:
+				return new HTTPServerFailureResponseException.LoopDetected(headers, responseBody);
+
+			case BANDWIDTH_LIMIT_EXCEEDED:
+				return new HTTPServerFailureResponseException.BandwidthLimitExceeded(headers, responseBody);
+
+			case NOT_EXTENDED:
+				return new HTTPServerFailureResponseException.NotExtended(headers, responseBody);
+
+			case NETWORK_AUTHENTICATION_REQUIRED:
+				return new HTTPServerFailureResponseException.NetWorkAuthenticationRequired(headers, responseBody);
 
 			default:
 				return new HTTPFailureResponseException(status, headers, responseBody);

@@ -41,12 +41,12 @@ public class SubscriberCallbackResponseT implements ResponseT<Publisher<Object>,
     }
 
     @Override
-    public <A> ResponseFn<A, Void> bind(Endpoint endpoint, ResponseFn<A, Publisher<Object>> fn) {
+    public <A> ResponseFn<A, Void> bind(Endpoint endpoint, ResponseFn<A, Publisher<Object>> next) {
         return new ResponseFn<>() {
 
             @Override
             public Void join(Promise<? extends Response<A>> response, Arguments arguments) {
-                fn.run(response, arguments)
+                next.run(response, arguments)
                         .onSuccess(publisher -> subscriber(endpoint.parameters(), arguments).ifPresent(publisher::subscribe));
                 return null;
             }
@@ -62,7 +62,7 @@ public class SubscriberCallbackResponseT implements ResponseT<Publisher<Object>,
 
             @Override
             public JavaType returnType() {
-                return fn.returnType();
+                return next.returnType();
             }
         };
     }

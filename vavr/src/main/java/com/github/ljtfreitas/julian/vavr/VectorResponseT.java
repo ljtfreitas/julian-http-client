@@ -38,12 +38,12 @@ import java.util.function.Predicate;
 public class VectorResponseT implements ResponseT<Collection<Object>, Vector<Object>> {
 
     @Override
-    public <A> ResponseFn<A, Vector<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> fn) {
+    public <A> ResponseFn<A, Vector<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> next) {
         return new ResponseFn<>() {
 
             @Override
             public Promise<Vector<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
-                return fn.run(response, arguments)
+                return next.run(response, arguments)
                         .then(c -> Optional.ofNullable(c)
                                 .filter(Predicate.not(Collection::isEmpty))
                                 .map(Vector::ofAll)
@@ -52,7 +52,7 @@ public class VectorResponseT implements ResponseT<Collection<Object>, Vector<Obj
 
             @Override
             public JavaType returnType() {
-                return fn.returnType();
+                return next.returnType();
             }
         };
     }

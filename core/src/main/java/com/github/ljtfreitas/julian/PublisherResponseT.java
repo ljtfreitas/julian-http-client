@@ -42,7 +42,7 @@ public class PublisherResponseT implements ResponseT<Object, Publisher<Object>> 
     }
 
     @Override
-    public <A> ResponseFn<A, Publisher<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
+    public <A> ResponseFn<A, Publisher<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> next) {
         return new ResponseFn<>() {
 
             @Override
@@ -50,7 +50,7 @@ public class PublisherResponseT implements ResponseT<Object, Publisher<Object>> 
                 SubmissionPublisher<Object> publisher = executor == null ?
                         new SubmissionPublisher<>() : new SubmissionPublisher<>(executor, Flow.defaultBufferSize());
 
-                fn.run(response, arguments).future()
+                next.run(response, arguments).future()
                         .thenAcceptAsync(publisher::submit)
                         .thenRunAsync(publisher::close)
                         .whenCompleteAsync((r, t) -> { if (t != null) publisher.closeExceptionally(t);});
@@ -60,7 +60,7 @@ public class PublisherResponseT implements ResponseT<Object, Publisher<Object>> 
 
             @Override
             public JavaType returnType() {
-                return fn.returnType();
+                return next.returnType();
             }
         };
     }

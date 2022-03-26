@@ -39,12 +39,12 @@ import com.github.ljtfreitas.julian.ResponseT;
 public class ObservableResponseT implements ResponseT<Collection<Object>, Observable<Object>> {
 
     @Override
-    public <A> ResponseFn<A, Observable<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> fn) {
+    public <A> ResponseFn<A, Observable<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> next) {
         return new ResponseFn<>() {
 
             @Override
             public Observable<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
-                Promise<Collection<Object>> promise = fn.run(response, arguments);
+                Promise<Collection<Object>> promise = next.run(response, arguments);
                 return promise.cast(new Kind<SinglePromise<Collection<Object>>>() {})
                         .map(SinglePromise::single)
                         .map(Single::toObservable)
@@ -54,7 +54,7 @@ public class ObservableResponseT implements ResponseT<Collection<Object>, Observ
 
             @Override
             public JavaType returnType() {
-                return fn.returnType();
+                return next.returnType();
             }
         };
     }

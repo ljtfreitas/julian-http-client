@@ -35,11 +35,11 @@ import java.lang.reflect.WildcardType
 
 object DeferredResponseT : ResponseT<Any, Deferred<Any>> {
 
-    override fun <A> bind(endpoint: Endpoint, fn: ResponseFn<A, Any>): ResponseFn<A, Deferred<Any>> = object : ResponseFn<A, Deferred<Any>> {
+    override fun <A> bind(endpoint: Endpoint, next: ResponseFn<A, Any>): ResponseFn<A, Deferred<Any>> = object : ResponseFn<A, Deferred<Any>> {
 
-        override fun join(response: Promise<out Response<A>>, arguments: Arguments) = fn.run(response, arguments).deferred()
+        override fun join(response: Promise<out Response<A>>, arguments: Arguments) = next.run(response, arguments).deferred()
 
-        override fun returnType(): JavaType = fn.returnType()
+        override fun returnType(): JavaType = next.returnType()
     }
 
     override fun adapted(endpoint: Endpoint): JavaType = endpoint.returnType().parameterized()

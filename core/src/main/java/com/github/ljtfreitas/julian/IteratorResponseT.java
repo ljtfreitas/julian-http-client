@@ -32,17 +32,17 @@ class IteratorResponseT implements ResponseT<Collection<Object>, Iterator<Object
 	private static final IteratorResponseT SINGLE_INSTANCE = new IteratorResponseT();
 
 	@Override
-	public <A> ResponseFn<A, Iterator<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> fn) {
+	public <A> ResponseFn<A, Iterator<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> next) {
 		return new ResponseFn<>() {
 
 			@Override
 			public Promise<Iterator<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
-				return fn.run(response, arguments).then(c -> Optional.ofNullable(c).map(Collection::iterator).orElseGet(Collections::emptyIterator));
+				return next.run(response, arguments).then(c -> Optional.ofNullable(c).map(Collection::iterator).orElseGet(Collections::emptyIterator));
 			}
 
 			@Override
 			public JavaType returnType() {
-				return fn.returnType();
+				return next.returnType();
 			}
 		};
 	}

@@ -40,19 +40,19 @@ public class MultiResponseT implements ResponseT<Collection<Object>, Multi<Objec
     private static final MultiResponseT SINGLE_INSTANCE = new MultiResponseT();
 
     @Override
-    public <A> ResponseFn<A, Multi<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> fn) {
+    public <A> ResponseFn<A, Multi<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> next) {
         return new ResponseFn<>() {
 
             @Override
             public Multi<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
                 return Multi.createFrom()
-                        .completionStage(fn.run(response, arguments).future())
+                        .completionStage(next.run(response, arguments).future())
                         .onItem().transformToIterable(identity());
             }
 
             @Override
             public JavaType returnType() {
-                return fn.returnType();
+                return next.returnType();
             }
         };
     }

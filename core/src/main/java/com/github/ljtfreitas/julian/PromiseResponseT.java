@@ -5,17 +5,17 @@ class PromiseResponseT implements ResponseT<Object, Promise<Object>> {
     private static final PromiseResponseT SINGLE_INSTANCE = new PromiseResponseT();
 
     @Override
-    public <A> ResponseFn<A, Promise<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
+    public <A> ResponseFn<A, Promise<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> next) {
         return new ResponseFn<>() {
 
             @Override
             public Promise<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
-                return fn.run(response, arguments);
+                return next.run(response, arguments);
             }
 
             @Override
             public JavaType returnType() {
-                return fn.returnType();
+                return next.returnType();
             }
         };
     }

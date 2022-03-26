@@ -40,12 +40,12 @@ import static java.util.function.Predicate.not;
 public class LinearSeqResponseT implements ResponseT<Collection<Object>, LinearSeq<Object>> {
 
     @Override
-    public <A> ResponseFn<A, LinearSeq<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> fn) {
+    public <A> ResponseFn<A, LinearSeq<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> next) {
         return new ResponseFn<>() {
 
             @Override
             public Promise<LinearSeq<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
-                return fn.run(response, arguments)
+                return next.run(response, arguments)
                         .then(c -> Optional.ofNullable(c)
                                 .filter(not(Collection::isEmpty))
                                 .map(List::ofAll)
@@ -54,7 +54,7 @@ public class LinearSeqResponseT implements ResponseT<Collection<Object>, LinearS
 
             @Override
             public JavaType returnType() {
-                return fn.returnType();
+                return next.returnType();
             }
         };
     }

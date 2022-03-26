@@ -27,17 +27,17 @@ class ExceptResponseT implements ResponseT<Object, Except<Object>> {
     private static final ExceptResponseT SINGLE_INSTANCE = new ExceptResponseT();
 
     @Override
-    public <A> ResponseFn<A, Except<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
+    public <A> ResponseFn<A, Except<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> next) {
         return new ResponseFn<>() {
 
             @Override
             public Except<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
-                return fn.run(response, arguments).join();
+                return next.run(response, arguments).join();
             }
 
             @Override
             public JavaType returnType() {
-                return fn.returnType();
+                return next.returnType();
             }
         };
     }

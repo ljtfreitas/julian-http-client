@@ -34,7 +34,7 @@ import io.vavr.control.Either;
 public class EitherResponseT<L extends Exception> implements ResponseT<Object, Either<L, Object>> {
 
     @Override
-    public <A> ResponseFn<A, Either<L, Object>> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
+    public <A> ResponseFn<A, Either<L, Object>> bind(Endpoint endpoint, ResponseFn<A, Object> next) {
         return new ResponseFn<>() {
 
             @SuppressWarnings("unchecked")
@@ -42,14 +42,14 @@ public class EitherResponseT<L extends Exception> implements ResponseT<Object, E
             public Promise<Either<L, Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
                 Class<?> leftClassType = JavaType.valueOf(endpoint.returnType().parameterized().map(JavaType.Parameterized::firstArg).orElse(Exception.class)).rawClassType();
 
-                return fn.run(response, arguments)
+                return next.run(response, arguments)
                         .then(Either::<L, Object>right)
                         .recover(leftClassType::isInstance, e -> Either.left((L) e));
             }
 
             @Override
             public JavaType returnType() {
-                return fn.returnType();
+                return next.returnType();
             }
         };
     }

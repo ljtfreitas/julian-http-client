@@ -39,12 +39,12 @@ import static java.util.function.Predicate.not;
 public class QueueResponseT implements ResponseT<Collection<Object>, Queue<Object>> {
 
     @Override
-    public <A> ResponseFn<A, Queue<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> fn) {
+    public <A> ResponseFn<A, Queue<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> next) {
         return new ResponseFn<>() {
 
             @Override
             public Promise<Queue<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
-                return fn.run(response, arguments)
+                return next.run(response, arguments)
                         .then(c -> Optional.ofNullable(c)
                                 .filter(not(Collection::isEmpty))
                                 .map(Queue::ofAll)
@@ -53,7 +53,7 @@ public class QueueResponseT implements ResponseT<Collection<Object>, Queue<Objec
 
             @Override
             public JavaType returnType() {
-                return fn.returnType();
+                return next.returnType();
             }
         };
     }

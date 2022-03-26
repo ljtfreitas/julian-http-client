@@ -32,18 +32,18 @@ class EnumerationResponseT implements ResponseT<Collection<Object>, Enumeration<
 	private static final EnumerationResponseT SINGLE_INSTANCE = new EnumerationResponseT();
 
 	@Override
-	public <A> ResponseFn<A, Enumeration<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> fn) {
+	public <A> ResponseFn<A, Enumeration<Object>> bind(Endpoint endpoint, ResponseFn<A, Collection<Object>> next) {
 		return new ResponseFn<>() {
 
 			@Override
 			public Promise<Enumeration<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
-				return fn.run(response, arguments)
+				return next.run(response, arguments)
 						.then(c -> Optional.ofNullable(c).map(Collections::enumeration).orElseGet(Collections::emptyEnumeration));
 			}
 
 			@Override
 			public JavaType returnType() {
-				return fn.returnType();
+				return next.returnType();
 			}
 		};
 	}

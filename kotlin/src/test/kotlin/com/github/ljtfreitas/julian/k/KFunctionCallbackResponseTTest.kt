@@ -155,7 +155,7 @@ class KFunctionCallbackResponseTTest : DescribeSpec({
                             Wildcard.lower(String::class.java)))
                     ))
 
-                    val fn = subject.bind<String>(endpoint, fn = ObjectResponseT<Any>().bind(endpoint, null))
+                    val fn = subject.bind<String>(endpoint, next = ObjectResponseT<Any>().bind(endpoint, null))
 
                     fn.join(Promise.done(Response.done(expected)), Arguments.create(check))
 
@@ -174,7 +174,7 @@ class KFunctionCallbackResponseTTest : DescribeSpec({
 
                     val failureFn = mockk<(Throwable) -> Unit>()
 
-                    val fn = subject.bind<String>(endpoint, fn = ObjectResponseT<Any>().bind(endpoint, null))
+                    val fn = subject.bind<String>(endpoint, next = ObjectResponseT<Any>().bind(endpoint, null))
 
                     fn.join(Promise.done(Response.done(expected)), Arguments.create(check, failureFn))
 
@@ -209,7 +209,7 @@ class KFunctionCallbackResponseTTest : DescribeSpec({
                             Wildcard.lower(Throwable::class.java)))
                     ))
 
-                    val fn = subject.bind<String>(endpoint, fn = ObjectResponseT<Any>().bind(endpoint, null))
+                    val fn = subject.bind<String>(endpoint, next = ObjectResponseT<Any>().bind(endpoint, null))
 
                     fn.join(Promise.failed(expected), Arguments.create(check))
 
@@ -228,7 +228,7 @@ class KFunctionCallbackResponseTTest : DescribeSpec({
 
                     val successFn = mockk<(String) -> Unit>()
 
-                    val fn = subject.bind<String>(endpoint, fn = ObjectResponseT<Any>().bind(endpoint, null))
+                    val fn = subject.bind<String>(endpoint, next = ObjectResponseT<Any>().bind(endpoint, null))
 
                     fn.join(Promise.failed(expected), Arguments.create(successFn, check))
 
@@ -258,7 +258,7 @@ class KFunctionCallbackResponseTTest : DescribeSpec({
 
                     justRun { resultFn(any()) }
 
-                    val fn = subject.bind<String>(endpoint, fn = ObjectResponseT<Any>().bind(endpoint, null))
+                    val fn = subject.bind<String>(endpoint, next = ObjectResponseT<Any>().bind(endpoint, null))
 
                     fn.join(Promise.done(Response.done(expected)), Arguments.create(check))
 
@@ -277,7 +277,7 @@ class KFunctionCallbackResponseTTest : DescribeSpec({
 
                     justRun { callback(any()) }
 
-                    val fn = subject.bind<String>(endpoint, fn = ObjectResponseT<Any>().bind(endpoint, null))
+                    val fn = subject.bind<String>(endpoint, next = ObjectResponseT<Any>().bind(endpoint, null))
 
                     fn.join(Promise.failed(expected), Arguments.create(check))
 

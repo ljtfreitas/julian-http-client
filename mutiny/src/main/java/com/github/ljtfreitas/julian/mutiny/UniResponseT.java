@@ -36,17 +36,17 @@ public class UniResponseT implements ResponseT<Object, Uni<Object>> {
     private static final UniResponseT SINGLE_INSTANCE = new UniResponseT();
 
     @Override
-    public <A> ResponseFn<A, Uni<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> fn) {
+    public <A> ResponseFn<A, Uni<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> next) {
         return new ResponseFn<>() {
 
             @Override
             public Uni<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
-                return Uni.createFrom().completionStage(fn.run(response, arguments).future());
+                return Uni.createFrom().completionStage(next.run(response, arguments).future());
             }
 
             @Override
             public JavaType returnType() {
-                return fn.returnType();
+                return next.returnType();
             }
         };
     }

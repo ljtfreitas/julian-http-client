@@ -118,19 +118,19 @@ public enum HTTPStatusCode {
 		return this.group == group;
 	}
 
-	public boolean informational() {
+	public boolean isInformational() {
 		return group == HTTPStatusGroup.INFORMATIONAL;
 	}
 
-	public boolean success() {
+	public boolean isSuccess() {
 		return group == HTTPStatusGroup.SUCCESSFUL;
 	}
 
-	public boolean redirection() {
+	public boolean isRedirection() {
 		return group == HTTPStatusGroup.REDIRECTION;
 	}
 
-	public boolean error() {
+	public boolean isError() {
 		return group == HTTPStatusGroup.CLIENT_ERROR || group == HTTPStatusGroup.SERVER_ERROR;
 	}
 

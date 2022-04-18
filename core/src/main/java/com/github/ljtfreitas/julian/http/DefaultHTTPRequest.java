@@ -37,7 +37,7 @@ class DefaultHTTPRequest<T> implements HTTPRequest<T> {
 	private final HTTPMethod method;
 	private final HTTPRequestBody body;
 	private final HTTPHeaders headers;
-	private final HTTPRequestIO<T> io;
+	private final DefaultHTTPRequestIO<T> io;
 
 	public DefaultHTTPRequest(URI path, HTTPMethod method, HTTPRequestBody body, HTTPHeaders headers, JavaType returnType,
 							  HTTPClient httpClient, HTTPMessageCodecs codecs, HTTPResponseFailure failure) {
@@ -49,13 +49,13 @@ class DefaultHTTPRequest<T> implements HTTPRequest<T> {
 		this.io = new DefaultHTTPRequestIO<>(this, httpClient, codecs, failure);
 	}
 
-	private DefaultHTTPRequest(URI path, HTTPMethod method, HTTPRequestBody body, HTTPHeaders headers, JavaType returnType, HTTPRequestIO<T> io) {
+	private DefaultHTTPRequest(URI path, HTTPMethod method, HTTPRequestBody body, HTTPHeaders headers, JavaType returnType, DefaultHTTPRequestIO<T> io) {
 		this.returnType = returnType;
 		this.path = path;
 		this.method = method;
 		this.body = body;
 		this.headers = headers;
-		this.io = io;
+		this.io = io.source(this);
 	}
 
 	@Override

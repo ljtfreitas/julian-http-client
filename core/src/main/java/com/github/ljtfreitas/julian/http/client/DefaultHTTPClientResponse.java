@@ -65,12 +65,12 @@ class DefaultHTTPClientResponse implements HTTPClientResponse {
 
 	@Override
 	public <T, R extends Response<T>> Optional<R> success(Function<? super HTTPClientResponse, R> fn) {
-		return status.success() || status.redirection() ? Optional.ofNullable(fn.apply(this)) : Optional.empty();
+		return status.isSuccess() || status.isRedirection() ? Optional.ofNullable(fn.apply(this)) : Optional.empty();
 	}
 
 	@Override
 	public <T, R extends Response<T>> Optional<R> failure(Function<? super HTTPClientResponse, R> fn) {
-		return status.error() ? Optional.ofNullable(fn.apply(this)) : Optional.empty();
+		return status.isError() ? Optional.ofNullable(fn.apply(this)) : Optional.empty();
 	}
 
 	static DefaultHTTPClientResponse valueOf(HttpResponse<Publisher<List<ByteBuffer>>> response) {

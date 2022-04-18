@@ -48,7 +48,7 @@ dependencies {
     testImplementation("org.mockito:mockito-core:3.8.0")
     testImplementation("org.mockito:mockito-junit-jupiter:3.8.0")
     testImplementation("org.mockito:mockito-inline:3.8.0")
-    testImplementation("org.mock-server:mockserver-junit-jupiter:5.11.1")
+    testImplementation("org.mock-server:mockserver-junit-jupiter:5.13.2")
     testImplementation("ch.qos.logback:logback-classic:1.2.3")
     testImplementation("org.hamcrest:hamcrest:2.2")
 

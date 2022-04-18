@@ -56,32 +56,32 @@ public class HTTPStatus {
 		return statuses.contains(code);
 	}
 
-	public boolean informational() {
+	public boolean isInformational() {
 		return (code / 100) == 1;
 	}
 
-	public boolean success() {
+	public boolean isSuccess() {
 		return (code / 100) == 2;
 	}
 
-	public boolean redirection() {
+	public boolean isRedirection() {
 		return (code / 100) == 3;
 	}
 
-	public boolean error() {
+	public boolean isError() {
 		return a4xx() || a5xx();
 	}
 
-	public boolean clientError() {
+	public boolean isClientError() {
 		return a4xx();
 	}
 
-	public boolean serverError() {
+	public boolean isServerError() {
 		return a5xx();
 	}
 
 	boolean readable() {
-		return !(informational() || code == 204 || code == 304);
+		return !(isInformational() || code == 204 || code == 304);
 	}
 
 	private boolean a4xx() {

@@ -20,24 +20,39 @@
  * SOFTWARE.
  */
 
-rootProject.name = "julian-http-client-parent"
-include("core")
-include("form-url-encoded-multipart")
-include("json-jackson")
-include("json-gson")
-include("json-jsonb")
-include("json-jsonp")
-include("json-kotlin")
-include("xml-jackson")
-include("http-client-reactor-netty")
-include("http-client-vertx")
-include("http-client-ktor")
-include("http-spring-web-flux")
-include("xml-jaxb")
-include("rx-java3")
-include("mutiny")
-include("reactor")
-include("vavr")
-include("kotlin")
-include("resilience4j")
-include("opentracing")
+package com.github.ljtfreitas.julian.http.opentracing;
+
+import com.github.ljtfreitas.julian.http.HTTPHeader;
+import com.github.ljtfreitas.julian.http.HTTPHeaders;
+import io.opentracing.propagation.TextMap;
+
+import java.util.Iterator;
+import java.util.Map;
+
+import static java.util.stream.Collectors.toMap;
+
+class MutableHTTPHeadersInjector implements TextMap {
+
+    private HTTPHeaders headers;
+
+    MutableHTTPHeadersInjector(HTTPHeaders headers) {
+        this.headers = headers;
+    }
+
+    @Override
+    public Iterator<Map.Entry<String, String>> iterator() {
+        return headers.all().stream()
+                .collect(toMap(HTTPHeader::name, HTTPHeader::value))
+                .entrySet()
+                .iterator();
+    }
+
+    @Override
+    public void put(String key, String value) {
+        this.headers = headers.join(new HTTPHeader(key, value));
+    }
+
+    HTTPHeaders headers() {
+        return headers;
+    }
+}

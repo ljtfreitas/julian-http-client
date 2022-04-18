@@ -36,7 +36,7 @@ public class CircuitBreakerHTTPRequestInterceptor implements HTTPRequestIntercep
     private final Predicate<HTTPResponse<?>> predicate;
 
     public CircuitBreakerHTTPRequestInterceptor(CircuitBreaker circuitBreaker) {
-        this(circuitBreaker, r -> r.status().success());
+        this(circuitBreaker, r -> r.status().isSuccess());
     }
 
     public CircuitBreakerHTTPRequestInterceptor(CircuitBreaker circuitBreaker, Predicate<HTTPResponse<?>> predicate) {

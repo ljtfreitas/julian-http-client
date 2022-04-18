@@ -54,6 +54,10 @@ class DefaultHTTPRequestIO<T> implements HTTPRequestIO<T> {
 		this.failure = failure;
 	}
 
+	DefaultHTTPRequestIO<T> source(HTTPRequest<T> source) {
+		return new DefaultHTTPRequestIO<>(source, httpClient, codecs, failure);
+	}
+
 	@Override
 	public Promise<HTTPResponse<T>> execute() {
 		return httpClient.request(source).execute()
@@ -120,5 +124,4 @@ class DefaultHTTPRequestIO<T> implements HTTPRequestIO<T> {
 			else throw new HTTPResponseReaderException(e);
 		else return (T) value;
 	}
-
 }

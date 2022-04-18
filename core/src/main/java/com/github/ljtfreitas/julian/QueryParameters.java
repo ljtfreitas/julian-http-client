@@ -38,6 +38,10 @@ public class QueryParameters {
 
 	private final MultiMap<String, String> parameters;
 
+	public QueryParameters() {
+		this(MultiMap.empty());
+	}
+
 	public QueryParameters(Map<String, ? extends Collection<String>> parameters) {
 		this(new MultiMap<>(parameters));
 	}

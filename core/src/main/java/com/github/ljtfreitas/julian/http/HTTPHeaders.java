@@ -42,11 +42,11 @@ public class HTTPHeaders implements Iterable<HTTPHeader> {
 
 	private final Map<String, HTTPHeader> headers;
 
-	private HTTPHeaders() {
+	public HTTPHeaders() {
 		this.headers = emptyMap();
 	}
 
-	private HTTPHeaders(Map<String, HTTPHeader> headers) {
+	public HTTPHeaders(Map<String, HTTPHeader> headers) {
 		this.headers = unmodifiableMap(headers);
 	}
 
@@ -63,6 +63,10 @@ public class HTTPHeaders implements Iterable<HTTPHeader> {
 
 	public Collection<HTTPHeader> all() {
 		return headers.values().stream().collect(toUnmodifiableList());
+	}
+
+	public Map<String, HTTPHeader> map() {
+		return headers;
 	}
 
 	public HTTPHeaders join(HTTPHeader header) {

@@ -20,24 +20,23 @@
  * SOFTWARE.
  */
 
-rootProject.name = "julian-http-client-parent"
-include("core")
-include("form-url-encoded-multipart")
-include("json-jackson")
-include("json-gson")
-include("json-jsonb")
-include("json-jsonp")
-include("json-kotlin")
-include("xml-jackson")
-include("http-client-reactor-netty")
-include("http-client-vertx")
-include("http-client-ktor")
-include("http-spring-web-flux")
-include("xml-jaxb")
-include("rx-java3")
-include("mutiny")
-include("reactor")
-include("vavr")
-include("kotlin")
-include("resilience4j")
-include("opentracing")
+package com.github.ljtfreitas.julian.http.opentracing;
+
+import com.github.ljtfreitas.julian.Promise;
+import com.github.ljtfreitas.julian.http.HTTPRequest;
+import com.github.ljtfreitas.julian.http.HTTPRequestInterceptor;
+import io.opentracing.Tracer;
+
+public class TracingHTTPRequestInterceptor implements HTTPRequestInterceptor {
+
+    private final Tracer tracer;
+
+    public TracingHTTPRequestInterceptor(Tracer tracer) {
+        this.tracer = tracer;
+    }
+
+    @Override
+    public <T> Promise<HTTPRequest<T>> intercepts(Promise<HTTPRequest<T>> request) {
+        return request.then(r -> new TracingHTTPRequest<>(tracer, r));
+    }
+}

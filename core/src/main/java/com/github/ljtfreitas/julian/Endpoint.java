@@ -271,12 +271,12 @@ public class Endpoint {
             };
         }
 
-        public Except<URI> expand() {
+        public Attempt<URI> expand() {
             return expand(Arguments.empty());
         }
 
-        public Except<URI> expand(Arguments arguments) {
-            return Except.run(() -> {
+        public Attempt<URI> expand(Arguments arguments) {
+            return Attempt.run(() -> {
                 URI source = URI.create(new DynamicParameters(path, parameters.stream().filter(PathParameter.class::isInstance).collect(toUnmodifiableList()))
                         .interpolate(arguments));
 

@@ -24,5 +24,5 @@ package com.github.ljtfreitas.julian;
 
 public interface Lazy<T> {
 
-    Except<T> run();
+    Attempt<T> run();
 }

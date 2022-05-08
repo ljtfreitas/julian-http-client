@@ -1,6 +1,6 @@
 package com.github.ljtfreitas.julian.k
 
-import com.github.ljtfreitas.julian.Except
+import com.github.ljtfreitas.julian.Attempt
 import com.github.ljtfreitas.julian.Promise
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
@@ -61,16 +61,16 @@ class ExtensionsTest : DescribeSpec({
             }
         }
 
-        describe("Except<T> extensions") {
+        describe("Attempt<T> extensions") {
 
-            it("a successful Except -> a successful Except") {
-                val result = Except.success("success").result()
+            it("a successful Attempt -> a successful Result") {
+                val result = Attempt.success("success").result()
                 result shouldBeSuccess "success"
             }
 
-            it("a failed Promise -> a failed Result") {
+            it("a failed Attempt -> a failed Result") {
                 val failure = RuntimeException("oops")
-                val result = Except.failed<Unit>(failure).result()
+                val result = Attempt.failed<Unit>(failure).result()
                 result.shouldBeFailure { it shouldBe failure }
             }
         }

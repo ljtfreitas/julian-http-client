@@ -13,8 +13,8 @@ class DoneResponse<T> implements Response<T> {
     }
 
     @Override
-    public Except<T> body() {
-        return Except.success(value);
+    public Attempt<T> body() {
+        return Attempt.success(value);
     }
 
     @Override

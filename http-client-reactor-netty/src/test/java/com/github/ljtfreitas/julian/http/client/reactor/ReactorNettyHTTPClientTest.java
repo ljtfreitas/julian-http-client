@@ -1,21 +1,16 @@
 package com.github.ljtfreitas.julian.http.client.reactor;
 
-import com.github.ljtfreitas.julian.Except;
+import com.github.ljtfreitas.julian.Attempt;
 import com.github.ljtfreitas.julian.JavaType;
-import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.http.DefaultHTTPRequestBody;
 import com.github.ljtfreitas.julian.http.HTTPHeader;
 import com.github.ljtfreitas.julian.http.HTTPHeaders;
 import com.github.ljtfreitas.julian.http.HTTPMethod;
 import com.github.ljtfreitas.julian.http.HTTPRequestBody;
 import com.github.ljtfreitas.julian.http.HTTPRequestDefinition;
-import com.github.ljtfreitas.julian.http.HTTPResponse;
-import com.github.ljtfreitas.julian.http.HTTPStatus;
 import com.github.ljtfreitas.julian.http.HTTPStatusCode;
 import com.github.ljtfreitas.julian.http.MediaType;
 import com.github.ljtfreitas.julian.http.client.HTTPClientResponse;
-import com.github.ljtfreitas.julian.http.codec.StringHTTPMessageCodec;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -251,7 +246,7 @@ class ReactorNettyHTTPClientTest {
                     }
                 };
 
-                Except<HTTPClientResponse> response = client.request(request).execute().join();
+                Attempt<HTTPClientResponse> response = client.request(request).execute().join();
 
                 response.onSuccess(r -> fail("a connection error was expected..."))
                         .onFailure(e -> assertThat(e.getCause(), instanceOf(ConnectException.class)));

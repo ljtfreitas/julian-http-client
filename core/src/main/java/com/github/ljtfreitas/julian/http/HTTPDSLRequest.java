@@ -26,7 +26,7 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.Map;
 
-import com.github.ljtfreitas.julian.Except;
+import com.github.ljtfreitas.julian.Attempt;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.Kind;
 import com.github.ljtfreitas.julian.Promise;
@@ -125,7 +125,7 @@ public class HTTPDSLRequest {
     private URI path() {
         String query = parameters.join(QueryParameters.parse(path.getQuery())).serialize();
 
-        return Except.run(()->  new URI(path.getScheme(), path.getUserInfo(), path.getHost(), path.getPort(), path.getPath(),
+        return Attempt.run(()->  new URI(path.getScheme(), path.getUserInfo(), path.getHost(), path.getPort(), path.getPath(),
                 query == null || query.isEmpty() ? null : query, path.getFragment())).prop();
     }
 

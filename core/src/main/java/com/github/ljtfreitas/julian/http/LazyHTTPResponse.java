@@ -22,7 +22,7 @@
 
 package com.github.ljtfreitas.julian.http;
 
-import com.github.ljtfreitas.julian.Except;
+import com.github.ljtfreitas.julian.Attempt;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.Subscriber;
 
@@ -53,7 +53,7 @@ class LazyHTTPResponse<T> implements HTTPResponse<T> {
 	}
 
 	@Override
-	public Except<T> body() {
+	public Attempt<T> body() {
 		return body.join();
 	}
 

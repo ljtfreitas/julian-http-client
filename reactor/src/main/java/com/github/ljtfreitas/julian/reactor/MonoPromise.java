@@ -22,7 +22,7 @@
 
 package com.github.ljtfreitas.julian.reactor;
 
-import com.github.ljtfreitas.julian.Except;
+import com.github.ljtfreitas.julian.Attempt;
 import com.github.ljtfreitas.julian.Kind;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.Subscriber;
@@ -102,8 +102,8 @@ public class MonoPromise<T> implements Promise<T> {
     }
 
     @Override
-    public Except<T> join() {
-        return Except.run(mono::block);
+    public Attempt<T> join() {
+        return Attempt.run(mono::block);
     }
 
     @Override

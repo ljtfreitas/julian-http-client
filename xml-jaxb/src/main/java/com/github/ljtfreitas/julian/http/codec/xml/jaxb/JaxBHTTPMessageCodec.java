@@ -22,7 +22,7 @@
 
 package com.github.ljtfreitas.julian.http.codec.xml.jaxb;
 
-import com.github.ljtfreitas.julian.Except;
+import com.github.ljtfreitas.julian.Attempt;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.DefaultHTTPRequestBody;
 import com.github.ljtfreitas.julian.http.HTTPRequestBody;
@@ -145,7 +145,7 @@ public class JaxBHTTPMessageCodec implements XMLHTTPMessageCodec<Object> {
     }
 
     private JAXBContext newContext(Class<?> classType) {
-        return Except.run(() -> JAXBContext.newInstance(classType)).unsafe();
+        return Attempt.run(() -> JAXBContext.newInstance(classType)).unsafe();
     }
 
     public static JaxBHTTPMessageCodec provider() {

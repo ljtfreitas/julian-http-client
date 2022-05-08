@@ -1,6 +1,6 @@
 package com.github.ljtfreitas.julian.http.resilience4j;
 
-import com.github.ljtfreitas.julian.Except;
+import com.github.ljtfreitas.julian.Attempt;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.BadRequest;
 import com.github.ljtfreitas.julian.http.HTTPHeaders;
@@ -23,7 +23,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.stream.IntStream.rangeClosed;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -63,7 +62,7 @@ class CircuitBreakerHTTPRequestInterceptorTest {
 
             Promise<HTTPRequest<String>> promise = interceptor.intercepts(Promise.done(request));
 
-            when(response.body()).thenReturn(Except.success("success"));
+            when(response.body()).thenReturn(Attempt.success("success"));
             when(response.status()).thenReturn(new HTTPStatus(HTTPStatusCode.OK));
 
             when(request.execute()).thenReturn(Promise.done(response), Promise.failed(new RuntimeException("ooops")));
@@ -132,7 +131,7 @@ class CircuitBreakerHTTPRequestInterceptorTest {
 
             Promise<HTTPRequest<String>> promise = interceptor.intercepts(Promise.done(request));
 
-            when(response.body()).thenReturn(Except.success("success"));
+            when(response.body()).thenReturn(Attempt.success("success"));
             when(response.status()).thenReturn(new HTTPStatus(HTTPStatusCode.OK));
 
             when(request.execute()).thenReturn(Promise.done(response), Promise.failed(new RuntimeException("ooops")), Promise.done(response));
@@ -193,7 +192,7 @@ class CircuitBreakerHTTPRequestInterceptorTest {
 
         Promise<HTTPRequest<String>> promise = interceptor.intercepts(Promise.done(request));
 
-        when(response.body()).thenReturn(Except.success("success"));
+        when(response.body()).thenReturn(Attempt.success("success"));
         when(response.status()).thenReturn(new HTTPStatus(HTTPStatusCode.OK));
 
         when(request.execute()).thenReturn(Promise.done(response), Promise.done(HTTPResponse.failed(new BadRequest(HTTPHeaders.empty(), Promise.done(new byte[0])))), Promise.done(response));

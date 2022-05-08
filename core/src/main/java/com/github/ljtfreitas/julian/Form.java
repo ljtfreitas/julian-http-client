@@ -81,7 +81,7 @@ public class Form {
 	}
 
 	private String encode(String value) {
-		return Except.run(() -> URLEncoder.encode(value, UTF_8))
+		return Attempt.run(() -> URLEncoder.encode(value, UTF_8))
 				.recover(UnsupportedEncodingException.class, () -> value)
 				.unsafe();
 	}

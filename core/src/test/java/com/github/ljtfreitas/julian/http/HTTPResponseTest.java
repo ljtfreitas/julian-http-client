@@ -1,6 +1,6 @@
 package com.github.ljtfreitas.julian.http;
 
-import com.github.ljtfreitas.julian.Except;
+import com.github.ljtfreitas.julian.Attempt;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.Subscriber;
 import com.github.ljtfreitas.julian.http.HTTPResponse.HTTPResponseConsumer;
@@ -191,9 +191,9 @@ class HTTPResponseTest {
         @Test
         @DisplayName("failure HTTP response should throw an exception when we try to get the body")
         void body() {
-            Except<String> body = response.body();
+            Attempt<String> body = response.body();
 
-            assertTrue(body instanceof Except.Failure);
+            assertTrue(body instanceof Attempt.Failure);
 
             HTTPResponseException exception = assertThrows(HTTPResponseException.class, body::unsafe);
 
@@ -633,9 +633,9 @@ class HTTPResponseTest {
             @Test
             @DisplayName("lazy, failure HTTP response should throw an exception when we try to get the body")
             void body() {
-                Except<String> body = failed.body();
+                Attempt<String> body = failed.body();
 
-                assertTrue(body instanceof Except.Failure);
+                assertTrue(body instanceof Attempt.Failure);
 
                 HTTPResponseException exception = assertThrows(HTTPResponseException.class, body::unsafe);
 

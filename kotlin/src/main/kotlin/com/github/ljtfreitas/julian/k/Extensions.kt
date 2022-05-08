@@ -22,11 +22,10 @@
 
 package com.github.ljtfreitas.julian.k
 
-import com.github.ljtfreitas.julian.Except
+import com.github.ljtfreitas.julian.Attempt
 import com.github.ljtfreitas.julian.Promise
-import com.github.ljtfreitas.julian.ProxyBuilder
 
-fun <T> Except<T>.result() : Result<T> = fold(Result.Companion::success, Result.Companion::failure)
+fun <T> Attempt<T>.result() : Result<T> = fold(Result.Companion::success, Result.Companion::failure)
 
 fun <T> Promise<T>.result() : Result<T> = join().result()
 

@@ -29,7 +29,7 @@ import java.util.function.Predicate;
 
 public interface Response<T> {
 
-	Except<T> body();
+	Attempt<T> body();
 
 	<R> Response<R> map(Function<? super T, R> fn);
 

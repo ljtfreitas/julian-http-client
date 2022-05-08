@@ -1,6 +1,6 @@
 package com.github.ljtfreitas.julian.http.resilience4j;
 
-import com.github.ljtfreitas.julian.Except;
+import com.github.ljtfreitas.julian.Attempt;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.http.HTTPRequest;
 import com.github.ljtfreitas.julian.http.HTTPRequestIO;
@@ -39,7 +39,7 @@ class TimeLimiterHTTPRequestInterceptorTest {
 
         TimeLimiterHTTPRequestInterceptor interceptor = new TimeLimiterHTTPRequestInterceptor(timeLimiter, scheduler);
 
-        when(request.execute()).then(i -> Promise.pending(() -> Except.just(() -> Thread.sleep(3000))
+        when(request.execute()).then(i -> Promise.pending(() -> Attempt.just(() -> Thread.sleep(3000))
                 .map(none -> response)
                 .unsafe()));
 
@@ -56,8 +56,8 @@ class TimeLimiterHTTPRequestInterceptorTest {
 
         TimeLimiterHTTPRequestInterceptor interceptor = new TimeLimiterHTTPRequestInterceptor(timeLimiter, scheduler);
 
-        when(response.body()).thenReturn(Except.success("success"));
-        when(request.execute()).then(i -> Promise.pending(() -> Except.just(() -> Thread.sleep(1000))
+        when(response.body()).thenReturn(Attempt.success("success"));
+        when(request.execute()).then(i -> Promise.pending(() -> Attempt.just(() -> Thread.sleep(1000))
                 .map(none -> response)
                 .unsafe()));
 

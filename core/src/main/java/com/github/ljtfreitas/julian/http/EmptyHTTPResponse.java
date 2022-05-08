@@ -26,7 +26,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import com.github.ljtfreitas.julian.Except;
+import com.github.ljtfreitas.julian.Attempt;
 import com.github.ljtfreitas.julian.Subscriber;
 
 class EmptyHTTPResponse<T> implements HTTPResponse<T> {
@@ -50,8 +50,8 @@ class EmptyHTTPResponse<T> implements HTTPResponse<T> {
 	}
 
 	@Override
-	public Except<T> body() {
-		return Except.success(null);
+	public Attempt<T> body() {
+		return Attempt.success(null);
 	}
 
 	@Override

@@ -88,8 +88,8 @@ class DonePromise<T> implements Promise<T> {
 	}
 
 	@Override
-	public Except<T> join() {
-		return Except.success(value);
+	public Attempt<T> join() {
+		return Attempt.success(value);
 	}
 
 	@Override

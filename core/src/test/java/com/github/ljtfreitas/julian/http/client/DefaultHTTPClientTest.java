@@ -1,6 +1,6 @@
 package com.github.ljtfreitas.julian.http.client;
 
-import com.github.ljtfreitas.julian.Except;
+import com.github.ljtfreitas.julian.Attempt;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.DefaultHTTPRequestBody;
 import com.github.ljtfreitas.julian.http.HTTPHeader;
@@ -204,7 +204,7 @@ class DefaultHTTPClientTest {
             void unknownHost() {
                 HTTPRequestDefinition request = new SimpleHTTPRequestDefinition("http://localhost:8099/");
 
-                Except<HTTPClientResponse> response = client.request(request).execute().join();
+                Attempt<HTTPClientResponse> response = client.request(request).execute().join();
 
                 response.onSuccess(r -> fail("a connection error was expected..."))
                         .onFailure(e -> assertThat(e, instanceOf(IOException.class)));
@@ -230,7 +230,7 @@ class DefaultHTTPClientTest {
 
                 SimpleHTTPRequestDefinition request = new SimpleHTTPRequestDefinition("http://localhost:8090/hello", "GET");
 
-                Except<HTTPClientResponse> response = httpClient.request(request).execute().join();
+                Attempt<HTTPClientResponse> response = httpClient.request(request).execute().join();
 
                 response.onSuccess(r -> fail("a timeout error was expected..."))
                         .onFailure(e -> assertThat(e, instanceOf(HttpTimeoutException.class)));

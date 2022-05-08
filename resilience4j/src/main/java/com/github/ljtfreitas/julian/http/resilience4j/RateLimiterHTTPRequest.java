@@ -22,7 +22,7 @@
 
 package com.github.ljtfreitas.julian.http.resilience4j;
 
-import com.github.ljtfreitas.julian.Except;
+import com.github.ljtfreitas.julian.Attempt;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.TooManyRequests;
@@ -97,7 +97,7 @@ class RateLimiterHTTPRequest<T> implements HTTPRequest<T> {
 
     @Override
     public Promise<HTTPResponse<T>> execute() {
-        Except<Void> acquired = Except.just(() -> waitForPermission(rateLimiter));
+        Attempt<Void> acquired = Attempt.just(() -> waitForPermission(rateLimiter));
 
         return acquired.map(none -> request.execute())
                 .recover(RequestNotPermitted.class, () -> Promise.done(HTTPResponse.failed(new TooManyRequests(HTTPHeaders.empty(), Promise.done("Too many requests!".getBytes())))))

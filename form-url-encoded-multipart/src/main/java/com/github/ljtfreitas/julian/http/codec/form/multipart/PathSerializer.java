@@ -22,7 +22,7 @@
 
 package com.github.ljtfreitas.julian.http.codec.form.multipart;
 
-import com.github.ljtfreitas.julian.Except;
+import com.github.ljtfreitas.julian.Attempt;
 import com.github.ljtfreitas.julian.Message;
 import com.github.ljtfreitas.julian.http.MediaType;
 import com.github.ljtfreitas.julian.http.codec.HTTPRequestWriterException;
@@ -50,7 +50,7 @@ class PathSerializer implements MultipartFormFieldSerializer<Path> {
         ContentDisposition contentDisposition = new ContentDisposition(field.name, path.getFileName().toString());
 
         MediaType mediaType = field.contentType
-                .orElseGet(() -> Except.run(() -> Files.probeContentType(path))
+                .orElseGet(() -> Attempt.run(() -> Files.probeContentType(path))
                         .map(MediaType::valueOf)
                         .recover(() -> MEDIA_TYPE_OCTET_STREAM));
 

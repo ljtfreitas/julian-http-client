@@ -1,5 +1,6 @@
 package com.github.ljtfreitas.julian.http.client.vertx;
 
+import com.github.ljtfreitas.julian.Attempt;
 import io.vertx.core.Vertx;
 
 import java.net.ConnectException;
@@ -13,7 +14,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,21 +28,16 @@ import org.mockserver.model.HttpRequest;
 import org.mockserver.model.HttpResponse;
 import org.mockserver.model.NottableString;
 
-import com.github.ljtfreitas.julian.Except;
 import com.github.ljtfreitas.julian.JavaType;
-import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.http.DefaultHTTPRequestBody;
 import com.github.ljtfreitas.julian.http.HTTPHeader;
 import com.github.ljtfreitas.julian.http.HTTPHeaders;
 import com.github.ljtfreitas.julian.http.HTTPMethod;
 import com.github.ljtfreitas.julian.http.HTTPRequestBody;
 import com.github.ljtfreitas.julian.http.HTTPRequestDefinition;
-import com.github.ljtfreitas.julian.http.HTTPResponse;
-import com.github.ljtfreitas.julian.http.HTTPStatus;
 import com.github.ljtfreitas.julian.http.HTTPStatusCode;
 import com.github.ljtfreitas.julian.http.MediaType;
 import com.github.ljtfreitas.julian.http.client.HTTPClientResponse;
-import com.github.ljtfreitas.julian.http.codec.StringHTTPMessageCodec;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
@@ -260,7 +255,7 @@ class VertxHTTPClientTest {
                     }
                 };
 
-                Except<HTTPClientResponse> response = client.request(request).execute().join();
+                Attempt<HTTPClientResponse> response = client.request(request).execute().join();
 
                 response.onSuccess(r -> fail("a connection error was expected..."))
                         .onFailure(e -> assertThat(e.getCause(), instanceOf(ConnectException.class)));

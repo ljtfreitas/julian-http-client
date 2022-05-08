@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.ljtfreitas.julian.Attempt;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.FailedDependency;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.Locked;
@@ -45,7 +46,6 @@ import org.springframework.web.reactive.function.client.WebClientException;
 
 import com.github.ljtfreitas.julian.Cookie;
 import com.github.ljtfreitas.julian.Cookies;
-import com.github.ljtfreitas.julian.Except;
 import com.github.ljtfreitas.julian.Headers;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.Promise;
@@ -197,7 +197,7 @@ class WebClientHTTPTest {
 
 					Promise<HTTPResponse<String>> promise = http.run(request);
 
-					String response = promise.then(HTTPResponse::body).then(Except::unsafe).join().unsafe();
+					String response = promise.then(HTTPResponse::body).then(Attempt::unsafe).join().unsafe();
 
 					assertEquals(expectedResponse, response);
 				}
@@ -260,7 +260,7 @@ class WebClientHTTPTest {
 
 					Promise<HTTPResponse<String>> promise = http.run(request);
 
-					String response = promise.then(HTTPResponse::body).then(Except::unsafe).join().unsafe();
+					String response = promise.then(HTTPResponse::body).then(Attempt::unsafe).join().unsafe();
 
 					assertEquals(expectedResponse, response);
 				}
@@ -282,7 +282,7 @@ class WebClientHTTPTest {
 					HTTPEndpoint request = new HTTPEndpoint(URI.create("http://localhost:8090/hello"), HTTPMethod.GET,
 							HTTPHeaders.empty(), null, JavaType.valueOf(MyObjectBody.class));
 
-					Except<HTTPResponse<Object>> response = http.run(request).join();
+					Attempt<HTTPResponse<Object>> response = http.run(request).join();
 
 					response.onSuccess(r -> fail("a HTTPResponseReaderException was expected."))
 							.onFailure(e -> assertThat(e, instanceOf(HTTPMessageException.class)));
@@ -298,9 +298,9 @@ class WebClientHTTPTest {
 					HTTPEndpoint request = new HTTPEndpoint(URI.create("http://localhost:8090/hello"), HTTPMethod.GET,
 							HTTPHeaders.empty(), null, JavaType.valueOf(String.class));
 
-					Except<Object> response = http.run(request)
+					Attempt<Object> response = http.run(request)
 							.then(HTTPResponse::body)
-							.then(Except::unsafe)
+							.then(Attempt::unsafe)
 							.join();
 
 					response.onSuccess(r -> fail("a HTTPResponseReaderException was expected, but the response is " + r))
@@ -377,7 +377,7 @@ class WebClientHTTPTest {
 				HTTPEndpoint request = new HTTPEndpoint(URI.create("http://localhost:8099/hello"), HTTPMethod.GET,
 						HTTPHeaders.empty());
 
-				Except<HTTPResponse<Void>> response = http.<Void> run(request).join();
+				Attempt<HTTPResponse<Void>> response = http.<Void> run(request).join();
 
 				response.onSuccess(r -> fail("a connection error was expected..."))
 						.onFailure(e -> assertThat(e, instanceOf(HTTPClientException.class)))

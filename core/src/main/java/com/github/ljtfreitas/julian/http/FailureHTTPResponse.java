@@ -22,7 +22,7 @@
 
 package com.github.ljtfreitas.julian.http;
 
-import com.github.ljtfreitas.julian.Except;
+import com.github.ljtfreitas.julian.Attempt;
 import com.github.ljtfreitas.julian.Subscriber;
 
 import java.util.function.Consumer;
@@ -44,8 +44,8 @@ public class FailureHTTPResponse<T> implements HTTPResponse<T> {
 	}
 
 	@Override
-	public Except<T> body() {
-		return Except.failed(failure);
+	public Attempt<T> body() {
+		return Attempt.failed(failure);
 	}
 
 	@Override

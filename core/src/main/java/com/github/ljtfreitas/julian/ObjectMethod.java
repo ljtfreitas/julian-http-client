@@ -40,7 +40,7 @@ class ObjectMethod {
 	}
 
 	public Object call(Object[] args) {
-		return Except.run(() -> method.invoke(target, args))
+		return Attempt.run(() -> method.invoke(target, args))
 				.prop(e -> new MethodInvocationException(format("Method {0} failed, with args: {1}", method, Arrays.toString(args)), e));
 	}
 }

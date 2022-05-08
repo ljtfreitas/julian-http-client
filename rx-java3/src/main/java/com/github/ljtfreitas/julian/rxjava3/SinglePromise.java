@@ -22,6 +22,7 @@
 
 package com.github.ljtfreitas.julian.rxjava3;
 
+import com.github.ljtfreitas.julian.Attempt;
 import io.reactivex.rxjava3.core.Single;
 
 import java.util.concurrent.CompletableFuture;
@@ -30,7 +31,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import com.github.ljtfreitas.julian.Except;
 import com.github.ljtfreitas.julian.Kind;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.Subscriber;
@@ -106,8 +106,8 @@ public class SinglePromise<T> implements Promise<T> {
     }
 
     @Override
-    public Except<T> join() {
-        return Except.run(single::blockingGet);
+    public Attempt<T> join() {
+        return Attempt.run(single::blockingGet);
     }
 
     @Override

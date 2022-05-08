@@ -30,8 +30,8 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import com.github.ljtfreitas.julian.Attempt;
 import com.github.ljtfreitas.julian.Endpoint.Parameters;
-import com.github.ljtfreitas.julian.Except;
 import com.github.ljtfreitas.julian.JavaType;
 
 import static com.github.ljtfreitas.julian.Message.format;
@@ -116,7 +116,7 @@ class JavaMethod {
 				.map(Path::value)
 				.or(() -> scannotation.meta(HTTPMethodDefinition.class)
 								.findFirst()
-								.map(a -> Except.run(() -> a.annotationType().getMethod("value"))
+								.map(a -> Attempt.run(() -> a.annotationType().getMethod("value"))
 												.map(m -> m.invoke(a).toString())
 												.unsafe()));
 

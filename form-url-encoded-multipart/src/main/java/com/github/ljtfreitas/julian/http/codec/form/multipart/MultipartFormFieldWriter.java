@@ -25,8 +25,8 @@ package com.github.ljtfreitas.julian.http.codec.form.multipart;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import com.github.ljtfreitas.julian.Except;
-import com.github.ljtfreitas.julian.Except.ThrowableConsumer;
+import com.github.ljtfreitas.julian.Attempt;
+import com.github.ljtfreitas.julian.Attempt.ThrowableConsumer;
 import com.github.ljtfreitas.julian.http.HTTPHeader;
 import com.github.ljtfreitas.julian.http.MediaType;
 
@@ -46,8 +46,8 @@ class MultipartFormFieldWriter {
         this.mediaType = mediaType;
     }
 
-    Except<Void> write(ThrowableConsumer<OutputStream> content) {
-        return Except.just(() -> {
+    Attempt<Void> write(ThrowableConsumer<OutputStream> content) {
+        return Attempt.just(() -> {
             output.write(boundary.getBytes());
             output.write('\r');
             output.write('\n');

@@ -22,7 +22,7 @@
 
 package com.github.ljtfreitas.julian.http.resilience4j;
 
-import com.github.ljtfreitas.julian.Except;
+import com.github.ljtfreitas.julian.Attempt;
 import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.http.HTTPHeaders;
@@ -96,7 +96,7 @@ class CircuitBreakerHTTPRequest<T> implements HTTPRequest<T> {
 
     @Override
     public Promise<HTTPResponse<T>> execute() {
-        Except<Void> acquired = Except.just(circuitBreaker::acquirePermission);
+        Attempt<Void> acquired = Attempt.just(circuitBreaker::acquirePermission);
 
         long start = circuitBreaker.getCurrentTimestamp();
 

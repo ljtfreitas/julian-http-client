@@ -1,6 +1,6 @@
 package com.github.ljtfreitas.julian;
 
-import com.github.ljtfreitas.julian.Except.ThrowableConsumer;
+import com.github.ljtfreitas.julian.Attempt.ThrowableConsumer;
 import com.github.ljtfreitas.julian.contract.Callback;
 import com.github.ljtfreitas.julian.contract.GET;
 import com.github.ljtfreitas.julian.contract.HEAD;
@@ -514,6 +514,6 @@ class ProxyBuilderTest {
         HTTPStatusCode httpStatusCode();
 
         @GET("/except")
-        Except<String> except();
+        Attempt<String> except();
     }
 }

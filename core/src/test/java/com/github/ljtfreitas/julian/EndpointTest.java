@@ -109,7 +109,7 @@ class EndpointTest {
 				void rejectDynamicParametersWithNullValues() {
 					Parameters parameters = Parameters.create(Parameter.path(0, "arg", JavaType.valueOf(String.class), null));
 
-					Except<URI> expanded = new Path("http://my.api.com/{arg}", parameters).expand(Arguments.create(new Object[]{null}));
+					Attempt<URI> expanded = new Path("http://my.api.com/{arg}", parameters).expand(Arguments.create(new Object[]{null}));
 
 					expanded.onSuccess(value -> fail("a failure is expected here..."))
 							.onFailure(e -> assertThat(e, isA(IllegalArgumentException.class)));

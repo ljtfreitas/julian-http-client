@@ -26,7 +26,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
 import java.lang.reflect.InvocationHandler;
 import java.net.InetSocketAddress;
-import java.net.ProxySelector;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -191,7 +190,7 @@ public class ProxyBuilder {
                     CompletionStageResponseT.get(),
                     DefaultResponseT.get(),
                     EnumerationResponseT.get(),
-                    ExceptResponseT.get(),
+                    AttemptResponseT.get(),
                     FutureResponseT.get(),
                     FutureTaskResponseT.get(),
                     HeadersResponseT.get(),
@@ -631,7 +630,7 @@ public class ProxyBuilder {
     }
 
     public <T> T build(Class<? extends T> type, String endpoint) {
-        return build(type, handler(type, Except.run(() -> new URL(endpoint)).unsafe()));
+        return build(type, handler(type, Attempt.run(() -> new URL(endpoint)).unsafe()));
     }
 
     public <T> T build(Class<? extends T> type, URL endpoint) {

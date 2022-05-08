@@ -28,7 +28,7 @@ import java.util.function.Function;
 
 import com.github.ljtfreitas.julian.Endpoint;
 import com.github.ljtfreitas.julian.Endpoint.Parameter;
-import com.github.ljtfreitas.julian.Except;
+import com.github.ljtfreitas.julian.Attempt;
 import com.github.ljtfreitas.julian.JavaType;
 
 import static java.util.function.Predicate.not;
@@ -92,8 +92,8 @@ class ParameterDefinitionReader {
 				.orElseThrow();
 	}
 
-	private <T> Except<ParameterSerializer<? super Object, T>> instantiate(Class<? extends ParameterSerializer<? super Object, T>> serializerClassType) {
-		return Except.run(() -> serializerClassType.getDeclaredConstructor().newInstance());
+	private <T> Attempt<ParameterSerializer<? super Object, T>> instantiate(Class<? extends ParameterSerializer<? super Object, T>> serializerClassType) {
+		return Attempt.run(() -> serializerClassType.getDeclaredConstructor().newInstance());
 	}
 
 	private <A extends Annotation, R> Optional<R> annotationType(Class<A> annotationType, Function<A, R> fn) {

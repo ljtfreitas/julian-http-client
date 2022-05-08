@@ -43,7 +43,6 @@ class CallableResponseT implements ResponseT<Object, Callable<Object>> {
 			}
 		};
 	}
-	
 
 	@Override
 	public boolean test(Endpoint endpoint) {

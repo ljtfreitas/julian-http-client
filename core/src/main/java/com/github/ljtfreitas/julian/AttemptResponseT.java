@@ -22,16 +22,16 @@
 
 package com.github.ljtfreitas.julian;
 
-class ExceptResponseT implements ResponseT<Object, Except<Object>> {
+class AttemptResponseT implements ResponseT<Object, Attempt<Object>> {
 
-    private static final ExceptResponseT SINGLE_INSTANCE = new ExceptResponseT();
+    private static final AttemptResponseT SINGLE_INSTANCE = new AttemptResponseT();
 
     @Override
-    public <A> ResponseFn<A, Except<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> next) {
+    public <A> ResponseFn<A, Attempt<Object>> bind(Endpoint endpoint, ResponseFn<A, Object> next) {
         return new ResponseFn<>() {
 
             @Override
-            public Except<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Attempt<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
                 return next.run(response, arguments).join();
             }
 
@@ -50,10 +50,10 @@ class ExceptResponseT implements ResponseT<Object, Except<Object>> {
 
     @Override
     public boolean test(Endpoint endpoint) {
-        return endpoint.returnType().is(Except.class);
+        return endpoint.returnType().is(Attempt.class);
     }
 
-    public static ExceptResponseT get() {
+    public static AttemptResponseT get() {
         return SINGLE_INSTANCE;
     }
 }

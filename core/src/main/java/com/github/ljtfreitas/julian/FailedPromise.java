@@ -110,8 +110,8 @@ class FailedPromise<T> implements Promise<T> {
 	}
 
 	@Override
-	public Except<T> join() {
-		return Except.failed(failure);
+	public Attempt<T> join() {
+		return Attempt.failed(failure);
 	}
 
 	@Override

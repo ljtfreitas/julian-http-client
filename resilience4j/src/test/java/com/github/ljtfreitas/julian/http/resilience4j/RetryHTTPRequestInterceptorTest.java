@@ -1,6 +1,6 @@
 package com.github.ljtfreitas.julian.http.resilience4j;
 
-import com.github.ljtfreitas.julian.Except;
+import com.github.ljtfreitas.julian.Attempt;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.http.HTTPClientFailureResponseException.BadRequest;
 import com.github.ljtfreitas.julian.http.HTTPHeaders;
@@ -48,7 +48,7 @@ class RetryHTTPRequestInterceptorTest {
 
         RetryHTTPRequestInterceptor interceptor = new RetryHTTPRequestInterceptor(retry, scheduler);
 
-        when(response.body()).thenReturn(Except.success("success"));
+        when(response.body()).thenReturn(Attempt.success("success"));
         when(request.execute()).thenReturn(Promise.done(response));
 
         Promise<HTTPRequest<String>> retryable = interceptor.intercepts(Promise.done(request));
@@ -66,7 +66,7 @@ class RetryHTTPRequestInterceptorTest {
 
         RetryHTTPRequestInterceptor interceptor = new RetryHTTPRequestInterceptor(retry, scheduler);
 
-        when(response.body()).thenReturn(Except.success("success"));
+        when(response.body()).thenReturn(Attempt.success("success"));
         when(request.execute()).thenReturn(
                 Promise.failed(new HTTPClientException("oops", new IOException())),
                 Promise.failed(new HTTPClientException("oops, again", new IOException())),
@@ -89,7 +89,7 @@ class RetryHTTPRequestInterceptorTest {
 
         RetryHTTPRequestInterceptor interceptor = new RetryHTTPRequestInterceptor(retry, scheduler);
 
-        when(response.body()).thenReturn(Except.success("success"));
+        when(response.body()).thenReturn(Attempt.success("success"));
         when(response.status()).thenReturn(new HTTPStatus(HTTPStatusCode.OK));
 
         when(request.execute()).thenReturn(

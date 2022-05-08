@@ -43,7 +43,7 @@ public interface Promise<T> {
 
 	<T2, R> Promise<R> zip(Promise<T2> other, BiFunction<? super T, ? super T2, R> fn);
 
-	Except<T> join();
+	Attempt<T> join();
 
 	Promise<T> onFailure(Consumer<? super Exception> fn);
 

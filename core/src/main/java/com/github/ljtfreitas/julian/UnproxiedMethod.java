@@ -40,7 +40,7 @@ class UnproxiedMethod {
 	}
 
 	Object call(Object[] args) {
-		return Except.run(MethodHandles::lookup)
+		return Attempt.run(MethodHandles::lookup)
                 .map(l -> l.findSpecial(method.getDeclaringClass(), method.getName(), methodTypeOf(method), method.getDeclaringClass()))
                 .map(h -> h.bindTo(target))
                 .map(h -> h.invokeWithArguments(args))

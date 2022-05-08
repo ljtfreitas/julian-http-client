@@ -14,19 +14,19 @@ import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ExceptResponseTTest {
+class AttemptResponseTTest {
 
     @Mock
     private Endpoint endpoint;
 
-    private final ExceptResponseT subject = new ExceptResponseT();
+    private final AttemptResponseT subject = new AttemptResponseT();
 
     @Nested
     class Predicates {
 
         @Test
         void supported() {
-            when(endpoint.returnType()).thenReturn(JavaType.parameterized(Except.class, String.class));
+            when(endpoint.returnType()).thenReturn(JavaType.parameterized(Attempt.class, String.class));
 
             assertTrue(subject.test(endpoint));
         }
@@ -44,7 +44,7 @@ class ExceptResponseTTest {
 
         @Test
         void parameterized() {
-            when(endpoint.returnType()).thenReturn(JavaType.parameterized(Except.class, String.class));
+            when(endpoint.returnType()).thenReturn(JavaType.parameterized(Attempt.class, String.class));
 
             assertEquals(JavaType.valueOf(String.class), subject.adapted(endpoint));
         }
@@ -63,7 +63,7 @@ class ExceptResponseTTest {
 
         when(fn.run(same(response), eq(arguments))).thenReturn(Promise.done("expected"));
 
-        Except<Object> actual = subject.bind(endpoint, fn).join(response, arguments);
+        Attempt<Object> actual = subject.bind(endpoint, fn).join(response, arguments);
 
         assertEquals("expected", actual.unsafe());
     }

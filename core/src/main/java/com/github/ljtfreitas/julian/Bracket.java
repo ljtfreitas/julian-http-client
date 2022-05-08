@@ -27,9 +27,9 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import static com.github.ljtfreitas.julian.Except.ThrowableFunction.identity;
+import static com.github.ljtfreitas.julian.Attempt.ThrowableFunction.identity;
 
-public interface Bracket<T extends AutoCloseable> extends Except<T> {
+public interface Bracket<T extends AutoCloseable> extends Attempt<T> {
 
 	static <T extends AutoCloseable> Bracket<T> acquire(AutoCloseableSupplier<T> fn) {
 		return new Acquired<>(fn);
@@ -45,7 +45,7 @@ public interface Bracket<T extends AutoCloseable> extends Except<T> {
 			this.supplier = supplier;
 		}
 
-		private Except<T> id() {
+		private Attempt<T> id() {
 			return map(identity());
 		}
 
@@ -55,18 +55,18 @@ public interface Bracket<T extends AutoCloseable> extends Except<T> {
 		}
 
 		@Override
-		public <R> Except<R> map(Except.ThrowableFunction<? super T, R> fn) {
-			return Except.run(() -> safe(fn));
+		public <R> Attempt<R> map(Attempt.ThrowableFunction<? super T, R> fn) {
+			return Attempt.run(() -> safe(fn));
 		}
 
-		private <R> R safe(Except.ThrowableFunction<? super T, R> fn) throws Throwable {
+		private <R> R safe(Attempt.ThrowableFunction<? super T, R> fn) throws Throwable {
 			try (T value = supplier.get()) {
 				return fn.apply(value);
 			}
 		}
 
 		@Override
-		public <R> Except<R> bind(Function<? super T, Except<R>> fn) {
+		public <R> Attempt<R> bind(Function<? super T, Attempt<R>> fn) {
 			return id().bind(fn);
 		}
 
@@ -81,12 +81,12 @@ public interface Bracket<T extends AutoCloseable> extends Except<T> {
 		}
 
 		@Override
-		public Except<T> recover(ThrowableFunction<? super Throwable, T> fn) {
+		public Attempt<T> recover(ThrowableFunction<? super Throwable, T> fn) {
 			return id().recover(fn);
 		}
 
 		@Override
-		public Except<T> recover(Class<? extends Throwable> candidate, Except.ThrowableSupplier<T> fn) {
+		public Attempt<T> recover(Class<? extends Throwable> candidate, Attempt.ThrowableSupplier<T> fn) {
 			return id().recover(candidate, fn);
 		}
 
@@ -96,27 +96,27 @@ public interface Bracket<T extends AutoCloseable> extends Except<T> {
 		}
 
 		@Override
-		public Except<T> recover(Predicate<? super Throwable> candidate, ThrowableSupplier<T> fn) {
+		public Attempt<T> recover(Predicate<? super Throwable> candidate, ThrowableSupplier<T> fn) {
 			return id().recover(candidate, fn);
 		}
 
 		@Override
-		public <E extends Throwable> Except<T> failure(Class<E> candidate, Function<? super E, ? extends Throwable> fn) {
+		public <E extends Throwable> Attempt<T> failure(Class<E> candidate, Function<? super E, ? extends Throwable> fn) {
 			return id().failure(candidate, fn);
 		}
 
 		@Override
-		public Except<T> failure(Predicate<? super Throwable> candidate, Function<? super Throwable, ? extends Throwable> fn) {
+		public Attempt<T> failure(Predicate<? super Throwable> candidate, Function<? super Throwable, ? extends Throwable> fn) {
 			return id().failure(candidate, fn);
 		}
 
 		@Override
-		public Except<T> onSuccess(Except.ThrowableConsumer<? super T> fn) {
+		public Attempt<T> onSuccess(Attempt.ThrowableConsumer<? super T> fn) {
 			return id().onSuccess(fn);
 		}
 
 		@Override
-		public Except<T> onFailure(Consumer<? super Throwable> fn) {
+		public Attempt<T> onFailure(Consumer<? super Throwable> fn) {
 			return id().onFailure(fn);
 		}
 		

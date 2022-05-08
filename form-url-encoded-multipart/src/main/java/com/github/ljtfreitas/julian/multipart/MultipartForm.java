@@ -72,15 +72,17 @@ public class MultipartForm {
 
         private final String name;
         private final Collection<Object> values;
+        private final String fileName;
         private final MediaType contentType;
 
-        private Part(String name, Object value, MediaType contentType) {
-            this(name, Collections.singleton(value), contentType);
+        private Part(String name, Object value, String fileName, MediaType contentType) {
+            this(name, Collections.singleton(value), fileName, contentType);
         }
 
-        private Part(String name, Collection<Object> values, MediaType contentType) {
+        private Part(String name, Collection<Object> values, String fileName, MediaType contentType) {
             this.name = name;
             this.values = values;
+            this.fileName = fileName;
             this.contentType = contentType;
         }
 
@@ -92,6 +94,10 @@ public class MultipartForm {
             return values;
         }
 
+        public String fileName() {
+            return fileName;
+        }
+
         public MediaType mediaType() {
             return contentType;
         }
@@ -101,47 +107,55 @@ public class MultipartForm {
         }
 
         public static Part create(String name, String value) {
-            return new Part(name, value, MediaType.valueOf("text/plain"));
+            return create(name, value, null);
+        }
+
+        public static Part create(String name, String value, String fileName) {
+            return new Part(name, value, fileName, MediaType.valueOf("text/plain"));
         }
 
         public static Part create(String name, File file) {
             return create(name, file, null);
         }
 
-        public static Part create(String name, File file, MediaType mediaType) {
-            return new Part(name, file, mediaType);
+        public static Part create(String name, File file, String fileName) {
+            return create(name, file, fileName, null);
         }
 
-        public static Part create(String name, Path path) {
-            return create(name, path, null);
+        public static Part create(String name, File file, String fileName, MediaType mediaType) {
+            return new Part(name, file, fileName, mediaType);
         }
 
-        public static Part create(String name, Path path, MediaType mediaType) {
-            return new Part(name, path, mediaType);
+        public static Part create(String name, Path path, String fileName) {
+            return create(name, path, fileName, null);
         }
 
-        public static Part create(String name, InputStream stream) {
-            return create(name, stream, null);
+        public static Part create(String name, Path path, String fileName, MediaType mediaType) {
+            return new Part(name, path, fileName, mediaType);
         }
 
-        public static Part create(String name, InputStream stream, MediaType mediaType) {
-            return new Part(name, stream, mediaType);
+        public static Part create(String name, InputStream stream, String fileName) {
+            return create(name, stream, fileName, null);
         }
 
-        public static Part create(String name, byte[] content) {
-            return create(name, content, null);
+        public static Part create(String name, InputStream stream, String fileName, MediaType mediaType) {
+            return new Part(name, stream, fileName, mediaType);
         }
 
-        public static Part create(String name, byte[] content, MediaType mediaType) {
-            return new Part(name, content, mediaType);
+        public static Part create(String name, byte[] content, String fileName) {
+            return create(name, content, fileName, null);
         }
 
-        public static Part create(String name, ByteBuffer buffer) {
-            return create(name, buffer, null);
+        public static Part create(String name, byte[] content, String fileName, MediaType mediaType) {
+            return new Part(name, content, fileName, mediaType);
         }
 
-        public static Part create(String name, ByteBuffer buffer, MediaType mediaType) {
-            return new Part(name, buffer, mediaType);
+        public static Part create(String name, ByteBuffer buffer, String fileName) {
+            return create(name, buffer, fileName, null);
+        }
+
+        public static Part create(String name, ByteBuffer buffer, String fileName, MediaType mediaType) {
+            return new Part(name, buffer, fileName, mediaType);
         }
     }
 }

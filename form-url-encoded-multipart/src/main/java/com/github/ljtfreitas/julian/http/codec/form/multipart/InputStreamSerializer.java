@@ -43,7 +43,7 @@ class InputStreamSerializer implements MultipartFormFieldSerializer<InputStream>
 
     @Override
     public void write(String boundary, MultipartFormField<InputStream> field, Charset charset, OutputStream output) {
-        ContentDisposition contentDisposition = new ContentDisposition(field.name);
+        ContentDisposition contentDisposition = new ContentDisposition(field.name, field.fileName.orElse(null));
 
         MediaType mediaType = field.contentType.orElse(MEDIA_TYPE_OCTET_STREAM);
 

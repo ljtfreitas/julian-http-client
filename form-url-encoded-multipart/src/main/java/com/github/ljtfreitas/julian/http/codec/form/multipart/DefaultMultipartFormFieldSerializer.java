@@ -40,7 +40,7 @@ class DefaultMultipartFormFieldSerializer implements MultipartFormFieldSerialize
 
     @Override
     public void write(String boundary, MultipartFormField<Object> field, Charset charset, OutputStream output) {
-        ContentDisposition contentDisposition = new ContentDisposition(field.name);
+        ContentDisposition contentDisposition = new ContentDisposition(field.name, field.fileName.orElse(null));
 
         new MultipartFormFieldWriter(output, boundary, contentDisposition, MEDIA_TYPE_TEXT_PLAIN)
                 .write(o -> o.write(field.value.toString().getBytes(charset)))

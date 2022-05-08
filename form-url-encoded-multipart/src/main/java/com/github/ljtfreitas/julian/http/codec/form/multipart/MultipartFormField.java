@@ -30,15 +30,17 @@ class MultipartFormField<T> {
 
     final String name;
     final T value;
+    final Optional<String> fileName;
     final Optional<MediaType> contentType;
 
     MultipartFormField(String name, T value) {
-        this(name, value, null);
+        this(name, value, null, null);
     }
 
-    MultipartFormField(String name, T value, MediaType contentType) {
+    MultipartFormField(String name, T value, String fileName, MediaType contentType) {
         this.name = name;
         this.value = value;
+        this.fileName = Optional.ofNullable(fileName);
         this.contentType = Optional.ofNullable(contentType);
     }
 }

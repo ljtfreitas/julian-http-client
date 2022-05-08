@@ -27,10 +27,6 @@ class ContentDisposition {
     final String name;
     final String fileName;
 
-    ContentDisposition(String name) {
-        this(name, null);
-    }
-
     ContentDisposition(String name, String fileName) {
         this.name = name;
         this.fileName = fileName;

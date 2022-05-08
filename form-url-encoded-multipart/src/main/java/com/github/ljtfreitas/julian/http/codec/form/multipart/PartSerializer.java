@@ -46,6 +46,6 @@ class PartSerializer implements MultipartFormFieldSerializer<MultipartForm.Part>
         MultipartForm.Part part = field.value;
 
         part.values().forEach(v -> serializers.select(v.getClass())
-                .write(boundary, new MultipartFormField(field.name, v, part.mediaType()), charset, output));
+                .write(boundary, new MultipartFormField(field.name, v, part.fileName(), part.mediaType()), charset, output));
     }
 }

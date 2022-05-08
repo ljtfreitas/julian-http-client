@@ -19,6 +19,7 @@ import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.Flow.Subscriber;
@@ -51,7 +52,7 @@ class MultipartFormObjectHTTPRequestWriterTest {
 
         @Test
         void simple() {
-            String expected = "----abc1234"
+            String expected = "--abc1234"
                     + "\r\n"
                     + "Content-Disposition: form-data; name=\"name\""
                     + "\r\n"
@@ -60,7 +61,7 @@ class MultipartFormObjectHTTPRequestWriterTest {
                     + "\r\n"
                     + "Tiago de Freitas Lima"
                     + "\r\n"
-                    + "----abc1234"
+                    + "--abc1234"
                     + "\r\n"
                     + "Content-Disposition: form-data; name=\"age\""
                     + "\r\n"
@@ -70,7 +71,7 @@ class MultipartFormObjectHTTPRequestWriterTest {
                     + "35"
                     + "\r\n"
                     + "\r\n"
-                    + "----abc1234--";
+                    + "--abc1234--";
 
             MultipartForm form = new MultipartForm()
                     .join(Part.create("name", "Tiago de Freitas Lima"))
@@ -85,7 +86,7 @@ class MultipartFormObjectHTTPRequestWriterTest {
 
         @Test
         void file() throws URISyntaxException {
-            String expected = "----abc1234"
+            String expected = "--abc1234"
                     + "\r\n"
                     + "Content-Disposition: form-data; name=\"name\""
                     + "\r\n"
@@ -94,7 +95,7 @@ class MultipartFormObjectHTTPRequestWriterTest {
                     + "\r\n"
                     + "Tiago de Freitas Lima"
                     + "\r\n"
-                    + "----abc1234"
+                    + "--abc1234"
                     + "\r\n"
                     + "Content-Disposition: form-data; name=\"age\""
                     + "\r\n"
@@ -103,7 +104,7 @@ class MultipartFormObjectHTTPRequestWriterTest {
                     + "\r\n"
                     + "35"
                     + "\r\n"
-                    + "----abc1234"
+                    + "--abc1234"
                     + "\r\n"
                     + "Content-Disposition: form-data; name=\"my-file\"; filename=\"sample-file.txt\""
                     + "\r\n"
@@ -115,7 +116,7 @@ class MultipartFormObjectHTTPRequestWriterTest {
                     + "if you can send this content in a multipart request, congrats. the code is working."
                     + "\r\n"
                     + "\r\n"
-                    + "----abc1234--";
+                    + "--abc1234--";
 
             MultipartForm form = new MultipartForm()
                     .join(Part.create("name", "Tiago de Freitas Lima"))
@@ -131,7 +132,7 @@ class MultipartFormObjectHTTPRequestWriterTest {
 
         @Test
         void path() throws URISyntaxException {
-            String expected = "----abc1234"
+            String expected = "--abc1234"
                     + "\r\n"
                     + "Content-Disposition: form-data; name=\"name\""
                     + "\r\n"
@@ -140,7 +141,7 @@ class MultipartFormObjectHTTPRequestWriterTest {
                     + "\r\n"
                     + "Tiago de Freitas Lima"
                     + "\r\n"
-                    + "----abc1234"
+                    + "--abc1234"
                     + "\r\n"
                     + "Content-Disposition: form-data; name=\"age\""
                     + "\r\n"
@@ -149,7 +150,7 @@ class MultipartFormObjectHTTPRequestWriterTest {
                     + "\r\n"
                     + "35"
                     + "\r\n"
-                    + "----abc1234"
+                    + "--abc1234"
                     + "\r\n"
                     + "Content-Disposition: form-data; name=\"my-file\"; filename=\"sample-file.txt\""
                     + "\r\n"
@@ -161,12 +162,13 @@ class MultipartFormObjectHTTPRequestWriterTest {
                     + "if you can send this content in a multipart request, congrats. the code is working."
                     + "\r\n"
                     + "\r\n"
-                    + "----abc1234--";
+                    + "--abc1234--";
 
             MultipartForm form = new MultipartForm()
                     .join(Part.create("name", "Tiago de Freitas Lima"))
                     .join(Part.create("age", "35"))
-                    .join(Part.create("my-file", Path.of(getClass().getResource("/sample-file.txt").toURI())));
+                    .join(Part.create("my-file", Path.of(getClass().getResource("/sample-file.txt").toURI()),
+                            "sample-file.txt"));
 
             HTTPRequestBody httpRequestBody = writer.write(form, UTF_8);
 
@@ -180,7 +182,7 @@ class MultipartFormObjectHTTPRequestWriterTest {
             byte[] fileAsBytes = Files.readAllBytes(Path.of(getClass().getResource("/image.jpeg").toURI()));
 
             ByteArrayOutputStream output = new ByteArrayOutputStream();
-            output.write(("----abc1234"
+            output.write(("--abc1234"
                     + "\r\n"
                     + "Content-Disposition: form-data; name=\"name\""
                     + "\r\n"
@@ -189,7 +191,7 @@ class MultipartFormObjectHTTPRequestWriterTest {
                     + "\r\n"
                     + "Tiago de Freitas Lima"
                     + "\r\n"
-                    + "----abc1234"
+                    + "--abc1234"
                     + "\r\n"
                     + "Content-Disposition: form-data; name=\"age\""
                     + "\r\n"
@@ -198,9 +200,9 @@ class MultipartFormObjectHTTPRequestWriterTest {
                     + "\r\n"
                     + "35"
                     + "\r\n"
-                    + "----abc1234"
+                    + "--abc1234"
                     + "\r\n"
-                    + "Content-Disposition: form-data; name=\"my-file\""
+                    + "Content-Disposition: form-data; name=\"my-file\"; filename=\"image.jpeg\""
                     + "\r\n"
                     + "Content-Type: image/jpeg"
                     + "\r\n"
@@ -208,14 +210,14 @@ class MultipartFormObjectHTTPRequestWriterTest {
             output.write(fileAsBytes);
             output.write(("\r\n"
                     + "\r\n"
-                    + "----abc1234--").getBytes());
+                    + "--abc1234--").getBytes());
             output.flush();
             output.close();
 
             MultipartForm form = new MultipartForm()
                     .join(Part.create("name", "Tiago de Freitas Lima"))
                     .join(Part.create("age", "35"))
-                    .join(Part.create("my-file", fileAsBytes, MediaType.valueOf("image/jpeg")));
+                    .join(Part.create("my-file", fileAsBytes, "image.jpeg", MediaType.valueOf("image/jpeg")));
 
             HTTPRequestBody httpRequestBody = writer.write(form, UTF_8);
 
@@ -232,7 +234,7 @@ class MultipartFormObjectHTTPRequestWriterTest {
             InputStream source = new BufferedInputStream(Files.newInputStream(Path.of(getClass().getResource("/image.jpeg").toURI())));
 
             ByteArrayOutputStream output = new ByteArrayOutputStream();
-            output.write(("----abc1234"
+            output.write(("--abc1234"
                     + "\r\n"
                     + "Content-Disposition: form-data; name=\"name\""
                     + "\r\n"
@@ -241,7 +243,7 @@ class MultipartFormObjectHTTPRequestWriterTest {
                     + "\r\n"
                     + "Tiago de Freitas Lima"
                     + "\r\n"
-                    + "----abc1234"
+                    + "--abc1234"
                     + "\r\n"
                     + "Content-Disposition: form-data; name=\"age\""
                     + "\r\n"
@@ -250,9 +252,9 @@ class MultipartFormObjectHTTPRequestWriterTest {
                     + "\r\n"
                     + "35"
                     + "\r\n"
-                    + "----abc1234"
+                    + "--abc1234"
                     + "\r\n"
-                    + "Content-Disposition: form-data; name=\"my-file\""
+                    + "Content-Disposition: form-data; name=\"my-file\"; filename=\"image.jpeg\""
                     + "\r\n"
                     + "Content-Type: image/jpeg"
                     + "\r\n"
@@ -260,7 +262,7 @@ class MultipartFormObjectHTTPRequestWriterTest {
             source.transferTo(output);
             output.write(("\r\n"
                     + "\r\n"
-                    + "----abc1234--").getBytes());
+                    + "--abc1234--").getBytes());
             output.flush();
             output.close();
 
@@ -269,7 +271,7 @@ class MultipartFormObjectHTTPRequestWriterTest {
             MultipartForm form = new MultipartForm()
                     .join(Part.create("name", "Tiago de Freitas Lima"))
                     .join(Part.create("age", "35"))
-                    .join(Part.create("my-file", fileAsInputStream, MediaType.valueOf("image/jpeg")));
+                    .join(Part.create("my-file", fileAsInputStream, "image.jpeg", MediaType.valueOf("image/jpeg")));
 
             HTTPRequestBody httpRequestBody = writer.write(form, UTF_8);
 
@@ -287,7 +289,7 @@ class MultipartFormObjectHTTPRequestWriterTest {
             ByteBuffer fileAsByteBuffer = ByteBuffer.wrap(Files.readAllBytes(Path.of(getClass().getResource("/image.jpeg").toURI())));
 
             ByteArrayOutputStream output = new ByteArrayOutputStream();
-            output.write(("----abc1234"
+            output.write(("--abc1234"
                     + "\r\n"
                     + "Content-Disposition: form-data; name=\"name\""
                     + "\r\n"
@@ -296,7 +298,7 @@ class MultipartFormObjectHTTPRequestWriterTest {
                     + "\r\n"
                     + "Tiago de Freitas Lima"
                     + "\r\n"
-                    + "----abc1234"
+                    + "--abc1234"
                     + "\r\n"
                     + "Content-Disposition: form-data; name=\"age\""
                     + "\r\n"
@@ -305,9 +307,9 @@ class MultipartFormObjectHTTPRequestWriterTest {
                     + "\r\n"
                     + "35"
                     + "\r\n"
-                    + "----abc1234"
+                    + "--abc1234"
                     + "\r\n"
-                    + "Content-Disposition: form-data; name=\"my-file\""
+                    + "Content-Disposition: form-data; name=\"my-file\"; filename=\"image.jpeg\""
                     + "\r\n"
                     + "Content-Type: image/jpeg"
                     + "\r\n"
@@ -315,7 +317,7 @@ class MultipartFormObjectHTTPRequestWriterTest {
             output.write(fileAsByteBuffer.array());
             output.write(("\r\n"
                     + "\r\n"
-                    + "----abc1234--").getBytes());
+                    + "--abc1234--").getBytes());
             output.flush();
             output.close();
 
@@ -324,7 +326,7 @@ class MultipartFormObjectHTTPRequestWriterTest {
             MultipartForm form = new MultipartForm()
                     .join(Part.create("name", "Tiago de Freitas Lima"))
                     .join(Part.create("age", "35"))
-                    .join(Part.create("my-file", fileAsByteBuffer, MediaType.valueOf("image/jpeg")));
+                    .join(Part.create("my-file", fileAsByteBuffer, "image.jpeg", MediaType.valueOf("image/jpeg")));
 
             HTTPRequestBody httpRequestBody = writer.write(form, UTF_8);
 

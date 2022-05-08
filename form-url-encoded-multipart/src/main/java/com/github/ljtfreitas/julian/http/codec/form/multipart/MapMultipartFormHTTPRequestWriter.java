@@ -63,7 +63,7 @@ public class MapMultipartFormHTTPRequestWriter implements MultipartFormDataHTTPR
 
         MediaType mediaType = MediaType.MULTIPART_FORM_DATA.parameter("boundary", boundary);
 
-        return new DefaultHTTPRequestBody(mediaType, () -> serialize(map, encoding, "----" + boundary));
+        return new DefaultHTTPRequestBody(mediaType, () -> serialize(map, encoding, "--" + boundary));
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})

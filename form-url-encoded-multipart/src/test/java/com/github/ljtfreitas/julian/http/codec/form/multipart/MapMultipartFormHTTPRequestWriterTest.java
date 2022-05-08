@@ -19,7 +19,7 @@ class MapMultipartFormHTTPRequestWriterTest {
 
     @Test
     void serialize() {
-        String expected = "----abc1234"
+        String expected = "--abc1234"
                 + "\r\n"
                 + "Content-Disposition: form-data; name=\"name\""
                 + "\r\n"
@@ -28,7 +28,7 @@ class MapMultipartFormHTTPRequestWriterTest {
                 + "\r\n"
                 + "Tiago de Freitas Lima"
                 + "\r\n"
-                + "----abc1234"
+                + "--abc1234"
                 + "\r\n"
                 + "Content-Disposition: form-data; name=\"age\""
                 + "\r\n"
@@ -38,7 +38,7 @@ class MapMultipartFormHTTPRequestWriterTest {
                 + "35"
                 + "\r\n"
                 + "\r\n"
-                + "----abc1234--";
+                + "--abc1234--";
 
         Map<String, Object> form = new LinkedHashMap<>();
         form.put("name", "Tiago de Freitas Lima");

@@ -28,8 +28,12 @@ interface BoundaryGen {
 
     String run();
 
-    BoundaryGen RANDOM = () -> UUID.randomUUID().toString()
-            .toLowerCase()
-            .replaceAll("-", "")
-            .substring(0, 71); // 1-70 characters
+    BoundaryGen RANDOM = () -> {
+        String boundary = UUID.randomUUID().toString()
+                .toLowerCase()
+                .replaceAll("-", "");
+
+        // 1-70 characters
+        return boundary.substring(0, Math.min(boundary.length(), 71));
+    };
 }

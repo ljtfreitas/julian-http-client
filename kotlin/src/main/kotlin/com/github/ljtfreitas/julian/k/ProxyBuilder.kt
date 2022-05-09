@@ -64,6 +64,7 @@ fun ProxyBuilder.enableKotlinExtensions() : ProxyBuilder {
             FlowResponseT,
             JobResponseT,
             SequenceResponseT,
+            KFunctionCallbackResponseT,
             SuspendKFunctionResponseT()
         )
     }

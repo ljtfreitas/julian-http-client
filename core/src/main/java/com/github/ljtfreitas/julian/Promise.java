@@ -83,6 +83,10 @@ public interface Promise<T> {
 		return new DefaultPromise<>(future);
 	}
 
+	static <T> Promise<T> pending(CompletableFuture<T> future, Executor executor) {
+		return new DefaultPromise<>(future, executor);
+	}
+
 	static <T> Promise<T> pending(Supplier<T> fn) {
 		return new DefaultPromise<>(supplyAsync(fn));
 	}

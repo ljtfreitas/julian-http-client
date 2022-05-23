@@ -34,7 +34,6 @@ import com.github.ljtfreitas.julian.http.MediaType
 import com.github.ljtfreitas.julian.http.client.HTTPClient
 import com.github.ljtfreitas.julian.http.client.HTTPClientRequest
 import com.github.ljtfreitas.julian.http.client.HTTPClientResponse
-import com.github.ljtfreitas.julian.k.http.client.ktor.KtorHTTPClient.Companion.invoke
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.call.receive

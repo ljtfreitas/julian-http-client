@@ -34,7 +34,6 @@ import com.github.ljtfreitas.julian.http.MediaType
 import com.github.ljtfreitas.julian.http.client.HTTPClient
 import com.github.ljtfreitas.julian.http.client.HTTPClientRequest
 import com.github.ljtfreitas.julian.http.client.HTTPClientResponse
-import com.github.ljtfreitas.julian.k.http.client.ktor.KtorHTTPClient.Companion.invoke
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.call.receive
@@ -51,12 +50,17 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.content.OutgoingContent
 import io.ktor.util.toMap
 import io.ktor.utils.io.ByteWriteChannel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.future.future
 import kotlinx.coroutines.jdk9.asFlow
 import java.io.Closeable
 import java.util.Optional
+import java.util.concurrent.Executor
+import kotlin.coroutines.ContinuationInterceptor
+import kotlin.coroutines.CoroutineContext
 
 @DelicateCoroutinesApi
 class KtorHTTPClient private constructor(private val client: HttpClient): HTTPClient, Closeable {
@@ -67,7 +71,7 @@ class KtorHTTPClient private constructor(private val client: HttpClient): HTTPCl
 
         operator fun invoke(
             block: HttpClientConfig<*>.() -> Unit = {}
-        ) = KtorHTTPClient(HttpClient() {
+        ) = KtorHTTPClient(HttpClient {
             block()
             expectSuccess = false
         })
@@ -90,7 +94,7 @@ class KtorHTTPClient private constructor(private val client: HttpClient): HTTPCl
     }
 
     override fun request(request: HTTPRequestDefinition) = HTTPClientRequest {
-        Promise.pending(GlobalScope.future {
+        Promise.pending(GlobalScope.future(client.coroutineContext) {
             val response: HttpResponse = client.request(request.path().toURL()) {
                 method = HttpMethod.parse(request.method().name)
 
@@ -104,7 +108,8 @@ class KtorHTTPClient private constructor(private val client: HttpClient): HTTPCl
             }
 
             return@future response.asHTTPClientResponse()
-        })
+
+        }, client.coroutineContext.javaExecutor())
     }
 
     private fun HTTPHeaders.contentType() = select(HTTPHeader.CONTENT_TYPE).map { MediaType.valueOf(it.value()) }
@@ -135,4 +140,7 @@ class KtorHTTPClient private constructor(private val client: HttpClient): HTTPCl
     }
 
     override fun close() = client.close()
+
+    private fun CoroutineContext.javaExecutor(): Executor = (get(ContinuationInterceptor) as CoroutineDispatcher).asExecutor()
 }
+

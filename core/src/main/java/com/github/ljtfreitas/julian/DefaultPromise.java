@@ -25,6 +25,7 @@ package com.github.ljtfreitas.julian;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -34,19 +35,25 @@ import java.util.function.Predicate;
 class DefaultPromise<T> implements Promise<T> {
 
 	private final CompletableFuture<T> future;
+	private final Executor executor;
 
 	DefaultPromise(CompletableFuture<T> future) {
+		this(future, future.defaultExecutor());
+	}
+
+	DefaultPromise(CompletableFuture<T> future, Executor executor) {
 		this.future = future;
+		this.executor = executor;
 	}
 
 	@Override
 	public Promise<T> onSuccess(Consumer<? super T> fn) {
-		return new DefaultPromise<>(future.whenCompleteAsync((r, e) -> { if (e == null) fn.accept(r); }));
+		return new DefaultPromise<>(future.whenCompleteAsync((r, e) -> { if (e == null) fn.accept(r); }, executor), executor);
 	}
 
 	@Override
 	public <R> Promise<R> then(Function<? super T, R> fn) {
-		return new DefaultPromise<>(future.thenApplyAsync(fn));
+		return new DefaultPromise<>(future.thenApplyAsync(fn, executor), executor);
 	}
 
 	@Override
@@ -56,23 +63,23 @@ class DefaultPromise<T> implements Promise<T> {
 				return failure.apply((Exception) e);
 			else
 				return success.apply(r);
-		})).join().unsafe();
+		}, executor), executor).join().unsafe();
 
 	}
 
 	@Override
 	public <R> Promise<R> bind(Function<? super T, Promise<R>> fn) {
-		return new DefaultPromise<>(future.thenComposeAsync(t -> fn.apply(t).future()));
+		return new DefaultPromise<>(future.thenComposeAsync(t -> fn.apply(t).future(), executor), executor);
 	}
 
 	@Override
 	public <T2, R> Promise<R> zip(Promise<T2> other, BiFunction<? super T, ? super T2, R> fn) {
-		return new DefaultPromise<>(future.thenCombineAsync(other.future(), fn));
+		return new DefaultPromise<>(future.thenCombineAsync(other.future(), fn, executor), executor);
 	}
 
 	@Override
 	public Promise<T> recover(Function<? super Exception, T> fn) {
-		return new DefaultPromise<>(future.exceptionally(t -> fn.apply((Exception) t)));
+		return new DefaultPromise<>(future.exceptionally(t -> fn.apply((Exception) t)), executor);
 	}
 
 	@Override
@@ -83,7 +90,7 @@ class DefaultPromise<T> implements Promise<T> {
 				return fn.apply(expected.cast(cause));
 			else
 				return r;
-		}));
+		}, executor), executor);
 	}
 
 	@Override
@@ -94,7 +101,7 @@ class DefaultPromise<T> implements Promise<T> {
 				return fn.apply(cause);
 			else
 				return r;
-		}));
+		}, executor), executor);
 	}
 
 	@Override
@@ -105,7 +112,7 @@ class DefaultPromise<T> implements Promise<T> {
 				throw failure(fn.apply(cause));
 			else
 				return r;
-		}));
+		}, executor), executor);
 	}
 
 	@Override
@@ -114,7 +121,7 @@ class DefaultPromise<T> implements Promise<T> {
 			Exception cause = deep(e);
 			if (cause != null)
 				fn.accept(cause);
-		}));
+		}, executor), executor);
 	}
 
 	private RuntimeException failure(Exception e) {
@@ -141,6 +148,6 @@ class DefaultPromise<T> implements Promise<T> {
 	public Promise<T> subscribe(Subscriber<? super T> subscriber) {
 		BiConsumer<T, Throwable> handle = (r, e) -> { if (e == null) subscriber.success(r); else subscriber.failure((Exception) e); };
 		BiConsumer<T, Throwable> done = (r, e) -> subscriber.done();
-		return new DefaultPromise<>(future.whenCompleteAsync(handle).whenCompleteAsync(done));
+		return new DefaultPromise<>(future.whenCompleteAsync(handle, executor).whenCompleteAsync(done, executor), executor);
 	}
 }

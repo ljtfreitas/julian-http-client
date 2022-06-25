@@ -29,13 +29,22 @@ fun <T> Attempt<T>.result() : Result<T> = fold(Result.Companion::success, Result
 
 fun <T> Promise<T>.result() : Result<T> = join().result()
 
-operator fun Promise<out Any>.plus(other: Promise<out Any>): Promise<Array<Any?>> = bind { a ->
-    other.bind { b ->
-        Promise.done(when {
-            a is Array<*> && b is Array<*> -> arrayOf(*a, *b)
-            a is Array<*> -> arrayOf(*a, b)
-            b is Array<*> -> arrayOf(a, *b)
-            else -> arrayOf(a, b)
-        })
-    }
+@JvmName("promisePlus")
+operator fun <A, B> Promise<A>.plus(other: Promise<B>): Promise<Pair<A, B>> = bind { a ->
+    other.then { b -> a to b }
+}
+
+@JvmName("promisePairPlus")
+operator fun <A, B, C> Promise<Pair<A, B>>.plus(other: Promise<C>): Promise<Triple<A, B, C>> = bind { (a, b) ->
+    other.then { c -> Triple(a, b, c) }
+}
+
+@JvmName("promiseTriplePlus")
+operator fun <A, B, C> Promise<Triple<A, B, C>>.plus(other: Promise<*>): Promise<Array<*>> = bind { (a, b, c) ->
+    other.then { d -> arrayOf(a, b, c, d) }
+}
+
+@JvmName("promiseArrayPlus")
+operator fun Promise<Array<*>>.plus(other: Promise<*>): Promise<Array<*>> = bind { a ->
+    other.then { b -> arrayOf(a, b) }
 }

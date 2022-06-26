@@ -25,6 +25,8 @@ plugins {
     kotlin("jvm") version "1.6.10"
 }
 
+description = "KtorClient implementation for julian-http-client"
+
 tasks.jar.configure {
     archiveBaseName.set("julian-http-client-ktor")
 }

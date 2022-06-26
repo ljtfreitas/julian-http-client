@@ -24,6 +24,8 @@ plugins {
     modules
 }
 
+description = "ReactorNetty implementation for julian-http-client"
+
 tasks.jar.configure {
     archiveBaseName.set("julian-http-client-reactor-netty")
 }

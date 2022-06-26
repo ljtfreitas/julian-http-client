@@ -30,6 +30,3 @@ repositories {
     gradlePluginPortal()
 }
 
-dependencies {
-    implementation("net.researchgate:gradle-release:2.8.1")
-}

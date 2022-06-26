@@ -1,5 +1,3 @@
-import net.researchgate.release.GitAdapter.GitConfig
-import net.researchgate.release.ReleaseExtension
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -29,7 +27,6 @@ plugins {
     `java-library`
     `maven-publish`
     signing
-    id("net.researchgate.release")
 }
 
 java {
@@ -173,11 +170,3 @@ publishing {
 signing {
     sign(publishing.publications["maven"])
 }
-
-release {
-    git {
-        requireBranch = "main"
-    }
-}
-
-fun ReleaseExtension.git(configure: GitConfig.() -> Unit) = (getProperty("git") as GitConfig).configure()

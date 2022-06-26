@@ -24,6 +24,8 @@ plugins {
     modules
 }
 
+description = "Resilience4j add-ons for julian-http-client"
+
 tasks.jar.configure {
     archiveBaseName.set("julian-http-client-resilience4j")
 }

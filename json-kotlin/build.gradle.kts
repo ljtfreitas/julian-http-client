@@ -26,6 +26,8 @@ plugins {
     kotlin("plugin.serialization") version "1.6.10"
 }
 
+description = "julian-http-client support for application/json using kotlinx.serialization-json"
+
 tasks.jar.configure {
     archiveBaseName.set("julian-http-client-json-kotlin")
 }

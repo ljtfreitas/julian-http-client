@@ -24,6 +24,8 @@ plugins {
     modules
 }
 
+description = "julian-http-client support for form-url-encoded/multipart-data"
+
 tasks.jar.configure {
     archiveBaseName.set("julian-http-client-form-url-encoded-multipart")
 }

@@ -24,6 +24,8 @@ plugins {
     modules
 }
 
+description = "Spring WebClient implementation for julian-http-client"
+
 tasks.jar.configure {
     archiveBaseName.set("julian-http-client-spring-web-flux")
 }

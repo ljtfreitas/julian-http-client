@@ -25,6 +25,8 @@ plugins {
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
 }
 
+description = "Reactor add-ons for julian-http-client"
+
 tasks.jar.configure {
     archiveBaseName.set("julian-http-client-reactor")
 }

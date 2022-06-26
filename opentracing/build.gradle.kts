@@ -24,6 +24,8 @@ plugins {
     modules
 }
 
+description = "OpenTracing add-ons for julian-http-client"
+
 tasks.jar.configure {
     archiveBaseName.set("julian-http-client-opentracing")
 }

@@ -10,4 +10,4 @@ bin
 .classpath
 .project
 .settings
-gradle.properties
+#gradle.properties

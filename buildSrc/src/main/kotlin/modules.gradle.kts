@@ -119,6 +119,8 @@ publishing {
 
             pom {
                 name.set(artifactId)
+                description.set(project.description)
+
                 url.set("https://github.com/ljtfreitas/julian-http-client")
                 packaging = "jar"
 

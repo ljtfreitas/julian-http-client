@@ -24,6 +24,8 @@ plugins {
     modules
 }
 
+description = "julian-http-client support for application/json using Gson"
+
 tasks.jar.configure {
     archiveBaseName.set("julian-http-client-json-gson")
 }

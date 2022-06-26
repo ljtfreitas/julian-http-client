@@ -24,6 +24,8 @@ plugins {
     modules
 }
 
+description = "RxJava3 add-ons for julian-http-client"
+
 tasks.jar.configure {
     archiveBaseName.set("julian-http-client-rx-java3")
 }

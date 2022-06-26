@@ -24,6 +24,8 @@ plugins {
     modules
 }
 
+description = "Vavr add-ons for julian-http-client"
+
 tasks.jar.configure {
     archiveBaseName.set("julian-http-client-vavr")
 }

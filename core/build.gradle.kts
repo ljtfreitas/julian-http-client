@@ -24,6 +24,8 @@ plugins {
     modules
 }
 
+description = "julian-http-client core module"
+
 tasks.compileTestJava.configure {
     options.compilerArgs.add("-parameters")
 }

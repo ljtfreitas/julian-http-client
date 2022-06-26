@@ -24,6 +24,8 @@ plugins {
     modules
 }
 
+description = "julian-http-client support for application/xml using Jackson"
+
 tasks.jar.configure {
     archiveBaseName.set("julian-http-client-xml-jackson")
 }

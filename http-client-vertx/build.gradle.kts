@@ -24,6 +24,8 @@ plugins {
     modules
 }
 
+description = "VertxClient implementation for julian-http-client"
+
 tasks.jar.configure {
     archiveBaseName.set("julian-http-client-vertx")
 }

@@ -26,6 +26,8 @@ plugins {
     kotlin("plugin.serialization") version "1.6.10"
 }
 
+description = "Kotlin extensions for julian-http-client"
+
 tasks.jar.configure {
     archiveBaseName.set("julian-http-client-kotlin")
 }

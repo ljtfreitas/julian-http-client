@@ -29,7 +29,6 @@ import com.github.ljtfreitas.julian.Promise
 import com.github.ljtfreitas.julian.Response
 import com.github.ljtfreitas.julian.ResponseFn
 import com.github.ljtfreitas.julian.ResponseT
-import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import java.lang.reflect.WildcardType
 import java.util.stream.Stream

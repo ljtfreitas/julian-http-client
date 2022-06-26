@@ -41,7 +41,7 @@ import com.github.ljtfreitas.julian.http.codec.FormURLEncodedHTTPMessageCodec;
 
 import static com.github.ljtfreitas.julian.http.MediaType.APPLICATION_FORM_URLENCODED;
 
-public class SimpleMapFormURLEncodedHTTPMessageCodec implements FormURLEncodedHTTPMessageCodec<Map<String, String>> {
+public class SimpleMapFormURLEncodedHTTPMessageCodec implements FormURLEncodedHTTPMessageCodec<Map<String, ?>> {
 
     private static final SimpleMapFormURLEncodedHTTPMessageCodec SINGLE_INSTANCE = new SimpleMapFormURLEncodedHTTPMessageCodec();
 
@@ -61,12 +61,12 @@ public class SimpleMapFormURLEncodedHTTPMessageCodec implements FormURLEncodedHT
     }
 
     @Override
-    public HTTPRequestBody write(Map<String, String> map, Charset encoding) {
+    public HTTPRequestBody write(Map<String, ?> map, Charset encoding) {
         return new DefaultHTTPRequestBody(APPLICATION_FORM_URLENCODED, () -> serialize(map, encoding));
     }
 
-    private Publisher<ByteBuffer> serialize(Map<String, String> map, Charset encoding) {
-        return serializer.serialize("", JavaType.parameterized(Map.class, String.class, String.class), map)
+    private Publisher<ByteBuffer> serialize(Map<String, ?> map, Charset encoding) {
+        return serializer.serialize("", JavaType.parameterized(Map.class, String.class, Object.class), map)
                 .map(form -> codec.write(form, encoding).serialize())
                 .orElseGet(BodyPublishers::noBody);
     }
@@ -77,7 +77,7 @@ public class SimpleMapFormURLEncodedHTTPMessageCodec implements FormURLEncodedHT
     }
 
     @Override
-    public Optional<CompletableFuture<Map<String, String>>> read(HTTPResponseBody body, JavaType javaType) {
+    public Optional<CompletableFuture<Map<String, ?>>> read(HTTPResponseBody body, JavaType javaType) {
         return codec.read(body, javaType)
                 .map(future -> future
                         .thenApplyAsync(form -> form.all().entrySet().stream()

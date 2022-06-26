@@ -35,8 +35,6 @@ import java.net.URI;
 import java.util.Optional;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static io.github.resilience4j.ratelimiter.RateLimiter.waitForPermission;
-
 class TimeLimiterHTTPRequest<T> implements HTTPRequest<T> {
 
     private final TimeLimiter timeLimiter;

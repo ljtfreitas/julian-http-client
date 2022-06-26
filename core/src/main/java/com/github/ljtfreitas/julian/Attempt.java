@@ -39,6 +39,8 @@ public interface Attempt<T> {
 
 	Attempt<T> onFailure(Consumer<? super Throwable> fn);
 
+	Attempt<T> failure(Function<? super Throwable, ? extends Throwable> fn);
+
 	<E extends Throwable> Attempt<T> failure(Class<E> candidate, Function<? super E, ? extends Throwable> fn);
 
 	Attempt<T> failure(Predicate<? super Throwable> candidate, Function<? super Throwable, ? extends Throwable> fn);
@@ -121,6 +123,11 @@ public interface Attempt<T> {
 
 		@Override
 		public Attempt<T> onFailure(Consumer<? super Throwable> fn) {
+			return this;
+		}
+
+		@Override
+		public Attempt<T> failure(Function<? super Throwable, ? extends Throwable> fn) {
 			return this;
 		}
 
@@ -226,6 +233,11 @@ public interface Attempt<T> {
 		@Override
 		public Attempt<T> recover(Predicate<? super Throwable> candidate, ThrowableSupplier<T> fn) {
 			return candidate.test(value) ? Attempt.run(fn) : this;
+		}
+
+		@Override
+		public Attempt<T> failure(Function<? super Throwable, ? extends Throwable> fn) {
+			return new Failure<>(fn.apply(value));
 		}
 
 		@SuppressWarnings("unchecked")

@@ -22,10 +22,9 @@
 
 package com.github.ljtfreitas.julian.http;
 
-import java.net.URI;
-
 import com.github.ljtfreitas.julian.Promise;
-import com.github.ljtfreitas.julian.http.client.HTTPClient;
+
+import java.net.URI;
 
 public interface HTTP {
 

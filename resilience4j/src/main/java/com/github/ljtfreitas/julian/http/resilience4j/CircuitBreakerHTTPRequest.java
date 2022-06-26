@@ -112,8 +112,7 @@ class CircuitBreakerHTTPRequest<T> implements HTTPRequest<T> {
         if (predicate.test(r)) {
             success(start, r);
         } else {
-            HTTPResponseException e = new HTTPResponseException(r.status(), r.headers(), Promise.done(new byte[0]));
-            failure(start, e);
+            failure(start, new HTTPResponseException(r.status(), r.headers(), Promise.done(new byte[0])));
         }
     }
 

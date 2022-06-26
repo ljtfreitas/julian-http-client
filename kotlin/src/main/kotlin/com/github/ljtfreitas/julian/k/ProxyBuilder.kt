@@ -26,23 +26,15 @@ import com.github.ljtfreitas.julian.Endpoint
 import com.github.ljtfreitas.julian.JavaType
 import com.github.ljtfreitas.julian.MethodEndpoint
 import com.github.ljtfreitas.julian.ProxyBuilder
-import com.github.ljtfreitas.julian.contract.ContractReader
 import com.github.ljtfreitas.julian.contract.EndpointMetadata
-import com.github.ljtfreitas.julian.http.HTTP
-import com.github.ljtfreitas.julian.http.HTTPResponseFailure
-import com.github.ljtfreitas.julian.http.HTTPStatusGroup
-import com.github.ljtfreitas.julian.http.client.HTTPClient
 import com.github.ljtfreitas.julian.k.coroutines.DeferredResponseT
 import com.github.ljtfreitas.julian.k.coroutines.FlowResponseT
 import com.github.ljtfreitas.julian.k.coroutines.JobResponseT
 import com.github.ljtfreitas.julian.k.http.codec.json.jsonCodec
 import kotlinx.serialization.json.Json
 import java.lang.reflect.Method
-import java.lang.reflect.Proxy
 import java.net.URL
 import java.util.Optional
-import java.util.concurrent.Executor
-import java.util.function.Function
 import kotlin.coroutines.Continuation
 import kotlin.reflect.KFunction
 import kotlin.reflect.jvm.kotlinFunction
@@ -67,6 +59,14 @@ fun ProxyBuilder.enableKotlinExtensions() : ProxyBuilder {
             KFunctionCallbackResponseT,
             SuspendKFunctionResponseT()
         )
+    }
+
+    http {
+        client {
+            configure {
+                requestTimeout(1000)
+            }
+        }
     }
 
     return this
@@ -101,6 +101,10 @@ fun ProxyBuilder.HTTPSpec.interceptors(spec: ProxyBuilder.HTTPSpec.HTTPRequestIn
 fun ProxyBuilder.HTTPSpec.failure(spec: ProxyBuilder.HTTPSpec.HTTPResponseFailureSpec.() -> Unit): ProxyBuilder.HTTPSpec = failure().apply(spec).and()
 
 fun ProxyBuilder.HTTPSpec.encoding(spec: ProxyBuilder.HTTPSpec.Encoding.() -> Unit): ProxyBuilder.HTTPSpec = encoding().apply(spec).and()
+
+inline fun <reified T> ProxyBuilder.build(endpoint: String?) : T = build(T::class.java, endpoint)
+
+inline fun <reified T> ProxyBuilder.build(endpoint: URL?) : T = build(T::class.java, endpoint)
 
 inline fun <reified T> proxy(endpoint: String? = null, block: ProxyBuilder.() -> Unit = {}) : T = proxy(endpoint?.let(::URL), block)
 

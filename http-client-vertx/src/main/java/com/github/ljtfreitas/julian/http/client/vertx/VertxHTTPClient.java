@@ -22,16 +22,14 @@
 
 package com.github.ljtfreitas.julian.http.client.vertx;
 
+import com.github.ljtfreitas.julian.http.HTTPRequestDefinition;
+import com.github.ljtfreitas.julian.http.client.HTTPClient;
+import com.github.ljtfreitas.julian.http.client.HTTPClientRequest;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 
 import java.io.Closeable;
-import java.io.IOException;
-
-import com.github.ljtfreitas.julian.http.HTTPRequestDefinition;
-import com.github.ljtfreitas.julian.http.client.HTTPClient;
-import com.github.ljtfreitas.julian.http.client.HTTPClientRequest;
 
 public class VertxHTTPClient implements HTTPClient, Closeable {
 

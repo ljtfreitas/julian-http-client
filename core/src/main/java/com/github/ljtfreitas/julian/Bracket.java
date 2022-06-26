@@ -101,6 +101,11 @@ public interface Bracket<T extends AutoCloseable> extends Attempt<T> {
 		}
 
 		@Override
+		public Attempt<T> failure(Function<? super Throwable, ? extends Throwable> fn) {
+			return id().failure(fn);
+		}
+
+		@Override
 		public <E extends Throwable> Attempt<T> failure(Class<E> candidate, Function<? super E, ? extends Throwable> fn) {
 			return id().failure(candidate, fn);
 		}

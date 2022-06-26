@@ -104,7 +104,7 @@ class RetryHTTPRequestInterceptorTest {
     }
 
     @Test
-    void shouldNotRetryWhenIgnoredExceptionsAreThrowed() {
+    void shouldNotRetryWhenIgnoredExceptionsAreThrew() {
         Retry retry = Retry.of("retry", RetryConfig.<HTTPResponse<String>> custom()
                 .maxAttempts(3)
                 .retryOnException(e -> e instanceof HTTPClientException)

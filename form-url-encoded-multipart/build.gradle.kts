@@ -25,7 +25,7 @@ plugins {
 }
 
 tasks.jar.configure {
-    archiveBaseName.set("julian-http-client-form-url-encodec-multipart")
+    archiveBaseName.set("julian-http-client-form-url-encoded-multipart")
 }
 
 dependencies {

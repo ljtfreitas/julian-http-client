@@ -111,7 +111,7 @@ class SimpleMapFormURLEncodedHTTPMessageCodecTest {
             void read() {
                 String value = "name=Tiago&age=35";
 
-                Map<String, String> form = codec.read(HTTPResponseBody.some(value.getBytes()), JavaType.valueOf(Form.class))
+                Map<String, ?> form = codec.read(HTTPResponseBody.some(value.getBytes()), JavaType.valueOf(Form.class))
                         .map(CompletableFuture::join)
                         .orElse(Collections.emptyMap());
 

@@ -61,14 +61,6 @@ fun ProxyBuilder.enableKotlinExtensions() : ProxyBuilder {
         )
     }
 
-    http {
-        client {
-            configure {
-                requestTimeout(1000)
-            }
-        }
-    }
-
     return this
 }
 

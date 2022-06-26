@@ -46,5 +46,5 @@ operator fun <A, B, C> Promise<Triple<A, B, C>>.plus(other: Promise<*>): Promise
 
 @JvmName("promiseArrayPlus")
 operator fun Promise<Array<*>>.plus(other: Promise<*>): Promise<Array<*>> = bind { a ->
-    other.then { b -> arrayOf(a, b) }
+    other.then { b -> arrayOf(*a, b) }
 }

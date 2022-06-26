@@ -31,7 +31,7 @@ repositories {
 
 allprojects {
     group = "com.github.ljtfreitas.julian-http-client"
-    version = "0.0.8-SNAPSHOT"
+    version = "1.0.0"
 }
 
 tasks.register("cleanAll") {

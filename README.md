@@ -29,7 +29,7 @@ The main goal is to be a good option to build HTTP requests, using regular Java 
 
 ## Current version
 
-0.0.7-SNAPSHOT
+1.0.0 (stable)
 
 ## Requirements
 

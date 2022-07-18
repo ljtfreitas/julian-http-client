@@ -20,7 +20,7 @@ The main goal is to be a good option to build HTTP requests, using regular Java 
         - [HTTP interceptors](#http-request-interceptors)
             - [Authentication](#authentication)
         - [HTTP response failures](#http-response-failures)
-        - [Additional HTTP client implementations](#custom-http-client-implementations)
+        - [Additional HTTP client implementations](#additional-http-client-implementations)
     - [Error handling](#error-handling)
     - [Kotlin support](#kotlin-support)
     - [Additional stuff](#additional-stuff)

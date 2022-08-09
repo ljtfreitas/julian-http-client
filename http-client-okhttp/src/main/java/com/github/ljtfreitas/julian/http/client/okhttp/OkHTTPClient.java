@@ -23,7 +23,6 @@
 package com.github.ljtfreitas.julian.http.client.okhttp;
 
 import com.github.ljtfreitas.julian.Attempt;
-import com.github.ljtfreitas.julian.http.HTTPRequestBody;
 import com.github.ljtfreitas.julian.http.HTTPRequestDefinition;
 import com.github.ljtfreitas.julian.http.client.HTTPClient;
 import com.github.ljtfreitas.julian.http.client.HTTPClientRequest;

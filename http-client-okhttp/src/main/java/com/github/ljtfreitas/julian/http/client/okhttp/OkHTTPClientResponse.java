@@ -1,6 +1,7 @@
 package com.github.ljtfreitas.julian.http.client.okhttp;
 
 import com.github.ljtfreitas.julian.Attempt;
+import com.github.ljtfreitas.julian.Bracket;
 import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.http.HTTPHeader;
 import com.github.ljtfreitas.julian.http.HTTPHeaders;
@@ -8,9 +9,12 @@ import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.HTTPStatus;
 import com.github.ljtfreitas.julian.http.HTTPStatusCode;
 import com.github.ljtfreitas.julian.http.client.HTTPClientResponse;
+import com.github.ljtfreitas.julian.http.codec.HTTPResponseReaderException;
+import okhttp3.ResponseBody;
 
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 class OkHTTPClientResponse implements HTTPClientResponse {
 
@@ -53,9 +57,12 @@ class OkHTTPClientResponse implements HTTPClientResponse {
                 .map(name -> HTTPHeader.create(name, response.headers().values(name)))
                 .reduce(HTTPHeaders.empty(), HTTPHeaders::join, (a, b) -> b);
 
-        byte[] bodyAsBytes = Attempt.run(response.body()::bytes).prop();
+        Supplier<HTTPResponseBody> responseBody = () -> Bracket.acquire(response::body)
+                .map(ResponseBody::bytes)
+                .map(HTTPResponseBody::some)
+                .prop(HTTPResponseReaderException::new);
 
         return new OkHTTPClientResponse(HTTPClientResponse.create(status, headers,
-                HTTPResponseBody.optional(status, headers, () -> HTTPResponseBody.some(bodyAsBytes))));
+                HTTPResponseBody.optional(status, headers, responseBody)));
     }
 }

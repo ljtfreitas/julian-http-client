@@ -1062,6 +1062,7 @@ Currently, there is a few additional implementations:
 - [Spring WebClient](./http-spring-web-flux/README.md)
 - [ReactorNetty](./http-client-reactor-netty/README.md)
 - [Vert.x HTTP Client](./http-client-vertx/README.md)
+- [OkHttp](./http-client-okhttp/README.md)
 
 ### Error handling
 

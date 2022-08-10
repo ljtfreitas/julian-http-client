@@ -20,25 +20,11 @@
  * SOFTWARE.
  */
 
-rootProject.name = "julian-http-client-parent"
-include("core")
-include("form-url-encoded-multipart")
-include("json-jackson")
-include("json-gson")
-include("json-jsonb")
-include("json-jsonp")
-include("json-kotlin")
-include("xml-jackson")
-include("http-client-reactor-netty")
-include("http-client-vertx")
-include("http-client-ktor")
-include("http-client-okhttp")
-include("http-spring-web-flux")
-include("xml-jaxb")
-include("rx-java3")
-include("mutiny")
-include("reactor")
-include("vavr")
-include("kotlin")
-include("resilience4j")
-include("opentracing")
+module com.github.ljtfreitas.julian.http.client.okhttp {
+    exports com.github.ljtfreitas.julian.http.client.okhttp;
+
+    requires com.github.ljtfreitas.julian;
+    requires okhttp3;
+    requires okio;
+    requires kotlin.stdlib;
+}

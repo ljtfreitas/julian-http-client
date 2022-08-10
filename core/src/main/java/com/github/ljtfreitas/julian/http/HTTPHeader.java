@@ -121,6 +121,10 @@ public class HTTPHeader {
 		return values.iterator().next();
 	}
 
+	public String valuesAsString() {
+		return String.join(", ", values);
+	}
+
 	public Collection<String> values() {
 		return values;
 	}

@@ -25,7 +25,7 @@ class MediaTypeTest {
 					  () -> assertEquals(mimeType, mediaType.toString()),
 					  () -> assertTrue(mediaType.parameters().isEmpty()));
 		}
-		
+
 		@Nested
 		class WithParameters {
 
@@ -111,6 +111,7 @@ class MediaTypeTest {
 			@ParameterizedTest
 			@CsvSource({"application/vnd.bla+json;version=1,application/vnd.bla+json;version=2",
 						"application/hal+json,application/*+json",
+						"application/*+json,application/problem+json",
 						"*/*,application/hal+json"})
 			void compatible(String a, String b) {
 				MediaType one = MediaType.valueOf(a);

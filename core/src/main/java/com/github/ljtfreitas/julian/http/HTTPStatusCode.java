@@ -135,6 +135,6 @@ public enum HTTPStatusCode {
 	}
 
 	public static Optional<HTTPStatusCode> select(int code) {
-		return Arrays.stream(values()).filter(s ->s.value == code).findFirst();
+		return Arrays.stream(values()).filter(s -> s.value == code).findFirst();
 	}
 }

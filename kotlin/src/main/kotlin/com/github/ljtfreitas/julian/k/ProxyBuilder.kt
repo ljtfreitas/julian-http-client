@@ -26,6 +26,7 @@ import com.github.ljtfreitas.julian.Endpoint
 import com.github.ljtfreitas.julian.JavaType
 import com.github.ljtfreitas.julian.MethodEndpoint
 import com.github.ljtfreitas.julian.ProxyBuilder
+import com.github.ljtfreitas.julian.ProxyBuilderExtension
 import com.github.ljtfreitas.julian.contract.EndpointMetadata
 import com.github.ljtfreitas.julian.http.HTTPResponseFailure
 import com.github.ljtfreitas.julian.http.HTTPStatusCode
@@ -44,7 +45,12 @@ import kotlin.coroutines.Continuation
 import kotlin.reflect.KFunction
 import kotlin.reflect.jvm.kotlinFunction
 
-fun ProxyBuilder.enableKotlinExtensions() : ProxyBuilder {
+class ProxyBuilderKotlinExtension : ProxyBuilderExtension {
+
+    override fun apply(builder: ProxyBuilder): ProxyBuilder = builder.enableKotlinExtensions()
+}
+
+fun ProxyBuilder.enableKotlinExtensions(): ProxyBuilder {
     contract {
         extensions {
             apply(::KExtensions)
@@ -119,8 +125,8 @@ inline fun <reified T> proxy(block: ProxyBuilder.() -> Unit = {}) : T = proxy(en
 inline fun <reified T> proxy(endpoint: String? = null, block: ProxyBuilder.() -> Unit = {}) : T = proxy(endpoint?.let(::URL), block)
 
 inline fun <reified T> proxy(endpoint: URL? = null, block: ProxyBuilder.() -> Unit = {}) : T = ProxyBuilder()
-    .apply(block)
     .enableKotlinExtensions()
+    .apply(block)
     .build(T::class.java, endpoint)
 
 internal class KExtensions(private val m: EndpointMetadata) : EndpointMetadata by m {

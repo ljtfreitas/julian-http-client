@@ -47,11 +47,13 @@ import com.github.ljtfreitas.julian.contract.DefaultEndpointMetadata;
 import com.github.ljtfreitas.julian.contract.EndpointMetadata;
 import com.github.ljtfreitas.julian.http.ConditionalHTTPResponseFailure;
 import com.github.ljtfreitas.julian.http.DefaultHTTP;
+import com.github.ljtfreitas.julian.http.DefaultHTTPResponseFailure;
 import com.github.ljtfreitas.julian.http.HTTP;
 import com.github.ljtfreitas.julian.http.HTTPHeadersResponseT;
 import com.github.ljtfreitas.julian.http.HTTPRequestInterceptor;
 import com.github.ljtfreitas.julian.http.HTTPRequestInterceptorChain;
 import com.github.ljtfreitas.julian.http.HTTPResponseFailure;
+import com.github.ljtfreitas.julian.http.HTTPResponseFailures;
 import com.github.ljtfreitas.julian.http.HTTPStatusCode;
 import com.github.ljtfreitas.julian.http.HTTPStatusCodeResponseT;
 import com.github.ljtfreitas.julian.http.HTTPStatusGroup;
@@ -71,6 +73,25 @@ import com.github.ljtfreitas.julian.http.codec.ScalarHTTPMessageCodec;
 import com.github.ljtfreitas.julian.http.codec.StringHTTPMessageCodec;
 import com.github.ljtfreitas.julian.http.codec.UnprocessableHTTPMessageCodec;
 import com.github.ljtfreitas.julian.spi.Plugins;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLParameters;
+import java.lang.reflect.InvocationHandler;
+import java.net.InetSocketAddress;
+import java.net.URI;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.Executor;
+import java.util.function.Function;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableCollection;
@@ -394,7 +415,7 @@ public class ProxyBuilder {
                     return this;
                 }
 
-                private HTTPClientSpec.Configuration apply(HTTPClient.Specification specification) {
+                public HTTPClientSpec.Configuration apply(HTTPClient.Specification specification) {
                     this.specification = specification;
                     return this;
                 }
@@ -482,7 +503,7 @@ public class ProxyBuilder {
         public class HTTPResponseFailureSpec {
 
             private HTTPResponseFailure failure = null;
-            private final HTTPResponseFailures failures = new HTTPResponseFailures();
+            private HTTPResponseFailures failures = new HTTPResponseFailures();
 
             public HTTPSpec with(HTTPResponseFailure failure) {
                 this.failure = failure;
@@ -490,13 +511,19 @@ public class ProxyBuilder {
             }
 
             public HTTPResponseFailureSpec when(HTTPStatusCode status, HTTPResponseFailure failure) {
-                failures.add(status, failure);
+                this.failures = failures.join(status, failure);
                 return this;
             }
 
             public HTTPResponseFailureSpec when(HTTPStatusGroup group, HTTPResponseFailure failure) {
-                Arrays.stream(HTTPStatusCode.values()).filter(s -> s.onGroup(group)).forEach(s -> failures.add(s, failure));
+                this.failures = group.range().mapToObj(HTTPStatusCode::select)
+                        .flatMap(Optional::stream)
+                        .reduce(failures, (all, status) -> failures.join(status, failure), (a, b) -> b);
                 return this;
+            }
+
+            public void with(HTTPResponseFailures failures) {
+                this.failures = failures;
             }
 
             public HTTPSpec and() {
@@ -648,6 +675,10 @@ public class ProxyBuilder {
 
     public <T> T build(Class<? extends T> type, URL endpoint) {
         return build(type, handler(type, endpoint));
+    }
+
+    public <T> T build(Class<? extends T> type, URI endpoint) {
+        return build(type, handler(type, Attempt.run(endpoint::toURL).unsafe()));
     }
 
     private <T> T build(Class<? extends T> type, InvocationHandler handler) {

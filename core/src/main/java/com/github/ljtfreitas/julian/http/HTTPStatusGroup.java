@@ -22,6 +22,8 @@
 
 package com.github.ljtfreitas.julian.http;
 
+import java.util.stream.IntStream;
+
 public enum HTTPStatusGroup {
     INFORMATIONAL(100, 199),
     SUCCESSFUL(200, 299),
@@ -37,11 +39,15 @@ public enum HTTPStatusGroup {
         this.end = end;
     }
 
-    boolean contains(HTTPStatusCode statusCode) {
+    public IntStream range() {
+        return IntStream.rangeClosed(start, end);
+    }
+
+    public boolean contains(HTTPStatusCode statusCode) {
         return contains(statusCode.value());
     }
 
-    boolean contains(int code) {
+    public boolean contains(int code) {
         return code >= start && code <= end;
     }
 }

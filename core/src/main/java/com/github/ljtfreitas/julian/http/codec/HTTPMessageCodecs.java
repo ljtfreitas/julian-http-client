@@ -31,9 +31,9 @@ public class HTTPMessageCodecs {
 	private final HTTPRequestWriters writers;
 	private final HTTPResponseReaders readers;
 
-	public HTTPMessageCodecs(Collection<? extends HTTPMessageCodec> converters) {
-		this.writers = new HTTPRequestWriters(writers(converters));
-		this.readers = new HTTPResponseReaders(readers(converters));
+	public HTTPMessageCodecs(Collection<? extends HTTPMessageCodec> codecs) {
+		this.writers = new HTTPRequestWriters(writers(codecs));
+		this.readers = new HTTPResponseReaders(readers(codecs));
 	}
 
 	private Collection<HTTPResponseReader<?>> readers(Collection<? extends HTTPMessageCodec> converters) {

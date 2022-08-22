@@ -20,27 +20,23 @@
  * SOFTWARE.
  */
 
-rootProject.name = "julian-http-client-parent"
-include("core")
-include("form-url-encoded-multipart")
-include("json-jackson")
-include("json-gson")
-include("json-jsonb")
-include("json-jsonp")
-include("json-kotlin")
-include("xml-jackson")
-include("http-client-reactor-netty")
-include("http-client-vertx")
-include("http-client-ktor")
-include("http-client-okhttp")
-include("http-spring-web-flux")
-include("xml-jaxb")
-include("rx-java3")
-include("mutiny")
-include("reactor")
-include("vavr")
-include("kotlin")
-include("resilience4j")
-include("opentracing")
-include("arrow")
-include("spring-autoconfigure")
+plugins {
+    modules
+    id("org.springframework.boot") version "2.7.2"
+    id("io.spring.dependency-management") version "1.0.12.RELEASE"
+}
+
+description = "Spring auto-configuration for julian-http-client"
+
+tasks.jar.configure {
+    archiveBaseName.set("julian-http-client-spring-autoconfigure")
+}
+
+dependencies {
+    implementation(project(":core"))
+    implementation("org.springframework.boot:spring-boot-autoconfigure")
+    implementation("org.springframework.boot:spring-boot-starter-logging")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+//    testImplementation(project(":kotlin"))
+}

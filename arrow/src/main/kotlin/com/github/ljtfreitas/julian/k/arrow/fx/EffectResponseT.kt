@@ -20,13 +20,31 @@
  * SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian;
+package com.github.ljtfreitas.julian.k.arrow.fx
 
-public interface Subscriber<T> {
+import arrow.core.continuations.Effect
+import com.github.ljtfreitas.julian.Arguments
+import com.github.ljtfreitas.julian.Endpoint
+import com.github.ljtfreitas.julian.JavaType
+import com.github.ljtfreitas.julian.Promise
+import com.github.ljtfreitas.julian.Response
+import com.github.ljtfreitas.julian.ResponseFn
+import com.github.ljtfreitas.julian.ResponseT
 
-    void success(T value);
+object EffectResponseT : ResponseT<Any, Effect<Exception, Any>> {
 
-    void failure(Exception failure);
+    override fun test(endpoint: Endpoint) = endpoint.returnType().`is`(Effect::class.java)
 
-    default void done() {};
+    override fun adapted(endpoint: Endpoint): JavaType = endpoint.returnType().parameterized()
+        .map { it.actualTypeArguments[1] }
+        .orElseGet { Any::class.java }
+        .let(JavaType::valueOf)
+
+    override fun <A> bind(endpoint: Endpoint, next: ResponseFn<A, Any>) = object : ResponseFn<A, Effect<Exception, Any>> {
+
+        override fun join(response: Promise<out Response<A>>, arguments: Arguments): Effect<Exception, Any> =
+            next.run(response, arguments).effect()
+
+        override fun returnType(): JavaType = next.returnType()
+    }
 }

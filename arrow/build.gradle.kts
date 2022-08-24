@@ -20,13 +20,24 @@
  * SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian;
+plugins {
+    modules
+    kotlin("jvm") version "1.6.10"
+}
 
-public interface Subscriber<T> {
+description = "Arrow.kt extensions for julian-http-client"
 
-    void success(T value);
+tasks.jar.configure {
+    archiveBaseName.set("julian-http-client-arrow")
+}
 
-    void failure(Exception failure);
-
-    default void done() {};
+dependencies {
+    implementation(project(":core"))
+    implementation(project(":kotlin"))
+    api("io.arrow-kt:arrow-core-jvm:1.1.2")
+    api("io.arrow-kt:arrow-fx-coroutines:1.1.2")
+    testImplementation("io.kotest:kotest-runner-junit5:5.4.2")
+    testImplementation("io.kotest:kotest-assertions-core-jvm:5.4.2")
+    testImplementation("io.kotest.extensions:kotest-assertions-arrow:1.2.5")
+    testImplementation("io.mockk:mockk:1.12.5")
 }

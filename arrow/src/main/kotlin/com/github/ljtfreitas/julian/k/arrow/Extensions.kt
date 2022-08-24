@@ -20,13 +20,14 @@
  * SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian;
+package com.github.ljtfreitas.julian.k.arrow
 
-public interface Subscriber<T> {
+import arrow.core.Either
+import arrow.core.left
+import arrow.core.right
+import com.github.ljtfreitas.julian.Attempt
+import com.github.ljtfreitas.julian.Promise
 
-    void success(T value);
+fun <T> Promise<T>.either(): Either<Exception, T> = join().either()
 
-    void failure(Exception failure);
-
-    default void done() {};
-}
+fun <T> Attempt<T>.either(): Either<Exception, T> = fold({ it.right() }, { (it as Exception).left()} )

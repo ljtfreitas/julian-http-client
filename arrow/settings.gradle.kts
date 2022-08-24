@@ -20,13 +20,4 @@
  * SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian;
-
-public interface Subscriber<T> {
-
-    void success(T value);
-
-    void failure(Exception failure);
-
-    default void done() {};
-}
+rootProject.name = "julian-http-client-arrow"

@@ -20,13 +20,20 @@
  * SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian;
+package com.github.ljtfreitas.julian.k.arrow.fx
 
-public interface Subscriber<T> {
+import arrow.core.Either
+import arrow.core.continuations.Effect
+import arrow.core.continuations.effect
+import com.github.ljtfreitas.julian.Promise
+import com.github.ljtfreitas.julian.k.coroutines.await
 
-    void success(T value);
-
-    void failure(Exception failure);
-
-    default void done() {};
+fun <T> Promise<T>.effect(): Effect<Exception, T> = effect {
+    try {
+        await()
+    } catch (e: Exception) {
+        shift(e)
+    }
 }
+
+suspend fun <T> Promise<T>.effectAsEither(): Either<Exception, T> = effect().toEither()

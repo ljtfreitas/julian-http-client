@@ -1,7 +1,9 @@
 package com.github.ljtfreitas.julian.k
 
 import com.github.ljtfreitas.julian.Attempt
+import com.github.ljtfreitas.julian.JavaType
 import com.github.ljtfreitas.julian.Promise
+import io.kotest.assertions.fail
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.result.shouldBeFailure
@@ -127,6 +129,15 @@ class ExtensionsTest : DescribeSpec({
                 val failure = RuntimeException("oops")
                 val result = Attempt.failed<Unit>(failure).result()
                 result.shouldBeFailure { it shouldBe failure }
+            }
+        }
+
+        describe("JavaType extensions") {
+
+            it("building a JavaType using a reified argument") {
+                val javaType = javaType<List<String>>()
+
+                javaType shouldBe JavaType.parameterized(List::class.java, String::class.java)
             }
         }
     }

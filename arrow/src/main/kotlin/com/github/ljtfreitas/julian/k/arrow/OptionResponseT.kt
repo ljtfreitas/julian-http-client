@@ -20,36 +20,32 @@
  * SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian.k
+package com.github.ljtfreitas.julian.k.arrow
 
-import com.github.ljtfreitas.julian.Attempt
+import arrow.core.Option
+import arrow.core.toOption
+import com.github.ljtfreitas.julian.Arguments
+import com.github.ljtfreitas.julian.Endpoint
 import com.github.ljtfreitas.julian.JavaType
 import com.github.ljtfreitas.julian.Promise
-import kotlin.reflect.jvm.javaType
-import kotlin.reflect.typeOf
+import com.github.ljtfreitas.julian.Response
+import com.github.ljtfreitas.julian.ResponseFn
+import com.github.ljtfreitas.julian.ResponseT
 
-fun <T> Attempt<T>.result() : Result<T> = fold(Result.Companion::success, Result.Companion::failure)
+object OptionResponseT : ResponseT<Any, Option<Any>> {
 
-fun <T> Promise<T>.result() : Result<T> = join().result()
+    override fun test(endpoint: Endpoint) = endpoint.returnType().`is`(Option::class.java)
 
-@JvmName("promisePlus")
-operator fun <A, B> Promise<A>.plus(other: Promise<B>): Promise<Pair<A, B>> = bind { a ->
-    other.then { b -> a to b }
+    override fun adapted(endpoint: Endpoint): JavaType = endpoint.returnType().parameterized()
+        .map(JavaType.Parameterized::firstArg)
+        .orElseGet { Any::class.java }
+        .let(JavaType::valueOf)
+
+    override fun <A> bind(endpoint: Endpoint, next: ResponseFn<A, Any>) = object : ResponseFn<A, Option<Any>> {
+
+        override fun run(response: Promise<out Response<A?>>, arguments: Arguments): Promise<Option<Any>> =
+            next.run(response, arguments).then { it.toOption() }
+
+        override fun returnType(): JavaType = next.returnType()
+    }
 }
-
-@JvmName("promisePairPlus")
-operator fun <A, B, C> Promise<Pair<A, B>>.plus(other: Promise<C>): Promise<Triple<A, B, C>> = bind { (a, b) ->
-    other.then { c -> Triple(a, b, c) }
-}
-
-@JvmName("promiseTriplePlus")
-operator fun <A, B, C> Promise<Triple<A, B, C>>.plus(other: Promise<*>): Promise<Array<*>> = bind { (a, b, c) ->
-    other.then { d -> arrayOf(a, b, c, d) }
-}
-
-@JvmName("promiseArrayPlus")
-operator fun Promise<Array<*>>.plus(other: Promise<*>): Promise<Array<*>> = bind { a ->
-    other.then { b -> arrayOf(*a, b) }
-}
-
-inline fun <reified T : Any> javaType(): JavaType = JavaType.valueOf(typeOf<T>().javaType)

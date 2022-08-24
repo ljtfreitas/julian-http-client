@@ -20,8 +20,11 @@
  * SOFTWARE.
  */
 
-package com.github.ljtfreitas.julian.k
+package com.github.ljtfreitas.julian.k.arrow
 
+import arrow.core.Either
+import arrow.core.left
+import arrow.core.right
 import com.github.ljtfreitas.julian.Arguments
 import com.github.ljtfreitas.julian.Endpoint
 import com.github.ljtfreitas.julian.JavaType
@@ -29,30 +32,36 @@ import com.github.ljtfreitas.julian.Promise
 import com.github.ljtfreitas.julian.Response
 import com.github.ljtfreitas.julian.ResponseFn
 import com.github.ljtfreitas.julian.ResponseT
-import java.lang.reflect.Type
-import java.lang.reflect.WildcardType
-import java.util.stream.Stream
-import kotlin.streams.asSequence
 
-object SequenceResponseT : ResponseT<Stream<Any>, Sequence<Any>> {
+object EitherResponseT : ResponseT<Any, Either<Exception, Any>> {
 
-    override fun <A> bind(endpoint: Endpoint, next: ResponseFn<A, Stream<Any>>): ResponseFn<A, Sequence<Any>> = object : ResponseFn<A, Sequence<Any>> {
-
-        override fun run(response: Promise<out Response<A>>, arguments: Arguments) = next.run(response, arguments).then { it.asSequence() }
-
-        override fun returnType(): JavaType = next.returnType()
+    override fun test(endpoint: Endpoint) = endpoint.returnType().let { returnType -> returnType.`is`(Either::class.java)
+            && returnType.parameterized()
+                    .map(JavaType.Parameterized::firstArg)
+                    .map(JavaType::valueOf)
+                    .filter { left -> left.compatible(java.lang.Exception::class.java) }
+                    .isPresent
     }
 
     override fun adapted(endpoint: Endpoint): JavaType = endpoint.returnType().parameterized()
-        .map(JavaType.Parameterized::firstArg)
-        .map(::argument)
+        .map { it.actualTypeArguments[1] }
         .orElseGet { Any::class.java }
-        .let { JavaType.parameterized(Stream::class.java, it) }
+        .let(JavaType::valueOf)
 
-    private fun argument(type: Type) : Type =
-        if (type is WildcardType && type.lowerBounds.isNotEmpty())
-            argument(type.lowerBounds.first())
-        else type
+    override fun <A> bind(endpoint: Endpoint, next: ResponseFn<A, Any>) = object : ResponseFn<A, Either<Exception, Any>> {
 
-    override fun test(endpoint: Endpoint) = endpoint.returnType().`is`(Sequence::class.java)
+        @Suppress("UNCHECKED_CAST")
+        override fun run(response: Promise<out Response<A>>, arguments: Arguments): Promise<Either<Exception, Any>> {
+            val leftClassType: Class<out Any> = JavaType.valueOf(endpoint.returnType().parameterized()
+                .map(JavaType.Parameterized::firstArg)
+                .orElse(Exception::class.java))
+                .rawClassType()
+
+            return next.run(response, arguments)
+                .then<Either<Exception, Any>> { it.right() }
+                .recover(leftClassType::isInstance) { it.left() }
+        }
+
+        override fun returnType() = next.returnType()
+    }
 }

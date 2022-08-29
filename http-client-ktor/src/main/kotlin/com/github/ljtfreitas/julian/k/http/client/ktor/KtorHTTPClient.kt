@@ -93,6 +93,8 @@ class KtorHTTPClient private constructor(private val client: HttpClient): HTTPCl
         })
     }
 
+    override fun close() = client.close()
+
     override fun request(request: HTTPRequestDefinition) = HTTPClientRequest {
         Promise.pending(GlobalScope.future(client.coroutineContext) {
             val response: HttpResponse = client.request(request.path().toURL()) {
@@ -138,8 +140,6 @@ class KtorHTTPClient private constructor(private val client: HttpClient): HTTPCl
                 HTTPResponseBody.some(bodyAsBytes)
             })
     }
-
-    override fun close() = client.close()
 
     private fun CoroutineContext.javaExecutor(): Executor = (get(ContinuationInterceptor) as CoroutineDispatcher).asExecutor()
 }

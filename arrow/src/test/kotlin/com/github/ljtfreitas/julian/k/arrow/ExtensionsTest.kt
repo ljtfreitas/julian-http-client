@@ -1,15 +1,10 @@
 package com.github.ljtfreitas.julian.k.arrow
 
 import com.github.ljtfreitas.julian.Attempt
-import com.github.ljtfreitas.julian.JavaType
 import com.github.ljtfreitas.julian.Promise
 import io.kotest.assertions.arrow.core.shouldBeLeft
 import io.kotest.assertions.arrow.core.shouldBeRight
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
-import io.kotest.matchers.result.shouldBeFailure
-import io.kotest.matchers.result.shouldBeSuccess
-import io.kotest.matchers.shouldBe
 
 class ExtensionsTest : DescribeSpec({
 

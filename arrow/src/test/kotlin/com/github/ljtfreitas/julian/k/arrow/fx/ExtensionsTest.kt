@@ -12,7 +12,7 @@ class ExtensionsTest : DescribeSpec({
         describe("Promise extensions") {
 
             it("Promise<T> -> Effect<Exception, T>") {
-                val effect = promise { "hello" }.effect()
+                val effect = promise { "hello" }.effect<Exception, String>()
 
                 val either = effect.toEither()
 
@@ -22,7 +22,7 @@ class ExtensionsTest : DescribeSpec({
             it("a failed Promise<T> -> a failed Effect<Exception, T>") {
                 val failure = RuntimeException("oops")
 
-                val effect = promise { throw failure }.effect()
+                val effect = promise { throw failure }.effect<Exception, Nothing>()
 
                 val either = effect.toEither()
 
@@ -30,7 +30,7 @@ class ExtensionsTest : DescribeSpec({
             }
 
             it("Promise<T> -> an effectful Either<Exception, T>") {
-                val either = promise { "hello" }.effectAsEither()
+                val either = promise { "hello" }.effectAsEither<Exception, String>()
 
                 either shouldBeRight "hello"
             }
@@ -38,7 +38,7 @@ class ExtensionsTest : DescribeSpec({
             it("a failed Promise<T> -> a failed, effectful Either<Exception, T> with the left side") {
                 val failure = RuntimeException("oops")
 
-                val either = promise { throw failure }.effectAsEither()
+                val either = promise { throw failure }.effectAsEither<Exception, Nothing>()
 
                 either shouldBeLeft failure
             }

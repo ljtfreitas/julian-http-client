@@ -23,9 +23,6 @@
 package com.github.ljtfreitas.julian.k.arrow
 
 import arrow.core.Eval
-import arrow.core.Option
-import arrow.core.continuations.Effect
-import arrow.core.continuations.effect
 import com.github.ljtfreitas.julian.Arguments
 import com.github.ljtfreitas.julian.Endpoint
 import com.github.ljtfreitas.julian.JavaType
@@ -33,7 +30,6 @@ import com.github.ljtfreitas.julian.Promise
 import com.github.ljtfreitas.julian.Response
 import com.github.ljtfreitas.julian.ResponseFn
 import com.github.ljtfreitas.julian.ResponseT
-import com.github.ljtfreitas.julian.k.coroutines.await
 
 object EvalResponseT : ResponseT<Any, Eval<Any>> {
 

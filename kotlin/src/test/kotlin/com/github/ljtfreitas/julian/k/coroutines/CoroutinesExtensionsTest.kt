@@ -25,6 +25,16 @@ class CoroutinesExtensionsTest : DescribeSpec({
             promise.await() shouldBe "hello"
         }
 
+        it("a failed Promise<T> should throw the cause exception when we try to await...") {
+            val cause = RuntimeException("oops")
+
+            val promise = Promise.pending(CompletableFuture.failedFuture<Unit>(cause))
+
+            val exception = shouldThrow<RuntimeException> { promise.await() }
+
+            exception shouldBe cause
+        }
+
         describe("we can run a Promise<T> inside a coroutine") {
 
             it("a successful Promise<T>") {

@@ -33,7 +33,14 @@ import com.github.ljtfreitas.julian.ResponseT
 
 object EffectResponseT : ResponseT<Any, Effect<Exception, Any>> {
 
-    override fun test(endpoint: Endpoint) = endpoint.returnType().`is`(Effect::class.java)
+    override fun test(endpoint: Endpoint) = endpoint.returnType().let { returnType ->
+        returnType.`is`(Effect::class.java)
+                && returnType.parameterized()
+                        .map(JavaType.Parameterized::firstArg)
+                        .map(JavaType::valueOf)
+                        .filter { r -> r.compatible(Exception::class.java) }
+                        .isPresent
+    }
 
     override fun adapted(endpoint: Endpoint): JavaType = endpoint.returnType().parameterized()
         .map { it.actualTypeArguments[1] }
@@ -42,8 +49,15 @@ object EffectResponseT : ResponseT<Any, Effect<Exception, Any>> {
 
     override fun <A> bind(endpoint: Endpoint, next: ResponseFn<A, Any>) = object : ResponseFn<A, Effect<Exception, Any>> {
 
-        override fun join(response: Promise<out Response<A>>, arguments: Arguments): Effect<Exception, Any> =
-            next.run(response, arguments).effect()
+        @Suppress("UNCHECKED_CAST")
+        override fun join(response: Promise<out Response<A>>, arguments: Arguments): Effect<Exception, Any> {
+            val leftClassType: Class<out Exception> = JavaType.valueOf(endpoint.returnType().parameterized()
+                .map(JavaType.Parameterized::firstArg)
+                .orElse(Exception::class.java))
+                .rawClassType() as Class<out Exception>
+
+            return next.run(response, arguments).effect(leftClassType)
+        }
 
         override fun returnType(): JavaType = next.returnType()
     }

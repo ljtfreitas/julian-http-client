@@ -28,12 +28,12 @@ import arrow.core.continuations.effect
 import com.github.ljtfreitas.julian.Promise
 import com.github.ljtfreitas.julian.k.coroutines.await
 
-fun <T> Promise<T>.effect(): Effect<Exception, T> = effect {
+inline fun <reified E : Exception, T> Promise<T>.effect(exceptionClassType: Class<out E> = E::class.java): Effect<E, T> = effect {
     try {
         await()
     } catch (e: Exception) {
-        shift(e)
+        shift(if (exceptionClassType.isInstance(e)) exceptionClassType.cast(e) else throw e)
     }
 }
 
-suspend fun <T> Promise<T>.effectAsEither(): Either<Exception, T> = effect().toEither()
+suspend inline fun <reified E : Exception, T> Promise<T>.effectAsEither(): Either<E, T> = effect<E, T>().toEither()

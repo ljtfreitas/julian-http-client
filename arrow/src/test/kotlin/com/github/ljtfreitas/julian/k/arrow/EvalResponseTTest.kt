@@ -1,17 +1,12 @@
 package com.github.ljtfreitas.julian.k.arrow
 
 import arrow.core.Eval
-import arrow.core.Option
 import com.github.ljtfreitas.julian.Arguments
 import com.github.ljtfreitas.julian.Endpoint
 import com.github.ljtfreitas.julian.ObjectResponseT
 import com.github.ljtfreitas.julian.Promise
 import com.github.ljtfreitas.julian.Response
 import com.github.ljtfreitas.julian.k.javaType
-import io.kotest.assertions.arrow.core.shouldBeLeft
-import io.kotest.assertions.arrow.core.shouldBeNone
-import io.kotest.assertions.arrow.core.shouldBeSome
-import io.kotest.assertions.fail
 import io.kotest.assertions.throwables.shouldThrowAny
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe

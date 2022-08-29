@@ -106,7 +106,7 @@ class EitherResponseTTest : DescribeSpec({
                         fail("it was expected a failure, not a successful value :(")
                     }
 
-                    override fun failure(exception: java.lang.Exception) {
+                    override fun failure(exception: Exception) {
                         exception shouldBe failure
                     }
                 })

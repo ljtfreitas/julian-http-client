@@ -43,6 +43,10 @@ public class FailureHTTPResponse<T> implements HTTPResponse<T> {
 		this.headers = failure.headers();
 	}
 
+	public HTTPResponseException asException() {
+		return failure;
+	}
+
 	@Override
 	public Attempt<T> body() {
 		return Attempt.failed(failure);

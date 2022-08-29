@@ -32,6 +32,11 @@ tasks.jar.configure {
     archiveBaseName.set("julian-http-client-kotlin")
 }
 
+tasks.compileKotlin.configure {
+    sourceCompatibility = "11"
+    targetCompatibility = "11"
+}
+
 dependencies {
     implementation(project(":core"))
     implementation(project(":json-kotlin"))

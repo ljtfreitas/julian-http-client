@@ -34,6 +34,7 @@ tasks.jar.configure {
 dependencies {
     implementation(project(":core"))
     implementation(project(":kotlin"))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.4")
     api("io.arrow-kt:arrow-core-jvm:1.1.2")
     api("io.arrow-kt:arrow-fx-coroutines:1.1.2")
     testImplementation("io.kotest:kotest-runner-junit5:5.4.2")

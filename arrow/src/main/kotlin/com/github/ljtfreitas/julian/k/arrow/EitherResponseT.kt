@@ -35,11 +35,12 @@ import com.github.ljtfreitas.julian.ResponseT
 
 object EitherResponseT : ResponseT<Any, Either<Exception, Any>> {
 
-    override fun test(endpoint: Endpoint) = endpoint.returnType().let { returnType -> returnType.`is`(Either::class.java)
+    override fun test(endpoint: Endpoint) = endpoint.returnType().let { returnType ->
+        returnType.`is`(Either::class.java)
             && returnType.parameterized()
                     .map(JavaType.Parameterized::firstArg)
                     .map(JavaType::valueOf)
-                    .filter { left -> left.compatible(java.lang.Exception::class.java) }
+                    .filter { left -> left.compatible(Exception::class.java) }
                     .isPresent
     }
 

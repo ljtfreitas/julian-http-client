@@ -35,8 +35,8 @@ tasks.jar.configure {
 dependencies {
     implementation(project(":core"))
     implementation(kotlin("reflect"))
-    api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
-    testImplementation("io.kotest:kotest-runner-junit5:5.1.0")
-    testImplementation("io.kotest:kotest-assertions-core-jvm:5.1.0")
-    testImplementation("io.kotest.extensions:kotest-extensions-mockserver:1.1.0")
+    api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
+    testImplementation("io.kotest:kotest-runner-junit5:5.4.2")
+    testImplementation("io.kotest:kotest-assertions-core-jvm:5.4.2")
+    testImplementation("io.kotest.extensions:kotest-extensions-mockserver:1.2.1")
 }

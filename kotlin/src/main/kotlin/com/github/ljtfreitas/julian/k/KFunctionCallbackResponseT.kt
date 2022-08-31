@@ -56,7 +56,7 @@ object KFunctionCallbackResponseT : ResponseT<Any, Unit> {
                         f(Result.success(value))
                     }
 
-                    override fun failure(failure: Exception) {
+                    override fun failure(failure: Throwable) {
                         f(Result.failure(failure))
                     }
 

@@ -57,7 +57,7 @@ class DefaultPromise<T> implements Promise<T> {
 	}
 
 	@Override
-	public <R> R fold(Function<? super T, R> success, Function<? super Exception, R> failure) {
+	public <R> R fold(Function<? super T, R> success, Function<? super Throwable, R> failure) {
 		return new DefaultPromise<R>(future.handleAsync((r, e) -> {
 			if (e != null)
 				return failure.apply((Exception) e);
@@ -78,14 +78,14 @@ class DefaultPromise<T> implements Promise<T> {
 	}
 
 	@Override
-	public Promise<T> recover(Function<? super Exception, T> fn) {
-		return new DefaultPromise<>(future.exceptionally(t -> fn.apply((Exception) t)), executor);
+	public Promise<T> recover(Function<? super Throwable, T> fn) {
+		return new DefaultPromise<>(future.exceptionally(t -> fn.apply(t)), executor);
 	}
 
 	@Override
-	public <Err extends Exception> Promise<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
+	public <Err extends Throwable> Promise<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
 		return new DefaultPromise<>(future.handleAsync((r, e) -> {
-			Exception cause = deep(e);
+			Throwable cause = deep(e);
 			if (expected.isInstance(cause))
 				return fn.apply(expected.cast(cause));
 			else
@@ -94,9 +94,9 @@ class DefaultPromise<T> implements Promise<T> {
 	}
 
 	@Override
-	public Promise<T> recover(Predicate<? super Exception> p, Function<? super Exception, T> fn) {
+	public Promise<T> recover(Predicate<? super Throwable> p, Function<? super Throwable, T> fn) {
 		return new DefaultPromise<>(future.handleAsync((r, e) -> {
-			Exception cause = deep(e);
+			Throwable cause = deep(e);
 			if (cause != null && p.test(cause))
 				return fn.apply(cause);
 			else
@@ -105,9 +105,9 @@ class DefaultPromise<T> implements Promise<T> {
 	}
 
 	@Override
-	public <Err extends Exception> Promise<T> failure(Function<? super Exception, Err> fn) {
+	public <Err extends Throwable> Promise<T> failure(Function<? super Throwable, Err> fn) {
 		return new DefaultPromise<>(future.handleAsync((r, e) -> {
-			Exception cause = deep(e);
+			Throwable cause = deep(e);
 			if (cause != null)
 				throw failure(fn.apply(cause));
 			else
@@ -116,20 +116,20 @@ class DefaultPromise<T> implements Promise<T> {
 	}
 
 	@Override
-	public Promise<T> onFailure(Consumer<? super Exception> fn) {
+	public Promise<T> onFailure(Consumer<? super Throwable> fn) {
 		return new DefaultPromise<>(future.whenCompleteAsync((r, e) -> {
-			Exception cause = deep(e);
+			Throwable cause = deep(e);
 			if (cause != null)
 				fn.accept(cause);
 		}, executor), executor);
 	}
 
-	private RuntimeException failure(Exception e) {
+	private RuntimeException failure(Throwable e) {
 		return (e instanceof RuntimeException) ? (RuntimeException) e : new CompletionException(e);
 	}
 
-	private Exception deep(Throwable t) {
-		if (t instanceof CompletionException || t instanceof ExecutionException) return deep(t.getCause()); else return (Exception) t;
+	private Throwable deep(Throwable t) {
+		if (t instanceof CompletionException || t instanceof ExecutionException) return deep(t.getCause()); else return t;
 	}
 
 	@Override
@@ -146,7 +146,7 @@ class DefaultPromise<T> implements Promise<T> {
 
 	@Override
 	public Promise<T> subscribe(Subscriber<? super T> subscriber) {
-		BiConsumer<T, Throwable> handle = (r, e) -> { if (e == null) subscriber.success(r); else subscriber.failure((Exception) e); };
+		BiConsumer<T, Throwable> handle = (r, e) -> { if (e == null) subscriber.success(r); else subscriber.failure(e); };
 		BiConsumer<T, Throwable> done = (r, e) -> subscriber.done();
 		return new DefaultPromise<>(future.whenCompleteAsync(handle, executor).whenCompleteAsync(done, executor), executor);
 	}

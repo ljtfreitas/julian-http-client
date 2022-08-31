@@ -33,15 +33,15 @@ public interface Response<T> {
 
 	<R> Response<R> map(Function<? super T, R> fn);
 
-	Response<T> onFailure(Consumer<? super Exception> fn);
+	Response<T> onFailure(Consumer<? super Throwable> fn);
 
-	Response<T> recover(Function<? super Exception, T> fn);
+	Response<T> recover(Function<? super Throwable, T> fn);
 
-	Response<T> recover(Predicate<? super Exception> p, Function<? super Exception, T> fn);
+	Response<T> recover(Predicate<? super Throwable> p, Function<? super Throwable, T> fn);
 
-	<Err extends Exception> Response<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn);
+	<Err extends Throwable> Response<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn);
 
-	<R> R fold(Function<? super T, R> success, Function<? super Exception, R> failure);
+	<R> R fold(Function<? super T, R> success, Function<? super Throwable, R> failure);
 
 	Response<T> subscribe(Subscriber<? super T> subscriber);
 

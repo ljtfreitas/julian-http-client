@@ -28,7 +28,7 @@ class FailedPromiseTest {
     }
 
     @Test
-    void onFailure(@Mock Consumer<Exception> consumer) {
+    void onFailure(@Mock Consumer<Throwable> consumer) {
         promise.onFailure(consumer);
         verify(consumer).accept(any());
     }

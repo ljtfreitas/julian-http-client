@@ -18,8 +18,10 @@ import io.kotest.matchers.throwable.shouldHaveCauseInstanceOf
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
@@ -82,6 +84,7 @@ class CircuitBreakerHTTPRequestInterceptorTest : DescribeSpec({
 
                     val protectedResponse = interceptor.intercepts(Promise.done(request))
                         .bind(HTTPRequest<String>::execute)
+                        .onFailure { it.shouldBeInstanceOf<CircuitBreaker.ExecutionRejected>() }
                         .join()
 
                     val failure = shouldThrow<Attempt.FailureException> { protectedResponse.unsafe().body() }
@@ -131,6 +134,7 @@ class CircuitBreakerHTTPRequestInterceptorTest : DescribeSpec({
 
                     val protectedResponse = interceptor.intercepts(Promise.done(request))
                         .bind(HTTPRequest<String>::execute)
+                        .onFailure { it.shouldBeInstanceOf<CircuitBreaker.ExecutionRejected>() }
                         .join()
 
                     val failure = shouldThrow<Attempt.FailureException> { protectedResponse.unsafe().body() }

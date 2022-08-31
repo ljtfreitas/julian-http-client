@@ -33,14 +33,14 @@ import com.github.ljtfreitas.julian.Response
 import com.github.ljtfreitas.julian.ResponseFn
 import com.github.ljtfreitas.julian.ResponseT
 
-object EitherResponseT : ResponseT<Any, Either<Exception, Any>> {
+object EitherResponseT : ResponseT<Any, Either<Throwable, Any>> {
 
     override fun test(endpoint: Endpoint) = endpoint.returnType().let { returnType ->
         returnType.`is`(Either::class.java)
             && returnType.parameterized()
                     .map(JavaType.Parameterized::firstArg)
                     .map(JavaType::valueOf)
-                    .filter { left -> left.compatible(Exception::class.java) }
+                    .filter { left -> left.compatible(Throwable::class.java) }
                     .isPresent
     }
 
@@ -49,17 +49,17 @@ object EitherResponseT : ResponseT<Any, Either<Exception, Any>> {
         .orElseGet { Any::class.java }
         .let(JavaType::valueOf)
 
-    override fun <A> bind(endpoint: Endpoint, next: ResponseFn<A, Any>) = object : ResponseFn<A, Either<Exception, Any>> {
+    override fun <A> bind(endpoint: Endpoint, next: ResponseFn<A, Any>) = object : ResponseFn<A, Either<Throwable, Any>> {
 
         @Suppress("UNCHECKED_CAST")
-        override fun run(response: Promise<out Response<A>>, arguments: Arguments): Promise<Either<Exception, Any>> {
+        override fun run(response: Promise<out Response<A>>, arguments: Arguments): Promise<Either<Throwable, Any>> {
             val leftClassType: Class<out Any> = JavaType.valueOf(endpoint.returnType().parameterized()
                 .map(JavaType.Parameterized::firstArg)
-                .orElse(Exception::class.java))
+                .orElse(Throwable::class.java))
                 .rawClassType()
 
             return next.run(response, arguments)
-                .then<Either<Exception, Any>> { it.right() }
+                .then<Either<Throwable, Any>> { it.right() }
                 .recover(leftClassType::isInstance) { it.left() }
         }
 

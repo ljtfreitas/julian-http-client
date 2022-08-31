@@ -45,24 +45,24 @@ public interface Promise<T> {
 
 	Attempt<T> join();
 
-	Promise<T> onFailure(Consumer<? super Exception> fn);
+	Promise<T> onFailure(Consumer<? super Throwable> fn);
 
-	<Err extends Exception> Promise<T> failure(Function<? super Exception, Err> fn);
+	<Err extends Throwable> Promise<T> failure(Function<? super Throwable, Err> fn);
 
-	Promise<T> recover(Function<? super Exception, T> fn);
+	Promise<T> recover(Function<? super Throwable, T> fn);
 
-	Promise<T> recover(Predicate<? super Exception> p, Function<? super Exception, T> fn);
+	Promise<T> recover(Predicate<? super Throwable> p, Function<? super Throwable, T> fn);
 
-	<Err extends Exception> Promise<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn);
+	<Err extends Throwable> Promise<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn);
 
-	<R> R fold(Function<? super T, R> success, Function<? super Exception, R> failure);
+	<R> R fold(Function<? super T, R> success, Function<? super Throwable, R> failure);
 
 	CompletableFuture<T> future();
 
 	Promise<T> subscribe(Subscriber<? super T> subscriber);
 
 	@SuppressWarnings("unchecked")
-	default <Err extends Exception, P extends Promise<T>> Optional<P> cast(Kind<P> candidate) {
+	default <P extends Promise<T>> Optional<P> cast(Kind<P> candidate) {
 		Class<?> javaType = candidate.javaType().rawClassType();
 		return javaType.isAssignableFrom(this.getClass()) ? Optional.of((P) javaType.cast(this)) : Optional.empty();
 	}
@@ -71,7 +71,7 @@ public interface Promise<T> {
 		return new DonePromise<>(value);
 	}
 
-	static <T, E extends Exception> Promise<T> failed(E e) {
+	static <T, E extends Throwable> Promise<T> failed(E e) {
 		return new FailedPromise<>(e);
 	}
 
@@ -95,5 +95,4 @@ public interface Promise<T> {
 		CompletableFuture<T> future = executor == null ? supplyAsync(fn) : PromiseCompletableFuture.pending(fn, executor);
 		return new DefaultPromise<>(future);
 	}
-
 }

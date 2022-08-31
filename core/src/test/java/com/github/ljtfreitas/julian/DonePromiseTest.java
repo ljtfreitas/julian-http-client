@@ -28,7 +28,7 @@ class DonePromiseTest {
     }
 
     @Test
-    void onFailure(@Mock Consumer<Exception> consumer) {
+    void onFailure(@Mock Consumer<Throwable> consumer) {
         CompletableFuture<String> future = promise.onFailure(consumer).future();
 
         verify(consumer, never()).accept(any());

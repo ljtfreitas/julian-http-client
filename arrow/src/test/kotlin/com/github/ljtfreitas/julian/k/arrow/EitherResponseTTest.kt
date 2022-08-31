@@ -23,17 +23,17 @@ class EitherResponseTTest : DescribeSpec({
 
     val endpoint = mockk<Endpoint>()
 
-    describe("a ResponseT instance for Either<Exception, T> values") {
+    describe("a ResponseT instance for Either<Throwable, T> values") {
 
         describe("predicates") {
 
-            it("supports Either<Exception, T> as function return type") {
-                every { endpoint.returnType() } returns javaType<Either<Exception, String>>()
+            it("supports Either<Throwable, T> as function return type") {
+                every { endpoint.returnType() } returns javaType<Either<Throwable, String>>()
 
                 subject.test(endpoint) shouldBe true
             }
 
-            it("supports just Exception (or sub-exceptions) as left argument.") {
+            it("supports just Throwable (or sub-exceptions) as left argument.") {
                 every { endpoint.returnType() } returns javaType<Either<String, String>>()
 
                 subject.test(endpoint) shouldBe false
@@ -44,18 +44,12 @@ class EitherResponseTTest : DescribeSpec({
 
                 subject.test(endpoint) shouldBe true
             }
-
-            it("Throwable as left-argument is not supported") {
-                every { endpoint.returnType() } returns javaType<Either<Throwable, String>>()
-
-                subject.test(endpoint) shouldBe false
-            }
         }
 
         describe("adapt to expected type") {
 
             it("we must to adapt to Right argument from either (Either<Left, Right> -> Right)") {
-                every { endpoint.returnType() } returns javaType<Either<Exception, String>>()
+                every { endpoint.returnType() } returns javaType<Either<Throwable, String>>()
 
                 subject.adapted(endpoint) shouldBe javaType<String>()
             }
@@ -63,11 +57,11 @@ class EitherResponseTTest : DescribeSpec({
 
         describe("bind") {
 
-            every { endpoint.returnType() } returns javaType<Either<Exception, String>>()
+            every { endpoint.returnType() } returns javaType<Either<Throwable, String>>()
 
             val fn = subject.bind<String>(endpoint = endpoint, next = ObjectResponseT<Any>().bind(endpoint, null))
 
-            it("bind a value T to Either<Exception, T>") {
+            it("bind a value T to Either<Throwable, T>") {
                 val expected = "hello"
 
                 val either = fn.join(Promise.done(Response.done(expected)), Arguments.empty())
@@ -75,7 +69,7 @@ class EitherResponseTTest : DescribeSpec({
                 either shouldBeRight expected
             }
 
-            it("bind a response failure to Either<Exception, T>") {
+            it("bind a response failure to Either<Throwable, T>") {
                 val failure = RuntimeException("oops")
 
                 val either = fn.join(Promise.failed(failure), Arguments.empty())
@@ -98,15 +92,15 @@ class EitherResponseTTest : DescribeSpec({
 
                 val failure = IllegalStateException("another kind of problem...")
 
-                val promise: Promise<Either<Exception, Any>> = fn.run(Promise.failed(failure), Arguments.empty())
+                val promise: Promise<Either<Throwable, Any>> = fn.run(Promise.failed(failure), Arguments.empty())
 
-                promise.subscribe(object : Subscriber<Either<Exception, Any>> {
+                promise.subscribe(object : Subscriber<Either<Throwable, Any>> {
 
-                    override fun success(value: Either<Exception, Any>) {
+                    override fun success(value: Either<Throwable, Any>) {
                         fail("it was expected a failure, not a successful value :(")
                     }
 
-                    override fun failure(exception: Exception) {
+                    override fun failure(exception: Throwable) {
                         exception shouldBe failure
                     }
                 })

@@ -59,7 +59,7 @@ class PromiseCallbackResponseT implements ResponseT<Object, Void> {
 							}
 
 							@Override
-							public void failure(Exception failure) {
+							public void failure(Throwable failure) {
 								c.accept(null, failure);
 							}
 

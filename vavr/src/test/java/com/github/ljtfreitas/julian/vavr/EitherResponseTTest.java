@@ -38,9 +38,9 @@ class EitherResponseTTest {
             assertTrue(responseT.test(endpoint));
         }
 
-        @DisplayName("We should support any Exception type.")
+        @DisplayName("We should support any Throwable type.")
         @Test
-        void supportAnyExceptionTypes() {
+        void supportAnyThrowableTypes() {
             when(endpoint.returnType()).thenReturn(JavaType.parameterized(Either.class, RuntimeException.class, String.class));
             assertTrue(responseT.test(endpoint));
         }
@@ -48,13 +48,6 @@ class EitherResponseTTest {
         @Test
         void unsupported() {
             when(endpoint.returnType()).thenReturn(JavaType.valueOf(String.class));
-            assertFalse(responseT.test(endpoint));
-        }
-
-        @DisplayName("We should not support Throwable class.")
-        @Test
-        void shouldNotSupportThrowable() {
-            when(endpoint.returnType()).thenReturn(JavaType.parameterized(Either.class, Throwable.class, String.class));
             assertFalse(responseT.test(endpoint));
         }
     }

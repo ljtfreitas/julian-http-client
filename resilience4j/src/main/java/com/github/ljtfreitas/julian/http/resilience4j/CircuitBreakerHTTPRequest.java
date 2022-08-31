@@ -120,7 +120,7 @@ class CircuitBreakerHTTPRequest<T> implements HTTPRequest<T> {
         circuitBreaker.onResult(circuitBreaker.getCurrentTimestamp() - start, circuitBreaker.getTimestampUnit(), r);
     }
 
-    private void failure(long start, Exception e) {
+    private void failure(long start, Throwable e) {
         circuitBreaker.onError(circuitBreaker.getCurrentTimestamp() - start, circuitBreaker.getTimestampUnit(), e);
     }
 }

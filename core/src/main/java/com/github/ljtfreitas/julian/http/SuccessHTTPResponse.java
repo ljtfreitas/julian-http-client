@@ -67,7 +67,7 @@ class SuccessHTTPResponse<T> implements HTTPResponse<T> {
 	}
 
 	@Override
-	public <R> R fold(Function<? super T, R> success, Function<? super Exception, R> failure) {
+	public <R> R fold(Function<? super T, R> success, Function<? super Throwable, R> failure) {
 		return success.apply(body);
 	}
 
@@ -98,22 +98,22 @@ class SuccessHTTPResponse<T> implements HTTPResponse<T> {
 	}
 
 	@Override
-	public HTTPResponse<T> onFailure(Consumer<? super Exception> fn) {
+	public HTTPResponse<T> onFailure(Consumer<? super Throwable> fn) {
 		return this;
 	}
 
 	@Override
-	public HTTPResponse<T> recover(Function<? super Exception, T> fn) {
+	public HTTPResponse<T> recover(Function<? super Throwable, T> fn) {
 		return this;
 	}
 
 	@Override
-	public HTTPResponse<T> recover(Predicate<? super Exception> p, Function<? super Exception, T> fn) {
+	public HTTPResponse<T> recover(Predicate<? super Throwable> p, Function<? super Throwable, T> fn) {
 		return this;
 	}
 
 	@Override
-	public <Err extends Exception> HTTPResponse<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
+	public <Err extends Throwable> HTTPResponse<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
 		return this;
 	}
 

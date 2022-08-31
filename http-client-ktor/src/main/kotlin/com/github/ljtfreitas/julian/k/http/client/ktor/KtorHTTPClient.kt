@@ -96,13 +96,13 @@ class KtorHTTPClient private constructor(private val client: HttpClient): HTTPCl
     override fun close() = client.close()
 
     override fun request(request: HTTPRequestDefinition) = HTTPClientRequest {
-        Promise.pending(GlobalScope.future(client.coroutineContext) {
+        val future = GlobalScope.future(context = client.coroutineContext) {
             val response: HttpResponse = client.request(request.path().toURL()) {
                 method = HttpMethod.parse(request.method().name)
 
                 headers {
                     request.headers()
-                        .filterNot { it.name() == HTTPHeader.CONTENT_TYPE  }
+                        .filterNot { it.name() == HTTPHeader.CONTENT_TYPE }
                         .forEach { appendAll(it.name(), it.values()) }
                 }
 
@@ -111,7 +111,11 @@ class KtorHTTPClient private constructor(private val client: HttpClient): HTTPCl
 
             return@future response.asHTTPClientResponse()
 
-        }, client.coroutineContext.javaExecutor())
+        }
+
+        val javaExecutor = client.coroutineContext.javaExecutor()
+
+        return@HTTPClientRequest Promise.pending(future, javaExecutor)
     }
 
     private fun HTTPHeaders.contentType() = select(HTTPHeader.CONTENT_TYPE).map { MediaType.valueOf(it.value()) }

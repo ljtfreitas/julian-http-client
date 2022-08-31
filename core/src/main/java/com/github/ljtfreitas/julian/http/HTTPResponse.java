@@ -52,16 +52,16 @@ public interface HTTPResponse<T> extends Response<T> {
 	HTTPResponse<T> subscribe(HTTPResponseSubscriber<? super T> subscriber);
 
 	@Override
-	HTTPResponse<T> onFailure(Consumer<? super Exception> fn);
+	HTTPResponse<T> onFailure(Consumer<? super Throwable> fn);
 
 	@Override
-	HTTPResponse<T> recover(Function<? super Exception, T> fn);
+	HTTPResponse<T> recover(Function<? super Throwable, T> fn);
 
 	@Override
-	HTTPResponse<T> recover(Predicate<? super Exception> p, Function<? super Exception, T> fn);
+	HTTPResponse<T> recover(Predicate<? super Throwable> p, Function<? super Throwable, T> fn);
 
 	@Override
-	<Err extends Exception> HTTPResponse<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn);
+	<Err extends Throwable> HTTPResponse<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn);
 
 	HTTPResponse<T> recover(HTTPStatusCode code, HTTPResponseFn<byte[], T> fn);
 
@@ -79,7 +79,7 @@ public interface HTTPResponse<T> extends Response<T> {
 
 		void success(HTTPStatus status, HTTPHeaders headers, T body);
 
-		void failure(Exception failure);
+		void failure(Throwable failure);
 
 		void done();
 	}

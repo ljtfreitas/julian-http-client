@@ -70,35 +70,35 @@ public class MonoPromise<T> implements Promise<T> {
     }
 
     @Override
-    public <R> R fold(Function<? super T, R> success, Function<? super Exception, R> failure) {
+    public <R> R fold(Function<? super T, R> success, Function<? super Throwable, R> failure) {
         return mono.map(success)
                 .onErrorResume(e -> Mono.just(failure.apply((Exception) e)))
                 .block();
     }
 
     @Override
-    public MonoPromise<T> recover(Function<? super Exception, T> fn) {
-        return new MonoPromise<>(mono.onErrorResume(e -> Mono.just(fn.apply((Exception) e))));
+    public MonoPromise<T> recover(Function<? super Throwable, T> fn) {
+        return new MonoPromise<>(mono.onErrorResume(e -> Mono.just(fn.apply(e))));
     }
 
     @Override
-    public <Err extends Exception> MonoPromise<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
+    public <Err extends Throwable> MonoPromise<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
         return new MonoPromise<>(mono.onErrorResume(expected, e -> Mono.just(fn.apply(e))));
     }
 
     @Override
-    public <Err extends Exception> MonoPromise<T> failure(Function<? super Exception, Err> fn) {
-        return new MonoPromise<>(mono.onErrorMap(t -> fn.apply((Exception) t)));
+    public <Err extends Throwable> MonoPromise<T> failure(Function<? super Throwable, Err> fn) {
+        return new MonoPromise<>(mono.onErrorMap(fn));
     }
 
     @Override
-    public Promise<T> recover(Predicate<? super Exception> p, Function<? super Exception, T> fn) {
-        return new MonoPromise<>(mono.onErrorResume(t -> p.test((Exception) t), e -> Mono.just(fn.apply((Exception) e))));
+    public Promise<T> recover(Predicate<? super Throwable> p, Function<? super Throwable, T> fn) {
+        return new MonoPromise<>(mono.onErrorResume(p, e -> Mono.just(fn.apply(e))));
     }
 
     @Override
-    public MonoPromise<T> onFailure(Consumer<? super Exception> fn) {
-        return new MonoPromise<>(mono.doOnError(t -> fn.accept((Exception) t)));
+    public MonoPromise<T> onFailure(Consumer<? super Throwable> fn) {
+        return new MonoPromise<>(mono.doOnError(fn));
     }
 
     @Override
@@ -113,7 +113,7 @@ public class MonoPromise<T> implements Promise<T> {
 
     @Override
     public MonoPromise<T> subscribe(Subscriber<? super T> subscriber) {
-        mono.subscribe(subscriber::success, e -> subscriber.failure((Exception) e), subscriber::done);
+        mono.subscribe(subscriber::success, subscriber::failure, subscriber::done);
         return this;
     }
 

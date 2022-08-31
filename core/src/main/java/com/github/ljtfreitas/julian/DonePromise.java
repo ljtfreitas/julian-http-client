@@ -44,17 +44,17 @@ class DonePromise<T> implements Promise<T> {
 
 	@Override
 	public <R> Promise<R> then(Function<? super T, R> fn) {
-		return new DonePromise<>(fn.apply(value));
+		return Attempt.run(() -> fn.apply(value)).fold(DonePromise::new, FailedPromise::new);
 	}
 
 	@Override
-	public <R> R fold(Function<? super T, R> success, Function<? super Exception, R> failure) {
+	public <R> R fold(Function<? super T, R> success, Function<? super Throwable, R> failure) {
 		return success.apply(value);
 	}
 
 	@Override
 	public <R> Promise<R> bind(Function<? super T, Promise<R>> fn) {
-		return fn.apply(value);
+		return Attempt.run(() -> fn.apply(value)).fold(Function.identity(), FailedPromise::new);
 	}
 
 	@Override
@@ -63,27 +63,27 @@ class DonePromise<T> implements Promise<T> {
 	}
 
 	@Override
-	public Promise<T> recover(Function<? super Exception, T> fn) {
+	public Promise<T> recover(Function<? super Throwable, T> fn) {
 		return this;
 	}
 
 	@Override
-	public <Err extends Exception> Promise<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
+	public <Err extends Throwable> Promise<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
 		return this;
 	}
 
 	@Override
-	public Promise<T> recover(Predicate<? super Exception> p, Function<? super Exception, T> fn) {
+	public Promise<T> recover(Predicate<? super Throwable> p, Function<? super Throwable, T> fn) {
 		return this;
 	}
 
 	@Override
-	public <Err extends Exception> Promise<T> failure(Function<? super Exception, Err> fn) {
+	public <Err extends Throwable> Promise<T> failure(Function<? super Throwable, Err> fn) {
 		return new DonePromise<>(value);
 	}
 
 	@Override
-	public Promise<T> onFailure(Consumer<? super Exception> fn) {
+	public Promise<T> onFailure(Consumer<? super Throwable> fn) {
 		return this;
 	}
 

@@ -72,7 +72,7 @@ class DefaultPromiseTest {
                 }
 
                 @Override
-                public void failure(Exception failure) {
+                public void failure(Throwable failure) {
                     fail("a success was expected...", failure);
                 }
 
@@ -96,7 +96,7 @@ class DefaultPromiseTest {
         private final Promise<String> promise = new DefaultPromise<>(CompletableFuture.failedFuture(failure));
 
         @Test
-        void onFailure(@Mock Consumer<Exception> consumer) {
+        void onFailure(@Mock Consumer<Throwable> consumer) {
             promise.onFailure(consumer).join();
 
             verify(consumer).accept(failure);
@@ -131,7 +131,7 @@ class DefaultPromiseTest {
                 }
 
                 @Override
-                public void failure(Exception e) {
+                public void failure(Throwable e) {
                     assertEquals(failure, e);
                 }
 

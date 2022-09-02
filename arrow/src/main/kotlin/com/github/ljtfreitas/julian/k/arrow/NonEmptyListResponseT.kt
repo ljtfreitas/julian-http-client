@@ -37,7 +37,7 @@ import java.lang.reflect.Type
 import java.lang.reflect.WildcardType
 import java.util.stream.Stream
 
-class NonEmptyListResponseT : ResponseT<Collection<Any>, NonEmptyList<Any>> {
+object NonEmptyListResponseT : ResponseT<Collection<Any>, NonEmptyList<Any>> {
 
     override fun test(endpoint: Endpoint) = endpoint.returnType().`is`(NonEmptyList::class.java)
 
@@ -60,3 +60,5 @@ class NonEmptyListResponseT : ResponseT<Collection<Any>, NonEmptyList<Any>> {
         override fun returnType(): JavaType = next.returnType()
     }
 }
+
+class NonEmptyListResponseTProxy : ResponseT<Collection<Any>, NonEmptyList<Any>> by NonEmptyListResponseT

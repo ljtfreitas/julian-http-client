@@ -19,7 +19,7 @@ import io.mockk.mockk
 
 class NonEmptyListResponseTTest : DescribeSpec({
 
-    val subject = NonEmptyListResponseT()
+    val subject = NonEmptyListResponseT
 
     val endpoint = mockk<Endpoint>()
 

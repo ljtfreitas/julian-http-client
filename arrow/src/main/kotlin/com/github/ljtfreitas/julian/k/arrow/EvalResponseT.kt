@@ -49,3 +49,5 @@ object EvalResponseT : ResponseT<Any, Eval<Any>> {
         override fun returnType(): JavaType = next.returnType()
     }
 }
+
+class EvalResponseTProxy : ResponseT<Any, Eval<Any>> by EvalResponseT

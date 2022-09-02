@@ -62,3 +62,5 @@ object EffectResponseT : ResponseT<Any, Effect<Exception, Any>> {
         override fun returnType(): JavaType = next.returnType()
     }
 }
+
+class EffectResponseTProxy : ResponseT<Any, Effect<Exception, Any>> by EffectResponseT

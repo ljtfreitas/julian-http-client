@@ -49,3 +49,5 @@ object OptionResponseT : ResponseT<Any, Option<Any>> {
         override fun returnType(): JavaType = next.returnType()
     }
 }
+
+class OptionResponseTProxy : ResponseT<Any, Option<Any>> by OptionResponseT

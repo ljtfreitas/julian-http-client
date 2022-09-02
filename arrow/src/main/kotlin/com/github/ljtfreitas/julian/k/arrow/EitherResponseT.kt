@@ -66,3 +66,5 @@ object EitherResponseT : ResponseT<Any, Either<Throwable, Any>> {
         override fun returnType() = next.returnType()
     }
 }
+
+class EitherResponseTProxy : ResponseT<Any, Either<Throwable, Any>> by EitherResponseT

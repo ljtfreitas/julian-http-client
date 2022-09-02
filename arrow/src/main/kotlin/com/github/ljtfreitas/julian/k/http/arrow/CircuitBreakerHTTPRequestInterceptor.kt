@@ -40,33 +40,33 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
 class CircuitBreakerHTTPRequestInterceptor(private val circuitBreaker: CircuitBreaker,
-                                           private val predicate: (HTTPResponse<*>) -> Boolean = { it.status().isSuccess},
-                                           private val coroutineContext: CoroutineContext = EmptyCoroutineContext) : HTTPRequestInterceptor {
+                                           private val coroutineContext: CoroutineContext = EmptyCoroutineContext,
+                                           private val predicate: (HTTPResponse<*>) -> Boolean = { it.status().isSuccess }) : HTTPRequestInterceptor {
 
     override fun <T : Any> intercepts(request: Promise<HTTPRequest<T>>): Promise<HTTPRequest<T>> = request.then {
-        CircuitBreakerHTTPRequest(circuitBreaker, predicate, coroutineContext, it)
+        CircuitBreakerHTTPRequest(circuitBreaker, coroutineContext, predicate, it)
     }
 }
 
 @OptIn(DelicateCoroutinesApi::class)
 class CircuitBreakerHTTPRequest<T>(
     private val circuitBreaker: CircuitBreaker,
-    private val predicate: (HTTPResponse<*>) -> Boolean,
     private val coroutineContext: CoroutineContext,
+    private val predicate: (HTTPResponse<*>) -> Boolean,
     private val request: HTTPRequest<T>
 ) : HTTPRequest<T> by request {
 
     override fun path(path: URI): HTTPRequest<T> =
-        CircuitBreakerHTTPRequest(circuitBreaker, predicate, coroutineContext, request.path(path))
+        CircuitBreakerHTTPRequest(circuitBreaker, coroutineContext, predicate, request.path(path))
 
     override fun method(method: HTTPMethod): HTTPRequest<T> =
-        CircuitBreakerHTTPRequest(circuitBreaker, predicate, coroutineContext, request.method(method))
+        CircuitBreakerHTTPRequest(circuitBreaker, coroutineContext, predicate, request.method(method))
 
     override fun headers(headers: HTTPHeaders): HTTPRequest<T> =
-        CircuitBreakerHTTPRequest(circuitBreaker, predicate, coroutineContext, request.headers(headers))
+        CircuitBreakerHTTPRequest(circuitBreaker, coroutineContext, predicate, request.headers(headers))
 
     override fun body(body: HTTPRequestBody): HTTPRequest<T> =
-        CircuitBreakerHTTPRequest(circuitBreaker, predicate, coroutineContext, request.body(body))
+        CircuitBreakerHTTPRequest(circuitBreaker, coroutineContext, predicate, request.body(body))
 
     override fun execute(): Promise<HTTPResponse<T>> = Promise.pending(
         GlobalScope.future {

@@ -28,6 +28,6 @@ import arrow.core.right
 import com.github.ljtfreitas.julian.Attempt
 import com.github.ljtfreitas.julian.Promise
 
-fun <T> Promise<T>.either(): Either<Exception, T> = join().either()
+fun <T> Promise<T>.either(): Either<Throwable, T> = join().either()
 
-fun <T> Attempt<T>.either(): Either<Exception, T> = fold({ it.right() }, { (it as Exception).left()} )
+fun <T> Attempt<T>.either(): Either<Throwable, T> = fold({ it.right() }, { it.left() })

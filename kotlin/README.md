@@ -129,8 +129,10 @@ interface PersonApi {
     // Deferred, Job and Flow values only can be used inside a coroutine.
     // For Sequence and Flow returns, deserialization process will assume that response body is a collection-like value (for example, a json array)
 
+    @GET
     fun getAllAsSequence(): Sequence<Person>
 
+    @GET
     fun getAllAsFlow(): Flow<Person>
     
     @GET("/{personId}")
@@ -138,7 +140,6 @@ interface PersonApi {
 
     @POST
     fun create(@Body("application/json") person: Person): Job
-
 }
 ```
 

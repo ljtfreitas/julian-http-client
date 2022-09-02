@@ -28,10 +28,10 @@ import arrow.core.continuations.effect
 import com.github.ljtfreitas.julian.Promise
 import com.github.ljtfreitas.julian.k.coroutines.await
 
-inline fun <reified E : Exception, T> Promise<T>.effect(exceptionClassType: Class<out E> = E::class.java): Effect<E, T> = effect {
+inline fun <reified E : Throwable, T> Promise<T>.effect(exceptionClassType: Class<out E> = E::class.java): Effect<E, T> = effect {
     try {
         await()
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
         shift(if (exceptionClassType.isInstance(e)) exceptionClassType.cast(e) else throw e)
     }
 }

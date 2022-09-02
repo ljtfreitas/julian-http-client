@@ -20,7 +20,7 @@ dependencies {
 }
 ```
 
-That's it. So, let's the code.
+That's it. So, let's to the code.
 
 ## Usage
 

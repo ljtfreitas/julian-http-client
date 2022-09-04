@@ -68,7 +68,7 @@ class LazyHTTPResponse<T> implements HTTPResponse<T> {
 	}
 
 	@Override
-	public <R> R fold(Function<? super T, R> success, Function<? super Exception, R> failure) {
+	public <R> R fold(Function<? super T, R> success, Function<? super Throwable, R> failure) {
 		return body.fold(success, failure);
 	}
 
@@ -87,7 +87,7 @@ class LazyHTTPResponse<T> implements HTTPResponse<T> {
 			}
 
 			@Override
-			public void failure(Exception failure) {
+			public void failure(Throwable failure) {
 				subscriber.failure(failure);
 			}
 
@@ -111,22 +111,22 @@ class LazyHTTPResponse<T> implements HTTPResponse<T> {
 	}
 
 	@Override
-	public HTTPResponse<T> onFailure(Consumer<? super Exception> fn) {
+	public HTTPResponse<T> onFailure(Consumer<? super Throwable> fn) {
 		return new LazyHTTPResponse<>(status, headers, body.onFailure(fn));
 	}
 
 	@Override
-	public HTTPResponse<T> recover(Function<? super Exception, T> fn) {
+	public HTTPResponse<T> recover(Function<? super Throwable, T> fn) {
 		return new LazyHTTPResponse<>(status, headers, body.recover(fn));
 	}
 
 	@Override
-	public HTTPResponse<T> recover(Predicate<? super Exception> p, Function<? super Exception, T> fn) {
+	public HTTPResponse<T> recover(Predicate<? super Throwable> p, Function<? super Throwable, T> fn) {
 		return new LazyHTTPResponse<>(status, headers, body.recover(p, fn));
 	}
 
 	@Override
-	public <Err extends Exception> HTTPResponse<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
+	public <Err extends Throwable> HTTPResponse<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
 		return new LazyHTTPResponse<>(status, headers, body.recover(expected, fn));
 	}
 

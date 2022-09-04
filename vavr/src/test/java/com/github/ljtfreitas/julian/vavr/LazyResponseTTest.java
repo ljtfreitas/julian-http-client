@@ -3,6 +3,7 @@ package com.github.ljtfreitas.julian.vavr;
 import com.github.ljtfreitas.julian.Arguments;
 import com.github.ljtfreitas.julian.Endpoint;
 import com.github.ljtfreitas.julian.JavaType;
+import com.github.ljtfreitas.julian.ObjectResponseT;
 import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
@@ -71,14 +72,11 @@ class LazyResponseTTest {
     }
 
     @Test
-    void bind(@Mock Promise<Response<String>> promise, @Mock ResponseFn<String, Object> fn) {
-        Arguments arguments = Arguments.empty();
-
+    void bind() {
         String content = "hello";
 
-        when(fn.run(promise, arguments)).thenReturn(Promise.done(content));
-
-        Lazy<Object> lazy = responseT.bind(endpoint, fn).join(promise, arguments);
+        Lazy<Object> lazy = responseT.bind(endpoint, new ObjectResponseT<>().bind(endpoint, null))
+                .join(Promise.done(Response.done(content)), Arguments.empty());
 
         assertFalse(lazy.isEvaluated());
 
@@ -86,14 +84,11 @@ class LazyResponseTTest {
     }
 
     @Test
-    void bindFailure(@Mock Promise<Response<String>> promise, @Mock ResponseFn<String, Object> fn) {
-        Arguments arguments = Arguments.empty();
-
+    void bindFailure() {
         RuntimeException failure = new RuntimeException("oops");
 
-        when(fn.run(promise, arguments)).then(i -> Promise.failed(failure));
-
-        Lazy<Object> lazy = responseT.bind(endpoint, fn).join(promise, arguments);
+        Lazy<Object> lazy = responseT.bind(endpoint, new ObjectResponseT<>().bind(endpoint, null))
+                .join(Promise.failed(failure), Arguments.empty());
 
         assertFalse(lazy.isEvaluated());
 

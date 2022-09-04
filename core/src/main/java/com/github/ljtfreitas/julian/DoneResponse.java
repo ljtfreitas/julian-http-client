@@ -29,27 +29,27 @@ class DoneResponse<T> implements Response<T> {
     }
 
     @Override
-    public Response<T> onFailure(Consumer<? super Exception> fn) {
+    public Response<T> onFailure(Consumer<? super Throwable> fn) {
         return this;
     }
 
     @Override
-    public Response<T> recover(Predicate<? super Exception> p, Function<? super Exception, T> fn) {
+    public Response<T> recover(Predicate<? super Throwable> p, Function<? super Throwable, T> fn) {
         return this;
     }
 
     @Override
-    public Response<T> recover(Function<? super Exception, T> fn) {
+    public Response<T> recover(Function<? super Throwable, T> fn) {
         return this;
     }
 
     @Override
-    public <Err extends Exception> Response<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
+    public <Err extends Throwable> Response<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
         return this;
     }
 
     @Override
-    public <R> R fold(Function<? super T, R> success, Function<? super Exception, R> failure) {
+    public <R> R fold(Function<? super T, R> success, Function<? super Throwable, R> failure) {
         return success.apply(value);
     }
 

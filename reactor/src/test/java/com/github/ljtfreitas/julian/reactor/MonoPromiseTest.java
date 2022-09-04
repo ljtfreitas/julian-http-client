@@ -83,7 +83,7 @@ class MonoPromiseTest {
                 }
 
                 @Override
-                public void failure(Exception failure) {
+                public void failure(Throwable failure) {
                     fail("a success was expected...", failure);
                 }
 
@@ -111,7 +111,7 @@ class MonoPromiseTest {
         private final MonoPromise<String> promise = new MonoPromise<>(Mono.error(failure));
 
         @Test
-        void onFailure(@Mock Consumer<Exception> consumer) {
+        void onFailure(@Mock Consumer<Throwable> consumer) {
             Mono<String> result = promise.onFailure(consumer).mono();
 
             StepVerifier.create(result)
@@ -154,7 +154,7 @@ class MonoPromiseTest {
                 }
 
                 @Override
-                public void failure(Exception e) {
+                public void failure(Throwable e) {
                     assertEquals(failure, e);
                 }
 

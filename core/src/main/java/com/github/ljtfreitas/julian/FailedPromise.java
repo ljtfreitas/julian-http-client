@@ -32,9 +32,9 @@ import java.util.function.Predicate;
 
 class FailedPromise<T> implements Promise<T> {
 
-	private final Exception failure;
+	private final Throwable failure;
 
-	FailedPromise(Exception failure) {
+	FailedPromise(Throwable failure) {
 		this.failure = failure;
 	}
 
@@ -59,18 +59,18 @@ class FailedPromise<T> implements Promise<T> {
 	}
 
 	@Override
-	public <R> R fold(Function<? super T, R> success, Function<? super Exception, R> failure) {
+	public <R> R fold(Function<? super T, R> success, Function<? super Throwable, R> failure) {
 		return failure.apply(this.failure);
 	}
 
 	@Override
-	public Promise<T> recover(Function<? super Exception, T> fn) {
+	public Promise<T> recover(Function<? super Throwable, T> fn) {
 		return new DonePromise<>(fn.apply(failure));
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <Err extends Exception> Promise<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
+	public <Err extends Throwable> Promise<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
 		Exception cause = deep(failure);
 
 		if (expected.isInstance(cause))
@@ -80,7 +80,7 @@ class FailedPromise<T> implements Promise<T> {
 	}
 
 	@Override
-	public Promise<T> recover(Predicate<? super Exception> p, Function<? super Exception, T> fn) {
+	public Promise<T> recover(Predicate<? super Throwable> p, Function<? super Throwable, T> fn) {
 		Exception cause = deep(failure);
 
 		if (cause != null && p.test(cause))
@@ -90,7 +90,7 @@ class FailedPromise<T> implements Promise<T> {
 	}
 
 	@Override
-	public <Err extends Exception> Promise<T> failure(Function<? super Exception, Err> fn) {
+	public <Err extends Throwable> Promise<T> failure(Function<? super Throwable, Err> fn) {
 		Exception cause = deep(failure);
 
 		if (cause != null)
@@ -100,7 +100,7 @@ class FailedPromise<T> implements Promise<T> {
 	}
 
 	@Override
-	public Promise<T> onFailure(Consumer<? super Exception> fn) {
+	public Promise<T> onFailure(Consumer<? super Throwable> fn) {
 		fn.accept(failure);
 		return this;
 	}

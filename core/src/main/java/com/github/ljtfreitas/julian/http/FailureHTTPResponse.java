@@ -43,6 +43,10 @@ public class FailureHTTPResponse<T> implements HTTPResponse<T> {
 		this.headers = failure.headers();
 	}
 
+	public HTTPResponseException asException() {
+		return failure;
+	}
+
 	@Override
 	public Attempt<T> body() {
 		return Attempt.failed(failure);
@@ -79,23 +83,23 @@ public class FailureHTTPResponse<T> implements HTTPResponse<T> {
 	}
 
 	@Override
-	public HTTPResponse<T> onFailure(Consumer<? super Exception> fn) {
+	public HTTPResponse<T> onFailure(Consumer<? super Throwable> fn) {
 		fn.accept(failure);
 		return this;
 	}
 
 	@Override
-	public HTTPResponse<T> recover(Function<? super Exception, T> fn) {
+	public HTTPResponse<T> recover(Function<? super Throwable, T> fn) {
 		return new SuccessHTTPResponse<>(status, headers, fn.apply(failure));
 	}
 
 	@Override
-	public <Err extends Exception> HTTPResponse<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
+	public <Err extends Throwable> HTTPResponse<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
 		return expected.isInstance(failure) ? new SuccessHTTPResponse<>(status, headers, fn.apply(expected.cast(failure))) : this;
 	}
 
 	@Override
-	public HTTPResponse<T> recover(Predicate<? super Exception> p, Function<? super Exception, T> fn) {
+	public HTTPResponse<T> recover(Predicate<? super Throwable> p, Function<? super Throwable, T> fn) {
 		return p.test(failure) ? new SuccessHTTPResponse<>(status, headers, fn.apply(failure)) : this;
 	}
 
@@ -105,7 +109,7 @@ public class FailureHTTPResponse<T> implements HTTPResponse<T> {
 	}
 
 	@Override
-	public <R> R fold(Function<? super T, R> success, Function<? super Exception, R> failure) {
+	public <R> R fold(Function<? super T, R> success, Function<? super Throwable, R> failure) {
 		return failure.apply(this.failure);
 	}
 

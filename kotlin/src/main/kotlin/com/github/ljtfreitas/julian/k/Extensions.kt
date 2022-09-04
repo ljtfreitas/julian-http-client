@@ -23,7 +23,10 @@
 package com.github.ljtfreitas.julian.k
 
 import com.github.ljtfreitas.julian.Attempt
+import com.github.ljtfreitas.julian.JavaType
 import com.github.ljtfreitas.julian.Promise
+import kotlin.reflect.jvm.javaType
+import kotlin.reflect.typeOf
 
 fun <T> Attempt<T>.result() : Result<T> = fold(Result.Companion::success, Result.Companion::failure)
 
@@ -48,3 +51,5 @@ operator fun <A, B, C> Promise<Triple<A, B, C>>.plus(other: Promise<*>): Promise
 operator fun Promise<Array<*>>.plus(other: Promise<*>): Promise<Array<*>> = bind { a ->
     other.then { b -> arrayOf(*a, b) }
 }
+
+inline fun <reified T : Any> javaType(): JavaType = JavaType.valueOf(typeOf<T>().javaType)

@@ -71,38 +71,38 @@ public class SinglePromise<T> implements Promise<T> {
     }
 
     @Override
-    public <R> R fold(Function<? super T, R> success, Function<? super Exception, R> failure) {
+    public <R> R fold(Function<? super T, R> success, Function<? super Throwable, R> failure) {
         return single.map(success::apply)
                 .onErrorReturn(e -> failure.apply((Exception) e))
                 .blockingGet();
     }
 
     @Override
-    public SinglePromise<T> recover(Function<? super Exception, T> fn) {
+    public SinglePromise<T> recover(Function<? super Throwable, T> fn) {
         return new SinglePromise<>(single.onErrorReturn(e -> fn.apply((Exception) e)));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <Err extends Exception> SinglePromise<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
+    public <Err extends Throwable> SinglePromise<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
         return new SinglePromise<>(single
                 .onErrorResumeNext(e -> (expected.isInstance(e)) ? Single.just(fn.apply((Err) e)) : Single.never()));
     }
 
     @Override
-    public <Err extends Exception> SinglePromise<T> failure(Function<? super Exception, Err> fn) {
-        return new SinglePromise<>(single.onErrorResumeNext(t -> Single.error(fn.apply((Exception) t))));
+    public <Err extends Throwable> SinglePromise<T> failure(Function<? super Throwable, Err> fn) {
+        return new SinglePromise<>(single.onErrorResumeNext(t -> Single.error(fn.apply(t))));
     }
 
     @Override
-    public Promise<T> recover(Predicate<? super Exception> p, Function<? super Exception, T> fn) {
+    public Promise<T> recover(Predicate<? super Throwable> p, Function<? super Throwable, T> fn) {
         return new SinglePromise<>(single
-                .onErrorResumeNext(t -> p.test((Exception) t) ? Single.just(fn.apply((Exception) t)) : Single.never()));
+                .onErrorResumeNext(t -> p.test(t) ? Single.just(fn.apply(t)) : Single.never()));
     }
 
     @Override
-    public SinglePromise<T> onFailure(Consumer<? super Exception> fn) {
-        return new SinglePromise<>(single.doOnError(t -> fn.accept((Exception) t)));
+    public SinglePromise<T> onFailure(Consumer<? super Throwable> fn) {
+        return new SinglePromise<>(single.doOnError(fn::accept));
     }
 
     @Override
@@ -120,7 +120,7 @@ public class SinglePromise<T> implements Promise<T> {
     @Override
     public SinglePromise<T> subscribe(Subscriber<? super T> subscriber) {
         single.subscribe(value -> { subscriber.success(value); subscriber.done(); },
-                e -> subscriber.failure((Exception) e));
+                subscriber::failure);
         return this;
     }
 

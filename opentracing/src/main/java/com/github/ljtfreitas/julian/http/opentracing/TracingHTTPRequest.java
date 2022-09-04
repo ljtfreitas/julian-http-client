@@ -66,7 +66,7 @@ class TracingHTTPRequest<T> implements HTTPRequest<T> {
 
     @Override
     public HTTPRequest<T> path(URI path) {
-        return new TracingHTTPRequest<T>(tracer, scopeManager, activeSpan, request.path(path));
+        return new TracingHTTPRequest<>(tracer, scopeManager, activeSpan, request.path(path));
     }
 
     @Override
@@ -124,7 +124,7 @@ class TracingHTTPRequest<T> implements HTTPRequest<T> {
         Tags.HTTP_STATUS.set(span, response.status().code());
     }
 
-    private void error(Span span, Exception e) {
+    private void error(Span span, Throwable e) {
         Tags.ERROR.set(span, true);
         span.log(Map.of("event", Tags.ERROR.getKey(), "error.object", e));
     }

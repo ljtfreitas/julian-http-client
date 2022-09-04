@@ -31,7 +31,7 @@ import com.github.ljtfreitas.julian.ResponseFn;
 import com.github.ljtfreitas.julian.ResponseT;
 import io.vavr.control.Either;
 
-public class EitherResponseT<L extends Exception> implements ResponseT<Object, Either<L, Object>> {
+public class EitherResponseT<L extends Throwable> implements ResponseT<Object, Either<L, Object>> {
 
     @Override
     public <A> ResponseFn<A, Either<L, Object>> bind(Endpoint endpoint, ResponseFn<A, Object> next) {
@@ -40,7 +40,10 @@ public class EitherResponseT<L extends Exception> implements ResponseT<Object, E
             @SuppressWarnings("unchecked")
             @Override
             public Promise<Either<L, Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
-                Class<?> leftClassType = JavaType.valueOf(endpoint.returnType().parameterized().map(JavaType.Parameterized::firstArg).orElse(Exception.class)).rawClassType();
+                Class<?> leftClassType = JavaType.valueOf(endpoint.returnType().parameterized()
+                        .map(JavaType.Parameterized::firstArg)
+                        .orElse(Throwable.class))
+                        .rawClassType();
 
                 return next.run(response, arguments)
                         .then(Either::<L, Object>right)
@@ -65,7 +68,7 @@ public class EitherResponseT<L extends Exception> implements ResponseT<Object, E
             && endpoint.returnType().parameterized()
                     .map(p -> p.getActualTypeArguments()[0])
                     .map(JavaType::valueOf)
-                    .filter(left -> left.compatible(Exception.class))
+                    .filter(left -> left.compatible(Throwable.class))
                     .isPresent();
     }
 }

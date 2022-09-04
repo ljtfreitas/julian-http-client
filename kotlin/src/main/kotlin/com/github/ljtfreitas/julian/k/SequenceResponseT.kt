@@ -43,7 +43,6 @@ object SequenceResponseT : ResponseT<Stream<Any>, Sequence<Any>> {
         override fun returnType(): JavaType = next.returnType()
     }
 
-
     override fun adapted(endpoint: Endpoint): JavaType = endpoint.returnType().parameterized()
         .map(JavaType.Parameterized::firstArg)
         .map(::argument)

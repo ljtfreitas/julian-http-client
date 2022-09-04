@@ -122,7 +122,7 @@ class HTTPResponseTest {
 
         @Test
         @DisplayName("success HTTP response doesn't have to do nothing on failure callback")
-        void onFailureDoNothing(@Mock Consumer<Exception> consumer) {
+        void onFailureDoNothing(@Mock Consumer<Throwable> consumer) {
             HTTPResponse<String> returned = response.onFailure(consumer);
 
             assertSame(response, returned);
@@ -132,7 +132,7 @@ class HTTPResponseTest {
 
         @Test
         @DisplayName("success HTTP response doesn't have to do nothing on failure")
-        void onRecoverExceptionDoNothing(@Mock Function<Exception, String> fn) {
+        void onRecoverExceptionDoNothing(@Mock Function<Throwable, String> fn) {
             HTTPResponse<String> returned = response.recover(fn);
 
             assertSame(response, returned);
@@ -142,7 +142,7 @@ class HTTPResponseTest {
 
         @Test
         @DisplayName("success HTTP response doesn't have to do nothing on recover")
-        void onRecoverUsingPredicateDoNothing(@Mock Predicate<Exception> p, @Mock Function<Exception, String> fn) {
+        void onRecoverUsingPredicateDoNothing(@Mock Predicate<Throwable> p, @Mock Function<Throwable, String> fn) {
             HTTPResponse<String> returned = response.recover(p, fn);
 
             assertSame(response, returned);
@@ -262,7 +262,7 @@ class HTTPResponseTest {
 
         @Test
         @DisplayName("just call failure callback passing HTTPResponseException")
-        void onFailureDoNothing(@Mock Consumer<Exception> consumer) {
+        void onFailureDoNothing(@Mock Consumer<Throwable> consumer) {
             HTTPResponse<String> returned = response.onFailure(consumer);
 
             assertSame(response, returned);
@@ -426,7 +426,7 @@ class HTTPResponseTest {
 
         @Test
         @DisplayName("empy HTTP response doesn't have to do nothing on failure callback")
-        void onFailureDoNothing(@Mock Consumer<Exception> consumer) {
+        void onFailureDoNothing(@Mock Consumer<Throwable> consumer) {
             HTTPResponse<String> returned = response.onFailure(consumer);
 
             assertSame(response, returned);
@@ -436,7 +436,7 @@ class HTTPResponseTest {
 
         @Test
         @DisplayName("empty HTTP response doesn't have to do nothing on failure")
-        void onRecoverExceptionDoNothing(@Mock Function<Exception, String> fn) {
+        void onRecoverExceptionDoNothing(@Mock Function<Throwable, String> fn) {
             HTTPResponse<String> returned = response.recover(fn);
 
             assertSame(response, returned);
@@ -446,7 +446,7 @@ class HTTPResponseTest {
 
         @Test
         @DisplayName("empty HTTP response doesn't have to do nothing on recover")
-        void onRecoverUsingPredicateDoNothing(@Mock Predicate<Exception> p, @Mock Function<Exception, String> fn) {
+        void onRecoverUsingPredicateDoNothing(@Mock Predicate<Throwable> p, @Mock Function<Throwable, String> fn) {
             HTTPResponse<String> returned = response.recover(p, fn);
 
             assertSame(response, returned);
@@ -564,7 +564,7 @@ class HTTPResponseTest {
 
             @Test
             @DisplayName("lazy, success HTTP response doesn't have to do nothing on failure callback")
-            void onFailureDoNothing(@Mock Consumer<Exception> consumer) {
+            void onFailureDoNothing(@Mock Consumer<Throwable> consumer) {
                 HTTPResponse<String> returned = success.onFailure(consumer);
 
                 assertTrue(returned instanceof LazyHTTPResponse);
@@ -574,7 +574,7 @@ class HTTPResponseTest {
 
             @Test
             @DisplayName("lazy, success HTTP response doesn't have to do nothing on failure")
-            void onRecoverExceptionDoNothing(@Mock Function<Exception, String> fn) {
+            void onRecoverExceptionDoNothing(@Mock Function<Throwable, String> fn) {
                 HTTPResponse<String> returned = success.recover(fn);
 
                 assertTrue(returned instanceof LazyHTTPResponse);
@@ -584,7 +584,7 @@ class HTTPResponseTest {
 
             @Test
             @DisplayName("lazy, success HTTP response doesn't have to do nothing on recover")
-            void onRecoverUsingPredicateDoNothing(@Mock Predicate<Exception> p, @Mock Function<Exception, String> fn) {
+            void onRecoverUsingPredicateDoNothing(@Mock Predicate<Throwable> p, @Mock Function<Throwable, String> fn) {
                 HTTPResponse<String> returned = success.recover(p, fn);
 
                 assertTrue(returned instanceof LazyHTTPResponse);
@@ -710,7 +710,7 @@ class HTTPResponseTest {
 
             @Test
             @DisplayName("just call failure callback passing HTTPResponseException")
-            void onFailureDoNothing(@Mock Consumer<Exception> consumer) {
+            void onFailureDoNothing(@Mock Consumer<Throwable> consumer) {
                 HTTPResponse<String> returned = failed.onFailure(consumer);
 
                 assertTrue(returned instanceof LazyHTTPResponse);

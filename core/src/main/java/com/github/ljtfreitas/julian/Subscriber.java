@@ -26,7 +26,7 @@ public interface Subscriber<T> {
 
     void success(T value);
 
-    void failure(Exception failure);
+    void failure(Throwable failure);
 
-    void done();
+    default void done() {};
 }

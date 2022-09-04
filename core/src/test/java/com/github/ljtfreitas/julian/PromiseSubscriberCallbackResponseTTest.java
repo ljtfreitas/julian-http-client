@@ -74,7 +74,7 @@ class PromiseSubscriberCallbackResponseTTest {
             }
 
             @Override
-            public void failure(Exception failure) {
+            public void failure(Throwable failure) {
                 reporter.publishEntry("failure");
                 fail(failure.getMessage());
             }

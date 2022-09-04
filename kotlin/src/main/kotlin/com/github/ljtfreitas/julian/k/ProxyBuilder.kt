@@ -98,6 +98,8 @@ inline fun <reified T> ProxyBuilder.build(endpoint: String?) : T = build(T::clas
 
 inline fun <reified T> ProxyBuilder.build(endpoint: URL?) : T = build(T::class.java, endpoint)
 
+inline fun <reified T> proxy(block: ProxyBuilder.() -> Unit = {}) : T = proxy(endpoint = null as URL, block)
+
 inline fun <reified T> proxy(endpoint: String? = null, block: ProxyBuilder.() -> Unit = {}) : T = proxy(endpoint?.let(::URL), block)
 
 inline fun <reified T> proxy(endpoint: URL? = null, block: ProxyBuilder.() -> Unit = {}) : T = ProxyBuilder()

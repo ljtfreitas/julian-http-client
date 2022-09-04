@@ -25,18 +25,21 @@ package com.github.ljtfreitas.julian.k.coroutines
 
 import com.github.ljtfreitas.julian.Promise
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.future.asDeferred
 import kotlinx.coroutines.future.await
-import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
 fun <T> Promise<T>.deferred(): Deferred<T> = future().asDeferred()
 
+fun <T> Promise<T>.job(): Job = future().asDeferred()
+
 suspend fun <T> Promise<T>.await(): T = future().await()
 
-suspend fun <T> promise(context: CoroutineContext = EmptyCoroutineContext, block: () -> T): Promise<T> = supervisorScope {
+suspend fun <T> promise(context: CoroutineContext = EmptyCoroutineContext, block: () -> T): Promise<T> = coroutineScope {
     try {
         withContext(context = context) {
             block()

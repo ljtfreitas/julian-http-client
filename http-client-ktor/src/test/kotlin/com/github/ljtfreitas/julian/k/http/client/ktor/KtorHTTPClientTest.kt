@@ -20,10 +20,10 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import io.ktor.client.engine.ProxyBuilder
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.engine.http
-import io.ktor.client.features.HttpRequestTimeoutException
-import io.ktor.client.features.HttpTimeout
-import io.ktor.client.features.logging.LogLevel
-import io.ktor.client.features.logging.Logging
+import io.ktor.client.plugins.HttpRequestTimeoutException
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logging
 import io.ktor.network.tls.addKeyStore
 import org.mockserver.client.MockServerClient
 import org.mockserver.logging.MockServerLogger

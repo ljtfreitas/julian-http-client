@@ -36,18 +36,21 @@ import com.github.ljtfreitas.julian.http.client.HTTPClientRequest
 import com.github.ljtfreitas.julian.http.client.HTTPClientResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
+import io.ktor.client.call.body
 import io.ktor.client.call.receive
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.HttpClientEngineConfig
 import io.ktor.client.engine.HttpClientEngineFactory
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.request.headers
+import io.ktor.client.request.post
 import io.ktor.client.request.request
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.utils.EmptyContent
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.content.OutgoingContent
+import io.ktor.util.InternalAPI
 import io.ktor.util.toMap
 import io.ktor.utils.io.ByteWriteChannel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -106,6 +109,7 @@ class KtorHTTPClient private constructor(private val client: HttpClient): HTTPCl
                         .forEach { appendAll(it.name(), it.values()) }
                 }
 
+                @OptIn(InternalAPI::class)
                 body = request.body().map { it.content(request.headers().contentType()) }.orElse(EmptyContent)
             }
 
@@ -135,7 +139,7 @@ class KtorHTTPClient private constructor(private val client: HttpClient): HTTPCl
             acc.join(HTTPHeader.create(name, values))
         }
 
-        val bodyAsBytes: ByteArray = receive()
+        val bodyAsBytes: ByteArray = body()
 
         return if (bodyAsBytes.isEmpty())
             HTTPClientResponse.empty(httpStatus, httpHeaders)

@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 /*
  * Copyright (C) 2021 Tiago de Freitas Lima
  *
@@ -31,6 +33,16 @@ tasks.jar.configure {
     archiveBaseName.set("julian-http-client-arrow")
 }
 
+val kotlinCompileAttributes: KotlinCompile.() -> Unit = {
+    sourceCompatibility = "11"
+    targetCompatibility = "11"
+
+    kotlinOptions.freeCompilerArgs += "-opt-in=kotlin.RequiresOptIn"
+}
+
+tasks.compileKotlin.configure(kotlinCompileAttributes)
+tasks.compileTestKotlin.configure(kotlinCompileAttributes)
+
 dependencies {
     implementation(project(":core"))
     implementation(project(":kotlin"))
@@ -40,5 +52,6 @@ dependencies {
     testImplementation("io.kotest:kotest-runner-junit5:5.4.2")
     testImplementation("io.kotest:kotest-assertions-core-jvm:5.4.2")
     testImplementation("io.kotest.extensions:kotest-assertions-arrow:1.2.5")
-    testImplementation("io.mockk:mockk:1.12.5")
+    testImplementation("io.mockk:mockk:1.12.7")
 }
+

@@ -1,6 +1,5 @@
 package com.github.ljtfreitas.julian.k.http.arrow
 
-import arrow.core.Either
 import arrow.fx.coroutines.CircuitBreaker
 import com.github.ljtfreitas.julian.Attempt
 import com.github.ljtfreitas.julian.Promise
@@ -11,7 +10,6 @@ import com.github.ljtfreitas.julian.http.HTTPResponse
 import com.github.ljtfreitas.julian.http.HTTPServerFailureResponseException.InternalServerError
 import com.github.ljtfreitas.julian.http.HTTPStatus
 import com.github.ljtfreitas.julian.http.HTTPStatusCode
-import com.github.ljtfreitas.julian.k.arrow.either
 import io.kotest.assertions.fail
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
@@ -20,11 +18,12 @@ import io.kotest.matchers.throwable.shouldHaveCauseInstanceOf
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.ExperimentalTime
 
-@OptIn(ExperimentalTime::class)
+@OptIn(ExperimentalTime::class, DelicateCoroutinesApi::class)
 class CircuitBreakerHTTPRequestInterceptorTest : DescribeSpec({
 
     describe("Arrow CircuitBreaker as HTTP request interceptor") {

@@ -32,6 +32,13 @@ tasks.jar.configure {
     archiveBaseName.set("julian-http-client-json-kotlin")
 }
 
+tasks.compileKotlin.configure {
+    sourceCompatibility = "11"
+    targetCompatibility = "11"
+
+    kotlinOptions.freeCompilerArgs += "-opt-in=kotlin.RequiresOptIn"
+}
+
 dependencies {
     implementation(project(":core"))
     implementation(kotlin("reflect"))

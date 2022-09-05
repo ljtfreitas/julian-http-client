@@ -39,6 +39,7 @@ import java.net.URI
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
+@DelicateCoroutinesApi
 class CircuitBreakerHTTPRequestInterceptor(private val circuitBreaker: CircuitBreaker,
                                            private val coroutineContext: CoroutineContext = EmptyCoroutineContext,
                                            private val predicate: (HTTPResponse<*>) -> Boolean = { it.status().isSuccess }) : HTTPRequestInterceptor {
@@ -48,7 +49,6 @@ class CircuitBreakerHTTPRequestInterceptor(private val circuitBreaker: CircuitBr
     }
 }
 
-@OptIn(DelicateCoroutinesApi::class)
 class CircuitBreakerHTTPRequest<T>(
     private val circuitBreaker: CircuitBreaker,
     private val coroutineContext: CoroutineContext,
@@ -68,6 +68,7 @@ class CircuitBreakerHTTPRequest<T>(
     override fun body(body: HTTPRequestBody): HTTPRequest<T> =
         CircuitBreakerHTTPRequest(circuitBreaker, coroutineContext, predicate, request.body(body))
 
+    @OptIn(DelicateCoroutinesApi::class)
     override fun execute(): Promise<HTTPResponse<T>> = Promise.pending(
         GlobalScope.future {
             circuitBreaker.protectOrThrow {

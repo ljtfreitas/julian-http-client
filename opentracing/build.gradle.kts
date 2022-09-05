@@ -35,8 +35,9 @@ dependencies {
     api("io.opentracing:opentracing-api:0.33.0")
 
     testImplementation("io.opentracing:opentracing-mock:0.33.0")
-    testImplementation("org.testcontainers:testcontainers:1.16.3")
-    testImplementation("io.jaegertracing:jaeger-client:1.8.0")
-    testImplementation("org.testcontainers:mockserver:1.16.3")
+    testImplementation("org.testcontainers:testcontainers:1.17.3")
+    testImplementation("io.jaegertracing:jaeger-client:1.8.1")
+    testImplementation("org.testcontainers:mockserver:1.17.3")
     testImplementation(project(":json-jsonp"))
 }
+

@@ -31,18 +31,25 @@ tasks.jar.configure {
     archiveBaseName.set("julian-http-client-ktor")
 }
 
+tasks.compileKotlin.configure {
+    sourceCompatibility = "11"
+    targetCompatibility = "11"
+
+    kotlinOptions.freeCompilerArgs += "-opt-in=kotlin.RequiresOptIn"
+}
+
 dependencies {
     implementation(project(":core"))
 
-    api("io.ktor:ktor-client-core:1.6.7")
-    api("io.ktor:ktor-client-cio:1.6.7")
+    api("io.ktor:ktor-client-core:2.1.0")
+    api("io.ktor:ktor-client-cio:2.1.0")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk9:1.6.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.4")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk9:1.6.4")
 
-    testImplementation("io.kotest:kotest-runner-junit5:5.1.0")
-    testImplementation("io.kotest:kotest-assertions-core-jvm:5.1.0")
-    testImplementation("io.kotest.extensions:kotest-extensions-mockserver:1.1.0")
-    testImplementation("io.mockk:mockk:1.12.3")
-    testImplementation("io.ktor:ktor-client-logging:1.6.7")
+    testImplementation("io.kotest:kotest-runner-junit5:5.4.2")
+    testImplementation("io.kotest:kotest-assertions-core-jvm:5.4.2")
+    testImplementation("io.kotest.extensions:kotest-extensions-mockserver:1.2.1")
+    testImplementation("io.mockk:mockk:1.12.7")
+    testImplementation("io.ktor:ktor-client-logging:2.1.0")
 }

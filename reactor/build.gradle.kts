@@ -39,6 +39,7 @@ dependencyManagement {
 
 dependencies {
     implementation(project(":core"))
-    api("io.projectreactor:reactor-core:3.4.14")
-    testImplementation("io.projectreactor:reactor-test:3.4.14")
+    api("io.projectreactor:reactor-core:3.4.22")
+    testImplementation("io.projectreactor:reactor-test:3.4.22")
 }
+

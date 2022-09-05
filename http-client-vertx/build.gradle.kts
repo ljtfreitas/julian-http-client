@@ -32,7 +32,8 @@ tasks.jar.configure {
 
 dependencies {
     implementation(project(":core"))
-    implementation("org.reactivestreams:reactive-streams:1.0.3")
+    implementation("org.reactivestreams:reactive-streams:1.0.4")
     api(project(":rx-java3"))
-    api("io.vertx:vertx-rx-java3:4.2.5")
+    api("io.vertx:vertx-rx-java3:4.3.3")
 }
+

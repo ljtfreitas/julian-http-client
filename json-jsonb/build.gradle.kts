@@ -32,5 +32,6 @@ tasks.jar.configure {
 
 dependencies {
     implementation(project(":core"))
-    api("org.eclipse:yasson:2.0.4")
+    api("org.eclipse:yasson:3.0.0")
 }
+

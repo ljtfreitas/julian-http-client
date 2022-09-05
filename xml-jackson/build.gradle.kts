@@ -32,6 +32,6 @@ tasks.jar.configure {
 
 dependencies {
     implementation(project(":core"))
-    api("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.13.1")
-    api("com.fasterxml.woodstox:woodstox-core:6.2.8")
+    api("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.13.3")
+    api("com.fasterxml.woodstox:woodstox-core:6.3.1")
 }

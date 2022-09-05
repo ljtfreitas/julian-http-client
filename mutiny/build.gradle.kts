@@ -32,5 +32,6 @@ tasks.jar.configure {
 
 dependencies {
     implementation(project(":core"))
-    api("io.smallrye.reactive:mutiny:1.2.0")
+    api("io.smallrye.reactive:mutiny:1.7.0")
 }
+

@@ -55,8 +55,8 @@ public class HTTPResponseFailures {
         return new HTTPResponseFailures(failures);
     }
 
-    public HTTPResponseFailure fold() {
-        return failures.isEmpty() ? DefaultHTTPResponseFailure.get() : new ConditionalHTTPResponseFailure(failures);
+    public HTTPResponseFailure fold(HTTPResponseFailure fallback) {
+        return failures.isEmpty() ? fallback : new ConditionalHTTPResponseFailure(failures, fallback);
     }
 
     public Map<HTTPStatusCode, HTTPResponseFailure> all() {

@@ -26,10 +26,10 @@ plugins {
     id("io.spring.dependency-management") version "1.0.12.RELEASE"
 }
 
-description = "Spring auto-configuration for julian-http-client"
+description = "Starter for julian-http-client's Spring auto-configuration"
 
 tasks.jar.configure {
-    archiveBaseName.set("julian-http-client-spring-autoconfigure")
+    archiveBaseName.set("julian-http-client-spring-starter")
 }
 
 dependencyManagement {
@@ -39,9 +39,6 @@ dependencyManagement {
 }
 
 dependencies {
-    api(project(":core"))
-    api("org.springframework.boot:spring-boot-starter-logging")
-    implementation("org.springframework.boot:spring-boot-autoconfigure")
-
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    api(project(":spring-autoconfigure"))
+    api("org.springframework.boot:spring-boot-starter")
 }

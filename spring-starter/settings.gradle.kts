@@ -20,28 +20,4 @@
  * SOFTWARE.
  */
 
-plugins {
-    modules
-    id("org.springframework.boot") version "2.7.2" apply false
-    id("io.spring.dependency-management") version "1.0.12.RELEASE"
-}
-
-description = "Spring auto-configuration for julian-http-client"
-
-tasks.jar.configure {
-    archiveBaseName.set("julian-http-client-spring-autoconfigure")
-}
-
-dependencyManagement {
-    imports {
-        mavenBom(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES)
-    }
-}
-
-dependencies {
-    api(project(":core"))
-    api("org.springframework.boot:spring-boot-starter-logging")
-    implementation("org.springframework.boot:spring-boot-autoconfigure")
-
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-}
+rootProject.name = "julian-http-client-spring-starter"

@@ -1,2 +1,2 @@
-## spring-auto-configure
+## spring-autoconfigure
 

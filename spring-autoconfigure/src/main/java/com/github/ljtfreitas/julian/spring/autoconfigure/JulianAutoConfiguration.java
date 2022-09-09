@@ -25,6 +25,7 @@ package com.github.ljtfreitas.julian.spring.autoconfigure;
 import com.github.ljtfreitas.julian.Attempt;
 import com.github.ljtfreitas.julian.ProxyBuilder;
 import com.github.ljtfreitas.julian.ProxyBuilderExtension;
+import com.github.ljtfreitas.julian.ResponseT;
 import com.github.ljtfreitas.julian.contract.ContractReader;
 import com.github.ljtfreitas.julian.http.DefaultHTTPResponseFailure;
 import com.github.ljtfreitas.julian.http.HTTP;
@@ -66,8 +67,10 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
 
 import java.net.URL;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.ljtfreitas.julian.Preconditions.nonNull;
@@ -163,7 +166,7 @@ public class JulianAutoConfiguration {
             Collection<JulianProxyCandidate> candidates = packages.stream()
                     .flatMap(packageName -> scanner.findCandidateComponents(packageName).stream())
                     .map(beanDefinition -> JulianProxyCandidate.valueOf(beanDefinition, beanNameGenerator.generateBeanName(beanDefinition, registry), beanFactory))
-                    .peek(candidate -> log.info("julian-http-client candidate bean found: {}", candidate.beanClass.getCanonicalName()))
+                    .peek(candidate -> log.info("julian-http-client candidate bean found: {} (candidate bean name: {})", candidate.beanClass.getCanonicalName(), candidate.beanName))
                     .collect(toList());
 
             candidates.stream()
@@ -257,6 +260,10 @@ public class JulianAutoConfiguration {
 
             ProxyBuilder builder = new ProxyBuilder();
 
+            spec.map(JulianHTTPClientSpecification::http)
+                    .ifPresentOrElse(builder.http()::with,
+                            () -> beanFactory.getBeanProvider(HTTP.class).ifAvailable(builder.http()::with));
+
             spec.map(JulianHTTPClientSpecification::httpClientSpec)
                     .ifPresent(builder.http().client().configure()::apply);
 
@@ -269,9 +276,6 @@ public class JulianAutoConfiguration {
             spec.map(JulianHTTPClientSpecification::failures)
                     .ifPresent(builder.http().failure()::with);
 
-            spec.map(JulianHTTPClientSpecification::codecs)
-                    .ifPresent(builder.codecs()::add);
-
             spec.map(JulianHTTPClientSpecification::contractExtensions)
                     .filter(not(Collection::isEmpty))
                     .ifPresent(builder.contract().extensions()::apply);
@@ -280,14 +284,23 @@ public class JulianAutoConfiguration {
                     .ifPresentOrElse(builder.contract()::reader,
                             () -> beanFactory.getBeanProvider(ContractReader.class).ifAvailable(builder.contract()::reader));
 
-            spec.map(JulianHTTPClientSpecification::http)
-                    .ifPresentOrElse(builder.http()::with,
-                            () -> beanFactory.getBeanProvider(HTTP.class).ifAvailable(builder.http()::with));
+            spec.map(JulianHTTPClientSpecification::responses)
+                    .ifPresent(builder.responses()::add);
+
+            spec.map(JulianHTTPClientSpecification::codecs)
+                    .ifPresent(builder.codecs()::add);
+
+            spec.map(JulianHTTPClientSpecification::executor)
+                    .ifPresent(builder.async()::executor);
 
             builder.codecs()
-                    .add(beanFactory.getBeanProvider(HTTPMessageCodec.class).stream().collect(toList()));
+                    .add(beanFactory.getBeanProvider(HTTPMessageCodec.class).stream().collect(toList()))
+                        .and()
+                    .responses()
+                        .add(beanFactory.getBeanProvider(ResponseT.class).stream().map(r -> (ResponseT<?, ?>) r)
+                                .collect(toList()));
 
-            Optional.ofNullable(beanFactory.resolveEmbeddedValue("${julian-http-client." + name + ".debug:false}"))
+            Optional.ofNullable(beanFactory.resolveEmbeddedValue("${julian-http-client." + name + ".debug-enabled:false}"))
                     .filter(not(String::isEmpty))
                     .map(Boolean::valueOf)
                     .ifPresent(builder.http().client().extensions().debug()::enabled);
@@ -298,7 +311,7 @@ public class JulianAutoConfiguration {
                             .filter(not(String::isEmpty))
                             .or(() -> Optional.ofNullable(name)
                                     .filter(not(String::isEmpty))
-                                    .map(name -> "${julian-http-client." + name + ".base-url}"))
+                                    .map(name -> "${julian-http-client." + name + ".base-url:}"))
                             .map(beanFactory::resolveEmbeddedValue)
                             .filter(not(String::isEmpty))
                             .map(s -> Attempt.run(() -> new URL(s)).unsafe()))

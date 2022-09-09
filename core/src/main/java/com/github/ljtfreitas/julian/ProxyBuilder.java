@@ -531,24 +531,7 @@ public class ProxyBuilder {
             }
 
             private HTTPResponseFailure build(HTTPResponseReaders readers) {
-                RecoverableHTTPResponseFailure fallback = new RecoverableHTTPResponseFailure(readers);
-                return failures.has() ? failures.build(fallback) : failure == null ? fallback : failure;
-            }
-
-            private class HTTPResponseFailures {
-                private final Map<HTTPStatusCode, HTTPResponseFailure> failures = new HashMap<>();
-
-                private void add(HTTPStatusCode status, HTTPResponseFailure failure) {
-                    failures.put(status, failure);
-                }
-
-                private boolean has() {
-                    return !failures.isEmpty();
-                }
-
-                private HTTPResponseFailure build(RecoverableHTTPResponseFailure fallback) {
-                    return new ConditionalHTTPResponseFailure(failures, fallback);
-                }
+                return failure == null ? failures.fold(new RecoverableHTTPResponseFailure(readers)) : failure;
             }
         }
 

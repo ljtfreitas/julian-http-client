@@ -23,6 +23,7 @@
 package com.github.ljtfreitas.julian.spring.autoconfigure;
 
 import com.github.ljtfreitas.julian.ProxyBuilder;
+import com.github.ljtfreitas.julian.ResponseT;
 import com.github.ljtfreitas.julian.contract.ContractReader;
 import com.github.ljtfreitas.julian.contract.EndpointMetadata;
 import com.github.ljtfreitas.julian.http.HTTP;
@@ -33,6 +34,7 @@ import com.github.ljtfreitas.julian.http.codec.HTTPMessageCodec;
 
 import java.net.URI;
 import java.util.Collection;
+import java.util.concurrent.Executor;
 import java.util.function.Function;
 
 import static java.util.Collections.emptyList;
@@ -40,6 +42,10 @@ import static java.util.Collections.emptyList;
 public interface JulianHTTPClientSpecification {
 
     default URI endpoint() {
+        return null;
+    }
+
+    default Executor executor() {
         return null;
     }
 
@@ -55,10 +61,6 @@ public interface JulianHTTPClientSpecification {
         return new HTTPClient.Specification();
     }
 
-    default Collection<HTTPMessageCodec> codecs() {
-        return emptyList();
-    }
-
     default Collection<HTTPRequestInterceptor> interceptors() {
         return emptyList();
     }
@@ -72,6 +74,14 @@ public interface JulianHTTPClientSpecification {
     }
 
     default Collection<Function<EndpointMetadata, EndpointMetadata>> contractExtensions() {
+        return emptyList();
+    }
+
+    default Collection<ResponseT<?, ?>> responses() {
+        return emptyList();
+    }
+
+    default Collection<HTTPMessageCodec> codecs() {
         return emptyList();
     }
 

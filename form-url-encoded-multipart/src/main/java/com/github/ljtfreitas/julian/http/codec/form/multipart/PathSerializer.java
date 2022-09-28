@@ -32,6 +32,8 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static java.util.function.Predicate.not;
+
 class PathSerializer implements MultipartFormFieldSerializer<Path> {
 
     private static final PathSerializer SINGLE_INSTANCE = new PathSerializer();
@@ -46,13 +48,15 @@ class PathSerializer implements MultipartFormFieldSerializer<Path> {
     @Override
     public void write(String boundary, MultipartFormField<Path> field, Charset charset, OutputStream output) {
         Path path = field.value;
+        String fileName = field.fileName.filter(not(String::isEmpty)).orElseGet(() -> path.getFileName().toString());
 
         ContentDisposition contentDisposition = new ContentDisposition(field.name, path.getFileName().toString());
 
         MediaType mediaType = field.contentType
-                .orElseGet(() -> Attempt.run(() -> Files.probeContentType(path))
-                        .map(MediaType::valueOf)
-                        .recover(() -> MEDIA_TYPE_OCTET_STREAM));
+                .or(() -> Attempt.run(() -> Files.probeContentType(path))
+                        .op()
+                        .map(MediaType::valueOf))
+                .orElse(MEDIA_TYPE_OCTET_STREAM);
 
         new MultipartFormFieldWriter(output, boundary, contentDisposition, mediaType)
                 .write(o -> Files.copy(path, output))

@@ -33,7 +33,7 @@ class FutureResponseT implements ResponseT<Object, Future<Object>> {
 		return new ResponseFn<>() {
 
 			@Override
-			public Future<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
+			public Future<Object> join(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
 				return next.run(response, arguments).future();
 			}
 

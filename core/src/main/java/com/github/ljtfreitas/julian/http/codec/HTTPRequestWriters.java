@@ -34,7 +34,7 @@ public class HTTPRequestWriters {
 
 	private final Collection<HTTPRequestWriter<? super Object>> writers;
 
-	HTTPRequestWriters(Collection<HTTPRequestWriter<? super Object>> collect) {
+	public HTTPRequestWriters(Collection<HTTPRequestWriter<? super Object>> collect) {
 		this.writers = unmodifiableCollection(collect);
 	}
 

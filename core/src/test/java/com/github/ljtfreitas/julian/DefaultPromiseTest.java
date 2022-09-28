@@ -15,6 +15,7 @@ import java.util.function.Consumer;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.endsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -64,7 +65,7 @@ class DefaultPromiseTest {
 
         @Test
         void subscribe() {
-            Subscriber<String> subscriber = spy(new Subscriber<>() {
+            Subscriber<String, Throwable> subscriber = spy(new Subscriber<String, Throwable>() {
 
                 @Override
                 public void success(String value) {
@@ -123,7 +124,7 @@ class DefaultPromiseTest {
 
         @Test
         void subscribe() {
-            Subscriber<String> subscriber = spy(new Subscriber<>() {
+            Subscriber<String, Throwable> subscriber = spy(new Subscriber<String, Throwable>() {
 
                 @Override
                 public void success(String value) {
@@ -143,6 +144,26 @@ class DefaultPromiseTest {
             promise.subscribe(subscriber).join();
 
             verify(subscriber).failure(failure);
+        }
+
+        @Nested
+        class UnrecoverableCases {
+
+            @Test
+            void unrecoverableBecauseExceptionClassIsDifferentThatExpected() {
+                Promise<Object> promise = new DefaultPromise<>(CompletableFuture.failedFuture(new IllegalArgumentException("ops")))
+                        .recover(IllegalStateException.class, Throwable::getMessage);
+
+                assertThrows(IllegalArgumentException.class, promise.join()::unsafe);
+            }
+
+            @Test
+            void unrecoverableBecauseExceptionDoesNotMatchThePredicate() {
+                Promise<Object> promise = new DefaultPromise<>(CompletableFuture.failedFuture(new IllegalArgumentException("ops")))
+                        .recover(e -> e instanceof IllegalStateException, Throwable::getMessage);
+
+                assertThrows(IllegalArgumentException.class, promise.join()::unsafe);
+            }
         }
     }
 

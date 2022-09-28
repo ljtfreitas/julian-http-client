@@ -23,9 +23,6 @@
 package com.github.ljtfreitas.julian.k.arrow
 
 import arrow.core.NonEmptyList
-import arrow.core.Option
-import arrow.core.nel
-import arrow.core.toOption
 import com.github.ljtfreitas.julian.Arguments
 import com.github.ljtfreitas.julian.Endpoint
 import com.github.ljtfreitas.julian.JavaType
@@ -35,7 +32,6 @@ import com.github.ljtfreitas.julian.ResponseFn
 import com.github.ljtfreitas.julian.ResponseT
 import java.lang.reflect.Type
 import java.lang.reflect.WildcardType
-import java.util.stream.Stream
 
 object NonEmptyListResponseT : ResponseT<Collection<Any>, NonEmptyList<Any>> {
 
@@ -48,13 +44,13 @@ object NonEmptyListResponseT : ResponseT<Collection<Any>, NonEmptyList<Any>> {
         .let { JavaType.parameterized(Collection::class.java, it) }
 
     private fun argument(type: Type) : Type =
-        if (type is WildcardType && type.lowerBounds.isNotEmpty())
-            argument(type.lowerBounds.first())
+        if (type is WildcardType && type.upperBounds.isNotEmpty())
+            argument(type.upperBounds.first())
         else type
 
     override fun <A> bind(endpoint: Endpoint, next: ResponseFn<A, Collection<Any>>) = object : ResponseFn<A, NonEmptyList<Any>> {
 
-        override fun run(response: Promise<out Response<A?>>, arguments: Arguments): Promise<NonEmptyList<Any>> =
+        override fun run(response: Promise<out Response<A?, out Throwable>>, arguments: Arguments): Promise<NonEmptyList<Any>> =
             next.run(response, arguments).then { NonEmptyList.fromListUnsafe(it.toList()) }
 
         override fun returnType(): JavaType = next.returnType()

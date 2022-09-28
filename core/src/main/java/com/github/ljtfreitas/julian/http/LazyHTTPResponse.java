@@ -68,18 +68,35 @@ class LazyHTTPResponse<T> implements HTTPResponse<T> {
 	}
 
 	@Override
-	public <R> R fold(Function<? super T, R> success, Function<? super Throwable, R> failure) {
-		return body.fold(success, failure);
+	public <R> R fold(Function<? super T, R> success, Function<? super HTTPResponseException, R> failure) {
+		return body.join().map(success::apply).unsafe();
 	}
 
 	@Override
-	public HTTPResponse<T> subscribe(Subscriber<? super T> subscriber) {
-		return new LazyHTTPResponse<>(status, headers, body.subscribe(subscriber));
+	public HTTPResponse<T> subscribe(Subscriber<? super T, HTTPResponseException> subscriber) {
+		return new LazyHTTPResponse<>(status, headers, body.subscribe(new Subscriber<>() {
+			@Override
+			public void success(T value) {
+				subscriber.success(value);
+			}
+
+			@Override
+			public void failure(Throwable failure) {
+				if (failure instanceof HTTPResponseException) {
+					subscriber.failure((HTTPResponseException) failure);
+				}
+			}
+
+			@Override
+			public void done() {
+				subscriber.done();
+			}
+		}));
 	}
 
 	@Override
 	public HTTPResponse<T> subscribe(HTTPResponseSubscriber<? super T> subscriber) {
-		return new LazyHTTPResponse<>(status, headers, body.subscribe(new Subscriber<>() {
+		return new LazyHTTPResponse<>(status, headers, body.subscribe(new Subscriber<T, Throwable>() {
 
 			@Override
 			public void success(T value) {
@@ -106,34 +123,43 @@ class LazyHTTPResponse<T> implements HTTPResponse<T> {
 
 	@Override
 	public HTTPResponse<T> onSuccess(HTTPResponseConsumer<? super T> fn) {
-		body.onSuccess(content ->fn.accept(status, headers, content));
+		body.onSuccess(content -> fn.accept(status, headers, content));
 		return this;
 	}
 
 	@Override
-	public HTTPResponse<T> onFailure(Consumer<? super Throwable> fn) {
-		return new LazyHTTPResponse<>(status, headers, body.onFailure(fn));
+	public HTTPResponse<T> onFailure(Consumer<? super HTTPResponseException> fn) {
+		return new LazyHTTPResponse<>(status, headers, body.onFailure(e -> { if (e instanceof HTTPResponseException) fn.accept((HTTPResponseException) e); }));
 	}
 
 	@Override
-	public HTTPResponse<T> recover(Function<? super Throwable, T> fn) {
-		return new LazyHTTPResponse<>(status, headers, body.recover(fn));
+	public HTTPResponse<T> recover(Function<? super HTTPResponseException, T> fn) {
+		return new LazyHTTPResponse<>(status, headers, body.recover(HTTPResponseException.class, fn));
 	}
 
 	@Override
-	public HTTPResponse<T> recover(Predicate<? super Throwable> p, Function<? super Throwable, T> fn) {
-		return new LazyHTTPResponse<>(status, headers, body.recover(p, fn));
-	}
-
-	@Override
-	public <Err extends Throwable> HTTPResponse<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
+	public HTTPResponse<T> recover(Class<? extends HTTPResponseException> expected, Function<? super HTTPResponseException, T> fn) {
 		return new LazyHTTPResponse<>(status, headers, body.recover(expected, fn));
 	}
 
 	@Override
+	public HTTPResponse<T> recover(Predicate<? super HTTPResponseException> p, Function<? super HTTPResponseException, T> fn) {
+		Predicate<Throwable> isHTTPResponseException = e -> e instanceof HTTPResponseException;
+		return new LazyHTTPResponse<>(status, headers, body.recover(isHTTPResponseException.and(e -> p.test((HTTPResponseException) e)), e -> fn.apply((HTTPResponseException) e)));
+	}
+
+	@Override
 	public HTTPResponse<T> recover(HTTPStatusCode code, HTTPResponseFn<byte[], T> fn) {
-		return (status.is(code)) ?
-				new LazyHTTPResponse<>(status, headers, body.recover(HTTPResponseException.class, e -> fn.apply(status, headers, e.bodyAsBytes()))) :
-				this;
+		return status.is(code) ? new LazyHTTPResponse<>(status, headers, body.recover(HTTPResponseException.class, e -> fn.apply(status, headers, e.bodyAsBytes()))) : this;
+	}
+
+	@Override
+	public Promise<T> promise() {
+		return body;
+	}
+
+	@Override
+	public String toString() {
+		return status + "\n" + headers;
 	}
 }

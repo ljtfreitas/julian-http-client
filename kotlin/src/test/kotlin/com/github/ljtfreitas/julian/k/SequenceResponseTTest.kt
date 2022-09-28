@@ -26,10 +26,7 @@ class SequenceResponseTTest : DescribeSpec({
 
         describe("predicates") {
             it("supports Sequence<T> as function return type") {
-                every { endpoint.returnType() } returns JavaType.parameterized(
-                    Sequence::class.java,
-                    Wildcard.lower(String::class.java)
-                )
+                every { endpoint.returnType() } returns javaType<Sequence<String>>()
 
                 subject.test(endpoint) shouldBe true
             }
@@ -43,10 +40,7 @@ class SequenceResponseTTest : DescribeSpec({
 
         describe("adapt to expected type") {
             it("adapts a Sequence<T> to Stream<T>") {
-                every { endpoint.returnType() } returns JavaType.parameterized(
-                    Sequence::class.java,
-                    Wildcard.lower(String::class.java)
-                )
+                every { endpoint.returnType() } returns javaType<Sequence<String>>()
 
                 subject.adapted(endpoint) shouldBe JavaType.parameterized(Stream::class.java, String::class.java)
             }

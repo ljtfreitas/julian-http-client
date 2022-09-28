@@ -38,7 +38,7 @@ public class OptionResponseT implements ResponseT<Object, Option<Object>> {
         return new ResponseFn<>() {
 
             @Override
-            public Promise<Option<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Promise<Option<Object>> run(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
                 return next.run(response, arguments).then(Option::of);
             }
 

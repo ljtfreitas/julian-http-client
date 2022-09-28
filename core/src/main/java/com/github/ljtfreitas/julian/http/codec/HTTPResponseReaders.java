@@ -34,7 +34,7 @@ public class HTTPResponseReaders {
 
 	private final Collection<HTTPResponseReader<?>> readers;
 
-	HTTPResponseReaders(Collection<HTTPResponseReader<?>> collect) {
+	public HTTPResponseReaders(Collection<HTTPResponseReader<?>> collect) {
 		this.readers = unmodifiableCollection(collect);
 	}
 

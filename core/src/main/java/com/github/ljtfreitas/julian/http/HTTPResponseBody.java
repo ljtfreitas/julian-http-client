@@ -55,10 +55,25 @@ public interface HTTPResponseBody {
     static HTTPResponseBody some(byte[] bodyAsBytes) {
         return new PublisherHTTPResponseBody(subscriber -> subscriber.onSubscribe(new Subscription() {
 
+            private final ByteBuffer bodyAsBuffer = ByteBuffer.wrap(bodyAsBytes);
+
+            private long requested = 0;
+
             @Override
             public void request(long n) {
-                subscriber.onNext(List.of(ByteBuffer.wrap(bodyAsBytes)));
-                subscriber.onComplete();
+                if (!bodyAsBuffer.hasRemaining()) {
+                    subscriber.onComplete();
+
+                } else if (n > bodyAsBuffer.remaining()) {
+                    subscriber.onNext(List.of(bodyAsBuffer));
+                    subscriber.onComplete();
+
+                } else {
+                    int size = (int) n;
+                    byte[] bytes = new byte[size];
+                    bodyAsBuffer.get(bytes);
+                    subscriber.onNext(List.of(ByteBuffer.wrap(bytes)));
+                }
             }
 
             @Override

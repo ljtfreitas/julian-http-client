@@ -30,8 +30,6 @@ import kotlin.reflect.typeOf
 
 fun <T> Attempt<T>.result() : Result<T> = fold(Result.Companion::success, Result.Companion::failure)
 
-fun <T> Promise<T>.result() : Result<T> = join().result()
-
 @JvmName("promisePlus")
 operator fun <A, B> Promise<A>.plus(other: Promise<B>): Promise<Pair<A, B>> = bind { a ->
     other.then { b -> a to b }

@@ -65,7 +65,7 @@ public class HTTPHeaders implements Iterable<HTTPHeader> {
 		return headers.values().stream().collect(toUnmodifiableList());
 	}
 
-	public Map<String, HTTPHeader> map() {
+	public Map<String, HTTPHeader> asMap() {
 		return headers;
 	}
 

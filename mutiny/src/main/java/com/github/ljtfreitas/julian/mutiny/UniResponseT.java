@@ -40,7 +40,7 @@ public class UniResponseT implements ResponseT<Object, Uni<Object>> {
         return new ResponseFn<>() {
 
             @Override
-            public Uni<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Uni<Object> join(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
                 return Uni.createFrom().completionStage(next.run(response, arguments).future());
             }
 

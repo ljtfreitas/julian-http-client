@@ -32,7 +32,7 @@ tasks.jar.configure {
 
 dependencies {
     implementation(project(":core"))
-    implementation(project(":reactor"))
+    api(project(":reactor"))
     implementation(project(":http-client-reactor-netty"))
-    implementation("org.springframework:spring-webflux:5.3.22")
+    api("org.springframework:spring-webflux:5.3.22")
 }

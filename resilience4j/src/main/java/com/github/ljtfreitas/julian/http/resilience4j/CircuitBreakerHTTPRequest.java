@@ -100,12 +100,10 @@ class CircuitBreakerHTTPRequest<T> implements HTTPRequest<T> {
 
         long start = circuitBreaker.getCurrentTimestamp();
 
-        return acquired
-                .map(none -> request.execute()
+        return acquired.promise()
+                .bind(none -> request.execute()
                         .onSuccess(r -> handle(start, r))
-                        .onFailure(e -> failure(start, e)))
-                .recover(e -> Promise.failed((Exception) e))
-                .unsafe();
+                        .onFailure(e -> failure(start, e)));
     }
 
     private void handle(long start, HTTPResponse<T> r) {

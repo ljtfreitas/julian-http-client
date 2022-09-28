@@ -23,11 +23,8 @@
 package com.github.ljtfreitas.julian.multipart;
 
 import com.github.ljtfreitas.julian.http.MediaType;
+import com.github.ljtfreitas.julian.http.Upload;
 
-import java.io.File;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -106,56 +103,20 @@ public class MultipartForm {
             return this.name.equals(name);
         }
 
-        public static Part create(String name, String value) {
-            return create(name, value, null);
+        public static Part create(Upload<?> upload) {
+            return create(upload.name(), upload.content(), upload.fileName().orElse(null), upload.mediaType().orElse(null));
         }
 
-        public static Part create(String name, String value, String fileName) {
-            return new Part(name, value, fileName, MediaType.valueOf("text/plain"));
+        public static Part create(String name, Object content) {
+            return create(name, content, null);
         }
 
-        public static Part create(String name, File file) {
-            return create(name, file, null);
+        public static Part create(String name, Object content, String fileName) {
+            return new Part(name, content, fileName, null);
         }
 
-        public static Part create(String name, File file, String fileName) {
-            return create(name, file, fileName, null);
-        }
-
-        public static Part create(String name, File file, String fileName, MediaType mediaType) {
-            return new Part(name, file, fileName, mediaType);
-        }
-
-        public static Part create(String name, Path path, String fileName) {
-            return create(name, path, fileName, null);
-        }
-
-        public static Part create(String name, Path path, String fileName, MediaType mediaType) {
-            return new Part(name, path, fileName, mediaType);
-        }
-
-        public static Part create(String name, InputStream stream, String fileName) {
-            return create(name, stream, fileName, null);
-        }
-
-        public static Part create(String name, InputStream stream, String fileName, MediaType mediaType) {
-            return new Part(name, stream, fileName, mediaType);
-        }
-
-        public static Part create(String name, byte[] content, String fileName) {
-            return create(name, content, fileName, null);
-        }
-
-        public static Part create(String name, byte[] content, String fileName, MediaType mediaType) {
+        public static Part create(String name, Object content, String fileName, MediaType mediaType) {
             return new Part(name, content, fileName, mediaType);
-        }
-
-        public static Part create(String name, ByteBuffer buffer, String fileName) {
-            return create(name, buffer, fileName, null);
-        }
-
-        public static Part create(String name, ByteBuffer buffer, String fileName, MediaType mediaType) {
-            return new Part(name, buffer, fileName, mediaType);
         }
     }
 }

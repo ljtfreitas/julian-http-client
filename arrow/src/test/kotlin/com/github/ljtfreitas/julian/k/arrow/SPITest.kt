@@ -14,10 +14,11 @@ class SPITest : DescribeSpec({
         it("All implementations should be provided by Java's ServiceLoader") {
             val expected = listOf(
                 EitherResponseTProxy::class.java,
+                EffectResponseTProxy::class.java,
                 EvalResponseTProxy::class.java,
                 NonEmptyListResponseTProxy::class.java,
                 OptionResponseTProxy::class.java,
-                EffectResponseTProxy::class.java
+                RecoverableEitherResponseTProxy::class.java,
             )
 
             val plugins = Plugins()

@@ -104,7 +104,7 @@ class KFunctionCallbackResponseTTest : DescribeSpec({
                             Wildcard.lower(Throwable::class.java)))
                     ))
 
-                    subject.adapted(endpoint) shouldBe JavaType.valueOf(Void.TYPE)
+                    subject.adapted(endpoint) shouldBe javaType<Void>()
                 }
 
                 it("in case a function has two Function1 arguments, adapt using successful one") {

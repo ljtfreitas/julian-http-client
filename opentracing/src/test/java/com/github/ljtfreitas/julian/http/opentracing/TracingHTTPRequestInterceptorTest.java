@@ -13,13 +13,10 @@ import io.opentracing.mock.MockSpan;
 import io.opentracing.mock.MockSpan.LogEntry;
 import io.opentracing.mock.MockTracer;
 import io.opentracing.tag.Tags;
-import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -40,7 +37,6 @@ import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.Answers.RETURNS_SELF;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -94,7 +90,7 @@ class TracingHTTPRequestInterceptorTest {
 
             verify(request).headers(captor.capture());
 
-            Map<String, HTTPHeader> headers = captor.getValue().map();
+            Map<String, HTTPHeader> headers = captor.getValue().asMap();
 
             List<MockSpan> spans = tracer.finishedSpans();
             assertThat(spans, hasSize(1));
@@ -131,7 +127,7 @@ class TracingHTTPRequestInterceptorTest {
 
             verify(request).headers(captor.capture());
 
-            Map<String, HTTPHeader> headers = captor.getValue().map();
+            Map<String, HTTPHeader> headers = captor.getValue().asMap();
 
             List<MockSpan> spans = tracer.finishedSpans();
             assertThat(spans, hasSize(2));

@@ -158,12 +158,12 @@ public class DebugHTTPClient implements HTTPClient {
                 }
 
                 @Override
-                public <T, R extends Response<T>> Optional<R> success(Function<? super HTTPClientResponse, R> fn) {
+                public <T, R extends Response<T, ? extends Throwable>> Optional<R> success(Function<? super HTTPClientResponse, R> fn) {
                     return response.success(r -> fn.apply(this));
                 }
 
                 @Override
-                public <T, R extends Response<T>> Optional<R> failure(Function<? super HTTPClientResponse, R> fn) {
+                public <T, R extends Response<T, ? extends Throwable>> Optional<R> failure(Function<? super HTTPClientResponse, R> fn) {
                     return response.failure(r -> fn.apply(this));
                 }
             };
@@ -215,12 +215,12 @@ public class DebugHTTPClient implements HTTPClient {
         }
 
         @Override
-        public <T, R extends Response<T>> Optional<R> success(Function<? super HTTPClientResponse, R> fn) {
+        public <T, R extends Response<T, ? extends Throwable>> Optional<R> success(Function<? super HTTPClientResponse, R> fn) {
             return source.success(r -> fn.apply(this));
         }
 
         @Override
-        public <T, R extends Response<T>> Optional<R> failure(Function<? super HTTPClientResponse, R> fn) {
+        public <T, R extends Response<T, ? extends Throwable>> Optional<R> failure(Function<? super HTTPClientResponse, R> fn) {
             return source.failure(r -> fn.apply(this));
         }
     }

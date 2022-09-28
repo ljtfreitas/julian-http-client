@@ -47,7 +47,6 @@ import com.github.ljtfreitas.julian.contract.DefaultEndpointMetadata;
 import com.github.ljtfreitas.julian.contract.EndpointMetadata;
 import com.github.ljtfreitas.julian.http.ConditionalHTTPResponseFailure;
 import com.github.ljtfreitas.julian.http.DefaultHTTP;
-import com.github.ljtfreitas.julian.http.DefaultHTTPResponseFailure;
 import com.github.ljtfreitas.julian.http.HTTP;
 import com.github.ljtfreitas.julian.http.HTTPHeadersResponseT;
 import com.github.ljtfreitas.julian.http.HTTPRequestInterceptor;
@@ -57,13 +56,16 @@ import com.github.ljtfreitas.julian.http.HTTPStatusCode;
 import com.github.ljtfreitas.julian.http.HTTPStatusCodeResponseT;
 import com.github.ljtfreitas.julian.http.HTTPStatusGroup;
 import com.github.ljtfreitas.julian.http.HTTPStatusResponseT;
+import com.github.ljtfreitas.julian.http.RecoverableHTTPResponseFailure;
 import com.github.ljtfreitas.julian.http.client.ComposedHTTPClient;
 import com.github.ljtfreitas.julian.http.client.DebugHTTPClient;
 import com.github.ljtfreitas.julian.http.client.DefaultHTTPClient;
 import com.github.ljtfreitas.julian.http.client.HTTPClient;
 import com.github.ljtfreitas.julian.http.codec.ByteArrayHTTPMessageCodec;
 import com.github.ljtfreitas.julian.http.codec.ByteBufferHTTPMessageCodec;
+import com.github.ljtfreitas.julian.http.codec.DownloadHTTPResponseReader;
 import com.github.ljtfreitas.julian.http.codec.HTTPMessageCodec;
+import com.github.ljtfreitas.julian.http.codec.HTTPResponseReaders;
 import com.github.ljtfreitas.julian.http.codec.InputStreamHTTPMessageCodec;
 import com.github.ljtfreitas.julian.http.codec.ScalarHTTPMessageCodec;
 import com.github.ljtfreitas.julian.http.codec.StringHTTPMessageCodec;
@@ -133,7 +135,8 @@ public class ProxyBuilder {
                     InputStreamHTTPMessageCodec.get(),
                     UnprocessableHTTPMessageCodec.get(),
                     ScalarHTTPMessageCodec.get(),
-                    StringHTTPMessageCodec.get()));
+                    StringHTTPMessageCodec.get(),
+                    DownloadHTTPResponseReader.get()));
         }
     }
 
@@ -249,10 +252,13 @@ public class ProxyBuilder {
             return ProxyBuilder.this;
         }
 
-        public HTTP build() {
-            return http == null ?
-                    new DefaultHTTP(client.build(), interceptors.build(), codecs.build(), failure.build(), encoding.charset, async.executor) :
-                    http;
+        private HTTP build() {
+            com.github.ljtfreitas.julian.http.codec.HTTPMessageCodecs codecs = ProxyBuilder.this.codecs.build();
+            return http == null ? build(codecs) : http;
+        }
+
+        private HTTP build(com.github.ljtfreitas.julian.http.codec.HTTPMessageCodecs codecs) {
+            return new DefaultHTTP(client.build(), interceptors.build(), codecs, failure.build(codecs.readers()), encoding.charset, async.executor);
         }
 
         public class HTTPClientSpec {
@@ -497,8 +503,9 @@ public class ProxyBuilder {
                 return HTTPSpec.this;
             }
 
-            private HTTPResponseFailure build() {
-                return failures.has() ? failures.build() : failure == null ? DefaultHTTPResponseFailure.get() : failure;
+            private HTTPResponseFailure build(HTTPResponseReaders readers) {
+                RecoverableHTTPResponseFailure fallback = new RecoverableHTTPResponseFailure(readers);
+                return failures.has() ? failures.build(fallback) : failure == null ? fallback : failure;
             }
 
             private class HTTPResponseFailures {
@@ -512,8 +519,8 @@ public class ProxyBuilder {
                     return !failures.isEmpty();
                 }
 
-                private HTTPResponseFailure build() {
-                    return new ConditionalHTTPResponseFailure(failures);
+                private HTTPResponseFailure build(RecoverableHTTPResponseFailure fallback) {
+                    return new ConditionalHTTPResponseFailure(failures, fallback);
                 }
             }
         }

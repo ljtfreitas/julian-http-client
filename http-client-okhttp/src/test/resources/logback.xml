@@ -21,7 +21,7 @@
   ~ SOFTWARE.
   -->
 <configuration>
-    <logger name="org.mockserver" level="INFO" >
+    <logger name="org.mockserver" level="OFF">
         <appender class="ch.qos.logback.core.ConsoleAppender">
             <encoder>
                 <pattern>%date %level [%thread] %logger{35} [%file:%line] %msg%n</pattern>

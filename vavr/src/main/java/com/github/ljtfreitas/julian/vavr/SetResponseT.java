@@ -44,7 +44,7 @@ public class SetResponseT implements ResponseT<Collection<Object>, Set<Object>> 
         return new ResponseFn<>() {
 
             @Override
-            public Promise<Set<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Promise<Set<Object>> run(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
                 return next.run(response, arguments)
                         .then(c -> Optional.ofNullable(c)
                                 .filter(not(Collection::isEmpty))

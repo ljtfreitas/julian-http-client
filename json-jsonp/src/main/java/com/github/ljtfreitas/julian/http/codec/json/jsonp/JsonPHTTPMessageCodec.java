@@ -82,7 +82,6 @@ public class JsonPHTTPMessageCodec implements JsonHTTPMessageCodec<JsonStructure
         this.jsonWriterFactory = jsonWriterFactory;
     }
 
-
     @Override
     public boolean writable(MediaType candidate, JavaType javaType) {
         return supports(candidate) && javaType.compatible(JsonStructure.class);
@@ -111,7 +110,7 @@ public class JsonPHTTPMessageCodec implements JsonHTTPMessageCodec<JsonStructure
 
     @Override
     public boolean readable(MediaType candidate, JavaType javaType) {
-        return javaType.classType().map(JsonStructure.class::isAssignableFrom).orElse(false);
+        return supports(candidate) && javaType.classType().map(JsonStructure.class::isAssignableFrom).orElse(false);
     }
 
     @Override

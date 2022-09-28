@@ -32,6 +32,8 @@ import com.github.ljtfreitas.julian.Promise
 import com.github.ljtfreitas.julian.Response
 import com.github.ljtfreitas.julian.ResponseFn
 import com.github.ljtfreitas.julian.ResponseT
+import java.lang.reflect.Type
+import java.lang.reflect.WildcardType
 
 object EitherResponseT : ResponseT<Any, Either<Throwable, Any>> {
 
@@ -46,13 +48,19 @@ object EitherResponseT : ResponseT<Any, Either<Throwable, Any>> {
 
     override fun adapted(endpoint: Endpoint): JavaType = endpoint.returnType().parameterized()
         .map { it.actualTypeArguments[1] }
+        .map(::argument)
         .orElseGet { Any::class.java }
         .let(JavaType::valueOf)
+
+    private fun argument(type: Type) : Type =
+        if (type is WildcardType && type.upperBounds.isNotEmpty())
+            argument(type.upperBounds.first())
+        else type
 
     override fun <A> bind(endpoint: Endpoint, next: ResponseFn<A, Any>) = object : ResponseFn<A, Either<Throwable, Any>> {
 
         @Suppress("UNCHECKED_CAST")
-        override fun run(response: Promise<out Response<A>>, arguments: Arguments): Promise<Either<Throwable, Any>> {
+        override fun run(response: Promise<out Response<A, out Throwable>>, arguments: Arguments): Promise<Either<Throwable, Any>> {
             val leftClassType: Class<out Any> = JavaType.valueOf(endpoint.returnType().parameterized()
                 .map(JavaType.Parameterized::firstArg)
                 .orElse(Throwable::class.java))

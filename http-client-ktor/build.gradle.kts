@@ -19,6 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     modules
@@ -31,18 +32,24 @@ tasks.jar.configure {
     archiveBaseName.set("julian-http-client-ktor")
 }
 
-tasks.compileKotlin.configure {
+val kotlinCompileAttributes: KotlinCompile.() -> Unit = {
     sourceCompatibility = "11"
     targetCompatibility = "11"
 
-    kotlinOptions.freeCompilerArgs += "-opt-in=kotlin.RequiresOptIn"
+    kotlinOptions {
+        jvmTarget = "11"
+        freeCompilerArgs += "-opt-in=kotlin.RequiresOptIn"
+    }
 }
+
+tasks.compileKotlin.configure(kotlinCompileAttributes)
+tasks.compileTestKotlin.configure(kotlinCompileAttributes)
 
 dependencies {
     implementation(project(":core"))
 
-    api("io.ktor:ktor-client-core:2.1.0")
-    api("io.ktor:ktor-client-cio:2.1.0")
+    api("io.ktor:ktor-client-core:2.1.1")
+    api("io.ktor:ktor-client-cio:2.1.1")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk9:1.6.4")
@@ -51,5 +58,6 @@ dependencies {
     testImplementation("io.kotest:kotest-assertions-core-jvm:5.4.2")
     testImplementation("io.kotest.extensions:kotest-extensions-mockserver:1.2.1")
     testImplementation("io.mockk:mockk:1.12.7")
-    testImplementation("io.ktor:ktor-client-logging:2.1.0")
+    testImplementation("io.ktor:ktor-client-logging:2.1.1")
 }
+

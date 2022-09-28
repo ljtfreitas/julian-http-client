@@ -42,7 +42,7 @@ class PromiseCallbackResponseT implements ResponseT<Object, Void> {
 		return new ResponseFn<>() {
 
 			@Override
-			public Void join(Promise<? extends Response<A>> response, Arguments arguments) {
+			public Void join(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
 				Promise<Object> promise = next.run(response, arguments);
 
 				success(endpoint.parameters(), arguments)
@@ -52,7 +52,7 @@ class PromiseCallbackResponseT implements ResponseT<Object, Void> {
 						.ifPresent(promise::onFailure);
 
 				subscriber(endpoint.parameters(), next.returnType(), arguments)
-						.ifPresent(c -> promise.subscribe(new Subscriber<>() {
+						.ifPresent(c -> promise.subscribe(new Subscriber<Object, Throwable>() {
 							@Override
 							public void success(Object value) {
 								c.accept(value, null);
@@ -117,7 +117,7 @@ class PromiseCallbackResponseT implements ResponseT<Object, Void> {
 	
 	@Override
 	public boolean test(Endpoint endpoint) {
-		return endpoint.returnType().equals(JavaType.none()) 
+		return endpoint.returnType().isNone()
 			&& endpoint.parameters().callbacks().anyMatch(c -> consumer(c) || biConsumer(c));
 	}
 

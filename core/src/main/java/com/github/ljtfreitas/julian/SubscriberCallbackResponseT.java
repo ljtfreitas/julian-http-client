@@ -45,7 +45,7 @@ public class SubscriberCallbackResponseT implements ResponseT<Publisher<Object>,
         return new ResponseFn<>() {
 
             @Override
-            public Void join(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Void join(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
                 next.run(response, arguments)
                         .onSuccess(publisher -> subscriber(endpoint.parameters(), arguments).ifPresent(publisher::subscribe));
                 return null;

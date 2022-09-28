@@ -50,7 +50,7 @@ object EffectResponseT : ResponseT<Any, Effect<Exception, Any>> {
     override fun <A> bind(endpoint: Endpoint, next: ResponseFn<A, Any>) = object : ResponseFn<A, Effect<Exception, Any>> {
 
         @Suppress("UNCHECKED_CAST")
-        override fun join(response: Promise<out Response<A>>, arguments: Arguments): Effect<Exception, Any> {
+        override fun join(response: Promise<out Response<A, out Throwable>>, arguments: Arguments): Effect<Exception, Any> {
             val leftClassType: Class<out Exception> = JavaType.valueOf(endpoint.returnType().parameterized()
                 .map(JavaType.Parameterized::firstArg)
                 .orElse(Exception::class.java))

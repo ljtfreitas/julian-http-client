@@ -40,7 +40,7 @@ object KFunctionCallbackResponseT : ResponseT<Any, Unit> {
 
     override fun <A> bind(endpoint: Endpoint, next: ResponseFn<A, Any>): ResponseFn<A, Unit> = object : ResponseFn<A, Unit> {
 
-        override fun join(response: Promise<out Response<A>>, arguments: Arguments) {
+        override fun join(response: Promise<out Response<A, out Throwable>>, arguments: Arguments) {
             val promise = next.run(response, arguments)
 
             success(endpoint.parameters(), arguments)
@@ -50,7 +50,7 @@ object KFunctionCallbackResponseT : ResponseT<Any, Unit> {
                 .ifPresent { f -> promise.onFailure(f::invoke) }
 
             result(endpoint.parameters(), arguments)
-                .ifPresent { f -> promise.subscribe(object : Subscriber<Any> {
+                .ifPresent { f -> promise.subscribe(object : Subscriber<Any, Throwable> {
 
                     override fun success(value: Any) {
                         f(Result.success(value))

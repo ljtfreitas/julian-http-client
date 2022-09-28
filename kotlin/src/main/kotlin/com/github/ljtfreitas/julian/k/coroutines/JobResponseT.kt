@@ -35,7 +35,7 @@ object JobResponseT : ResponseT<Unit, Job> {
 
     override fun <A> bind(endpoint: Endpoint, next: ResponseFn<A, Unit>): ResponseFn<A, Job> = object : ResponseFn<A, Job> {
 
-        override fun join(response: Promise<out Response<A>>, arguments: Arguments) = next.run(response, arguments).job()
+        override fun join(response: Promise<out Response<A, out Throwable>>, arguments: Arguments) = next.run(response, arguments).job()
 
         override fun returnType(): JavaType = next.returnType()
     }

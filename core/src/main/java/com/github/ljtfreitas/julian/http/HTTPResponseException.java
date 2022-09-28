@@ -33,13 +33,20 @@ public class HTTPResponseException extends HTTPException {
 
 	private final HTTPStatus status;
 	private final HTTPHeaders headers;
-	private final Promise<byte[]> bodyAsBytes;
+	private final Promise<byte[]> bodyAsPromise;
 
 	public HTTPResponseException(HTTPStatus status, HTTPHeaders headers, Promise<byte[]> body) {
 		super(HTTPResponseException.message(status, headers, body));
 		this.status = status;
 		this.headers = headers;
-		this.bodyAsBytes = body;
+		this.bodyAsPromise = body;
+	}
+
+	public HTTPResponseException(HTTPResponseException source, Throwable cause) {
+		super(HTTPResponseException.message(source.status, source.headers, source.bodyAsPromise), cause);
+		this.status = source.status;
+		this.headers = source.headers;
+		this.bodyAsPromise = source.bodyAsPromise;
 	}
 
 	public HTTPStatus status() {
@@ -51,11 +58,15 @@ public class HTTPResponseException extends HTTPException {
 	}
 
 	public byte[] bodyAsBytes() {
-		return bodyAsBytes.fold(identity(), e -> new byte[0]);
+		return bodyAsPromise.fold(identity(), e -> new byte[0]);
 	}
 
 	public String bodyAsString() {
-		return bodyAsString(bodyAsBytes);
+		return bodyAsString(bodyAsPromise);
+	}
+
+	public Promise<byte[]> bodyAsPromise() {
+		return bodyAsPromise;
 	}
 
 	private static String message(HTTPStatus status, HTTPHeaders headers, Promise<byte[]> body) {

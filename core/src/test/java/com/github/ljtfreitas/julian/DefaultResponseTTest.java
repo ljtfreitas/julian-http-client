@@ -61,11 +61,11 @@ class DefaultResponseTTest {
     void compose(@Mock ResponseFn<String, Object> fn) {
         Arguments arguments = Arguments.empty();
 
-        Response<String> response = Response.done("expected");
+        Response<String, Throwable> response = Response.done("expected");
 
         when(fn.join(any(), eq(arguments))).thenReturn(response.body().unsafe());
 
-        Response<Object> actual = responseT.bind(endpoint, fn).join(Promise.done(response), arguments);
+        Response<Object, ? extends Throwable> actual = responseT.bind(endpoint, fn).join(Promise.done(response), arguments);
 
         assertEquals("expected", actual.body().unsafe());
     }

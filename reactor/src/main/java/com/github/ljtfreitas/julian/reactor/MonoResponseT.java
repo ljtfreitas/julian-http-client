@@ -41,7 +41,7 @@ public class MonoResponseT implements ResponseT<Object, Mono<Object>> {
         return new ResponseFn<>() {
 
             @Override
-            public Mono<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Mono<Object> join(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
                 Promise<Object> promise = next.run(response, arguments);
 
                 return promise.cast(new Kind<MonoPromise<Object>>() {})

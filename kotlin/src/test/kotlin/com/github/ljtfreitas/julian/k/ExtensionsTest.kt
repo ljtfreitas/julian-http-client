@@ -3,7 +3,6 @@ package com.github.ljtfreitas.julian.k
 import com.github.ljtfreitas.julian.Attempt
 import com.github.ljtfreitas.julian.JavaType
 import com.github.ljtfreitas.julian.Promise
-import io.kotest.assertions.fail
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.result.shouldBeFailure
@@ -15,20 +14,6 @@ class ExtensionsTest : DescribeSpec({
     describe("Kotlin extensions") {
 
         describe("Promise<T> extensions") {
-
-            describe("Promise<T> to Result<T>") {
-
-                it("a successful Promise -> a successful Result") {
-                    val result = Promise.done("success").result()
-                    result shouldBeSuccess "success"
-                }
-
-                it("a failed Promise -> a failed Result") {
-                    val failure = RuntimeException("oops")
-                    val result = Promise.failed<Unit, RuntimeException>(failure).result()
-                    result.shouldBeFailure { it shouldBe failure }
-                }
-            }
 
             describe("composed Promises") {
 

@@ -58,7 +58,7 @@ class FutureResponseTTest {
 	}
 	
 	@Test
-	void compose(@Mock ResponseFn<String, Object> fn, @Mock Promise<Response<String>> response) throws Exception {
+	void compose(@Mock ResponseFn<String, Object> fn, @Mock Promise<Response<String, Throwable>> response) throws Exception {
 		Arguments arguments = Arguments.empty();
 
 		when(fn.run(response, arguments)).thenReturn(Promise.done("expected"));

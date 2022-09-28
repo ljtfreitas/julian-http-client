@@ -34,7 +34,7 @@ class FutureTaskResponseT implements ResponseT<Callable<Object>, FutureTask<Obje
 		return new ResponseFn<>() {
 
 			@Override
-			public FutureTask<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
+			public FutureTask<Object> join(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
 				return new FutureTask<>(next.join(response, arguments));
 			}
 

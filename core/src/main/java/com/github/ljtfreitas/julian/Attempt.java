@@ -22,6 +22,7 @@
 
 package com.github.ljtfreitas.julian;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -53,11 +54,15 @@ public interface Attempt<T> {
 
 	T recover(Supplier<T> fn);
 
-	<E extends Exception> T prop() throws E;
+	<E extends Throwable> T prop() throws E;
 
-	<E extends Exception> T prop(Function<? super Throwable, E> fn) throws E;
+	<E extends Throwable> T prop(Function<? super Throwable, E> fn) throws E;
 
 	<R> R fold(Function<? super T, R> success, Function<? super Throwable, R> failure);
+
+	Optional<T> op();
+
+	Promise<T> promise();
 
 	static <T> Attempt<T> run(ThrowableSupplier<T> fn) {
 		try {
@@ -84,7 +89,7 @@ public interface Attempt<T> {
 		return new Failure<>(t);
 	}
 
-	class Success<T> implements Attempt<T> {
+    class Success<T> implements Attempt<T> {
 
 		private final T value;
 
@@ -162,18 +167,28 @@ public interface Attempt<T> {
 		}
 
 		@Override
-		public <E extends Exception> T prop() throws E {
+		public <E extends Throwable> T prop() throws E {
 			return value;
 		}
 
 		@Override
-		public <E extends Exception> T prop(Function<? super Throwable, E> fn) throws E {
+		public <E extends Throwable> T prop(Function<? super Throwable, E> fn) throws E {
 			return value;
 		}
 
 		@Override
 		public <R> R fold(Function<? super T, R> success, Function<? super Throwable, R> failure) {
 			return success.apply(value);
+		}
+
+		@Override
+		public Optional<T> op() {
+			return Optional.ofNullable(value);
+		}
+
+		@Override
+		public Promise<T> promise() {
+			return Promise.done(value);
 		}
 	}
 
@@ -252,7 +267,7 @@ public interface Attempt<T> {
 		}
 
 		@Override
-		public <E extends Exception> T prop() throws E {
+		public <E extends Throwable> T prop() throws E {
 			if (value instanceof RuntimeException) {
 				throw (RuntimeException) value;
 			} else {
@@ -261,13 +276,23 @@ public interface Attempt<T> {
 		}
 
 		@Override
-		public <E extends Exception> T prop(Function<? super Throwable, E> fn) throws E {
+		public <E extends Throwable> T prop(Function<? super Throwable, E> fn) throws E {
 			throw fn.apply(value);
 		}
 
 		@Override
 		public <R> R fold(Function<? super T, R> success, Function<? super Throwable, R> failure) {
 			return failure.apply(value);
+		}
+
+		@Override
+		public Optional<T> op() {
+			return Optional.empty();
+		}
+
+		@Override
+		public Promise<T> promise() {
+			return Promise.failed(value);
 		}
 	}
 

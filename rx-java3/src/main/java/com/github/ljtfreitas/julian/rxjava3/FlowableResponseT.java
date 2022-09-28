@@ -43,7 +43,7 @@ public class FlowableResponseT implements ResponseT<Collection<Object>, Flowable
         return new ResponseFn<>() {
 
             @Override
-            public Flowable<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Flowable<Object> join(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
                 Promise<Collection<Object>> promise = next.run(response, arguments);
                 return promise.cast(new Kind<SinglePromise<Collection<Object>>>() {})
                         .map(SinglePromise::single)

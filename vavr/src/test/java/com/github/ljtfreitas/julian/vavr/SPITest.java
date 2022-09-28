@@ -17,9 +17,21 @@ public class SPITest {
     @Test
     void shouldRegisterAllServices() {
         Collection<Class<? extends ResponseT>> expected = List.of(ArrayResponseT.class,
-                EitherResponseT.class, FutureResponseT.class, IndexedSeqResponseT.class, LazyResponseT.class,
-                LinearSeqResponseT.class, ListResponseT.class, OptionResponseT.class, QueueResponseT.class,
-                SeqResponseT.class, SetResponseT.class, TraversableResponseT.class, TryResponseT.class, VectorResponseT.class);
+                EitherResponseT.class,
+                FutureResponseT.class,
+                IndexedSeqResponseT.class,
+                LazyResponseT.class,
+                LinearSeqResponseT.class,
+                ListResponseT.class,
+                OptionResponseT.class,
+                QueueResponseT.class,
+                RecoverableEitherResponseT.class,
+                SeqResponseT.class,
+                SetResponseT.class,
+                StreamResponseT.class,
+                TraversableResponseT.class,
+                TryResponseT.class,
+                VectorResponseT.class);
 
         Plugins plugins = new Plugins();
         Collection<? extends Class<?>> founded = plugins.all(ResponseT.class).map(Object::getClass).collect(toList());

@@ -39,7 +39,7 @@ public class EitherResponseT<L extends Throwable> implements ResponseT<Object, E
 
             @SuppressWarnings("unchecked")
             @Override
-            public Promise<Either<L, Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Promise<Either<L, Object>> run(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
                 Class<?> leftClassType = JavaType.valueOf(endpoint.returnType().parameterized()
                         .map(JavaType.Parameterized::firstArg)
                         .orElse(Throwable.class))

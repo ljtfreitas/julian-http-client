@@ -19,6 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     modules
@@ -32,12 +33,18 @@ tasks.jar.configure {
     archiveBaseName.set("julian-http-client-json-kotlin")
 }
 
-tasks.compileKotlin.configure {
+val kotlinCompileAttributes: KotlinCompile.() -> Unit = {
     sourceCompatibility = "11"
     targetCompatibility = "11"
 
-    kotlinOptions.freeCompilerArgs += "-opt-in=kotlin.RequiresOptIn"
+    kotlinOptions {
+        jvmTarget = "11"
+        freeCompilerArgs += "-opt-in=kotlin.RequiresOptIn"
+    }
 }
+
+tasks.compileKotlin.configure(kotlinCompileAttributes)
+tasks.compileTestKotlin.configure(kotlinCompileAttributes)
 
 dependencies {
     implementation(project(":core"))

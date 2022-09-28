@@ -35,7 +35,7 @@ import okhttp3.RequestBody;
 import java.io.Closeable;
 import java.util.Optional;
 
-class OkHTTPClient implements HTTPClient, Closeable {
+public class OkHTTPClient implements HTTPClient, Closeable {
 
     private final OkHttpClient client;
 

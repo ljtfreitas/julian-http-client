@@ -37,7 +37,10 @@ val kotlinCompileAttributes: KotlinCompile.() -> Unit = {
     sourceCompatibility = "11"
     targetCompatibility = "11"
 
-    kotlinOptions.freeCompilerArgs += "-opt-in=kotlin.RequiresOptIn"
+    kotlinOptions {
+        jvmTarget = "11"
+        freeCompilerArgs += "-opt-in=kotlin.RequiresOptIn"
+    }
 }
 
 tasks.compileKotlin.configure(kotlinCompileAttributes)
@@ -45,7 +48,7 @@ tasks.compileTestKotlin.configure(kotlinCompileAttributes)
 
 dependencies {
     implementation(project(":core"))
-    implementation(project(":kotlin"))
+    api(project(":kotlin"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.4")
     api("io.arrow-kt:arrow-core-jvm:1.1.2")
     api("io.arrow-kt:arrow-fx-coroutines:1.1.2")

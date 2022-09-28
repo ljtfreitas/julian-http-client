@@ -9,6 +9,7 @@ import com.github.ljtfreitas.julian.ObjectResponseT
 import com.github.ljtfreitas.julian.Promise
 import com.github.ljtfreitas.julian.Response
 import com.github.ljtfreitas.julian.StreamResponseT
+import com.github.ljtfreitas.julian.k.javaType
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
@@ -29,16 +30,13 @@ class FlowResponseTTest : DescribeSpec({
         describe("predicates") {
 
             it("supports Flow<T> as function return type") {
-                every { endpoint.returnType() } returns JavaType.parameterized(
-                    Flow::class.java,
-                    Wildcard.lower(String::class.java)
-                )
+                every { endpoint.returnType() } returns javaType<Flow<String>>()
 
                 subject.test(endpoint) shouldBe true
             }
 
             it("doesn't support any other return type") {
-                every { endpoint.returnType() } returns JavaType.valueOf(String::class.java)
+                every { endpoint.returnType() } returns javaType<String>()
 
                 subject.test(endpoint) shouldBe false
             }
@@ -46,10 +44,7 @@ class FlowResponseTTest : DescribeSpec({
 
         describe("adapt to expected type") {
             it("adapts a Flow<T> to Stream<T>") {
-                every { endpoint.returnType() } returns JavaType.parameterized(
-                    Flow::class.java,
-                    Wildcard.lower(String::class.java)
-                )
+                every { endpoint.returnType() } returns javaType<Flow<String>>()
 
                 subject.adapted(endpoint) shouldBe JavaType.parameterized(Stream::class.java, String::class.java)
             }

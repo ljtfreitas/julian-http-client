@@ -22,6 +22,7 @@
 
 package com.github.ljtfreitas.julian;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -71,12 +72,12 @@ public interface Bracket<T extends AutoCloseable> extends Attempt<T> {
 		}
 
 		@Override
-		public <E extends Exception> T prop() throws E {
+		public <E extends Throwable> T prop() throws E {
 			return id().prop();
 		}
 
 		@Override
-		public <E extends Exception> T prop(Function<? super Throwable, E> fn) throws E {
+		public <E extends Throwable> T prop(Function<? super Throwable, E> fn) throws E {
 			return id().prop(fn);
 		}
 
@@ -133,6 +134,16 @@ public interface Bracket<T extends AutoCloseable> extends Attempt<T> {
 		@Override
 		public <R> R fold(Function<? super T, R> success, Function<? super Throwable, R> failure) {
 			return id().fold(success, failure);
+		}
+
+		@Override
+		public Optional<T> op() {
+			return id().op();
+		}
+
+		@Override
+		public Promise<T> promise() {
+			return id().promise();
 		}
 	}
 

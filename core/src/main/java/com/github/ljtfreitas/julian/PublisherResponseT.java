@@ -46,7 +46,7 @@ public class PublisherResponseT implements ResponseT<Object, Publisher<Object>> 
         return new ResponseFn<>() {
 
             @Override
-            public Publisher<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Publisher<Object> join(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
                 SubmissionPublisher<Object> publisher = executor == null ?
                         new SubmissionPublisher<>() : new SubmissionPublisher<>(executor, Flow.defaultBufferSize());
 

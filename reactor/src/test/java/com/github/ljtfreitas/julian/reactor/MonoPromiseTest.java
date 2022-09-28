@@ -75,7 +75,7 @@ class MonoPromiseTest {
 
         @Test
         void subscribe() {
-            Subscriber<String> subscriber = spy(new Subscriber<>() {
+            Subscriber<String, Throwable> subscriber = spy(new Subscriber<String, Throwable>() {
 
                 @Override
                 public void success(String value) {
@@ -146,7 +146,7 @@ class MonoPromiseTest {
 
         @Test
         void subscribe() {
-            Subscriber<String> subscriber = spy(new Subscriber<>() {
+            Subscriber<String, Throwable> subscriber = spy(new Subscriber<String, Throwable>() {
 
                 @Override
                 public void success(String value) {

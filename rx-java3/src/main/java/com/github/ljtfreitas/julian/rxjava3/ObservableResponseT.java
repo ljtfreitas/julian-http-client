@@ -43,7 +43,7 @@ public class ObservableResponseT implements ResponseT<Collection<Object>, Observ
         return new ResponseFn<>() {
 
             @Override
-            public Observable<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Observable<Object> join(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
                 Promise<Collection<Object>> promise = next.run(response, arguments);
                 return promise.cast(new Kind<SinglePromise<Collection<Object>>>() {})
                         .map(SinglePromise::single)

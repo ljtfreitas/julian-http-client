@@ -1,6 +1,3 @@
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-
 /*
  * Copyright (C) 2021 Tiago de Freitas Lima
  *
@@ -22,6 +19,8 @@ import java.time.format.DateTimeFormatter
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 plugins {
     `java-library`
@@ -52,6 +51,8 @@ dependencies {
     // Use JUnit Jupiter Engine for testing.
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.6.0")
 }
+
+val isReleaseVersion = !version.toString().endsWith("SNAPSHOT")
 
 val test by tasks.getting(Test::class) {
     useJUnitPlatform()
@@ -106,7 +107,10 @@ val javadocJarTask by tasks.creating(Jar::class) {
 val sourcesJar = artifacts.add("archives", sourcesJarTask)
 val javadocJar = artifacts.add("archives", javadocJarTask)
 
-tasks.javadoc { (options as StandardJavadocDocletOptions).addBooleanOption("html5", true) }
+tasks.javadoc {
+    (options as StandardJavadocDocletOptions).addBooleanOption("html5", true)
+    onlyIf { isReleaseVersion }
+}
 
 publishing {
     publications {
@@ -169,5 +173,10 @@ publishing {
 }
 
 signing {
+    setRequired({ isReleaseVersion && gradle.taskGraph.hasTask("publish") })
     sign(publishing.publications["maven"])
+}
+
+tasks.withType<Sign>().configureEach {
+    onlyIf { isReleaseVersion }
 }

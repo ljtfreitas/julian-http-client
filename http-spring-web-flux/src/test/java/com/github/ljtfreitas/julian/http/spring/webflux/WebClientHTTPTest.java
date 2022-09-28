@@ -363,7 +363,7 @@ class WebClientHTTPTest {
 
 				assertAll(() -> assertThat(response, instanceOf(FailureHTTPResponse.class)),
 						() -> assertEquals(recovered, response.recover(empty -> recovered).body().unsafe()),
-						() -> assertEquals(recovered, response.recover(exceptionType, e -> recovered).body().unsafe()),
+						() -> assertEquals(recovered, response.recover(e -> recovered).body().unsafe()),
 						() -> assertEquals(recovered, response.recover(statusCode, (status, header, bodyAsBytes) -> recovered).body().unsafe()),
 						() -> assertEquals(recovered, response.recover(exceptionType::isInstance, e -> recovered).body().unsafe()));
 			}

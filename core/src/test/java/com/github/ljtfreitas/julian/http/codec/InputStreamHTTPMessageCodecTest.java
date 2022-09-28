@@ -49,7 +49,7 @@ class InputStreamHTTPMessageCodecTest {
 
 		InputStream in = codec.read(HTTPResponseBody.some(expected.getBytes()), JavaType.valueOf(InputStream.class))
 				.map(CompletableFuture::join)
-				.orElse(new ByteArrayInputStream(new byte[0]));
+				.orElse(InputStream.nullInputStream());
 
 		String actual = Bracket.acquire(( ) -> new BufferedReader(new InputStreamReader(in)))
 			.map(r -> r.lines().collect(joining()))

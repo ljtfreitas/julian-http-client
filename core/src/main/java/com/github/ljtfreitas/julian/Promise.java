@@ -33,7 +33,7 @@ import java.util.function.Supplier;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
-public interface Promise<T> {
+public interface Promise<T> extends Disposable {
 
     Promise<T> onSuccess(Consumer<? super T> fn);
 
@@ -55,11 +55,17 @@ public interface Promise<T> {
 
 	<Err extends Throwable> Promise<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn);
 
-	<R> R fold(Function<? super T, R> success, Function<? super Throwable, R> failure);
+	default <R> R fold(Function<? super T, R> success, Function<? super Throwable, R> failure) {
+		return join().fold(success, failure);
+	}
 
 	CompletableFuture<T> future();
 
-	Promise<T> subscribe(Subscriber<? super T> subscriber);
+	Promise<T> subscribe(Subscriber<? super T, Throwable> subscriber);
+
+	default Promise<Optional<T>> op() {
+		return then(Optional::ofNullable);
+	}
 
 	@SuppressWarnings("unchecked")
 	default <P extends Promise<T>> Optional<P> cast(Kind<P> candidate) {

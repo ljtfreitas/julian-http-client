@@ -36,7 +36,7 @@ class EnumerationResponseT implements ResponseT<Collection<Object>, Enumeration<
 		return new ResponseFn<>() {
 
 			@Override
-			public Promise<Enumeration<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
+			public Promise<Enumeration<Object>> run(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
 				return next.run(response, arguments)
 						.then(c -> Optional.ofNullable(c).map(Collections::enumeration).orElseGet(Collections::emptyEnumeration));
 			}

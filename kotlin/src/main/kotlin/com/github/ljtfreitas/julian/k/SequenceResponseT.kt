@@ -38,7 +38,7 @@ object SequenceResponseT : ResponseT<Stream<Any>, Sequence<Any>> {
 
     override fun <A> bind(endpoint: Endpoint, next: ResponseFn<A, Stream<Any>>): ResponseFn<A, Sequence<Any>> = object : ResponseFn<A, Sequence<Any>> {
 
-        override fun run(response: Promise<out Response<A>>, arguments: Arguments) = next.run(response, arguments).then { it.asSequence() }
+        override fun run(response: Promise<out Response<A, out Throwable>>, arguments: Arguments) = next.run(response, arguments).then { it.asSequence() }
 
         override fun returnType(): JavaType = next.returnType()
     }
@@ -50,8 +50,8 @@ object SequenceResponseT : ResponseT<Stream<Any>, Sequence<Any>> {
         .let { JavaType.parameterized(Stream::class.java, it) }
 
     private fun argument(type: Type) : Type =
-        if (type is WildcardType && type.lowerBounds.isNotEmpty())
-            argument(type.lowerBounds.first())
+        if (type is WildcardType && type.upperBounds.isNotEmpty())
+            argument(type.upperBounds.first())
         else type
 
     override fun test(endpoint: Endpoint) = endpoint.returnType().`is`(Sequence::class.java)

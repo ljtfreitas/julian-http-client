@@ -1,5 +1,11 @@
 com.github.ljtfreitas.julian.http.codec.form.FormObjectURLEncodedHTTPMessageCodec
 com.github.ljtfreitas.julian.http.codec.form.SimpleMapFormURLEncodedHTTPMessageCodec
 com.github.ljtfreitas.julian.http.codec.form.MultiMapFormURLEncodedHTTPMessageCodec
+com.github.ljtfreitas.julian.http.codec.form.multipart.ByteArrayUploadHTTPRequestWriter
+com.github.ljtfreitas.julian.http.codec.form.multipart.ByteBufferUploadHTTPRequestWriter
+com.github.ljtfreitas.julian.http.codec.form.multipart.FileUploadHTTPRequestWriter
+com.github.ljtfreitas.julian.http.codec.form.multipart.InputStreamUploadHTTPRequestWriter
+com.github.ljtfreitas.julian.http.codec.form.multipart.PathUploadHTTPRequestWriter
 com.github.ljtfreitas.julian.http.codec.form.multipart.MultipartFormObjectHTTPRequestWriter
 com.github.ljtfreitas.julian.http.codec.form.multipart.MapMultipartFormHTTPRequestWriter
+com.github.ljtfreitas.julian.http.codec.form.multipart.UploadContentHTTPRequestWriter

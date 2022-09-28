@@ -9,7 +9,7 @@ class PromiseResponseT implements ResponseT<Object, Promise<Object>> {
         return new ResponseFn<>() {
 
             @Override
-            public Promise<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Promise<Object> join(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
                 return next.run(response, arguments);
             }
 

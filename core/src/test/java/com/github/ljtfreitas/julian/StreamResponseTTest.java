@@ -63,7 +63,7 @@ class StreamResponseTTest {
 	}
 
 	@Test
-	void compose(@Mock ResponseFn<Collection<String>, Collection<Object>> fn, @Mock Promise<Response<Collection<String>>> response) {
+	void compose(@Mock ResponseFn<Collection<String>, Collection<Object>> fn, @Mock Promise<Response<Collection<String>, Throwable>> response) {
 		Arguments arguments = Arguments.empty();
 
 		when(fn.run(response, arguments)).thenReturn(Promise.done(List.of("expected")));

@@ -73,8 +73,6 @@ public class MapMultipartFormHTTPRequestWriter implements MultipartFormDataHTTPR
             form.forEach((name, value) -> serializers.select(value.getClass())
                     .write(boundary, new MultipartFormField(name, value), encoding, output));
 
-            output.write('\r');
-            output.write('\n');
             output.write((boundary + "--").getBytes());
 
             output.flush();

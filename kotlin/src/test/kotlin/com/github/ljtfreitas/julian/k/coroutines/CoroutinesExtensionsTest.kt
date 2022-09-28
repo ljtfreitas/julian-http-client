@@ -1,12 +1,11 @@
 package com.github.ljtfreitas.julian.k.coroutines
 
 import com.github.ljtfreitas.julian.Promise
-import io.kotest.assertions.failure
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
+import io.kotest.matchers.result.shouldBeFailure
+import io.kotest.matchers.result.shouldBeSuccess
 import io.kotest.matchers.shouldBe
-import kotlinx.coroutines.async
-import kotlinx.coroutines.future.asCompletableFuture
 import java.util.concurrent.CompletableFuture
 
 class CoroutinesExtensionsTest : DescribeSpec({
@@ -50,6 +49,35 @@ class CoroutinesExtensionsTest : DescribeSpec({
 
                 val exception = shouldThrow<RuntimeException> { promise.join().unsafe() }
 
+                exception shouldBe failure
+            }
+        }
+
+        describe("Promise<T> to Result<T>, non-blocking") {
+
+            it("a successful Promise -> a successful Result") {
+                val result = Promise.done("success").result()
+                result shouldBeSuccess "success"
+            }
+
+            it("a failed Promise -> a failed Result") {
+                val failure = RuntimeException("oops")
+                val result = Promise.failed<Unit, RuntimeException>(failure).result()
+                result.shouldBeFailure { it shouldBe failure }
+            }
+        }
+
+        describe("Promise<T> to Attempt<T>, non-blocking") {
+
+            it("a successful Promise -> a successful Attempt") {
+                val attempt = Promise.done("success").attempt()
+                attempt.unsafe() shouldBe "success"
+            }
+
+            it("a failed Promise -> a failed Attempt") {
+                val failure = RuntimeException("oops")
+                val attempt = Promise.failed<Unit, RuntimeException>(failure).attempt()
+                val exception = shouldThrow<RuntimeException> { attempt.unsafe() }
                 exception shouldBe failure
             }
         }

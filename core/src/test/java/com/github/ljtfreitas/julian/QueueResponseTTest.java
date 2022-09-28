@@ -70,7 +70,7 @@ class QueueResponseTTest {
 		private ResponseFn<Collection<String>, Collection<Object>> fn;
 
 		@Mock 
-		private Promise<Response<Collection<String>>> response;
+		private Promise<Response<Collection<String>, Throwable>> response;
 		
 		@Test
 		void compose() {

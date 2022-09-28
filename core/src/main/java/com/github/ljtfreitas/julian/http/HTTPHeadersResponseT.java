@@ -40,7 +40,7 @@ public class HTTPHeadersResponseT implements ResponseT<Void, HTTPHeaders> {
         return new ResponseFn<>() {
 
             @Override
-            public Promise<HTTPHeaders> run(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Promise<HTTPHeaders> run(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
                 return response.then(r -> r.cast(new Kind<HTTPResponse<A>>() {})
                         .map(HTTPResponse::headers).orElseGet(HTTPHeaders::empty));
             }

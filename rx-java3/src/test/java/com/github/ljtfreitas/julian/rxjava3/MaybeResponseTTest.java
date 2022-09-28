@@ -72,7 +72,7 @@ class MaybeResponseTTest {
 
     @Test
     void bind() {
-        Promise<Response<String>> response = new SinglePromise<>(Single.just(Response.done("hello")));
+        Promise<Response<String, Throwable>> response = new SinglePromise<>(Single.just(Response.done("hello")));
 
         ResponseFn<String, Object> fn = new ObjectResponseT<>().bind(endpoint, null);
 

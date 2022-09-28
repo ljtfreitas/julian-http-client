@@ -59,7 +59,7 @@ class LazyResponseTTest {
 	void compose() {
 		ResponseFn<String, Object> fn = new ObjectResponseT<>().bind(endpoint, null);
 
-		Promise<Response<String>> response = Promise.done(Response.done("expected"));
+		Promise<Response<String, Throwable>> response = Promise.done(Response.done("expected"));
 
 		Lazy<Object> lazy = responseT.bind(endpoint, fn).join(response, Arguments.empty());
 

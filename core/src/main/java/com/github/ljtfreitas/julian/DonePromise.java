@@ -98,9 +98,14 @@ class DonePromise<T> implements Promise<T> {
 	}
 
 	@Override
-	public Promise<T> subscribe(Subscriber<? super T> subscriber) {
+	public Promise<T> subscribe(Subscriber<? super T, Throwable> subscriber) {
 		subscriber.success(value);
 		subscriber.done();
 		return this;
+	}
+
+	@Override
+	public Attempt<Void> dispose() {
+		return Attempt.success(null);
 	}
 }

@@ -33,16 +33,16 @@ import com.github.ljtfreitas.julian.ResponseT;
 
 import java.lang.reflect.Type;
 
-public class HTTPResponseT implements ResponseT<Response<Object>, HTTPResponse<Object>> {
+public class HTTPResponseT implements ResponseT<Response<Object, ? extends Throwable>, HTTPResponse<Object>> {
 
     private static final HTTPResponseT SINGLE_INSTANCE = new HTTPResponseT();
 
     @Override
-    public <A> ResponseFn<A, HTTPResponse<Object>> bind(Endpoint endpoint, ResponseFn<A, Response<Object>> next) {
+    public <A> ResponseFn<A, HTTPResponse<Object>> bind(Endpoint endpoint, ResponseFn<A, Response<Object, ? extends Throwable>> next) {
         return new ResponseFn<>() {
 
             @Override
-            public Promise<HTTPResponse<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Promise<HTTPResponse<Object>> run(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
                 return next.run(response, arguments).then(r -> r.cast(new Kind<HTTPResponse<Object>>() {})
                         .orElseThrow(() -> new IllegalArgumentException("It was expected a HTTPResponse instance, but it was " + r)));
             }

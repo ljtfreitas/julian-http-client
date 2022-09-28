@@ -1,6 +1,5 @@
 package com.github.ljtfreitas.julian.http.client.okhttp;
 
-import com.github.ljtfreitas.julian.Attempt;
 import com.github.ljtfreitas.julian.Bracket;
 import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.http.HTTPHeader;
@@ -40,12 +39,12 @@ class OkHTTPClientResponse implements HTTPClientResponse {
     }
 
     @Override
-    public <T, R extends Response<T>> Optional<R> success(Function<? super HTTPClientResponse, R> fn) {
+    public <T, R extends Response<T, ? extends Throwable>> Optional<R> success(Function<? super HTTPClientResponse, R> fn) {
         return response.success(fn);
     }
 
     @Override
-    public <T, R extends Response<T>> Optional<R> failure(Function<? super HTTPClientResponse, R> fn) {
+    public <T, R extends Response<T, ? extends Throwable>> Optional<R> failure(Function<? super HTTPClientResponse, R> fn) {
         return response.failure(fn);
     }
 

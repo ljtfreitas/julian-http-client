@@ -62,12 +62,12 @@ class VertxHTTPClientResponse implements HTTPClientResponse {
     }
 
     @Override
-    public <T, R extends Response<T>> Optional<R> failure(Function<? super HTTPClientResponse, R> fn) {
+    public <T, R extends Response<T, ? extends Throwable>> Optional<R> failure(Function<? super HTTPClientResponse, R> fn) {
         return response.failure(fn);
     }
 
     @Override
-    public <T, R extends Response<T>> Optional<R> success(Function<? super HTTPClientResponse, R> fn) {
+    public <T, R extends Response<T, ? extends Throwable>> Optional<R> success(Function<? super HTTPClientResponse, R> fn) {
         return response.success(fn);
     }
 

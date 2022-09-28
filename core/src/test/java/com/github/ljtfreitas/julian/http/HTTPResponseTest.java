@@ -98,7 +98,7 @@ class HTTPResponseTest {
 
         @Test
         @DisplayName("subscribe to HTTP response content")
-        void subscribe(@Mock Subscriber<String> subscriber) {
+        void subscribe(@Mock Subscriber<String, HTTPResponseException> subscriber) {
             HTTPResponse<String> returned = response.subscribe(subscriber);
 
             assertSame(response, returned);
@@ -154,7 +154,7 @@ class HTTPResponseTest {
         @Test
         @DisplayName("success HTTP response doesn't have to do nothing on recover")
         void onRecoverUsingExceptionTypeDoNothing(@Mock Function<Exception, String> fn) {
-            HTTPResponse<String> returned = response.recover(Exception.class, fn);
+            HTTPResponse<String> returned = response.recover(fn);
 
             assertSame(response, returned);
 
@@ -238,7 +238,7 @@ class HTTPResponseTest {
 
         @Test
         @DisplayName("subscribe to failure should pass a HTTPResponseException")
-        void subscribe(@Mock Subscriber<String> subscriber) {
+        void subscribe(@Mock Subscriber<String, HTTPResponseException> subscriber) {
             HTTPResponse<String> returned = response.subscribe(subscriber);
 
             assertSame(response, returned);
@@ -301,7 +301,7 @@ class HTTPResponseTest {
         @DisplayName("a failure HTTP response can recover for a successful one using an exception type")
         void onRecoverUsingExceptionType() {
             HTTPResponse<String> returned = response
-                    .recover(InternalServerError.class, e -> "i'm recovered from an Internal Server Error");
+                    .recover(e -> "i'm recovered from an Internal Server Error");
 
             assertEquals("i'm recovered from an Internal Server Error", returned.body().unsafe());
         }
@@ -402,7 +402,7 @@ class HTTPResponseTest {
 
         @Test
         @DisplayName("subscribe to HTTP response content, but the content must be null")
-        void subscribe(@Mock Subscriber<String> subscriber) {
+        void subscribe(@Mock Subscriber<String, HTTPResponseException> subscriber) {
             HTTPResponse<String> returned = response.subscribe(subscriber);
 
             assertSame(response, returned);
@@ -458,7 +458,7 @@ class HTTPResponseTest {
         @Test
         @DisplayName("empty HTTP response doesn't have to do nothing on recover")
         void onRecoverUsingExceptionTypeDoNothing(@Mock Function<Exception, String> fn) {
-            HTTPResponse<String> returned = response.recover(Exception.class, fn);
+            HTTPResponse<String> returned = response.recover(fn);
 
             assertSame(response, returned);
 
@@ -540,7 +540,7 @@ class HTTPResponseTest {
 
             @Test
             @DisplayName("subscribe to HTTP response content")
-            void subscribe(@Mock Subscriber<String> subscriber) {
+            void subscribe(@Mock Subscriber<String, HTTPResponseException> subscriber) {
                 HTTPResponse<String> returned = success.subscribe(subscriber);
 
                 assertTrue(returned instanceof LazyHTTPResponse);
@@ -596,7 +596,7 @@ class HTTPResponseTest {
             @Test
             @DisplayName("lazy, success HTTP response doesn't have to do nothing on recover")
             void onRecoverUsingExceptionTypeDoNothing(@Mock Function<Exception, String> fn) {
-                HTTPResponse<String> returned = success.recover(Exception.class, fn);
+                HTTPResponse<String> returned = success.recover(fn);
 
                 assertTrue(returned instanceof LazyHTTPResponse);
 
@@ -686,7 +686,7 @@ class HTTPResponseTest {
 
             @Test
             @DisplayName("subscribe to failure should pass a HTTPResponseException")
-            void subscribe(@Mock Subscriber<String> subscriber) {
+            void subscribe(@Mock Subscriber<String, HTTPResponseException> subscriber) {
                 HTTPResponse<String> returned = failed.subscribe(subscriber);
 
                 assertTrue(returned instanceof LazyHTTPResponse);
@@ -750,7 +750,7 @@ class HTTPResponseTest {
             @DisplayName("a lazy, failure HTTP response can recover for a successful one using an exception type")
             void onRecoverUsingExceptionType() {
                 HTTPResponse<String> returned = failed
-                        .recover(InternalServerError.class, e -> "i'm recovered from an Internal Server Error");
+                        .recover(e -> "i'm recovered from an Internal Server Error");
 
                 assertEquals("i'm recovered from an Internal Server Error", returned.body().unsafe());
             }

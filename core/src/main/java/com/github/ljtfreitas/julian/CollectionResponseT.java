@@ -37,7 +37,7 @@ public class CollectionResponseT implements ResponseT<Collection<Object>, Collec
 		return new ResponseFn<>() {
 
 			@Override
-			public Promise<Collection<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
+			public Promise<Collection<Object>> run(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
 				return next.run(response, arguments).then(c -> Optional.ofNullable(c).map(this::collectionByType).orElseGet(this::emptyCollectionByType));
 			}
 

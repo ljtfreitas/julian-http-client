@@ -47,7 +47,7 @@ public class FluxResponseT implements ResponseT<Collection<Object>, Flux<Object>
         return new ResponseFn<>() {
 
             @Override
-            public Flux<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Flux<Object> join(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
                 Promise<Collection<Object>> promise = next.run(response, arguments);
 
                 return promise.cast(new Kind<MonoPromise<Collection<Object>>>() {})

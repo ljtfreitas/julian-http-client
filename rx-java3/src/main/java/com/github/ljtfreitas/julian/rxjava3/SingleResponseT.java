@@ -40,7 +40,7 @@ public class SingleResponseT implements ResponseT<Object, Single<Object>> {
         return new ResponseFn<>() {
 
             @Override
-            public Single<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Single<Object> join(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
                 Promise<Object> promise = next.run(response, arguments);
                 return promise.cast(new Kind<SinglePromise<Object>>() {})
                         .map(SinglePromise::single)

@@ -30,6 +30,8 @@ import com.github.ljtfreitas.julian.Promise
 import com.github.ljtfreitas.julian.Response
 import com.github.ljtfreitas.julian.ResponseFn
 import com.github.ljtfreitas.julian.ResponseT
+import java.lang.reflect.Type
+import java.lang.reflect.WildcardType
 
 object EvalResponseT : ResponseT<Any, Eval<Any>> {
 
@@ -37,12 +39,18 @@ object EvalResponseT : ResponseT<Any, Eval<Any>> {
 
     override fun adapted(endpoint: Endpoint): JavaType = endpoint.returnType().parameterized()
         .map(JavaType.Parameterized::firstArg)
+        .map(::argument)
         .orElseGet { Any::class.java }
         .let(JavaType::valueOf)
 
+    private fun argument(type: Type) : Type =
+        if (type is WildcardType && type.upperBounds.isNotEmpty())
+            argument(type.upperBounds.first())
+        else type
+
     override fun <A> bind(endpoint: Endpoint, next: ResponseFn<A, Any>) = object : ResponseFn<A, Eval<Any>> {
 
-        override fun join(response: Promise<out Response<A>>, arguments: Arguments): Eval<Any> = Eval.later {
+        override fun join(response: Promise<out Response<A, out Throwable>>, arguments: Arguments): Eval<Any> = Eval.later {
             next.join(response, arguments)
         }
 

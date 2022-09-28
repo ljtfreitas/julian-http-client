@@ -33,7 +33,7 @@ class CompletionStageResponseT implements ResponseT<Object, CompletionStage<Obje
 		return new ResponseFn<>() {
 
 			@Override
-			public CompletionStage<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
+			public CompletionStage<Object> join(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
 				return next.run(response, arguments).future();
 			}
 

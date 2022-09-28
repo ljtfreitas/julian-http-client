@@ -76,7 +76,7 @@ class FlowableResponseTTest {
 
     @Test
     void bind() {
-        Promise<Response<Collection<String>>> response = new SinglePromise<>(Single.just(Response.done(List.of("one", "two", "three"))));
+        Promise<Response<Collection<String>, Throwable>> response = new SinglePromise<>(Single.just(Response.done(List.of("one", "two", "three"))));
 
         ResponseFn<Collection<String>, Collection<Object>> fn = new CollectionResponseT().bind(endpoint,
                 new ObjectResponseT<Collection<Object>>().bind(endpoint, null));

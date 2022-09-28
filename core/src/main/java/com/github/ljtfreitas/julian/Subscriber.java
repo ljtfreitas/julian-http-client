@@ -22,11 +22,11 @@
 
 package com.github.ljtfreitas.julian;
 
-public interface Subscriber<T> {
+public interface Subscriber<T, E extends Throwable> {
 
     void success(T value);
 
-    void failure(Throwable failure);
+    void failure(E failure);
 
     default void done() {};
 }

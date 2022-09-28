@@ -42,18 +42,18 @@ public class PromiseSubscriberCallbackResponseT implements ResponseT<Promise<Obj
         return new ResponseFn<>() {
 
             @Override
-            public Void join(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Void join(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
                 subscriber(endpoint.parameters(), arguments).ifPresent(subscriber -> next.join(response, arguments).subscribe(subscriber));
                 return null;
             }
 
             @SuppressWarnings("unchecked")
-            private Optional<Subscriber<Object>> subscriber(Parameters parameters, Arguments arguments) {
+            private Optional<Subscriber<Object, Throwable>> subscriber(Parameters parameters, Arguments arguments) {
                 return parameters.callbacks()
                         .filter(c -> c.javaType().compatible(Subscriber.class))
                         .findFirst()
                         .flatMap(c -> arguments.of(c.position()))
-                        .map(arg -> (Subscriber<Object>) arg);
+                        .map(arg -> (Subscriber<Object, Throwable>) arg);
             }
 
             @Override

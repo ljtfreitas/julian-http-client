@@ -44,7 +44,7 @@ public class SeqResponseT implements ResponseT<Collection<Object>, Seq<Object>> 
         return new ResponseFn<>() {
 
             @Override
-            public Promise<Seq<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Promise<Seq<Object>> run(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
                 return next.run(response, arguments)
                         .then(c -> Optional.ofNullable(c)
                                 .filter(not(Collection::isEmpty))

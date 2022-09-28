@@ -72,7 +72,7 @@ class MonoResponseTTest {
 
     @Test
     void bind() {
-        Promise<Response<String>> response = Promise.done(Response.done("hello"));
+        Promise<Response<String, Throwable>> response = Promise.done(Response.done("hello"));
 
         ResponseFn<String, Object> fn = new ObjectResponseT<>().bind(endpoint, null);
 
@@ -86,7 +86,7 @@ class MonoResponseTTest {
 
     @Test
     void bindAsMono() {
-        Promise<Response<String>> response = new MonoPromise<>(Mono.just(Response.done("hello")));
+        Promise<Response<String, Throwable>> response = new MonoPromise<>(Mono.just(Response.done("hello")));
 
         ResponseFn<String, Object> fn = new ObjectResponseT<>().bind(endpoint, null);
 
@@ -102,7 +102,7 @@ class MonoResponseTTest {
     void failure() {
         RuntimeException exception = new RuntimeException("oops");
 
-        Promise<Response<String>> response = Promise.failed(exception);
+        Promise<Response<String, Throwable>> response = Promise.failed(exception);
 
         ResponseFn<String, Object> fn = new ObjectResponseT<>().bind(endpoint, null);
 
@@ -117,7 +117,7 @@ class MonoResponseTTest {
     void failureAsMono() {
         RuntimeException exception = new RuntimeException("oops");
 
-        Promise<Response<String>> response = new MonoPromise<>(Mono.error(exception));
+        Promise<Response<String, Throwable>> response = new MonoPromise<>(Mono.error(exception));
 
         ResponseFn<String, Object> fn = new ObjectResponseT<>().bind(endpoint, null);
 

@@ -44,7 +44,7 @@ import static java.util.stream.Collectors.joining;
 
 public class JavaType {
 
-	private static final JavaType VOID_TYPE = JavaType.valueOf(void.class);
+	private static final JavaType VOID_TYPE = JavaType.valueOf(Void.class);
 
 	private static final JavaType OBJECT_TYPE = JavaType.valueOf(Object.class);
 
@@ -54,6 +54,11 @@ public class JavaType {
 	private JavaType(Type javaType) {
 		this.javaType = nonNull(javaType);
 		this.rawClass = Kind.of(javaType);
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> Optional<T> cast(Object value) {
+		return (value != null && compatible(value.getClass())) ? Optional.of((T) rawClass.cast(value)) : Optional.empty();
 	}
 
     public Type get() {
@@ -70,6 +75,10 @@ public class JavaType {
 
 	public boolean compatible(Class<?> candidate) {
 		return candidate.isAssignableFrom(rawClass);
+	}
+
+	public boolean isNone() {
+		return is(Void.class) || is(void.class);
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})

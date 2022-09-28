@@ -27,6 +27,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import com.github.ljtfreitas.julian.Attempt;
+import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.Subscriber;
 
 class EmptyHTTPResponse<T> implements HTTPResponse<T> {
@@ -77,12 +78,12 @@ class EmptyHTTPResponse<T> implements HTTPResponse<T> {
 	}
 
 	@Override
-	public <R> R fold(Function<? super T, R> success, Function<? super Throwable, R> failure) {
+	public <R> R fold(Function<? super T, R> success, Function<? super HTTPResponseException, R> failure) {
 		return success.apply(null);
 	}
 
 	@Override
-	public HTTPResponse<T> subscribe(Subscriber<? super T> subscriber) {
+	public HTTPResponse<T> subscribe(Subscriber<? super T, HTTPResponseException> subscriber) {
 		subscriber.success(null);
 		subscriber.done();
 		return this;
@@ -96,27 +97,37 @@ class EmptyHTTPResponse<T> implements HTTPResponse<T> {
 	}
 
 	@Override
-	public HTTPResponse<T> onFailure(Consumer<? super Throwable> fn) {
+	public HTTPResponse<T> onFailure(Consumer<? super HTTPResponseException> fn) {
 		return this;
 	}
 
 	@Override
-	public HTTPResponse<T> recover(Function<? super Throwable, T> fn) {
+	public HTTPResponse<T> recover(Function<? super HTTPResponseException, T> fn) {
 		return this;
 	}
 
 	@Override
-	public HTTPResponse<T> recover(Predicate<? super Throwable> p, Function<? super Throwable, T> fn) {
+	public HTTPResponse<T> recover(Class<? extends HTTPResponseException> expected, Function<? super HTTPResponseException, T> fn) {
 		return this;
 	}
 
 	@Override
-	public <Err extends Throwable> HTTPResponse<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
+	public HTTPResponse<T> recover(Predicate<? super HTTPResponseException> p, Function<? super HTTPResponseException, T> fn) {
 		return this;
 	}
 
 	@Override
 	public HTTPResponse<T> recover(HTTPStatusCode code, HTTPResponseFn<byte[], T> fn) {
 		return this;
+	}
+
+	@Override
+	public Promise<T> promise() {
+		return Promise.empty();
+	}
+
+	@Override
+	public String toString() {
+		return status + "\n" + headers;
 	}
 }

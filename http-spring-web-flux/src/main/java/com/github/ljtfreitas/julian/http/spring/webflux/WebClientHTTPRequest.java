@@ -128,15 +128,25 @@ class WebClientHTTPRequest<T> implements HTTPRequestIO<T> {
     }
 
     private Mono<HTTPResponse<T>> success(HTTPStatus status, HTTPHeaders headers, ClientResponse response) {
-        ParameterizedTypeReference<T> expectedType = new ParameterizedTypeReference<>() {
-            @Override
-            public Type getType() {
-                return responseType.get();
-            }
-        };
+        Mono<T> bodyAsMono = bodyToMono(response);
 
-        return response.bodyToMono(expectedType)
-                .map(value -> HTTPResponse.success(status, headers, value))
+        return bodyAsMono.map(value -> HTTPResponse.success(status, headers, value))
                 .switchIfEmpty(Mono.just(HTTPResponse.empty(status, headers)));
+    }
+
+    private Mono<T> bodyToMono(ClientResponse response) {
+        // void/Void are special cases
+        if (responseType.isNone()) {
+            //noinspection unchecked
+            return response.releaseBody().map(none -> (T) none);
+        } else {
+            ParameterizedTypeReference<T> expectedType = new ParameterizedTypeReference<>() {
+                @Override
+                public Type getType() {
+                    return responseType.get();
+                }
+            };
+            return response.bodyToMono(expectedType);
+        }
     }
 }

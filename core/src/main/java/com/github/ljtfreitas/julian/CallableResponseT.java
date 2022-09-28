@@ -33,7 +33,7 @@ class CallableResponseT implements ResponseT<Object, Callable<Object>> {
 		return new ResponseFn<>() {
 
 			@Override
-			public Callable<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
+			public Callable<Object> join(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
 				return () -> next.join(response, arguments);
 			}
 

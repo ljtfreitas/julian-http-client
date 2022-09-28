@@ -77,7 +77,7 @@ class TraversableResponseTTest {
 
         Collection<String> values = java.util.List.of("one", "two", "three");
 
-        Promise<Response<Collection<String>>> promise = Promise.done(Response.done(values));
+        Promise<Response<Collection<String>, Throwable>> promise = Promise.done(Response.done(values));
 
         ResponseFn<Collection<String>, Collection<Object>> fn = new CollectionResponseT().bind(endpoint,
                 new ObjectResponseT<Collection<Object>>().bind(endpoint, null));
@@ -91,7 +91,7 @@ class TraversableResponseTTest {
     void bindNullCollection() {
         when(endpoint.returnType()).thenReturn(JavaType.parameterized(Collection.class, String.class));
 
-        Promise<Response<Collection<String>>> promise = Promise.done(Response.done(null));
+        Promise<Response<Collection<String>, Throwable>> promise = Promise.done(Response.done(null));
 
         ResponseFn<Collection<String>, Collection<Object>> fn = new CollectionResponseT().bind(endpoint,
                 new ObjectResponseT<Collection<Object>>().bind(endpoint, null));

@@ -4,7 +4,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-class DoneResponse<T> implements Response<T> {
+class DoneResponse<T, E extends Throwable> implements Response<T, E> {
 
     private final T value;
 
@@ -18,45 +18,50 @@ class DoneResponse<T> implements Response<T> {
     }
 
     @Override
-    public <R> Response<R> map(Function<? super T, R> fn) {
+    public <R> Response<R, E> map(Function<? super T, R> fn) {
         return new DoneResponse<>(fn.apply(value));
     }
 
     @Override
-    public Response<T> onSuccess(Consumer<? super T> fn) {
+    public Response<T, E> onSuccess(Consumer<? super T> fn) {
         fn.accept(value);
         return this;
     }
 
     @Override
-    public Response<T> onFailure(Consumer<? super Throwable> fn) {
+    public Response<T, E> onFailure(Consumer<? super E> fn) {
         return this;
     }
 
     @Override
-    public Response<T> recover(Predicate<? super Throwable> p, Function<? super Throwable, T> fn) {
+    public Response<T, E> recover(Class<? extends E> expected, Function<? super E, T> fn) {
         return this;
     }
 
     @Override
-    public Response<T> recover(Function<? super Throwable, T> fn) {
+    public Response<T, E> recover(Predicate<? super E> p, Function<? super E, T> fn) {
         return this;
     }
 
     @Override
-    public <Err extends Throwable> Response<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
+    public Response<T, E> recover(Function<? super E, T> fn) {
         return this;
     }
 
     @Override
-    public <R> R fold(Function<? super T, R> success, Function<? super Throwable, R> failure) {
+    public <R> R fold(Function<? super T, R> success, Function<? super E, R> failure) {
         return success.apply(value);
     }
 
     @Override
-    public Response<T> subscribe(Subscriber<? super T> subscriber) {
+    public Response<T, E> subscribe(Subscriber<? super T, E> subscriber) {
         subscriber.success(value);
         subscriber.done();
         return this;
+    }
+
+    @Override
+    public Promise<T> promise() {
+        return Promise.done(value);
     }
 }

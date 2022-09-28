@@ -32,6 +32,6 @@ tasks.jar.configure {
 
 dependencies {
     implementation(project(":core"))
-    api("com.fasterxml.jackson.core:jackson-databind:2.13.3")
+    api("com.fasterxml.jackson.core:jackson-databind:2.13.4")
 }
 

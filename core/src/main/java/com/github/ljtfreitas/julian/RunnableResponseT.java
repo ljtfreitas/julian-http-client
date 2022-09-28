@@ -31,7 +31,7 @@ class RunnableResponseT implements ResponseT<Void, Runnable> {
 		return new ResponseFn<>() {
 
 			@Override
-			public Runnable join(Promise<? extends Response<A>> response, Arguments arguments) {
+			public Runnable join(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
 				return () -> next.join(response, arguments);
 			}
 

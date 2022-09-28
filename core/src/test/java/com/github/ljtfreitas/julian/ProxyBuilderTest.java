@@ -478,7 +478,7 @@ class ProxyBuilderTest {
         CompletableFuture<String> completableFuture();
 
         @GET("/response")
-        Response<String> response();
+        Response<String, Throwable> response();
 
         @GET("/http-response")
         HTTPResponse<String> httpResponse();

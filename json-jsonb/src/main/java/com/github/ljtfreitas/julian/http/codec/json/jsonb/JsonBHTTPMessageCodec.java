@@ -92,7 +92,6 @@ public class JsonBHTTPMessageCodec implements JsonHTTPMessageCodec<Object> {
         return supports(candidate);
     }
 
-
     @Override
     public Optional<CompletableFuture<Object>> read(HTTPResponseBody body, JavaType javaType) {
         return body.readAsInputStream(s -> deserialize(s, javaType));

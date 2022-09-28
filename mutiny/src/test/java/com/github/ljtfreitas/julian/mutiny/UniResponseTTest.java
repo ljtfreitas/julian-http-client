@@ -70,7 +70,7 @@ class UniResponseTTest {
 
     @Test
     void bind() {
-        Promise<Response<String>> response = Promise.done(Response.done("hello"));
+        Promise<Response<String, Throwable>> response = Promise.done(Response.done("hello"));
 
         ResponseFn<String, Object> fn = new ObjectResponseT<>().bind(endpoint, null);
 
@@ -86,7 +86,7 @@ class UniResponseTTest {
     void failure() {
         RuntimeException exception = new RuntimeException("oops");
 
-        Promise<Response<String>> response = Promise.failed(exception);
+        Promise<Response<String, Throwable>> response = Promise.failed(exception);
 
         ResponseFn<String, Object> fn = new ObjectResponseT<>().bind(endpoint, null);
 

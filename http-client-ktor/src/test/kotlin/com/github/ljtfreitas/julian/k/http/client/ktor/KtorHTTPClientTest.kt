@@ -25,6 +25,7 @@ import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.network.tls.addKeyStore
+import kotlinx.coroutines.DelicateCoroutinesApi
 import org.mockserver.client.MockServerClient
 import org.mockserver.logging.MockServerLogger
 import org.mockserver.model.HttpRequest.request
@@ -43,6 +44,7 @@ typealias CompletableString = CompletableFuture<String>
 
 private fun HTTPResponseBody.readAsString() = readAsBytes(ByteArray::decodeToString).map(CompletableString::join).orElse("")
 
+@OptIn(DelicateCoroutinesApi::class)
 class KtorHTTPClientTest : DescribeSpec({
 
 	listener(MockServerListener(port = intArrayOf(8090, 8094)))

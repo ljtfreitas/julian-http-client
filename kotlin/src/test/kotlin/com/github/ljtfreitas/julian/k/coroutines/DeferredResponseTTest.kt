@@ -7,6 +7,7 @@ import com.github.ljtfreitas.julian.JavaType.Wildcard
 import com.github.ljtfreitas.julian.ObjectResponseT
 import com.github.ljtfreitas.julian.Promise
 import com.github.ljtfreitas.julian.Response
+import com.github.ljtfreitas.julian.k.javaType
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
@@ -25,13 +26,13 @@ class DeferredResponseTTest : DescribeSpec({
         describe("predicates") {
 
             it("a Deferred<T> return is acceptable") {
-                every { endpoint.returnType() } returns JavaType.parameterized(Deferred::class.java, Wildcard.lower(String::class.java))
+                every { endpoint.returnType() } returns javaType<Deferred<String>>()
 
                 subject.test(endpoint) shouldBe true
             }
 
             it("any other return type is unacceptable") {
-                every { endpoint.returnType() } returns JavaType.valueOf(String::class.java)
+                every { endpoint.returnType() } returns javaType<String>()
 
                 subject.test(endpoint) shouldBe false
             }
@@ -40,7 +41,7 @@ class DeferredResponseTTest : DescribeSpec({
         describe("adapt to expected type") {
 
             it("adapt to Deferred<T> argument") {
-                every { endpoint.returnType() } returns JavaType.parameterized(Deferred::class.java, Wildcard.lower(String::class.java))
+                every { endpoint.returnType() } returns javaType<Deferred<String>>()
 
                 subject.adapted(endpoint) shouldBe JavaType.valueOf(String::class.java)
             }

@@ -30,7 +30,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public interface HTTPResponse<T> extends Response<T> {
+public interface HTTPResponse<T> extends Response<T, HTTPResponseException> {
 
 	HTTPStatus status();
 
@@ -47,21 +47,21 @@ public interface HTTPResponse<T> extends Response<T> {
 	HTTPResponse<T> onSuccess(HTTPResponseConsumer<? super T> fn);
 
 	@Override
-	HTTPResponse<T> subscribe(Subscriber<? super T> subscriber);
+	HTTPResponse<T> subscribe(Subscriber<? super T, HTTPResponseException> subscriber);
 
 	HTTPResponse<T> subscribe(HTTPResponseSubscriber<? super T> subscriber);
 
 	@Override
-	HTTPResponse<T> onFailure(Consumer<? super Throwable> fn);
+	HTTPResponse<T> onFailure(Consumer<? super HTTPResponseException> fn);
 
 	@Override
-	HTTPResponse<T> recover(Function<? super Throwable, T> fn);
+	HTTPResponse<T> recover(Class<? extends HTTPResponseException> expected, Function<? super HTTPResponseException, T> fn);
 
 	@Override
-	HTTPResponse<T> recover(Predicate<? super Throwable> p, Function<? super Throwable, T> fn);
+	HTTPResponse<T> recover(Function<? super HTTPResponseException, T> fn);
 
 	@Override
-	<Err extends Throwable> HTTPResponse<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn);
+	HTTPResponse<T> recover(Predicate<? super HTTPResponseException> p, Function<? super HTTPResponseException, T> fn);
 
 	HTTPResponse<T> recover(HTTPStatusCode code, HTTPResponseFn<byte[], T> fn);
 

@@ -36,7 +36,7 @@ class IteratorResponseT implements ResponseT<Collection<Object>, Iterator<Object
 		return new ResponseFn<>() {
 
 			@Override
-			public Promise<Iterator<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
+			public Promise<Iterator<Object>> run(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
 				return next.run(response, arguments).then(c -> Optional.ofNullable(c).map(Collection::iterator).orElseGet(Collections::emptyIterator));
 			}
 

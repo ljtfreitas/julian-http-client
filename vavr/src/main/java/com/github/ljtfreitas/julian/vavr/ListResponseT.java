@@ -43,7 +43,7 @@ public class ListResponseT implements ResponseT<Collection<Object>, List<Object>
         return new ResponseFn<>() {
 
             @Override
-            public Promise<List<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Promise<List<Object>> run(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
                 return next.run(response, arguments)
                         .then(c -> Optional.ofNullable(c)
                                 .filter(not(Collection::isEmpty))

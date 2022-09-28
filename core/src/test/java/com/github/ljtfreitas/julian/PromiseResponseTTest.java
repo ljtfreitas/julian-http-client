@@ -58,7 +58,7 @@ class PromiseResponseTTest {
     }
 
     @Test
-    void compose(@Mock ResponseFn<String, Object> fn, @Mock Promise<Response<String>> response) {
+    void compose(@Mock ResponseFn<String, Object> fn, @Mock Promise<Response<String, Throwable>> response) {
         Arguments arguments = Arguments.empty();
 
         when(fn.run(same(response), eq(arguments))).thenReturn(Promise.done("expected"));

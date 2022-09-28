@@ -76,7 +76,7 @@ class TryResponseTTest {
         String content = "hello";
 
         ResponseFn<String, Object> fn = new ObjectResponseT<>().bind(endpoint, null);
-        Promise<Response<String>> promise = Promise.done(Response.done(content));
+        Promise<Response<String, Throwable>> promise = Promise.done(Response.done(content));
 
         Try<Object> attempt = responseT.bind(endpoint, fn).join(promise, Arguments.empty());
 
@@ -90,7 +90,7 @@ class TryResponseTTest {
         RuntimeException failure = new RuntimeException("oops");
 
         ResponseFn<String, Object> fn = new ObjectResponseT<>().bind(endpoint, null);
-        Promise<Response<String>> promise = Promise.failed(failure);
+        Promise<Response<String, Throwable>> promise = Promise.failed(failure);
 
         Arguments arguments = Arguments.empty();
 

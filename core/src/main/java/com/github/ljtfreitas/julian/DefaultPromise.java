@@ -60,11 +60,10 @@ class DefaultPromise<T> implements Promise<T> {
 	public <R> R fold(Function<? super T, R> success, Function<? super Throwable, R> failure) {
 		return new DefaultPromise<R>(future.handleAsync((r, e) -> {
 			if (e != null)
-				return failure.apply((Exception) e);
+				return failure.apply(e);
 			else
 				return success.apply(r);
 		}, executor), executor).join().unsafe();
-
 	}
 
 	@Override
@@ -79,28 +78,37 @@ class DefaultPromise<T> implements Promise<T> {
 
 	@Override
 	public Promise<T> recover(Function<? super Throwable, T> fn) {
-		return new DefaultPromise<>(future.exceptionally(t -> fn.apply(t)), executor);
+		return new DefaultPromise<>(future.exceptionally(fn::apply), executor);
 	}
 
 	@Override
 	public <Err extends Throwable> Promise<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
 		return new DefaultPromise<>(future.handleAsync((r, e) -> {
-			Throwable cause = deep(e);
-			if (expected.isInstance(cause))
-				return fn.apply(expected.cast(cause));
-			else
+			if (e != null) {
+				Throwable cause = deep(e);
+				if (expected.isInstance(cause))
+					return fn.apply(expected.cast(cause));
+				else
+					throw new CompletionException(cause);
+
+			} else
 				return r;
+
 		}, executor), executor);
 	}
 
 	@Override
 	public Promise<T> recover(Predicate<? super Throwable> p, Function<? super Throwable, T> fn) {
 		return new DefaultPromise<>(future.handleAsync((r, e) -> {
-			Throwable cause = deep(e);
-			if (cause != null && p.test(cause))
-				return fn.apply(cause);
-			else
+			if (e != null) {
+				Throwable cause = deep(e);
+				if (cause != null && p.test(cause))
+					return fn.apply(cause);
+				else
+					throw new CompletionException(cause);
+			} else
 				return r;
+
 		}, executor), executor);
 	}
 
@@ -145,9 +153,14 @@ class DefaultPromise<T> implements Promise<T> {
 	}
 
 	@Override
-	public Promise<T> subscribe(Subscriber<? super T> subscriber) {
+	public Promise<T> subscribe(Subscriber<? super T, Throwable> subscriber) {
 		BiConsumer<T, Throwable> handle = (r, e) -> { if (e == null) subscriber.success(r); else subscriber.failure(e); };
 		BiConsumer<T, Throwable> done = (r, e) -> subscriber.done();
 		return new DefaultPromise<>(future.whenCompleteAsync(handle, executor).whenCompleteAsync(done, executor), executor);
+	}
+
+	@Override
+	public Attempt<Void> dispose() {
+		return Attempt.just(() -> future.cancel(true));
 	}
 }

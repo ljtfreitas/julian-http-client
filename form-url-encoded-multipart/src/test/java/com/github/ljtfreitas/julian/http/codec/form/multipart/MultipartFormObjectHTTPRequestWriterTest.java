@@ -70,7 +70,6 @@ class MultipartFormObjectHTTPRequestWriterTest {
                     + "\r\n"
                     + "35"
                     + "\r\n"
-                    + "\r\n"
                     + "--abc1234--";
 
             MultipartForm form = new MultipartForm()
@@ -114,7 +113,6 @@ class MultipartFormObjectHTTPRequestWriterTest {
                     + "this is a simple text file."
                     + "\n"
                     + "if you can send this content in a multipart request, congrats. the code is working."
-                    + "\r\n"
                     + "\r\n"
                     + "--abc1234--";
 
@@ -160,7 +158,6 @@ class MultipartFormObjectHTTPRequestWriterTest {
                     + "this is a simple text file."
                     + "\n"
                     + "if you can send this content in a multipart request, congrats. the code is working."
-                    + "\r\n"
                     + "\r\n"
                     + "--abc1234--";
 
@@ -209,7 +206,6 @@ class MultipartFormObjectHTTPRequestWriterTest {
                     + "\r\n").getBytes());
             output.write(fileAsBytes);
             output.write(("\r\n"
-                    + "\r\n"
                     + "--abc1234--").getBytes());
             output.flush();
             output.close();
@@ -261,7 +257,6 @@ class MultipartFormObjectHTTPRequestWriterTest {
                     + "\r\n").getBytes());
             source.transferTo(output);
             output.write(("\r\n"
-                    + "\r\n"
                     + "--abc1234--").getBytes());
             output.flush();
             output.close();
@@ -316,7 +311,6 @@ class MultipartFormObjectHTTPRequestWriterTest {
                     + "\r\n").getBytes());
             output.write(fileAsByteBuffer.array());
             output.write(("\r\n"
-                    + "\r\n"
                     + "--abc1234--").getBytes());
             output.flush();
             output.close();

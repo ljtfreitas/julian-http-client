@@ -38,7 +38,7 @@ public class LazyResponseT implements ResponseT<Object, Lazy<Object>> {
         return new ResponseFn<>() {
 
             @Override
-            public Lazy<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Lazy<Object> join(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
                 return Lazy.of(() -> next.join(response, arguments));
             }
 

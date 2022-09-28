@@ -199,7 +199,8 @@ public class Endpoint {
 
             return Objects.equals(path, endpoint.path)
                 && Objects.equals(method, endpoint.method)
-                && Objects.equals(parameters, endpoint.parameters) && Objects.equals(returnType, endpoint.returnType);
+                && Objects.equals(parameters, endpoint.parameters)
+                && Objects.equals(returnType, endpoint.returnType);
 
         } else {
             return false;

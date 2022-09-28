@@ -2,4 +2,5 @@ com.github.ljtfreitas.julian.k.arrow.EitherResponseTProxy
 com.github.ljtfreitas.julian.k.arrow.EvalResponseTProxy
 com.github.ljtfreitas.julian.k.arrow.NonEmptyListResponseTProxy
 com.github.ljtfreitas.julian.k.arrow.OptionResponseTProxy
+com.github.ljtfreitas.julian.k.arrow.RecoverableEitherResponseTProxy
 com.github.ljtfreitas.julian.k.arrow.fx.EffectResponseTProxy

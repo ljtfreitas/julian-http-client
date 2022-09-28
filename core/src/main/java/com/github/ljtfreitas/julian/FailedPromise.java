@@ -120,9 +120,14 @@ class FailedPromise<T> implements Promise<T> {
 	}
 
 	@Override
-	public Promise<T> subscribe(Subscriber<? super T> subscriber) {
+	public Promise<T> subscribe(Subscriber<? super T, Throwable> subscriber) {
 		subscriber.failure(failure);
 		subscriber.done();
 		return this;
+	}
+
+	@Override
+	public Attempt<Void> dispose() {
+		return Attempt.failed(failure);
 	}
 }

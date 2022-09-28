@@ -40,7 +40,7 @@ public class HTTPStatusResponseT implements ResponseT<Void, HTTPStatus> {
         return new ResponseFn<>() {
 
             @Override
-            public Promise<HTTPStatus> run(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Promise<HTTPStatus> run(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
                 return response.then(r -> r.cast(new Kind<HTTPResponse<A>>() {}).map(HTTPResponse::status).orElseThrow());
             }
 

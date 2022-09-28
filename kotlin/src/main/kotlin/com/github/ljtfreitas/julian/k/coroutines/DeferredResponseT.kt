@@ -37,7 +37,7 @@ object DeferredResponseT : ResponseT<Any, Deferred<Any>> {
 
     override fun <A> bind(endpoint: Endpoint, next: ResponseFn<A, Any>): ResponseFn<A, Deferred<Any>> = object : ResponseFn<A, Deferred<Any>> {
 
-        override fun join(response: Promise<out Response<A>>, arguments: Arguments) = next.run(response, arguments).deferred()
+        override fun join(response: Promise<out Response<A, out Throwable>>, arguments: Arguments) = next.run(response, arguments).deferred()
 
         override fun returnType(): JavaType = next.returnType()
     }
@@ -49,8 +49,8 @@ object DeferredResponseT : ResponseT<Any, Deferred<Any>> {
         .orElseThrow()
 
     private fun argument(type: Type) : Type =
-        if (type is WildcardType && type.lowerBounds.isNotEmpty())
-            argument(type.lowerBounds.first())
+        if (type is WildcardType && type.upperBounds.isNotEmpty())
+            argument(type.upperBounds.first())
         else type
 
     override fun test(endpoint: Endpoint) = endpoint.returnType().`is`(Deferred::class.java)

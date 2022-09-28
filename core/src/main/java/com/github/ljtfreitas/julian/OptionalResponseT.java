@@ -33,8 +33,8 @@ class OptionalResponseT implements ResponseT<Object, Optional<Object>> {
 		return new ResponseFn<>() {
 
 			@Override
-			public Promise<Optional<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
-				return next.run(response, arguments).then(Optional::ofNullable);
+			public Promise<Optional<Object>> run(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
+				return next.run(response, arguments).op();
 			}
 
 			@Override

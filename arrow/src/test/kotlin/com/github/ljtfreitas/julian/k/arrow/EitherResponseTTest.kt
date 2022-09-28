@@ -94,7 +94,7 @@ class EitherResponseTTest : DescribeSpec({
 
                 val promise: Promise<Either<Throwable, Any>> = fn.run(Promise.failed(failure), Arguments.empty())
 
-                promise.subscribe(object : Subscriber<Either<Throwable, Any>> {
+                promise.subscribe(object : Subscriber<Either<Throwable, Any>, Throwable> {
 
                     override fun success(value: Either<Throwable, Any>) {
                         fail("it was expected a failure, not a successful value :(")

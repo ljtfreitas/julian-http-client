@@ -37,7 +37,6 @@ class MapMultipartFormHTTPRequestWriterTest {
                 + "\r\n"
                 + "35"
                 + "\r\n"
-                + "\r\n"
                 + "--abc1234--";
 
         Map<String, Object> form = new LinkedHashMap<>();

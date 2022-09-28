@@ -24,11 +24,11 @@ package com.github.ljtfreitas.julian;
 
 public interface ResponseFn<T, M> {
 
-	default Promise<M> run(Promise<? extends Response<T>> response, Arguments arguments) {
+	default Promise<M> run(Promise<? extends Response<T, ? extends Throwable>> response, Arguments arguments) {
 		return Promise.done(join(response, arguments));
 	}
 
-	default M join(Promise<? extends Response<T>> response, Arguments arguments) {
+	default M join(Promise<? extends Response<T, ? extends Throwable>> response, Arguments arguments) {
 		return run(response, arguments).join().unsafe();
 	}
 

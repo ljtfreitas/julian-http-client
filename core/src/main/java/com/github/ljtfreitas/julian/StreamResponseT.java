@@ -35,7 +35,7 @@ public class StreamResponseT implements ResponseT<Collection<Object>, Stream<Obj
 		return new ResponseFn<>() {
 
 			@Override
-			public Promise<Stream<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
+			public Promise<Stream<Object>> run(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
 				return next.run(response, arguments).then(c -> Optional.ofNullable(c).stream().flatMap(Collection::stream));
 			}
 

@@ -38,9 +38,9 @@ public interface HTTPClientResponse {
 
 	HTTPResponseBody body();
 
-	<T, R extends Response<T>> Optional<R> success(Function<? super HTTPClientResponse, R> fn);
+	<T, R extends Response<T, ? extends Throwable>> Optional<R> success(Function<? super HTTPClientResponse, R> fn);
 
-	<T, R extends Response<T>> Optional<R> failure(Function<? super HTTPClientResponse, R> fn);
+	<T, R extends Response<T, ? extends Throwable>> Optional<R> failure(Function<? super HTTPClientResponse, R> fn);
 
 	static HTTPClientResponse create(HTTPStatus status, HTTPHeaders headers, HTTPResponseBody body) {
 		return new DefaultHTTPClientResponse(status, headers, body);

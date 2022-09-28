@@ -84,7 +84,7 @@ class CollectionResponseTTest {
 		private ResponseFn<Collection<String>, Collection<Object>> fn;
 
 		@Mock 
-		private Promise<Response<Collection<String>>> response;
+		private Promise<Response<Collection<String>, Throwable>> response;
 		
 		@ParameterizedTest
 		@ArgumentsSource(AcceptableCollectionsProvider.class)

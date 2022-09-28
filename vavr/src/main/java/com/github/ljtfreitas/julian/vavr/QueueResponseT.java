@@ -43,7 +43,7 @@ public class QueueResponseT implements ResponseT<Collection<Object>, Queue<Objec
         return new ResponseFn<>() {
 
             @Override
-            public Promise<Queue<Object>> run(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Promise<Queue<Object>> run(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
                 return next.run(response, arguments)
                         .then(c -> Optional.ofNullable(c)
                                 .filter(not(Collection::isEmpty))

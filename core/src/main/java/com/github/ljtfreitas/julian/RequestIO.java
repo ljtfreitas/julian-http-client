@@ -24,6 +24,6 @@ package com.github.ljtfreitas.julian;
 
 public interface RequestIO<T> {
 
-	Promise<? extends Response<T>> execute();
+	Promise<? extends Response<T, ? extends Throwable>> execute();
 
 }

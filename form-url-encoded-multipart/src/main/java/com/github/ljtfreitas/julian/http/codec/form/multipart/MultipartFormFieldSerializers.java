@@ -24,6 +24,7 @@ package com.github.ljtfreitas.julian.http.codec.form.multipart;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 
 class MultipartFormFieldSerializers {
 

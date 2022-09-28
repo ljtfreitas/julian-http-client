@@ -68,7 +68,7 @@ class OptionResponseTTest {
     }
 
     @Test
-    void bind(@Mock Promise<Response<String>> promise, @Mock ResponseFn<String, Object> fn) {
+    void bind(@Mock Promise<Response<String, Throwable>> promise, @Mock ResponseFn<String, Object> fn) {
         Arguments arguments = Arguments.empty();
 
         String content = "hello";
@@ -81,7 +81,7 @@ class OptionResponseTTest {
     }
 
     @Test
-    void bindNullValue(@Mock Promise<Response<String>> promise, @Mock ResponseFn<String, Object> fn) {
+    void bindNullValue(@Mock Promise<Response<String, Throwable>> promise, @Mock ResponseFn<String, Object> fn) {
         Arguments arguments = Arguments.empty();
 
         when(fn.run(promise, arguments)).thenReturn(Promise.done(null));

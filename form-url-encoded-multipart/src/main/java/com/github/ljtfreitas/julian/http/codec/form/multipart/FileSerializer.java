@@ -31,6 +31,10 @@ import java.io.File;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.util.Optional;
+import java.util.function.Predicate;
+
+import static java.util.function.Predicate.not;
 
 class FileSerializer implements MultipartFormFieldSerializer<File> {
 
@@ -46,8 +50,9 @@ class FileSerializer implements MultipartFormFieldSerializer<File> {
     @Override
     public void write(String boundary, MultipartFormField<File> field, Charset charset, OutputStream output) {
         File file = field.value;
+        String fileName = field.fileName.filter(not(String::isEmpty)).orElseGet(file::getName);
 
-        ContentDisposition contentDisposition = new ContentDisposition(field.name, file.getName());
+        ContentDisposition contentDisposition = new ContentDisposition(field.name, fileName);
 
         MediaType mediaType = field.contentType
                 .orElseGet(() -> Attempt.run(() -> Files.probeContentType(file.toPath()))

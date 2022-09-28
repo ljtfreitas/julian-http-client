@@ -76,7 +76,7 @@ class EitherResponseTTest {
     }
 
     @Test
-    void bind(@Mock Promise<Response<String>> promise, @Mock ResponseFn<String, Object> fn) {
+    void bind(@Mock Promise<Response<String, Throwable>> promise, @Mock ResponseFn<String, Object> fn) {
         Arguments arguments = Arguments.empty();
 
         String content = "hello";
@@ -92,7 +92,7 @@ class EitherResponseTTest {
     }
 
     @Test
-    void bindFailure(@Mock Promise<Response<String>> promise, @Mock ResponseFn<String, Object> fn) {
+    void bindFailure(@Mock Promise<Response<String, Throwable>> promise, @Mock ResponseFn<String, Object> fn) {
         Arguments arguments = Arguments.empty();
 
         RuntimeException failure = new RuntimeException("oops");

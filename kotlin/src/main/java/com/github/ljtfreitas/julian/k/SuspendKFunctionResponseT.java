@@ -21,7 +21,7 @@ public class SuspendKFunctionResponseT implements ResponseT<Object, Object> {
 
             @SuppressWarnings("unchecked")
             @Override
-            public Object join(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Object join(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
                 Continuation<Object> continuation = arguments.of(Continuation.class).findFirst()
                         .map(Argument::value)
                         .map(Continuation.class::cast)

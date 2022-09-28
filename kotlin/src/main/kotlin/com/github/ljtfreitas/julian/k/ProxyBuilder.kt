@@ -27,13 +27,18 @@ import com.github.ljtfreitas.julian.JavaType
 import com.github.ljtfreitas.julian.MethodEndpoint
 import com.github.ljtfreitas.julian.ProxyBuilder
 import com.github.ljtfreitas.julian.contract.EndpointMetadata
+import com.github.ljtfreitas.julian.http.HTTPResponseFailure
+import com.github.ljtfreitas.julian.http.HTTPStatusCode
+import com.github.ljtfreitas.julian.http.HTTPStatusGroup
 import com.github.ljtfreitas.julian.k.coroutines.DeferredResponseT
 import com.github.ljtfreitas.julian.k.coroutines.FlowResponseT
 import com.github.ljtfreitas.julian.k.coroutines.JobResponseT
 import com.github.ljtfreitas.julian.k.http.codec.json.jsonCodec
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import java.lang.reflect.Method
 import java.net.URL
+import java.util.Objects
 import java.util.Optional
 import kotlin.coroutines.Continuation
 import kotlin.reflect.KFunction
@@ -46,6 +51,7 @@ fun ProxyBuilder.enableKotlinExtensions() : ProxyBuilder {
         }
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
     codecs {
         add(jsonCodec(Json))
     }
@@ -92,13 +98,23 @@ fun ProxyBuilder.HTTPSpec.interceptors(spec: ProxyBuilder.HTTPSpec.HTTPRequestIn
 
 fun ProxyBuilder.HTTPSpec.failure(spec: ProxyBuilder.HTTPSpec.HTTPResponseFailureSpec.() -> Unit): ProxyBuilder.HTTPSpec = failure().apply(spec).and()
 
+@JvmName("httpResponseFailureHTTPStatusCode")
+fun ProxyBuilder.HTTPSpec.HTTPResponseFailureSpec.`when`(status: Pair<HTTPStatusCode, HTTPResponseFailure>): ProxyBuilder.HTTPSpec.HTTPResponseFailureSpec = status.let { (code, failure) ->
+    `when`(code, failure)
+}
+
+@JvmName("httpResponseFailureHTTPStatusGroup")
+fun ProxyBuilder.HTTPSpec.HTTPResponseFailureSpec.`when`(statusGroup: Pair<HTTPStatusGroup, HTTPResponseFailure>): ProxyBuilder.HTTPSpec.HTTPResponseFailureSpec = statusGroup.let { (group, failure) ->
+    `when`(group, failure)
+}
+
 fun ProxyBuilder.HTTPSpec.encoding(spec: ProxyBuilder.HTTPSpec.Encoding.() -> Unit): ProxyBuilder.HTTPSpec = encoding().apply(spec).and()
 
 inline fun <reified T> ProxyBuilder.build(endpoint: String?) : T = build(T::class.java, endpoint)
 
 inline fun <reified T> ProxyBuilder.build(endpoint: URL?) : T = build(T::class.java, endpoint)
 
-inline fun <reified T> proxy(block: ProxyBuilder.() -> Unit = {}) : T = proxy(endpoint = null as URL, block)
+inline fun <reified T> proxy(block: ProxyBuilder.() -> Unit = {}) : T = proxy(endpoint = null as URL?, block)
 
 inline fun <reified T> proxy(endpoint: String? = null, block: ProxyBuilder.() -> Unit = {}) : T = proxy(endpoint?.let(::URL), block)
 
@@ -125,11 +141,26 @@ internal class KExtensions(private val m: EndpointMetadata) : EndpointMetadata b
     }
 }
 
-class SuspendKFunctionEndpoint(private val kFunction: KFunction<*>?, private val javaMethod: Method, endpoint: Endpoint) : MethodEndpoint(endpoint, javaMethod) {
+class SuspendKFunctionEndpoint(private val kFunction: KFunction<*>?, private val javaMethod: Method, private val endpoint: Endpoint) : MethodEndpoint(endpoint, javaMethod) {
 
     private val continuationParameter = javaMethod.parameters
         .firstOrNull { Continuation::class.java.isAssignableFrom(it.type) }
 
     fun continuationArgumentType() = continuationParameter?.let { JavaType.valueOf(javaMethod.declaringClass, it.parameterizedType) }
+
+    override fun equals(that: Any?): Boolean {
+        if (this === that) return true
+
+        return when(that) {
+            is SuspendKFunctionEndpoint ->
+                this.endpoint == that.endpoint && this.kFunction == that.kFunction && this.javaMethod == that.javaMethod
+            is Endpoint ->
+                this.endpoint == that
+            else ->
+                false
+        }
+    }
+
+    override fun hashCode(): Int = Objects.hash(kFunction, javaMethod, endpoint)
 }
 

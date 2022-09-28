@@ -64,9 +64,9 @@ class PromiseSubscriberCallbackResponseTTest {
 
     @Test
     void compose(@Mock Endpoint endpoint, TestReporter reporter) throws InterruptedException {
-        Promise<Response<String>> response = Promise.done(new DoneResponse<>("it works!"));
+        Promise<Response<String, Throwable>> response = Promise.done(new DoneResponse<>("it works!"));
 
-        Subscriber<String> subscriber = new Subscriber<>() {
+        Subscriber<String, Throwable> subscriber = new Subscriber<String, Throwable>() {
 
             @Override
             public void success(String item) {

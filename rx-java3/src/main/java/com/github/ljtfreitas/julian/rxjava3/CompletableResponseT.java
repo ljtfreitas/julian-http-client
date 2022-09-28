@@ -34,16 +34,16 @@ import com.github.ljtfreitas.julian.Response;
 import com.github.ljtfreitas.julian.ResponseFn;
 import com.github.ljtfreitas.julian.ResponseT;
 
-public class CompletableResponseT implements ResponseT<Response<Object>, Completable> {
+public class CompletableResponseT implements ResponseT<Response<Object, ? extends Throwable>, Completable> {
 
     @Override
-    public <A> ResponseFn<A, Completable> bind(Endpoint endpoint, ResponseFn<A, Response<Object>> next) {
+    public <A> ResponseFn<A, Completable> bind(Endpoint endpoint, ResponseFn<A, Response<Object, ? extends Throwable>> next) {
         return new ResponseFn<>() {
 
             @Override
-            public Completable join(Promise<? extends Response<A>> response, Arguments arguments) {
-                Promise<Response<Object>> promise = next.run(response, arguments);
-                return promise.cast(new Kind<SinglePromise<Response<Object>>>() {})
+            public Completable join(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
+                Promise<Response<Object, ? extends Throwable>> promise = next.run(response, arguments);
+                return promise.cast(new Kind<SinglePromise<Response<Object, ? extends Throwable>>>() {})
                         .map(SinglePromise::single)
                         .map(Single::ignoreElement)
                         .orElseGet(() -> Completable.fromCompletionStage(promise.future()));

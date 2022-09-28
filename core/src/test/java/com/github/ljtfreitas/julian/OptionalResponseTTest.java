@@ -59,7 +59,7 @@ class OptionalResponseTTest {
 	}
 
 	@Test
-	void compose(@Mock ResponseFn<String, Object> fn, @Mock Promise<Response<String>> response) {
+	void compose(@Mock ResponseFn<String, Object> fn, @Mock Promise<Response<String, Throwable>> response) {
 		Arguments arguments = Arguments.empty();
 
 		when(fn.run(response, arguments)).thenReturn(Promise.done("expected"));

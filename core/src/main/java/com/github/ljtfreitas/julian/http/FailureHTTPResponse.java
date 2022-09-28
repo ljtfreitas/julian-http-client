@@ -23,6 +23,7 @@
 package com.github.ljtfreitas.julian.http;
 
 import com.github.ljtfreitas.julian.Attempt;
+import com.github.ljtfreitas.julian.Promise;
 import com.github.ljtfreitas.julian.Subscriber;
 
 import java.util.function.Consumer;
@@ -53,22 +54,22 @@ public class FailureHTTPResponse<T> implements HTTPResponse<T> {
 	}
 
 	@Override
-	public <R> HTTPResponse<R> map(Function<? super T, R> fn) {
+	public <R> FailureHTTPResponse<R> map(Function<? super T, R> fn) {
 		return new FailureHTTPResponse<>(failure);
 	}
 
 	@Override
-	public <R> HTTPResponse<R> map(HTTPResponseFn<? super T, R> fn) {
+	public <R> FailureHTTPResponse<R> map(HTTPResponseFn<? super T, R> fn) {
 		return new FailureHTTPResponse<>(failure);
 	}
 
 	@Override
-	public HTTPResponse<T> onSuccess(Consumer<? super T> fn) {
+	public FailureHTTPResponse<T> onSuccess(Consumer<? super T> fn) {
 		return this;
 	}
 
 	@Override
-	public HTTPResponse<T> onSuccess(HTTPResponseConsumer<? super T> fn) {
+	public FailureHTTPResponse<T> onSuccess(HTTPResponseConsumer<? super T> fn) {
 		return this;
 	}
 
@@ -83,38 +84,38 @@ public class FailureHTTPResponse<T> implements HTTPResponse<T> {
 	}
 
 	@Override
-	public HTTPResponse<T> onFailure(Consumer<? super Throwable> fn) {
+	public FailureHTTPResponse<T> onFailure(Consumer<? super HTTPResponseException> fn) {
 		fn.accept(failure);
 		return this;
 	}
 
 	@Override
-	public HTTPResponse<T> recover(Function<? super Throwable, T> fn) {
-		return new SuccessHTTPResponse<>(status, headers, fn.apply(failure));
+	public HTTPResponse<T> recover(Function<? super HTTPResponseException, T> fn) {
+		return new LazyHTTPResponse<>(status, headers, Attempt.run(() -> fn.apply(failure)).promise());
 	}
 
 	@Override
-	public <Err extends Throwable> HTTPResponse<T> recover(Class<? extends Err> expected, Function<? super Err, T> fn) {
-		return expected.isInstance(failure) ? new SuccessHTTPResponse<>(status, headers, fn.apply(expected.cast(failure))) : this;
+	public HTTPResponse<T> recover(Class<? extends HTTPResponseException> expected, Function<? super HTTPResponseException, T> fn) {
+		return expected.isInstance(failure) ? new LazyHTTPResponse<>(status, headers, Attempt.run(() -> fn.apply(failure)).promise()) : this;
 	}
 
 	@Override
-	public HTTPResponse<T> recover(Predicate<? super Throwable> p, Function<? super Throwable, T> fn) {
-		return p.test(failure) ? new SuccessHTTPResponse<>(status, headers, fn.apply(failure)) : this;
+	public HTTPResponse<T> recover(Predicate<? super HTTPResponseException> p, Function<? super HTTPResponseException, T> fn) {
+		return p.test(failure) ? new LazyHTTPResponse<>(status, headers, Attempt.run(() -> fn.apply(failure)).promise()) : this;
 	}
 
 	@Override
 	public HTTPResponse<T> recover(HTTPStatusCode code, HTTPResponseFn<byte[], T> fn) {
-		return status.is(code) ? new SuccessHTTPResponse<>(status, headers, fn.apply(status, headers, failure.bodyAsBytes())) : this;
+		return status.is(code) ? new LazyHTTPResponse<>(status, headers, Attempt.run(() -> fn.apply(status, headers, failure.bodyAsBytes())).promise()) : this;
 	}
 
 	@Override
-	public <R> R fold(Function<? super T, R> success, Function<? super Throwable, R> failure) {
+	public <R> R fold(Function<? super T, R> success, Function<? super HTTPResponseException, R> failure) {
 		return failure.apply(this.failure);
 	}
 
 	@Override
-	public HTTPResponse<T> subscribe(Subscriber<? super T> subscriber) {
+	public HTTPResponse<T> subscribe(Subscriber<? super T, HTTPResponseException> subscriber) {
 		subscriber.failure(failure);
 		subscriber.done();
 		return this;
@@ -125,5 +126,15 @@ public class FailureHTTPResponse<T> implements HTTPResponse<T> {
 		subscriber.failure(failure);
 		subscriber.done();
 		return this;
+	}
+
+	@Override
+	public Promise<T> promise() {
+		return Promise.failed(failure);
+	}
+
+	@Override
+	public String toString() {
+		return status + "\n" + headers;
 	}
 }

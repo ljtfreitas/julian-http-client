@@ -72,7 +72,7 @@ public class MonoPromise<T> implements Promise<T> {
     @Override
     public <R> R fold(Function<? super T, R> success, Function<? super Throwable, R> failure) {
         return mono.map(success)
-                .onErrorResume(e -> Mono.just(failure.apply((Exception) e)))
+                .onErrorResume(e -> Mono.just(failure.apply(e)))
                 .block();
     }
 
@@ -112,9 +112,14 @@ public class MonoPromise<T> implements Promise<T> {
     }
 
     @Override
-    public MonoPromise<T> subscribe(Subscriber<? super T> subscriber) {
+    public MonoPromise<T> subscribe(Subscriber<? super T, Throwable> subscriber) {
         mono.subscribe(subscriber::success, subscriber::failure, subscriber::done);
         return this;
+    }
+
+    @Override
+    public Attempt<Void> dispose() {
+        return Attempt.just(mono.subscribe()::dispose);
     }
 
     public Mono<T> mono() {

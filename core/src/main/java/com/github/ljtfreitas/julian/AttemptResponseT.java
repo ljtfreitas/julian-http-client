@@ -31,7 +31,7 @@ class AttemptResponseT implements ResponseT<Object, Attempt<Object>> {
         return new ResponseFn<>() {
 
             @Override
-            public Attempt<Object> join(Promise<? extends Response<A>> response, Arguments arguments) {
+            public Attempt<Object> join(Promise<? extends Response<A, ? extends Throwable>> response, Arguments arguments) {
                 return next.run(response, arguments).join();
             }
 

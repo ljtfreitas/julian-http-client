@@ -403,7 +403,7 @@ public interface MyApi {
 
 #### @Body
 
-We can sent an object to be used as HTTP request body, using the `@Body` on the argument:
+We can send an object to be used as HTTP request body, using the `@Body` on the argument:
 
 ```java
 import com.github.ljtfreitas.julian.contract.Body;
@@ -486,24 +486,22 @@ public interface MyApi {
     String someResource();
 
     @POST("/resource")
-    @FormUrlEncoded // alias to @Header(name="Content-Type", value="application/x-www-form-urlencoded")
-    String someResource(@Body String urlEncodedBody);
+    String someResource(@FormUrlEncoded String urlEncodedBody); // alias to @Body("application/x-www-form-urlencoded")
 
     @POST("/resource")
-    @JsonContent    // alias to @Header(name = "Content-Type", value="application/json")
-    String someResource(@Body String jsonBody);
+    String someResource(@JsonContent String jsonBody); // alias to a @Body("application/json")
 
     @POST("/resource")
-    @MultipartFormData  // alias to @Header(name = "Content-Type", value="multipart/form-data")
-    String someResource(@Body String multipartBody);
+    String someResource(@MultipartFormData String multipartBody); // alias to @Body("multipart/form-data")
 
     @POST("/resource")
-    @SerializableContent    // alias to @Header(name="Content-Type", value="application/octet-stream")
-    String someResource(@Body byte[] binaryBody);
+    String someResource(@SerializableContent byte[] binaryBody); // alias to @Body("application/octet-stream")
 
     @POST("/resource")
-    @XmlContent // alias to @Header(name = "Content-Type", value="application/xml")
-    String someResource(@Body String xmlBody);
+    String someResource(@XmlContent String xmlBody); // alias to @Body("application/xml")
+
+    @POST("/resource")
+    String someResource(@TextPlainContent String textBody); // alias to @Body("text/plain")
 
     @GET("/resource")
     String someResource(@Authorization String credentials); // alias to @Header(name="Authorization", value={argument value}"); (more details about authentication, see below)

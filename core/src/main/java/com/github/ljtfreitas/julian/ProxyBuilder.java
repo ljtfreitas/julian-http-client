@@ -550,9 +550,15 @@ public class ProxyBuilder {
         private final Extensions extensions = new Extensions();
 
         private ContractReader reader = null;
+        private EndpointMetadata endpointMetadata = null;
 
         public ContractSpec reader(ContractReader reader) {
             this.reader = reader;
+            return this;
+        }
+
+        public ContractSpec endpointMetadata(EndpointMetadata endpointMetadata) {
+            this.endpointMetadata = endpointMetadata;
             return this;
         }
 
@@ -569,8 +575,8 @@ public class ProxyBuilder {
         }
 
         private EndpointMetadata endpointMetadata() {
-            return extensions.all.stream().reduce((EndpointMetadata) new DefaultEndpointMetadata(),
-                    (m, f) -> f.apply(m), (a, b) -> b);
+            EndpointMetadata identity = endpointMetadata == null ? new DefaultEndpointMetadata() : endpointMetadata;
+            return extensions.all.stream().reduce(identity, (m, f) -> f.apply(m), (a, b) -> b);
         }
 
         public class Extensions {

@@ -175,9 +175,9 @@ class JulianAutoConfigurationTest {
     }
 
     @Test
-    @DisplayName("We can enable debug extension using Spring properties, following the convention: julian-http-client.[name].debug = true")
+    @DisplayName("We can enable debug extension using Spring properties, following the convention: julian-http-client.[name].debug-enabled = true")
     void debug() {
-        contextRunner.withPropertyValues("julian-http-client.julianAutoConfigurationTest.SampleApi.debug:true")
+        contextRunner.withPropertyValues("julian-http-client.julianAutoConfigurationTest.SampleApi.debug-enabled:true")
                 .run(context -> {
                     SampleApi sampleApi = context.getBean(SampleApi.class);
 

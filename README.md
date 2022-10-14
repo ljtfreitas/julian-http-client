@@ -984,6 +984,10 @@ MyApi myApi = new ProxyBuilder()
                     .parameters(/* sets a SSLParameters; more details: https://docs.oracle.com/en/java/javase/11/docs/api/java.net.http/java/net/http/HttpClient.Builder.html#sslParameters(javax.net.ssl.SSLParameters) */)
                     .and()
                 .executor(myThreadPool) // custom Executor object used by HttpClient
+            .extensions()
+                .debug()
+                    .enabled() // enable a debug mode that logs HTTP requests and responses; this feature is intended to be used for development/debugging purposes
+                .and()   
             .and()
         .and()
     .async()
@@ -1061,6 +1065,16 @@ Currently, there is a few additional implementations:
 - [ReactorNetty](./http-client-reactor-netty/README.md)
 - [Vert.x HTTP Client](./http-client-vertx/README.md)
 - [OkHttp](./http-client-okhttp/README.md)
+
+```java
+MyApi myApi = new ProxyBuilder()
+    .http()
+        .extensions()
+            .add(new HTTPAuthenticationInterceptor(basicAuthentication))
+            .and()
+        .and()
+    .build(MyApi.class, "http://my.api.com");
+```
 
 ### Error handling
 

@@ -20,4 +20,6 @@ dependencies {
 }
 ```
 
-And that's it.
+## Usage
+
+Check out the [autoconfiguration docs](../spring-autoconfigure/README.md).

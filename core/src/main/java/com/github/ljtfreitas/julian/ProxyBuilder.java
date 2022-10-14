@@ -22,32 +22,12 @@
 
 package com.github.ljtfreitas.julian;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLParameters;
-import java.lang.reflect.InvocationHandler;
-import java.net.InetSocketAddress;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Executor;
-import java.util.function.Function;
-
 import com.github.ljtfreitas.julian.contract.Contract;
 import com.github.ljtfreitas.julian.contract.ContractReader;
 import com.github.ljtfreitas.julian.contract.DefaultContractReader;
 import com.github.ljtfreitas.julian.contract.DefaultEndpointMetadata;
 import com.github.ljtfreitas.julian.contract.EndpointMetadata;
-import com.github.ljtfreitas.julian.http.ConditionalHTTPResponseFailure;
 import com.github.ljtfreitas.julian.http.DefaultHTTP;
-import com.github.ljtfreitas.julian.http.DefaultHTTPResponseFailure;
 import com.github.ljtfreitas.julian.http.HTTP;
 import com.github.ljtfreitas.julian.http.HTTPHeadersResponseT;
 import com.github.ljtfreitas.julian.http.HTTPRequestInterceptor;
@@ -59,7 +39,6 @@ import com.github.ljtfreitas.julian.http.HTTPStatusCodeResponseT;
 import com.github.ljtfreitas.julian.http.HTTPStatusGroup;
 import com.github.ljtfreitas.julian.http.HTTPStatusResponseT;
 import com.github.ljtfreitas.julian.http.RecoverableHTTPResponseFailure;
-import com.github.ljtfreitas.julian.http.client.ComposedHTTPClient;
 import com.github.ljtfreitas.julian.http.client.DebugHTTPClient;
 import com.github.ljtfreitas.julian.http.client.DefaultHTTPClient;
 import com.github.ljtfreitas.julian.http.client.HTTPClient;
@@ -84,7 +63,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -323,7 +301,8 @@ public class ProxyBuilder {
 
                 private HTTPClient apply(HTTPClient client) {
                     Collection<Function<HTTPClient, HTTPClient>> constructors = new ArrayList<>();
-                    return new ComposedHTTPClient(client, debug.add(constructors));
+                    debug.add(constructors);
+                    return constructors.stream().reduce(client, (a, b) -> b.apply(a), (a, b) -> b);
                 }
 
                 public class Debug {

@@ -4,6 +4,7 @@ import com.github.ljtfreitas.julian.JavaType;
 import com.github.ljtfreitas.julian.http.HTTPRequestBody;
 import com.github.ljtfreitas.julian.http.HTTPResponseBody;
 import com.github.ljtfreitas.julian.http.MediaType;
+import com.google.gson.Gson;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
